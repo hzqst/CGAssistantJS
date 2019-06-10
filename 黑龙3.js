@@ -22,6 +22,8 @@ var cga = require('./cgaapi')(function(){
 	{	
 		cga.waitTeammateSay((player, msg)=>{
 
+			console.log(msg);
+
 			if(!cga.callHosiptal && msg.indexOf('需要回补') >= 0){
 				cga.callHosiptal = true;
 			}
