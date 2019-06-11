@@ -14,11 +14,6 @@ const protect = { // 遇敌保护条件
 
 require('wrapper').then(cga => {
 	console.log('半山');
-	if (cga.GetPlayerInfo().name == '白西瓜') {
-		cga.emogua.autoBattle(cga.emogua.AutoBattlePreset.getIntelligentHeal());
-	} else {
-		cga.emogua.autoBattle(cga.emogua.AutoBattlePreset.getCommonAttack());
-	}
 
 	cga.emogua.recursion(
 		() => (
