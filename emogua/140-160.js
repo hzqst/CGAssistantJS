@@ -21,19 +21,21 @@ require('./wrapper').then(cga => {
 		).then(() => {
 			const currentTeamNumber = cga.emogua.getTeamNumber();
 			const isCaptain = cga.GetPlayerInfo().name == captain;
+			let mapName = cga.GetMapName();
 			if (currentTeamNumber == 1) {
+				let mapXy = cga.GetMapXY();
 				if (isCaptain) {
-					if (cga.GetMapName() == '小岛' && cga.GetMapXY().x == 65 && cga.GetMapXY().y == 98) {
+					if (mapName == '小岛' && mapXy.x == 65 && mapXy.y == 98) {
 						return cga.emogua.walkList([[joinPoint.x, joinPoint.y]]);
-					} else if (cga.GetMapName() == '小岛' && cga.GetMapXY().x == 64 && cga.GetMapXY().y == 98) {
+					} else if (mapName == '小岛' && mapXy.x == 64 && mapXy.y == 98) {
 						return cga.emogua.waitTeamBlock(teamNumber);
 					}
 				} else {
-					if (cga.GetMapName() == '小岛' && cga.GetMapXY().x == 65 && cga.GetMapXY().y == 98) {
+					if (mapName == '小岛' && mapXy.x == 65 && mapXy.y == 98) {
 						return cga.emogua.joinTeamBlock(joinPoint.x, joinPoint.y, captain);
 					}
 				}
-				if (cga.GetMapName() != '艾尔莎岛') {
+				if (mapName != '艾尔莎岛') {
 					return cga.emogua.waitAfterBattle().then(cga.emogua.logBack);
 				}
 				return cga.emogua.falan.toStone('W1').then(
@@ -46,7 +48,7 @@ require('./wrapper').then(cga => {
 				);
 			}
 			if (currentTeamNumber >= teamNumber && isCaptain) {
-				if (cga.GetMapName() == '小岛') {
+				if (mapName == '小岛') {
 					return cga.emogua.autoWalk([65, 46]).then(
 						() => cga.emogua.waitUntil(() => cga.getMapObjects().filter(e => e.cell === 3 && e.mapx == 64 && e.mapy == 45))
 					).then(() => {
@@ -61,7 +63,7 @@ require('./wrapper').then(cga => {
 							return cga.emogua.waitAfterBattle().then(cga.emogua.logBack);
 						}
 					});
-				} else if (cga.GetMapName() == '半山腰') {
+				} else if (mapName == '半山腰') {
 					return cga.emogua.autoWalk([64, 63]).then(
 						() => cga.emogua.encounter(protect)
 					).then(
@@ -71,7 +73,7 @@ require('./wrapper').then(cga => {
 				return cga.emogua.logBack();
 			}
 			if (isCaptain) {
-				cga.emogua.waitAfterBattle().then(cga.emogua.logBack)
+				cga.emogua.waitAfterBattle().then(cga.emogua.logBack);
 			}
 			if (!isCaptain) {
 				cga.emogua.checkStopEncounter(protect, true);
