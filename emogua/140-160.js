@@ -12,7 +12,7 @@ const protect = { // 遇敌保护条件
 	minTeamNumber: teamNumber
 };
 
-require('wrapper').then(cga => {
+require('./wrapper').then(cga => {
 	console.log('半山');
 
 	cga.emogua.recursion(
