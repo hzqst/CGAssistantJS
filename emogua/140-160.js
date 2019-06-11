@@ -17,7 +17,7 @@ require('wrapper').then(cga => {
 
 	cga.emogua.recursion(
 		() => (
-			cga.GetMapName() == '小岛' ? Promise.resolve() : cga.emogua.prepare({rechargeFlag: (cga.GetPlayerInfo().name == '医生西瓜' ? 2 : 1), crystalName: '火风的水晶（5：5）', repairFlag: -1})
+			cga.GetMapName() == '小岛' ? Promise.resolve() : cga.emogua.prepare({crystalName: '火风的水晶（5：5）', repairFlag: -1})
 		).then(() => {
 			const currentTeamNumber = cga.emogua.getTeamNumber();
 			const isCaptain = cga.GetPlayerInfo().name == captain;
