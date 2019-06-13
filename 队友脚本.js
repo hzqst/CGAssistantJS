@@ -5,7 +5,12 @@ var cga = require('./cgaapi')(function(){
 	
 	var minHp = 0.3;//50%hp提醒
 	var minPetHp = 0.3;//宠30%hp提醒
+	var minBottleHp = 0.6;//60%hp吃瓶子
 	var minMp = 0.2;//10%mp提醒
+	var minFoodMp = 0.6;//60%mp吃料理
+	
+	var eatBottle = '生命力回复药（500）';//恰瓶子
+	var eatFood = '炒面面包';//恰料理
 
 	var mute = 0;
 	
@@ -50,11 +55,16 @@ var cga = require('./cgaapi')(function(){
 	{
 		mapindex:27101,//辛希亚探索指挥部
 		pos:[7, 21],
+		leaveteam:true,
 		cb : ()=>{
 			
 			if(!cga.isTeamLeader && teammates.length > 0){
 				
+				console.log('inposition');
+				
 				var waitAdd = ()=>{
+					
+					console.log('waitadd');
 					
 					cga.addTeammate(teammates[0], (r)=>{
 						if(r){
@@ -65,6 +75,9 @@ var cga = require('./cgaapi')(function(){
 					});
 				}
 				var retry = ()=>{
+					
+					console.log('retry');
+					
 					cga.TurnTo(7, 21);
 					cga.AsyncWaitMovement({map:'圣骑士营地', delay:1000, timeout:5000}, (r)=>{
 						if(r == true){
@@ -91,7 +104,7 @@ var cga = require('./cgaapi')(function(){
 		if(cga.isInBattle())
 			return;
 
-		if(new Date().getTime() - mute >= 1000 * 15)//15s内闭嘴
+		if(new Date().getTime() >= mute )//15s内闭嘴
 		{
 			var playerinfo = cga.GetPlayerInfo();
 			var petinfo = cga.GetPetInfo(playerinfo.petid);
@@ -102,16 +115,60 @@ var cga = require('./cgaapi')(function(){
 				return;
 			}
 			
-			if(playerinfo.mp < playerinfo.maxmp * minMp)
-				cga.SayWords('人物蓝量不够，需要回补!', 0, 3, 1);
-			else if(playerinfo.hp < playerinfo.maxhp * minHp)
+			if(playerinfo.hp < playerinfo.maxhp * minHp){
 				cga.SayWords('人物血量不够，需要回补!', 0, 3, 1);
-			else if(petinfo.mp < petinfo.maxmp * minMp)
+			}
+			else if(playerinfo.hp < playerinfo.maxhp * minBottleHp){
+				if(eatBottle.length > 0){
+					var foodPos = cga.findItem(eatBottle);
+					if(foodPos != -1){
+						cga.UseItem(foodPos);
+						cga.AsyncWaitPlayerMenu(function(players){
+							console.log(players);
+							cga.PlayerMenuSelect(0);
+							cga.AsyncWaitUnitMenu(function(units){
+								console.log(units);
+								cga.UnitMenuSelect(0);
+							});
+						});
+						
+						mute = new Date().getTime() + 1000 * 15;
+						return;
+					}
+				}
+				
+				cga.SayWords('人物血量不够，需要回补!', 0, 3, 1);
+			}
+			else if(playerinfo.mp < playerinfo.maxmp * minMp){
+				cga.SayWords('人物蓝量不够，需要回补!', 0, 3, 1);
+			}
+			else if(playerinfo.mp < playerinfo.maxmp * minFoodMp){
+				if(eatFood.length > 0){
+					var foodPos = cga.findItem(eatFood);
+					if(foodPos != -1){
+						cga.UseItem(foodPos);
+						cga.AsyncWaitPlayerMenu(function(players){
+							console.log(players);
+							cga.PlayerMenuSelect(0);
+							cga.AsyncWaitUnitMenu(function(units){
+								console.log(units);
+								cga.UnitMenuSelect(0);
+							});
+						});
+						
+						mute = new Date().getTime() + 1000 * 15;
+						return;
+					}
+				}
+			}
+			else if(petinfo.mp < petinfo.maxmp * minMp){
 				cga.SayWords('宠物蓝量不够，需要回补!', 0, 3, 1);
-			else if(petinfo.hp < petinfo.maxhp * minPetHp)
+			}
+			else if(petinfo.hp < petinfo.maxhp * minPetHp){
 				cga.SayWords('宠物血量不够，需要回补!', 0, 3, 1);
+			}
 			
-			mute = new Date().getTime();
+			mute = new Date().getTime() + 1000 * 15;
 		}
 	}, 1000);
 });
