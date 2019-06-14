@@ -1190,11 +1190,11 @@ module.exports = function(callback){
 					cga.TurnTo(16, 4);
 					cga.AsyncWaitNPCDialog(function(dlg){
 						if(dlg.message.indexOf('费用是') == -1){
-							cb(false, new Error('无法使用前往杰诺瓦村的传送石'));
+							cb(false, new Error('无法使用前往杰诺瓦镇的传送石'));
 							return;
 						}
 						cga.ClickNPCDialog(4, -1);
-						cga.AsyncWaitMovement({map:'杰诺瓦村的传送点', delay:1000, timeout:5000}, function(r){
+						cga.AsyncWaitMovement({map:'杰诺瓦镇的传送点', delay:1000, timeout:5000}, function(r){
 							cb(r);
 							return;
 						});
@@ -2136,8 +2136,8 @@ module.exports = function(callback){
 										], (r)=>{
 											cga.turnDir(6);
 											cga.AsyncWaitNPCDialog(function(dlg2){
-												console.log(dlg2);
-												cb2(true);
+												cga.ClickNPCDialog(1, 0);
+												setTimeout(cb2, 1000, true);
 											});
 										});
 									} else {
@@ -2149,7 +2149,7 @@ module.exports = function(callback){
 											cga.AsyncWaitNPCDialog(function(dlg2){
 												if(dlg2.message.indexOf('那就拿去吧') >= 0){
 													cga.ClickNPCDialog(1, 0);
-													cb2(true);
+													setTimeout(cb2, 1000, true);
 												}
 											});
 										});
