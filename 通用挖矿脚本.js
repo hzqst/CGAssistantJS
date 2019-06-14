@@ -134,7 +134,7 @@ var cga = require('./cgaapi')(function(){
 		level : 7,
 		name : '幻之钢条',
 		func : (cb)=>{
-			cga.travel.falan.toJieNuoWa('S', (r)=>{
+			cga.travel.falan.toJieNuoWa((r)=>{
 				cga.walkList([
 					[14, 6, '村长的家'],
 					[1, 9, '杰诺瓦镇'],
@@ -150,7 +150,7 @@ var cga = require('./cgaapi')(function(){
 		level : 8,
 		name : '幻之银条',
 		func : (cb)=>{
-			cga.travel.falan.toJieNuoWa('S', (r)=>{
+			cga.travel.falan.toJieNuoWa((r)=>{
 				cga.walkList([
 					[14, 6, '村长的家'],
 					[1, 9, '杰诺瓦镇'],
