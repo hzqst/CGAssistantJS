@@ -2,9 +2,10 @@ var cga = require('./cgaapi')(function(){
 	const walkToZhzj = [
 		[47, 85, '召唤之间'],
 		[27, 8, '回廊'],
-		[23, 19, '灵堂'],
+		[23, 23],
+		[23, 19, '灵堂', null, null, true],
 		[7, 52, '地下牢房'],
-		[31, 20, null],
+		[31, 20],
 	];
 
 	var task = cga.task.Task('矿山钥匙', [
