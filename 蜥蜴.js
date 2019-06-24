@@ -89,6 +89,26 @@ var cga = require('./cgaapi')(function(){
 			});
 		}
 				
+		var hosiptal_to_out = (cb)=>{
+			const walkTo = [
+				[9, 20],
+				[0, 20, '圣骑士营地'],
+				[36, 87, '肯吉罗岛'],
+				[384, 245, '蜥蜴洞穴'],
+				[17, 4, '蜥蜴洞穴上层第1层'],
+			];
+			cga.walkList(walkTo, function(r){
+				if(!r){
+					cb(false);
+					return;
+				}
+				cga.exitPos = cga.GetMapXY();
+				var randomSpace = cga.getRandomSpace(cga.exitPos.x, cga.exitPos.y);
+				cga.WalkTo(randomSpace[0], randomSpace[1]);
+				setTimeout(cb, 1000, true);
+			});
+		}
+				
 		var out_to_hosiptal = (cb)=>{
 
 			var walkTo = [
@@ -156,10 +176,8 @@ var cga = require('./cgaapi')(function(){
 		}
 		var map = cga.GetMapName();
 		if(map == '医院'){
-			hosiptal_to_gongfang(()=>{
-				gongfang_to_out(()=>{
-					startBattle();
-				});
+			hosiptal_to_out(()=>{
+				startBattle();
 			});
 		} else if(map == '工房'){
 			gongfang_to_out(()=>{

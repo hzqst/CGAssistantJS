@@ -243,7 +243,7 @@ var cga = require('./cgaapi')(function(){
 								cga.walkList([
 								[27, 82]
 								], ()=>{
-									cb(true);									
+									cb(true);
 								});
 							});
 						});

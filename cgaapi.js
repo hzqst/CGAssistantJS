@@ -2020,6 +2020,8 @@ module.exports = function(callback){
 					cb(r);
 					return;
 				}
+				console.trace()
+				
 				if(r === true){
 					console.log('第'+(index+1)+'阶段执行完成。');
 					objThis.doNext(index + 1, cb);

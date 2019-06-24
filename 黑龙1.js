@@ -76,7 +76,7 @@ var cga = require('./cgaapi')(function(){
 			setTimeout(cb, 1000, true);
 		});
 	}
-		
+
 	var out_to_hosiptal = (cb)=>{
 
 		var walkTo = [
@@ -93,9 +93,15 @@ var cga = require('./cgaapi')(function(){
 			}
 		}
 		if(cga.exitPos!=null && cga.GetMapName() == '黑龙沼泽1区'){
-			walkTo.unshift([cga.exitPos.x,cga.exitPos.y,'肯吉罗岛']);
+			walkTo.unshift([cga.exitPos.x,cga.exitPos.y, '']);
 		}
-		cga.walkList(walkTo, cb);
+		cga.walkList(walkTo, (r, reason)=>{
+			if(!r && reason === 4){
+				out_to_hosiptal(cb);
+				return;
+			}
+			cb(true);
+		});
 	}
 
 	var startBattle = ()=>{

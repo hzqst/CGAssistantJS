@@ -285,7 +285,7 @@ var cga = require('./cgaapi')(function(){
 					cga.TurnTo(54, 161);
 					cga.AsyncWaitMovement({map:'诅咒的迷宫', delay:1000, timeout:5000}, function(r){
 						if(!r){
-							cga.walkList([ [54, 162], [55, 162] ], retry);
+							cga.walkList([ [54, 162], [55, 162], [54, 162], [55, 162] ], retry);
 							return;
 						}
 						
@@ -305,7 +305,7 @@ var cga = require('./cgaapi')(function(){
 		}
 	},
 	{//3
-		intro: '8.诅咒的迷宫为固定迷宫，每10层一个关卡，需战胜BOSS或满足通关条件后方可通过。9.抵达第一个难关，与纳帕（22.14）对话进入战斗。',
+		intro: '9.抵达第一个难关，与纳帕（22.14）对话进入战斗。',
 		workFunc: function(cb2){
 			var checkSkill = (cb3)=>{
 				var skills = cga.GetSkillsInfo();
@@ -346,7 +346,7 @@ var cga = require('./cgaapi')(function(){
 						return;
 					}
 					if(dlg instanceof TypeError){
-						fuckBOSS();
+						cga.waitForMultipleLocation(nextMap);
 						return;
 					}
 					cga.ClickNPCDialog(1, 0);
@@ -356,6 +356,12 @@ var cga = require('./cgaapi')(function(){
 			}
 			
 			var wait15 = (counter)=>{
+
+				if(cga.GetMapName() != '第一个难关')
+				{
+					cga.waitForMultipleLocation(nextMap);
+					return;
+				}
 
 				if(counter == 0){
 					fuckBOSS();
@@ -466,7 +472,7 @@ var cga = require('./cgaapi')(function(){
 						return;
 					}
 					if(dlg instanceof TypeError){
-						fuckBOSS();
+						cga.waitForMultipleLocation(nextMap);
 						return;
 					}
 					cga.ClickNPCDialog(1, 0);
@@ -476,6 +482,12 @@ var cga = require('./cgaapi')(function(){
 			}
 			
 			var wait15 = (counter)=>{
+
+				if(cga.GetMapName() != '第二个难关')
+				{
+					cga.waitForMultipleLocation(nextMap);
+					return;
+				}
 
 				if(counter == 0){
 					fuckBOSS();
@@ -599,7 +611,7 @@ var cga = require('./cgaapi')(function(){
 						return;
 					}
 					if(dlg instanceof TypeError){						
-						fuckBOSS();
+						cga.waitForMultipleLocation(nextMap);
 						return;
 					}
 					cga.ClickNPCDialog(1, 0);
@@ -609,6 +621,12 @@ var cga = require('./cgaapi')(function(){
 			}
 			
 			var wait15 = (counter)=>{
+
+				if(cga.GetMapName() != '第三个难关')
+				{
+					cga.waitForMultipleLocation(nextMap);
+					return;
+				}
 
 				if(counter == 0){
 					fuckBOSS();
@@ -728,7 +746,7 @@ var cga = require('./cgaapi')(function(){
 						return;
 					}
 					if(dlg instanceof TypeError){
-						fuckBOSS();
+						cga.waitForMultipleLocation(nextMap);
 						return;
 					}
 					cga.ClickNPCDialog(1, 0);
@@ -738,6 +756,12 @@ var cga = require('./cgaapi')(function(){
 			}
 			
 			var wait15 = (counter)=>{
+
+				if(cga.GetMapName() != '第四个难关')
+				{
+					cga.waitForMultipleLocation(nextMap);
+					return;
+				}
 
 				if(counter == 0){
 					fuckBOSS();
@@ -862,7 +886,7 @@ var cga = require('./cgaapi')(function(){
 						return;
 					}
 					if(dlg instanceof TypeError){
-						fuckBOSS();
+						cga.waitForMultipleLocation(nextMap);
 						return;
 					}
 					cga.ClickNPCDialog(1, 0);
@@ -871,6 +895,12 @@ var cga = require('./cgaapi')(function(){
 			}
 			
 			var wait15 = (counter)=>{
+
+				if(cga.GetMapName() != '第五个难关')
+				{
+					cga.waitForMultipleLocation(nextMap);
+					return;
+				}
 
 				if(counter == 0){
 					fuckBOSS();
@@ -962,7 +992,7 @@ var cga = require('./cgaapi')(function(){
 						return;
 					}
 					if(dlg instanceof TypeError){
-						fuckBOSS();
+						cga.waitForMultipleLocation(nextMap);
 						return;
 					}
 					cga.ClickNPCDialog(1, 0);

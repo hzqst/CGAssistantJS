@@ -6,7 +6,7 @@ var cga = require('./cgaapi')(function(){
 	var minHp = 0.3;//50%hp提醒
 	var minPetHp = 0.3;//宠30%hp提醒
 	var minBottleHp = 0.6;//60%hp吃瓶子
-	var minMp = 0.2;//10%mp提醒
+	var minMp = 0.1;//10%mp提醒
 	var minFoodMp = 0.6;//60%mp吃料理
 	
 	var eatBottle = '生命力回复药（500）';//恰瓶子
@@ -117,6 +117,7 @@ var cga = require('./cgaapi')(function(){
 			
 			if(playerinfo.hp < playerinfo.maxhp * minHp){
 				cga.SayWords('人物血量不够，需要回补!', 0, 3, 1);
+				mute = new Date().getTime() + 1000 * 15;
 			}
 			else if(playerinfo.hp < playerinfo.maxhp * minBottleHp){
 				if(eatBottle.length > 0){
@@ -136,11 +137,10 @@ var cga = require('./cgaapi')(function(){
 						return;
 					}
 				}
-				
-				cga.SayWords('人物血量不够，需要回补!', 0, 3, 1);
 			}
 			else if(playerinfo.mp < playerinfo.maxmp * minMp){
 				cga.SayWords('人物蓝量不够，需要回补!', 0, 3, 1);
+				mute = new Date().getTime() + 1000 * 15;
 			}
 			else if(playerinfo.mp < playerinfo.maxmp * minFoodMp){
 				if(eatFood.length > 0){
@@ -163,12 +163,14 @@ var cga = require('./cgaapi')(function(){
 			}
 			else if(petinfo.mp < petinfo.maxmp * minMp){
 				cga.SayWords('宠物蓝量不够，需要回补!', 0, 3, 1);
+				mute = new Date().getTime() + 1000 * 15;
 			}
 			else if(petinfo.hp < petinfo.maxhp * minPetHp){
 				cga.SayWords('宠物血量不够，需要回补!', 0, 3, 1);
+				mute = new Date().getTime() + 1000 * 15;
 			}
 			
-			mute = new Date().getTime() + 1000 * 15;
+			
 		}
 	}, 1000);
 });
