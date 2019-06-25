@@ -105,7 +105,9 @@ var cga = require('./cgaapi')(function(){
 	}
 
 	var startBattle = ()=>{
-		cga.freqMove(0, function(){
+		var xy = cga.GetMapXY();
+		var dir = cga.getRandomSpaceDir(xy.x, xy.y);
+		cga.freqMove(dir, function(){
 			
 			if(cga.isInBattle())
 				return true;

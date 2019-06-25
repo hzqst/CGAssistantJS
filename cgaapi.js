@@ -2459,31 +2459,67 @@ module.exports = function(callback){
 		repeat();		
 	}
 	
-	cga.freqMoveDirTable = [ 4, 5, 6, 7, 0, 1, 2, 3 ];
+	
 	cga.freqMove = function(dir, cb){
 		if(!cga.IsInGame()){
 			cb(new Error('not in game!'));
 			return;
 		}
-		cga.freqMoveDir = dir;
+		var freqMoveDirTable = [ 4, 5, 6, 7, 0, 1, 2, 3 ];
+		var freqMoveDir = dir;
 		var pos = cga.GetMapXY();
 		var move = ()=>{
 			var result = true;
 			try{
 				var curpos = cga.GetMapXY();
-				if(cga.freqMoveDir == 0 || cga.freqMoveDir == 4){
+				if(freqMoveDir == 0){
 					if(pos.x > curpos.x)
-						cga.ForceMove(cga.freqMoveDir, false);
+						cga.ForceMove(freqMoveDir, false);
 					else
-						cga.ForceMove(cga.freqMoveDirTable[cga.freqMoveDir], false);
+						cga.ForceMove(freqMoveDirTable[cga.freqMoveDir], false);
 				}
-				else if(cga.freqMoveDir == 2 || cga.freqMoveDir == 6){
+				else if(freqMoveDir == 4){
+					if(pos.x < curpos.x)
+						cga.ForceMove(freqMoveDir, false);
+					else
+						cga.ForceMove(freqMoveDirTable[cga.freqMoveDir], false);
+				}
+				else if(freqMoveDir == 2){
 					if(pos.y > curpos.y)
-						cga.ForceMove(cga.freqMoveDir, false);
+						cga.ForceMove(freqMoveDir, false);
 					else
-						cga.ForceMove(cga.freqMoveDirTable[cga.freqMoveDir], false);
+						cga.ForceMove(freqMoveDirTable[freqMoveDir], false);
 				}
-				
+				else if(freqMoveDir == 6){
+					if(pos.y < curpos.y)
+						cga.ForceMove(freqMoveDir, false);
+					else
+						cga.ForceMove(freqMoveDirTable[freqMoveDir], false);
+				}
+				else if(freqMoveDir == 1){
+					if(pos.x > curpos.x)
+						cga.ForceMove(freqMoveDir, false);
+					else
+						cga.ForceMove(freqMoveDirTable[freqMoveDir], false);
+				}
+				else if(freqMoveDir == 5){
+					if(pos.x < curpos.x)
+						cga.ForceMove(freqMoveDir, false);
+					else
+						cga.ForceMove(freqMoveDirTable[freqMoveDir], false);
+				}
+				else if(freqMoveDir == 3){
+					if(pos.y > curpos.y)
+						cga.ForceMove(freqMoveDir, false);
+					else
+						cga.ForceMove(freqMoveDirTable[freqMoveDir], false);
+				}
+				else if(freqMoveDir == 7){
+					if(pos.y < curpos.y)
+						cga.ForceMove(freqMoveDir, false);
+					else
+						cga.ForceMove(freqMoveDirTable[freqMoveDir], false);
+				}
 				result = cb();
 			}
 			catch(e){
@@ -2996,7 +3032,28 @@ module.exports = function(callback){
 		
 		return null;
 	}
+	
+	cga.getRandomSpaceDir = (x, y)=>{
+		var walls = cga.buildMapCollisionMatrix(true);
+		if(walls.matrix[y][x-1] == 0)
+			return 4;
+		if(walls.matrix[y][x+1] == 0)
+			return 0;
+		if(walls.matrix[y-1][x] == 0)
+			return 6;
+		if(walls.matrix[y+1][x] == 0)
+			return 2;
+		if(walls.matrix[y+1][x+1] == 0)
+			return 1;
+		if(walls.matrix[y+1][x-1] == 0)
+			return 3;
+		if(walls.matrix[y-1][x+1] == 0)
+			return 7;
+		if(walls.matrix[y-1][x-1] == 0)
+			return 5;
 		
+		return null;
+	}
 		
 	cga.tradeInternal = (stuff, checkParty, resolve, playerName) => {
 		cga.AsyncWaitTradeDialog((partyName, partyLevel) => {
