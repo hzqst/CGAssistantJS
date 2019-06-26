@@ -116,12 +116,12 @@ var cga = require('./cgaapi')(function(){
 			
 			if(cga.isInBattle())
 				return true;
-			
-		
+
 			var playerinfo = cga.GetPlayerInfo();
 			var petinfo = cga.GetPetInfo(playerinfo.petid);
 			
 			if(playerinfo.health > 0){
+				cga.LogBack();
 				process.exit(1);
 				return;
 			}

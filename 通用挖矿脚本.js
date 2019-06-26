@@ -33,13 +33,17 @@ var cga = require('./cgaapi')(function(){
 					setTimeout(()=>{
 						cga.walkList([
 							[23, 13, '国营第24坑道  地下3楼'],
-							[6, 3, '国营第24坑道  地下4楼'],
-							[24, 17],
+							[29, 3, '国营第24坑道  地下4楼'],
+							[19, 36],
 						], cb);
-					}, 1000);
+					}, 1000);				
 				});
 			});
-		}
+		},
+		prerequisite : ()=>{
+			return cga.getItemCount('矿山钥匙') > 0;
+		},
+		prerequisite_info : '需要矿山钥匙！'
 	},
 	{
 		level : 3,
@@ -56,13 +60,17 @@ var cga = require('./cgaapi')(function(){
 					setTimeout(()=>{
 						cga.walkList([
 							[23, 13, '国营第24坑道  地下3楼'],
-							[29, 3, '国营第24坑道  地下4楼'],
-							[19, 36],
+							[6, 3, '国营第24坑道  地下4楼'],
+							[24, 17],
 						], cb);
-					}, 1000);				
+					}, 1000);
 				});
 			});
-		}
+		},
+		prerequisite : ()=>{
+			return cga.getItemCount('矿山钥匙') > 0;
+		},
+		prerequisite_info : '需要矿山钥匙！'
 	},
 	{
 		level : 4,
@@ -326,6 +334,13 @@ var cga = require('./cgaapi')(function(){
 			cga.SayWords(errmsg , 0, 3, 1);
 			throw new Error(errmsg);
 			return;
+		}
+		
+		if(typeof mineObject.prerequisite == 'function'){
+			if(!mineObject.prerequisite()){
+				throw new Error(mineObject.prerequisite_info);
+				return;
+			}
 		}
 		
 		var playerInfo = cga.GetPlayerInfo();

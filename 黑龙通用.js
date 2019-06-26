@@ -1,5 +1,6 @@
 var cga = require('./cgaapi')(function(){
-	console.log('黑一 起始地点：艾尔莎岛 里堡 营地 （或医院） 或 肯吉罗岛')
+	console.log('黑龙通用脚本 起始地点：艾尔莎岛 里堡 营地 （或医院） 或 肯吉罗岛')
+	console.log('支持新城组队启动并在营地门口重新组队')
 	
 	var minHp = 0.5;//50%hp提醒
 	var minMp = 0.2;//10%mp提醒
@@ -60,7 +61,7 @@ var cga = require('./cgaapi')(function(){
 		cga.walkRandomMaze(null, (err)=>{
 			walkMazeBack(cb3);
 		}, (layerIndex)=>{
-			return '黑龙沼泽'+(layerIndex - 1)+'区';
+			return layerIndex > 1 ? ('黑龙沼泽'+(layerIndex - 1)+'区') : '肯吉罗岛';
 		});
 	}
 
@@ -167,6 +168,7 @@ var cga = require('./cgaapi')(function(){
 			var petinfo = cga.GetPetInfo(playerinfo.petid);
 			
 			if(playerinfo.health > 0){
+				cga.LogBack();
 				process.exit(1);
 				return;
 			}
@@ -242,13 +244,13 @@ var cga = require('./cgaapi')(function(){
 		}
 	}
 
-	cga.SayWords('欢迎使用CGA通用黑龙脚本，输入数字1~10去黑龙1~10层练级。', 0, 3, 1);
+	cga.SayWords('欢迎使用CGA通用黑龙脚本，输入数字1~N去黑龙1~N层练级。', 0, 3, 1);
 	
 	cga.waitTeammateSay((player, msg)=>{
 
 		if(player.is_me == true){
 			
-			if(parseInt(msg) >= 1 && parseInt(msg) <= 10){
+			if(parseInt(msg) >= 1 && parseInt(msg) <= 99){
 				layerLevel = parseInt(msg);
 				cga.SayWords('您选择了黑龙'+layerLevel+'层。', 0, 3, 1);
 				loop();
