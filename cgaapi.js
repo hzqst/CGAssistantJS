@@ -1680,8 +1680,7 @@ module.exports = function(callback){
 			var curmap = cga.GetMapName();
 			var curpos = cga.GetMapXY();
 			var curmapindex = cga.GetMapIndex().index3;
-			var walker = null;
-			
+
 			console.log('当前地图: ' + curmap);
 			console.log('当前地图序号: ' + curmapindex);
 			console.log('当前坐标: (%d, %d)', curpos.x, curpos.y);
@@ -1715,25 +1714,8 @@ module.exports = function(callback){
 				}
 				setTimeout(waitBattle2, 1500);
 			}
-				
-			if(targetX == curpos.x && targetY == curpos.y){		
-				var isEntrance = typeof targetMap == 'string' || typeof targetMap == 'number' || (targetMap instanceof Array) ? true : false;
-				if(isEntrance){
-					cga.FixMapWarpStuck(1);
-					cga.AsyncWalkTo(targetX, targetY, targetMap, null, null, walker);
-					return;
-				}
-				walkCb();
-				return;
-			}
-
-			if(isAStarPath !== true){
-				newList = cga.calculatePath(curpos.x, curpos.y, targetX, targetY, targetMap, dstX, dstY, newList);
-				walkCb();
-				return;
-			}
-
-			walker = (result, reason)=>{
+			
+			var walker = (result, reason)=>{
 				//console.log(result);
 				//console.log(reason);
 				if(result !== true){
@@ -1819,26 +1801,7 @@ module.exports = function(callback){
 					} else if(reason == 3){
 						
 						console.log('当前寻路卡住，抛出错误！');
-						/*var curpos = cga.GetMapXY();
-						var curmap = cga.GetMapName();
-						
-						for(var i = newList.length - 1 > 3 ? 3 : newList.length - 1;
-							i > 0 ; --i){
-							if(newList[i][2] == curmap)
-							{
-								newList.splice(0, i+1);
-								
-								if(typeof newList[0] != 'undefined'){
-									targetX = newList[0][0];
-									targetY = newList[0][1];
-									targetMap = newList[0][2];
-								}
-							}
-						}
-												
-						newList = cga.calculatePath(curpos.x, curpos.y, targetX, targetY, targetMap, dstX, dstY, newList);
-						walkCb();
-						return;*/
+
 					}
 					cb(result, reason);
 					return;
@@ -1850,6 +1813,23 @@ module.exports = function(callback){
 				}
 				
 				walkCb();
+			}
+				
+			if(targetX == curpos.x && targetY == curpos.y){		
+				var isEntrance = typeof targetMap == 'string' || typeof targetMap == 'number' || (targetMap instanceof Array) ? true : false;
+				if(isEntrance){
+					cga.FixMapWarpStuck(1);
+					cga.AsyncWalkTo(targetX, targetY, targetMap, null, null, walker);
+					return;
+				}
+				walkCb();
+				return;
+			}
+
+			if(isAStarPath !== true){
+				newList = cga.calculatePath(curpos.x, curpos.y, targetX, targetY, targetMap, dstX, dstY, newList);
+				walkCb();
+				return;
 			}
 			
 			cga.AsyncWalkTo(targetX, targetY, targetMap, dstX, dstY, walker);

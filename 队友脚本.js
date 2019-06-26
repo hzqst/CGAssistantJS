@@ -29,7 +29,64 @@ var cga = require('./cgaapi')(function(){
 		
 	}
 	
+	var openbox = (cb)=>{
+		var box = cga.findItem('加强补给品');
+		if(box != -1){
+			cga.AsyncWaitNPCDialog(function(dlg){
+				cga.ClickNPCDialog(4, 0);
+				setTimeout(openbox, 1500);
+			});
+			cga.UseItem(box);
+		}
+	}
+	
 	var waitArray = [
+	{
+		mapname:'肯吉罗岛',
+		pos:[475, 208],
+		cb : ()=>{
+
+			if(cga.getItemCount('龙角') >= 30){
+				cga.TurnTo(475, 208);
+				cga.AsyncWaitNPCDialog(function(dlg){
+					if(typeof dlg.message == 'string' && 
+					dlg.message.indexOf('非常好') >= 0){
+						cga.ClickNPCDialog(32, 0);
+						cga.AsyncWaitNPCDialog(function(dlg){
+							cga.ClickNPCDialog(1, 0);
+						});
+					}
+					else if(typeof dlg.message == 'string' && 
+					dlg.message.indexOf('滚开') >= 0){
+						openbox();
+					}
+					else if(typeof dlg.message == 'string' && 
+					dlg.message.indexOf('新的增援') >= 0){
+						cga.ClickNPCDialog(32, 0);
+						cga.AsyncWaitNPCDialog(function(dlg){
+							cga.ClickNPCDialog(32, 0);
+							cga.AsyncWaitNPCDialog(function(dlg){
+								cga.ClickNPCDialog(32, 0);
+								cga.AsyncWaitNPCDialog(function(dlg){
+									cga.ClickNPCDialog(1, 0);
+									
+								});
+							});
+						});
+					}
+					else if(typeof dlg.message == 'string' && 
+					dlg.message.indexOf('哦？不错') >= 0){
+						cga.ClickNPCDialog(32, 0);
+						cga.AsyncWaitNPCDialog(function(dlg){
+							cga.ClickNPCDialog(1, 0);
+						});
+					}
+				});
+			}
+			
+			setTimeout(cga.waitForMultipleLocation, 5000, waitArray);
+		}
+	},
 	{
 		mapname:'工房',
 		pos:[21, 23],
@@ -103,7 +160,7 @@ var cga = require('./cgaapi')(function(){
 
 		if(cga.isInBattle())
 			return;
-
+		
 		if(new Date().getTime() >= mute )//15s内闭嘴
 		{
 			var playerinfo = cga.GetPlayerInfo();
@@ -114,8 +171,12 @@ var cga = require('./cgaapi')(function(){
 				process.exit(1);
 				return;
 			}
-			
-			if(playerinfo.hp < playerinfo.maxhp * minHp){
+
+			if(cga.getItemCount('加强补给品') >= 1){
+				openbox();
+				mute = new Date().getTime() + 1000 * 3;
+			}
+			else if(playerinfo.hp < playerinfo.maxhp * minHp){
 				cga.SayWords('人物血量不够，需要回补!', 0, 3, 1);
 				mute = new Date().getTime() + 1000 * 15;
 			}
