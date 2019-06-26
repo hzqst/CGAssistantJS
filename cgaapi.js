@@ -2918,7 +2918,7 @@ module.exports = function(callback){
 		download();
 	}
 	
-	cga.walkMaze = (target_map, cb)=>{
+	cga.walkMaze = (target_map, cb, layerNameFilter)=>{
 		
 		var walls = cga.buildMapCollisionMatrix();
 		
@@ -2942,9 +2942,16 @@ module.exports = function(callback){
 				return;
 			}
 			
-			newmap = regex[1] + (layerIndex + 1);
-			if(typeof regex[3] == 'string')
-				newmap += regex[3];
+			if(typeof layerNameFilter == 'function')
+			{
+				newmap = layerNameFilter(layerIndex, regex);
+			}
+			else
+			{
+				newmap = regex[1] + (layerIndex + 1);
+				if(typeof regex[3] == 'string')
+					newmap += regex[3];
+			}
 		} else {
 			newmap = target_map;
 		}
@@ -2976,7 +2983,7 @@ module.exports = function(callback){
 		});
 	}
 	
-	cga.walkRandomMaze = (target_map, cb)=>{
+	cga.walkRandomMaze = (target_map, cb, layerNameFilter)=>{
 		
 		var walls = cga.buildMapCollisionMatrix();
 		
@@ -2985,10 +2992,10 @@ module.exports = function(callback){
 		|| walls.matrix[walls.y_size-1][walls.x_size-1] == 1
 		|| walls.matrix[0][walls.x_size-1] == 1){
 			cga.downloadMap(walls.x_size,walls.y_size, ()=>{
-				cga.walkMaze(target_map, cb);
+				cga.walkMaze(target_map, cb, layerNameFilter);
 			});
 		} else {
-			cga.walkMaze(target_map, cb);
+			cga.walkMaze(target_map, cb, layerNameFilter);
 		}
 	}
 	
