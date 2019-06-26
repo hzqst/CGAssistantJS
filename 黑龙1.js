@@ -93,7 +93,7 @@ var cga = require('./cgaapi')(function(){
 			}
 		}
 		if(cga.exitPos!=null && cga.GetMapName() == '黑龙沼泽1区'){
-			walkTo.unshift([cga.exitPos.x,cga.exitPos.y, '']);
+			walkTo.unshift([cga.exitPos.x,cga.exitPos.y, '肯吉罗岛']);
 		}
 		cga.walkList(walkTo, (r, reason)=>{
 			if(!r && reason === 4){
@@ -107,6 +107,7 @@ var cga = require('./cgaapi')(function(){
 	var startBattle = ()=>{
 		var xy = cga.GetMapXY();
 		var dir = cga.getRandomSpaceDir(xy.x, xy.y);
+
 		cga.freqMove(dir, function(){
 			
 			if(cga.isInBattle())

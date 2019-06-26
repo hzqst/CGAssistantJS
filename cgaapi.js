@@ -1680,6 +1680,7 @@ module.exports = function(callback){
 			var curmap = cga.GetMapName();
 			var curpos = cga.GetMapXY();
 			var curmapindex = cga.GetMapIndex().index3;
+			var walker = null;
 			
 			console.log('当前地图: ' + curmap);
 			console.log('当前地图序号: ' + curmapindex);
@@ -1714,25 +1715,25 @@ module.exports = function(callback){
 				}
 				setTimeout(waitBattle2, 1500);
 			}
-	
-			if(isAStarPath !== true){
-				newList = cga.calculatePath(curpos.x, curpos.y, targetX, targetY, targetMap, dstX, dstY, newList);
-				walkCb();
-				return;
-			}
-			
+				
 			if(targetX == curpos.x && targetY == curpos.y){		
 				var isEntrance = typeof targetMap == 'string' || typeof targetMap == 'number' || (targetMap instanceof Array) ? true : false;
 				if(isEntrance){
 					cga.FixMapWarpStuck(1);
-					setTimeout(walkCb, 1000);
+					cga.AsyncWalkTo(targetX, targetY, targetMap, null, null, walker);
 					return;
 				}
 				walkCb();
 				return;
 			}
 
-			var walker = function(result, reason){
+			if(isAStarPath !== true){
+				newList = cga.calculatePath(curpos.x, curpos.y, targetX, targetY, targetMap, dstX, dstY, newList);
+				walkCb();
+				return;
+			}
+
+			walker = (result, reason)=>{
 				//console.log(result);
 				//console.log(reason);
 				if(result !== true){
@@ -2476,13 +2477,13 @@ module.exports = function(callback){
 					if(pos.x > curpos.x)
 						cga.ForceMove(freqMoveDir, false);
 					else
-						cga.ForceMove(freqMoveDirTable[cga.freqMoveDir], false);
+						cga.ForceMove(freqMoveDirTable[freqMoveDir], false);
 				}
 				else if(freqMoveDir == 4){
 					if(pos.x < curpos.x)
 						cga.ForceMove(freqMoveDir, false);
 					else
-						cga.ForceMove(freqMoveDirTable[cga.freqMoveDir], false);
+						cga.ForceMove(freqMoveDirTable[freqMoveDir], false);
 				}
 				else if(freqMoveDir == 2){
 					if(pos.y > curpos.y)
