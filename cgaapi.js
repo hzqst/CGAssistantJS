@@ -29,6 +29,7 @@ module.exports = function(callback){
 	
 	cga.TRADE_STUFFS_ITEM = 1;
 	cga.TRADE_STUFFS_PET = 2;
+	cga.TRADE_STUFFS_PETSKILL = 3;
 	cga.TRADE_STUFFS_GOLD = 4;
 
 	cga.REQUEST_TYPE_PK = 1;
