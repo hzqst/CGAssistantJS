@@ -228,7 +228,7 @@ var cga = require('./cgaapi')(function(){
 		{
 			whatever_to_out(startBattle);
 		}
-		else if(map == '艾尔莎岛' || map == '里谢里雅堡')
+		else if(map == '艾尔莎岛' || map == '里谢里雅堡' || map == '法兰城')
 		{
 			cga.travel.falan.toCamp(()=>{
 				var teamplayersnow = cga.getTeamPlayers();

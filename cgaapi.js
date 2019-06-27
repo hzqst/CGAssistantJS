@@ -365,14 +365,18 @@ module.exports = function(callback){
 			});
 			return;
 		}
-		if(curMap == '艾尔莎岛' && curXY.x == 140 && curXY.y == 105){
-			cga.turnDir(7);
-			cga.AsyncWaitNPCDialog(function(dlg){
-				cga.ClickNPCDialog(4, -1);
-				cga.AsyncWaitMovement({map:desiredMap, delay:1000, timeout:5000}, function(r){
-					cga.travel.falan.toStoneInternal(stone, cb, r);
+		if(curMap == '艾尔莎岛'){
+			cga.walkList([
+			[140, 105],
+			], ()=>{
+				cga.turnDir(7);
+				cga.AsyncWaitNPCDialog(function(dlg){
+					cga.ClickNPCDialog(4, -1);
+					cga.AsyncWaitMovement({map:desiredMap, delay:1000, timeout:5000}, function(r){
+						cga.travel.falan.toStoneInternal(stone, cb, r);
+					});
 				});
-			});
+			})
 			return;
 		}
 		if(curMap == '里谢里雅堡' && curXY.x == 41){//&& curXY.y == 91
@@ -628,7 +632,10 @@ module.exports = function(callback){
 	}
 
 	cga.travel.falan.toCamp = (cb)=>{
-		cga.travel.falan.toStone('S', (r)=>{
+		var stage2 = (r, err)=>{
+			if(!r)
+				throw new Error(err);
+			
 			if(cga.getItemCount('承认之戒') > 0){
 				var list = [
 				[153, 241, '芙蕾雅'],
@@ -652,6 +659,9 @@ module.exports = function(callback){
 					);
 				}
 				
+				if(cga.GetMapName() == '里谢里雅堡')
+					list.unshift([41, 98, '法兰城']);
+				
 				cga.walkList(list, (r)=>{
 					
 					var go = ()=>{
@@ -673,7 +683,13 @@ module.exports = function(callback){
 				[153, 241, '芙蕾雅'],
 				], cb);
 			}
-		});
+		}
+		
+		var mapname = cga.GetMapName();
+		if(mapname == '法兰城' || mapname == '里谢里雅堡')
+			stage2(true);
+		else
+			cga.travel.falan.toStone('C', stage2);
 	}
 
 	cga.travel.falan.toFabricStore = (cb)=>{
@@ -1345,14 +1361,15 @@ module.exports = function(callback){
 			cb(false);
 			return;
 		}
+
 		var curXY = cga.GetMapXY();
 		var curMap = cga.GetMapName();
 		const desiredMap = ['艾尔莎岛', '艾夏岛'];
 		if(curMap == '艾尔莎岛' || curMap == '艾夏岛'){
 			
 			var curStone = cga.travel.newisland.xy2name(curXY.x, curXY.y);
-			if(curStone) {
-				//console.log(curStone);
+			if(curStone !== false) {
+
 				var turn = false;
 				if(stone.length >= 2 && curStone.charAt(1) == stone.charAt(1)) {
 					if(curStone == stone){
@@ -1399,6 +1416,13 @@ module.exports = function(callback){
 					});
 					return;
 				}
+			} else if(curMap == '艾尔莎岛' && stone == 'X'){
+				cga.walkList([
+				[140, 105],
+				], ()=>{
+					cga.travel.newisland.toStoneInternal(stone, cb, r);
+				});
+				return;
 			}
 		}
 
