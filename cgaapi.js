@@ -557,6 +557,12 @@ module.exports = function(callback){
 	//从法兰城到里谢里雅堡，启动地点：登出到法兰城即可
 	//参数1：回调函数function(result), result 为true或false
 	cga.travel.falan.toCastle = function(cb){
+		
+		if(cga.GetMapName() == '里谢里雅堡'){
+			cb(true);
+			return;
+		}
+		
 		cga.travel.falan.toStone('S', function(r){
 			if(!r){
 				cb(false);
@@ -564,13 +570,7 @@ module.exports = function(callback){
 			}
 			cga.walkList([
 			[154, 100, '里谢里雅堡']
-			], function(r){
-				if(!r){
-					cb(false);
-					return;
-				}
-				cb(true);
-			});
+			], cb);
 		});
 	}
 	
@@ -3146,6 +3146,18 @@ module.exports = function(callback){
 	cga.waitTrade = (stuff, checkParty, resolve) => {
 		cga.EnableFlags(cga.ENABLE_FLAG_TRADE, true)
 		cga.tradeInternal(stuff, checkParty, resolve);
+	}
+	
+	cga.needSupplyInitial = ()=>{
+		var playerinfo = cga.GetPlayerInfo();
+			var petinfo = cga.GetPetInfo(playerinfo.petid);
+			if( playerinfo.hp < playerinfo.maxhp ||
+				playerinfo.mp < playerinfo.maxmp || 
+				petinfo.hp < petinfo.maxhp ||
+				petinfo.mp < petinfo.maxmp)
+				return true;
+		
+		return false;
 	}
 		
 	return cga;

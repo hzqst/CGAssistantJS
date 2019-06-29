@@ -16,7 +16,7 @@ var cga = require('./cgaapi')(function(){
 					[351, 145, '国营第24坑道 地下1楼'],
 				], cb);
 			});
-		}		
+		}
 	},
 	{
 		level : 2,
