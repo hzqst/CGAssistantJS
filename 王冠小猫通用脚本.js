@@ -217,6 +217,14 @@ var cga = require('./cgaapi')(function(){
 								setTimeout(cb2, 3000, true);
 							});
 						}
+						else if(typeof dlg.message == 'string' &&
+						dlg.message.indexOf('我是管理') >= 0){
+							cga.SayWords('男', 0, 3, 1);
+							cga.AsyncWaitNPCDialog((dlg)=>{
+								cga.ClickNPCDialog(1, 0);
+								setTimeout(cb2, 3000, true);
+							});
+						}
 					}
 				});
 			});
