@@ -412,19 +412,19 @@ var cga = require('./cgaapi')(function(){
 		intro: '1.前往光之路调查（165.81）处石碑，选“是”进入白色方舟第一层。',
 		workFunc: function(cb2){
 	
-			if(cga.needSupplyInitial())
-			{
-				cga.travel.falan.toCastleHospital(()=>{
-					setTimeout(cb2, 3000, 'restart stage');
-				});
-				return;
-			}
-			
 			var dropItem = cga.findItem('誓约之花');
 			if(dropItem != -1)
 			{
 				cga.DropItem(dropItem);
 				setTimeout(cb2, 1000, 'restart stage');
+				return;
+			}
+	
+			if(cga.needSupplyInitial())
+			{
+				cga.travel.falan.toCastleHospital(()=>{
+					setTimeout(cb2, 3000, 'restart stage');
+				});
 				return;
 			}
 			

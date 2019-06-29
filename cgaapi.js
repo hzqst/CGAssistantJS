@@ -3245,14 +3245,27 @@ module.exports = function(callback){
 		cga.DoRequest(cga.REQUEST_TYPE_TRADE);
 	}
 	
-	cga.needSupplyInitial = ()=>{
+	cga.needSupplyInitial = (obj)=>{
 		var playerinfo = cga.GetPlayerInfo();
-			var petinfo = cga.GetPetInfo(playerinfo.petid);
-			if( playerinfo.hp < playerinfo.maxhp ||
-				playerinfo.mp < playerinfo.maxmp || 
-				petinfo.hp < petinfo.maxhp ||
-				petinfo.mp < petinfo.maxmp)
-				return true;
+		var petinfo = cga.GetPetInfo(playerinfo.petid);
+		
+		if(!obj)
+			obj = {};
+		
+		if(!obj.playerhp)
+			obj.playerhp = 1.0;
+		if(!obj.playermp)
+			obj.playermp = 1.0;
+		if(!obj.pethp)
+			obj.pethp = 1.0;
+		if(!obj.petmp)
+			obj.petmp = 1.0;
+		
+		if( playerinfo.hp < playerinfo.maxhp * obj.playerhp ||
+			playerinfo.mp < playerinfo.maxmp * obj.playermp || 
+			petinfo.hp < petinfo.maxhp * obj.playerhp ||
+			petinfo.mp < petinfo.maxmp * obj.playermp)
+			return true;
 		
 		return false;
 	}
