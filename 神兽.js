@@ -101,9 +101,9 @@ var cga = require('./cgaapi')(function(){
 							});
 						});
 					});
-					
-					waitStage(cb2);
 				});
+				
+				waitStage(cb2);
 			}
 			
 			var go2 = ()=>{
@@ -211,7 +211,6 @@ var cga = require('./cgaapi')(function(){
 
 				if(name == '医院2楼')
 					list.unshift(
-					[135, 334],
 					[15, 11, '医院'],
 					[1, 9, '杰诺瓦镇'],
 					[24, 40, '莎莲娜'],

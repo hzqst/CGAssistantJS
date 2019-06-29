@@ -107,8 +107,8 @@ var cga = require('./cgaapi')(function(){
 						});
 					});
 				}
-								
-				cga.waitForLocation({mapname : '医院', walkto:[6, 5], leaveteam : true}, retry);
+
+				cga.waitForLocation({mapname : '医院', walkto:[6, 5], pos: [7, 5], leaveteam : true}, retry);
 			}
 			
 			var wait3 = ()=>{
@@ -163,12 +163,7 @@ var cga = require('./cgaapi')(function(){
 					setTimeout(waitBOSS, 1000);
 					return;
 				}
-				
-				var swordItem = cga.findItem('艾里克的大剑');
-				if(swordItem != -1){
-					cga.DropItem(swordItem);
-				}
-				
+					
 				setTimeout(cb2, 1000, true);
 			}
 			
@@ -251,24 +246,41 @@ var cga = require('./cgaapi')(function(){
 				[26, 13],
 				[27, 13],
 				], ()=>{
-					cga.TurnTo(26, 12);
-					cga.AsyncWaitNPCDialog((dlg)=>{
-						cga.SayWords('拿到树苗后请自行完成后续任务！前往法兰城凯蒂夫人的店，鉴定树苗并将其交给维诺亚村村长的家“村长卡丹”，即可完成任务！', 0, 3, 1);
-						setTimeout(cb2, 1000, true);
-					});
+					var swordItem = cga.findItem('艾里克的大剑');
+					console.log('swordItem='+swordItem);
+					if(swordItem != -1){
+						cga.DropItem(swordItem);
+					}
+					setTimeout(()=>{
+						cga.TurnTo(26, 12);
+						cga.AsyncWaitNPCDialog((dlg)=>{
+							cga.SayWords('拿到树苗后请自行完成后续任务！前往法兰城凯蒂夫人的店，鉴定树苗并将其交给维诺亚村村长的家“村长卡丹”，即可完成任务！', 0, 3, 1);
+							setTimeout(cb2, 1000, true);
+						});
+					}, 1000);					
 				});
 			}
 			
 			var go2 = ()=>{
 				var retry = ()=>{
-					cga.TurnTo(26, 12);
-					cga.AsyncWaitNPCDialog((dlg)=>{
-						if(dlg instanceof TypeError){
-							cga.walkList([ [26, 13], [27, 13] ], retry);
-							return;
-						}
-						setTimeout(cb2, 1000, true);
-					});
+					var swordItem = cga.findItem('艾里克的大剑');
+					console.log('swordItem='+swordItem);
+					if(swordItem != -1){
+						cga.DropItem(swordItem);
+					}
+					setTimeout(()=>{
+						cga.TurnTo(26, 12);
+						cga.AsyncWaitNPCDialog((dlg)=>{
+							if(dlg instanceof TypeError){
+								cga.walkList([ [26, 13], [27, 13] ], retry);
+								return;
+							}
+							if(cga.findItem('树苗？') == -1){
+								setTimeout(retry, 1000);
+							}
+							setTimeout(cb2, 1000, true);
+						});
+					}, 1000);
 				}
 				
 				cga.waitForLocation({mapname : '叹息森林', pos:[26, 12], walkto : [26, 13], leaveteam : true}, retry);

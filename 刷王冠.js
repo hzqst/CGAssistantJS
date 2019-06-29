@@ -1,0 +1,187 @@
+var cga = require('./cgaapi')(function(){
+	console.log('刷王冠 起始地点：艾尔莎岛')
+	console.log('重要提示：途经的每一层塔地图档都要下载，否则自动寻路会失败！')
+	console.log('BUG期间建议移动速度不超过300%否则容易掉线')
+	
+	var loop_count = 0;
+	
+	var task = cga.task.Task('圣域守护者', [
+	{//0
+		intro: '1.前往雪拉威森塔95楼与守护者杰斯（28.104）对话，选“是”获得【塞特的护身符】。',
+		workFunc: function(cb2){
+			
+			var stage2 = ()=>{
+				cga.TurnTo(28, 103);
+				cga.AsyncWaitNPCDialog((dlg)=>{
+					cga.ClickNPCDialog(32, 0);
+					cga.AsyncWaitNPCDialog((dlg)=>{
+						cga.ClickNPCDialog(4, 0);
+						cga.AsyncWaitNPCDialog((dlg)=>{
+							cga.ClickNPCDialog(32, 0);
+							cga.AsyncWaitNPCDialog((dlg)=>{
+								cga.ClickNPCDialog(1, 0);
+								cga.AsyncWaitMovement({map:'雪拉威森塔９６层', delay:1000, timeout:5000}, cb2);
+							});
+						});
+					});
+				});
+			}
+			
+			if(cga.GetMapName() == '国民会馆')
+			{
+				cga.walkList([
+					[108, 39, '雪拉威森塔１层'],
+					[73, 60],
+					[75, 50, '雪拉威森塔５０层'],
+					[16, 44, '雪拉威森塔９５层'],
+					[28, 105],
+				], stage2);
+			}
+			else
+			{
+				cga.travel.newisland.toLiXiaIsland(()=>{
+					cga.walkList([
+					[90, 99, '国民会馆'],
+					[108, 39, '雪拉威森塔１层'],
+					[73, 60],
+					[75, 50, '雪拉威森塔５０层'],
+					[16, 44, '雪拉威森塔９５层'],
+					[28, 105],
+					], stage2);
+				});
+			}
+		}
+	},
+	{//1
+		intro: '2.前往雪拉威森塔96楼与守护者梅亚（88.118）对话，交出【塞特的护身符】获得【梅雅的护身符】。',
+		workFunc: function(cb2){
+			cga.walkList([
+			[87, 118],
+			], ()=>{
+				cga.TurnTo(89, 118);
+				cga.AsyncWaitNPCDialog((dlg)=>{
+					cga.ClickNPCDialog(32, 0);
+					cga.AsyncWaitNPCDialog((dlg)=>{
+						cga.ClickNPCDialog(32, 0);
+						cga.AsyncWaitNPCDialog((dlg)=>{
+							cga.ClickNPCDialog(4, 0);
+							cga.AsyncWaitNPCDialog((dlg)=>{
+								cga.ClickNPCDialog(1, 0);
+								cga.AsyncWaitMovement({map:'雪拉威森塔９７层', delay:1000, timeout:5000}, cb2);
+							});
+						});
+					});
+				});
+			});
+		}
+	},
+	{//2
+		intro: '3.前往雪拉威森塔97楼与守护者迪斯（117.125）对话，交出【梅雅的护身符】获得【提斯的护身符】。',
+		workFunc: function(cb2){
+			cga.walkList([
+			[117, 126],
+			], ()=>{
+				cga.TurnTo(117, 124);
+				cga.AsyncWaitNPCDialog((dlg)=>{
+					cga.ClickNPCDialog(32, 0);
+					cga.AsyncWaitNPCDialog((dlg)=>{
+						cga.ClickNPCDialog(32, 0);
+						cga.AsyncWaitNPCDialog((dlg)=>{
+							cga.ClickNPCDialog(32, 0);
+							cga.AsyncWaitNPCDialog((dlg)=>{
+								cga.ClickNPCDialog(4, 0);
+								cga.AsyncWaitNPCDialog((dlg)=>{
+									cga.ClickNPCDialog(1, 0);
+									cga.AsyncWaitMovement({map:'雪拉威森塔９８层', delay:1000, timeout:5000}, cb2);
+								});
+							});
+						});
+					});
+				});
+			});
+		}
+	},
+	{//3
+		intro: '4.前往雪拉威森塔98楼与守护者乌斯（120.120）对话，交出【提斯的护身符】获得【伍斯的护身符】。',
+		workFunc: function(cb2){
+			cga.walkList([
+			[120, 121],
+			], ()=>{
+				cga.TurnTo(120, 119);
+				cga.AsyncWaitNPCDialog((dlg)=>{
+					cga.ClickNPCDialog(32, 0);
+					cga.AsyncWaitNPCDialog((dlg)=>{
+						cga.ClickNPCDialog(4, 0);
+						cga.AsyncWaitNPCDialog((dlg)=>{
+							cga.ClickNPCDialog(1, 0);
+							cga.AsyncWaitMovement({map:'雪拉威森塔９９层', delay:1000, timeout:5000}, cb2);
+						});
+					});
+				});
+			});
+		}
+	},
+	{//4
+		intro: '5.前往雪拉威森塔99楼与守护者妮斯（102.54）对话，交出【伍斯的护身符】获得【尼斯的护身符】。',
+		workFunc: function(cb2){
+			cga.walkList([
+			[101, 54],
+			], ()=>{
+				cga.TurnTo(103, 54);
+				cga.AsyncWaitNPCDialog((dlg)=>{
+					cga.ClickNPCDialog(4, 0);
+					cga.AsyncWaitNPCDialog((dlg)=>{
+						cga.ClickNPCDialog(1, 0);
+						cga.AsyncWaitMovement({map:'雪拉威森塔最上层', delay:1000, timeout:5000}, cb2);
+					});
+				});
+			});
+		}
+	},
+	{//5
+		intro: '6.通过（103.134）处楼梯上楼达到雪拉威森塔塔顶。',
+		workFunc: function(cb2){
+			cga.walkList([
+			[103, 134, '雪拉威森塔前庭'],
+			[103, 19],
+			], ()=>{
+				cga.TurnTo(105, 17);
+				cga.SayWords('男', 0, 3, 1);
+				cga.AsyncWaitNPCDialog((dlg)=>{
+					cga.ClickNPCDialog(1, 0);
+					setTimeout(cb2, 1000, true);
+				});
+			});
+		}
+	},
+	],
+	[//任务阶段是否完成
+		function(){
+			return (cga.getItemCount('塞特') >= 1) ? true : false;
+		},
+		function(){
+			return (cga.getItemCount('梅雅的护身符') >= 1) ? true : false;
+		},
+		function(){
+			return (cga.getItemCount('提斯的护身符') >= 1) ? true : false;
+		},
+		function(){
+			return (cga.getItemCount('伍斯的护身符') >= 1) ? true : false;
+		},
+		function(){
+			return (cga.getItemCount('尼斯的护身符') >= 1) ? true : false;
+		},
+		function(){
+			return false;
+		},
+	]
+	);
+
+	var loop = ()=>{
+		loop_count ++;
+		cga.SayWords('已刷' + loop_count + '遍贝爷！', 0, 3, 1);
+		task.doTask(loop);
+	}
+
+	task.doTask(loop);
+});

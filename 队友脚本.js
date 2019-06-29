@@ -99,6 +99,17 @@ var cga = require('./cgaapi')(function(){
 		}
 	},
 	{
+		mapname:'矮人城镇',
+		pos:[122, 110],
+		cb : ()=>{
+			cga.TurnTo(122, 110);
+			cga.sellStone(function(){
+				cga.SayWords('卖石完毕...', 0, 3, 1);
+				setTimeout(cga.waitForMultipleLocation, 15000, waitArray);
+			});
+		}
+	},
+	{
 		mapname:'里谢里雅堡',
 		pos:[30, 77],
 		cb : ()=>{
