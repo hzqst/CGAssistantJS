@@ -2898,7 +2898,7 @@ module.exports = function(callback){
 
 	cga.findPlayerUnit = (name)=>{
 		var units = cga.GetMapUnits();
-	
+
 		for(var i = 0; i < units.length; ++i){
 			if(units[i].type == 8 && units[i].unit_name == name){
 				return units[i];
@@ -3069,66 +3069,143 @@ module.exports = function(callback){
 	}
 		
 	cga.tradeInternal = (stuff, checkParty, resolve, playerName) => {
-		cga.AsyncWaitTradeDialog((partyName, partyLevel) => {
+		
+		var waitDialog = ()=>{
+			
+			var getInTradeStuffs = false;
+			var tradeStuffsChecked = false;
+			var receivedStuffs = {};
+			var tradeFinished = false;
+			
+			var waitTradeMsg = ()=>{
+				
+				cga.AsyncWaitChatMsg((r)=>{
+					console.log('AsyncWaitChatMsg');
+					console.log(r);
 
-			if (partyLevel > 0) {
-				var getInTradeStuffs = false;
-				var receivedStuffs;
-				const waitTradeState = () => {
-					cga.AsyncWaitTradeState((state) => {
-						console.log('AsyncWaitTradeState ' + state);
-						if (state == cga.TRADE_STATE_READY) {
-							if (!getInTradeStuffs) cga.DoRequest(cga.REQUEST_TYPE_TRADE_CONFIRM);
-							waitTradeState();
-						} else if (state == cga.TRADE_STATE_SUCCEED || state == cga.TRADE_STATE_CANCEL) {
-							resolve({
-								success: (state == cga.TRADE_STATE_SUCCEED),
-								received: receivedStuffs
-							});
-						} else if (state == cga.TRADE_STATE_CONFIRM) {
-							waitTradeState();
-						} else {
-							resolve({success: false});
-						}
-					}, 10000);
-				};
-				waitTradeState();
+					if(!r.msg){
+						
+						if(!tradeFinished)
+							waitTradeMsg();
+						
+						return;
+					}
+
+					if(r.unitid == -1 && r.msg.indexOf('交易完成') >= 0){
+						tradeFinished = true;
+						resolve({
+							success: true,
+							received: receivedStuffs
+						});
+					}
+					else if(r.unitid == -1 && r.msg.indexOf('交易中止') >= 0){
+						tradeFinished = true;
+						resolve({
+							success: false,
+							received: receivedStuffs,
+							reason : 'refused'
+						});
+					} else {
+						if(!tradeFinished)
+							waitTradeMsg();
+					}
+				}, 3000);		
+			}
+			
+			var waitTradeStuffs = ()=>{
+				
 				cga.AsyncWaitTradeStuffs((type, args) => {
+				
 					console.log('AsyncWaitTradeStuffs');
+					console.log(type);
+					console.log(args);	
+				
+					if(!args){
+
+						if(getInTradeStuffs == false && !tradeFinished)
+							waitTradeStuffs();
+						
+						return;
+					}
+															
 					getInTradeStuffs = true;
-					if (args) {
-						if (!checkParty || checkParty(playerName ? playerName : partyName, type, args)) {
-							receivedStuffs = args;
+						
+					if(type == cga.TRADE_STUFFS_ITEM){
+						receivedStuffs.items = args;
+					}else if(type == cga.TRADE_STUFFS_PET){
+						receivedStuffs.pet = [];
+						receivedStuffs.pet[args.index] = args;
+					}else if(type == cga.TRADE_STUFFS_PETSKILL){
+						if(!(receivedStuffs.pet instanceof Array))
+							receivedStuffs.pet = [];
+						if(receivedStuffs.pet[args.index])
+							receivedStuffs.pet[args.index].skills = args;
+					}else if(type == cga.TRADE_STUFFS_GOLD){
+						receivedStuffs.gold = args;
+					}
+				
+				}, 1000);
+			}
+			
+			var waitTradeState = () => {
+				cga.AsyncWaitTradeState((state) => {
+					console.log('AsyncWaitTradeState');
+					console.log(state);
+
+					if (state == cga.TRADE_STATE_READY || state == cga.TRADE_STATE_CONFIRM) {
+						getInTradeStuffs = true;
+						if (!checkParty || tradeStuffsChecked || checkParty(playerName ? playerName : partyName, receivedStuffs)) {
+							tradeStuffsChecked = true;
 							console.log('confirm');
 							cga.DoRequest(cga.REQUEST_TYPE_TRADE_CONFIRM);
 						} else {
 							console.log('refuse');
 							cga.DoRequest(cga.REQUEST_TYPE_TRADE_REFUSE);
 						}
+					} else if (state == cga.TRADE_STATE_SUCCEED || state == cga.TRADE_STATE_CANCEL) {
+						getInTradeStuffs = true;
+					}
+					
+					if(!tradeFinished){
+						waitTradeState();
 					}
 				}, 10000);
-				const itemFilter = (stuff && typeof stuff.itemFilter == 'function') ? stuff.itemFilter : () => false;
-				const petFilter = (stuff && typeof stuff.petFilter == 'function') ? stuff.petFilter : () => false;
-				const tradeItems = cga.getInventoryItems().filter(itemFilter).map(e => {
-					return {itemid: e.itemid, itempos: e.pos, count: (e.count > 1 ? e.count : 1)};
-				});
+			};
 
-				cga.TradeAddStuffs(
-					tradeItems,
-					cga.GetPetsInfo().filter(petFilter).map((p, index) => index),
-					(stuff && stuff.amount) ? stuff.amount : 0
-				);
-			} else {
-				console.log('refuse2');
-				console.log(partyName);
-				console.log(partyLevel);
+			waitTradeStuffs();
+			
+			waitTradeState();
+			
+			waitTradeMsg();
+			
+			const itemFilter = (stuff && typeof stuff.itemFilter == 'function') ? stuff.itemFilter : () => false;
+			const petFilter = (stuff && typeof stuff.petFilter == 'function') ? stuff.petFilter : () => false;
+			const tradeItems = cga.getInventoryItems().filter(itemFilter).map(e => {
+				return {itemid: e.itemid, itempos: e.pos, count: (e.count > 1 ? e.count : 1)};
+			});
+
+			cga.TradeAddStuffs(
+				tradeItems,
+				cga.GetPetsInfo().filter(petFilter).map((p, index) => index),
+				(stuff && stuff.gold) ? stuff.gold : 0
+			);
+		}
+		
+		cga.AsyncWaitTradeDialog((partyName, partyLevel) => {
+			console.log('AsyncWaitTradeDialog');
+			console.log(partyName);
+			console.log(partyLevel);
+			
+			if (partyLevel > 0) {
+				waitDialog();
+			} else {					
 				cga.DoRequest(cga.REQUEST_TYPE_TRADE_REFUSE);
-				resolve({success: false});
+				resolve({success: false, reason : 'trade dialog timeout'});
 			}
 		}, 10000);
 	};
 
-	cga.trade = (name, stuff, checkParty, resolve) => {
+	cga.positiveTrade = (name, stuff, checkParty, resolve) => {
 		cga.AsyncWaitPlayerMenu(players => {
 			if (!(players instanceof Array)) players = [];
 			var player = players.find((e, index) => typeof name == 'number' ? index == name : e.name == name);
@@ -3136,16 +3213,36 @@ module.exports = function(callback){
 				cga.tradeInternal(stuff, checkParty, resolve, name);
 				cga.PlayerMenuSelect(player.index);
 			} else {
-				resolve({success: false});
+				console.log('player not found')
+				resolve({success: false, reason : 'player menu timeout'});
 			}
 		}, 3000);
-		console.log('trade request')
+		
 		cga.DoRequest(cga.REQUEST_TYPE_TRADE);
 	}
 
 	cga.waitTrade = (stuff, checkParty, resolve) => {
 		cga.EnableFlags(cga.ENABLE_FLAG_TRADE, true)
 		cga.tradeInternal(stuff, checkParty, resolve);
+	}
+	
+	cga.trade = (name, stuff, checkParty, resolve) => {
+		
+		cga.EnableFlags(cga.ENABLE_FLAG_TRADE, true)
+		
+		cga.AsyncWaitPlayerMenu(players => {
+			if (!(players instanceof Array)) players = [];
+			var player = players.find((e, index) => typeof name == 'number' ? index == name : e.name == name);
+			if (player) {
+				cga.PlayerMenuSelect(player.index);
+			} else {
+				console.log('player not found, do nothing');
+			}
+		}, 3000);
+		
+		cga.tradeInternal(stuff, checkParty, resolve, name);
+		
+		cga.DoRequest(cga.REQUEST_TYPE_TRADE);
 	}
 	
 	cga.needSupplyInitial = ()=>{

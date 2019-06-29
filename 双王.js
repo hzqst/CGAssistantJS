@@ -195,7 +195,7 @@ var cga = require('./cgaapi')(function(){
 						cga.ClickNPCDialog(1, 0);
 						cga.AsyncWaitMovement({map:4331, delay:1000, timeout:5000}, function(r){
 							cga.walkList([
-							[14, 7],	
+							[14, 7],
 							], ()=>{
 								cga.TurnTo(15, 7);
 								cga.AsyncWaitNPCDialog((dlg)=>{
