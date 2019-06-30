@@ -584,6 +584,20 @@ module.exports = function(callback){
 				cb(true);
 				return;
 			}
+			else
+			{
+				cga.walkList([
+				[34, 89]
+				], function(r){
+					if(!r){
+						cb(false);
+						return;
+					}
+					cga.TurnTo(36, 87);
+					cb(true);
+				});
+			}
+			return;
 		}
 		
 		cga.travel.falan.toStone('C', (r)=>{
@@ -600,7 +614,7 @@ module.exports = function(callback){
 				}
 				cga.TurnTo(36, 87);
 				cb(true);
-			});	
+			});
 		});	
 	}
 	
@@ -1754,7 +1768,8 @@ module.exports = function(callback){
 						console.log('当前地图序号: ' + curmapindex);
 					}
 					//we are in battle status, wait a second then try again until battle is end
-					if(reason == 2){
+					//or we are forcely moved back to an position by server
+					if(reason == 2 || reason == 5){
 						
 						var waitBattle = ()=>{
 							if(!cga.isInNormalState()){
@@ -1766,6 +1781,7 @@ module.exports = function(callback){
 							var curmapindex = cga.GetMapIndex().index3;
 							var curpos = cga.GetMapXY();
 							
+							console.log('战斗回滚');
 							console.log('当前地图 ：' + curmap);
 							console.log('当前地图序号 ：' + curmapindex);
 							console.log('当前坐标：' + curpos.x + ', ' + curpos.y);

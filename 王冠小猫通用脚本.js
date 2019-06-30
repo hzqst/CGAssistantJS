@@ -125,28 +125,35 @@ var cga = require('./cgaapi')(function(){
 		intro: '2.前往雪拉威森塔96楼与守护者梅亚（88.118）对话，交出【塞特的护身符】获得【梅雅的护身符】。',
 		workFunc: function(cb2){
 			
-			if(cga.needSupplyInitial({ playerhp : 0.75, pethp : 0.5 })){
+			if(cga.needSupplyInitial({  })){
+				cga.travel.falan.toCastleHospital(()=>{
+					setTimeout(()=>{
+						cga.travel.newisland.toStone('X', ()=>{
+							cb2('restart stage');
+						});
+					}, 3000);
+				});
+				return;
+			}
+			
+			if(cga.GetMapName() != '雪拉威森塔９６层'){
 				var useItem = cga.findItem('塞特的护身符');
 				if(useItem != -1){
-					cga.travel.falan.toCastleHospital(()=>{
-						setTimeout(()=>{
-							cga.UseItem(useItem);
+					cga.UseItem(useItem);
+					cga.AsyncWaitNPCDialog((dlg)=>{
+						cga.ClickNPCDialog(4, 0);
+						cga.AsyncWaitMovement({map:'雪拉威森塔９５层', delay:1000, timeout:5000}, ()=>{
+							cga.TurnTo(29, 104);
 							cga.AsyncWaitNPCDialog((dlg)=>{
-								cga.ClickNPCDialog(4, 0);
-								cga.AsyncWaitMovement({map:'雪拉威森塔９５层', delay:1000, timeout:5000}, ()=>{
-									cga.TurnTo(29, 104);
-									cga.AsyncWaitNPCDialog((dlg)=>{
-										cga.ClickNPCDialog(1, 0);
-										cga.AsyncWaitMovement({map:'雪拉威森塔９６层', delay:1000, timeout:5000}, ()=>{
-											cb2('restart stage');
-										});
-									});
+								cga.ClickNPCDialog(1, 0);
+								cga.AsyncWaitMovement({map:'雪拉威森塔９６层', delay:1000, timeout:5000}, ()=>{
+									cb2('restart stage');
 								});
 							});
-						}, 3000);
+						});
 					});
-					return;
 				}
+				return;
 			}
 			
 			cga.walkList([
@@ -173,28 +180,35 @@ var cga = require('./cgaapi')(function(){
 		intro: '3.前往雪拉威森塔97楼与守护者迪斯（117.125）对话，交出【梅雅的护身符】获得【提斯的护身符】。',
 		workFunc: function(cb2){
 			
-			if(cga.needSupplyInitial({ playerhp : 0.75, pethp : 0.5 })){
+			if(cga.needSupplyInitial({  })){
+				cga.travel.falan.toCastleHospital(()=>{
+					setTimeout(()=>{
+						cga.travel.newisland.toStone('X', ()=>{
+							cb2('restart stage');
+						});
+					}, 3000);
+				});
+				return;
+			}
+			
+			if(cga.GetMapName() != '雪拉威森塔９７层'){
 				var useItem = cga.findItem('梅雅的护身符');
 				if(useItem != -1){
-					cga.travel.falan.toCastleHospital(()=>{
-						setTimeout(()=>{
-							cga.UseItem(useItem);
+					cga.UseItem(useItem);
+					cga.AsyncWaitNPCDialog((dlg)=>{
+						cga.ClickNPCDialog(4, 0);
+						cga.AsyncWaitMovement({map:'雪拉威森塔９６层', delay:1000, timeout:5000}, ()=>{
+							cga.TurnTo(89, 118);
 							cga.AsyncWaitNPCDialog((dlg)=>{
-								cga.ClickNPCDialog(4, 0);
-								cga.AsyncWaitMovement({map:'雪拉威森塔９６层', delay:1000, timeout:5000}, ()=>{
-									cga.TurnTo(89, 118);
-									cga.AsyncWaitNPCDialog((dlg)=>{
-										cga.ClickNPCDialog(1, 0);
-										cga.AsyncWaitMovement({map:'雪拉威森塔９７层', delay:1000, timeout:5000}, ()=>{
-											cb2('restart stage');
-										});
-									});
+								cga.ClickNPCDialog(1, 0);
+								cga.AsyncWaitMovement({map:'雪拉威森塔９７层', delay:1000, timeout:5000}, ()=>{
+									cb2('restart stage');
 								});
 							});
-						}, 3000);
+						});
 					});
-					return;
 				}
+				return;
 			}
 			
 			cga.walkList([
@@ -224,28 +238,35 @@ var cga = require('./cgaapi')(function(){
 		intro: '4.前往雪拉威森塔98楼与守护者乌斯（120.120）对话，交出【提斯的护身符】获得【伍斯的护身符】。',
 		workFunc: function(cb2){
 
-			if(cga.needSupplyInitial({ playerhp : 0.75, pethp : 0.5 })){
+			if(cga.needSupplyInitial({  })){
+				cga.travel.falan.toCastleHospital(()=>{
+					setTimeout(()=>{
+						cga.travel.newisland.toStone('X', ()=>{
+							cb2('restart stage');
+						});
+					}, 3000);
+				});
+				return;
+			}
+			
+			if(cga.GetMapName() != '雪拉威森塔９８层'){
 				var useItem = cga.findItem('提斯的护身符');
 				if(useItem != -1){
-					cga.travel.falan.toCastleHospital(()=>{
-						setTimeout(()=>{
-							cga.UseItem(useItem);
+					cga.UseItem(useItem);
+					cga.AsyncWaitNPCDialog((dlg)=>{
+						cga.ClickNPCDialog(4, 0);
+						cga.AsyncWaitMovement({map:'雪拉威森塔９７层', delay:1000, timeout:5000}, ()=>{
+							cga.TurnTo(118, 125);
 							cga.AsyncWaitNPCDialog((dlg)=>{
-								cga.ClickNPCDialog(4, 0);
-								cga.AsyncWaitMovement({map:'雪拉威森塔９７层', delay:1000, timeout:5000}, ()=>{
-									cga.TurnTo(118, 125);
-									cga.AsyncWaitNPCDialog((dlg)=>{
-										cga.ClickNPCDialog(1, 0);
-										cga.AsyncWaitMovement({map:'雪拉威森塔９８层', delay:1000, timeout:5000}, ()=>{
-											cb2('restart stage');
-										});
-									});
+								cga.ClickNPCDialog(1, 0);
+								cga.AsyncWaitMovement({map:'雪拉威森塔９８层', delay:1000, timeout:5000}, ()=>{
+									cb2('restart stage');
 								});
 							});
-						}, 3000);
+						});
 					});
-					return;
 				}
+				return;
 			}
 			
 			cga.walkList([
@@ -269,28 +290,35 @@ var cga = require('./cgaapi')(function(){
 		intro: '5.前往雪拉威森塔99楼与守护者妮斯（102.54）对话，交出【伍斯的护身符】获得【尼斯的护身符】。',
 		workFunc: function(cb2){
 						
-			if(cga.needSupplyInitial({ playerhp : 0.75, pethp : 0.5 })){
+			if(cga.needSupplyInitial({  })){
+				cga.travel.falan.toCastleHospital(()=>{
+					setTimeout(()=>{
+						cga.travel.newisland.toStone('X', ()=>{
+							cb2('restart stage');
+						});
+					}, 3000);
+				});
+				return;
+			}
+			
+			if(cga.GetMapName() != '雪拉威森塔９９层'){
 				var useItem = cga.findItem('伍斯的护身符');
 				if(useItem != -1){
-					cga.travel.falan.toCastleHospital(()=>{
-						setTimeout(()=>{
-							cga.UseItem(useItem);
+					cga.UseItem(useItem);
+					cga.AsyncWaitNPCDialog((dlg)=>{
+						cga.ClickNPCDialog(4, 0);
+						cga.AsyncWaitMovement({map:'雪拉威森塔９８层', delay:1000, timeout:5000}, ()=>{
+							cga.TurnTo(120, 119);
 							cga.AsyncWaitNPCDialog((dlg)=>{
-								cga.ClickNPCDialog(4, 0);
-								cga.AsyncWaitMovement({map:'雪拉威森塔９８层', delay:1000, timeout:5000}, ()=>{
-									cga.TurnTo(118, 125);
-									cga.AsyncWaitNPCDialog((dlg)=>{
-										cga.ClickNPCDialog(1, 0);
-										cga.AsyncWaitMovement({map:'雪拉威森塔９９层', delay:1000, timeout:5000}, ()=>{
-											cb2('restart stage');
-										});
-									});
+								cga.ClickNPCDialog(1, 0);
+								cga.AsyncWaitMovement({map:'雪拉威森塔９９层', delay:1000, timeout:5000}, ()=>{
+									cb2('restart stage');
 								});
 							});
-						}, 3000);
+						});
 					});
-					return;
 				}
+				return;
 			}
 						
 			cga.walkList([
@@ -311,28 +339,35 @@ var cga = require('./cgaapi')(function(){
 		intro: '6.通过（103.134）处楼梯上楼达到雪拉威森塔塔顶。',
 		workFunc: function(cb2){
 			
-			if(cga.needSupplyInitial({ playerhp : 0.75, pethp : 0.5})){
+			if(cga.needSupplyInitial({  })){
+				cga.travel.falan.toCastleHospital(()=>{
+					setTimeout(()=>{						
+						cga.travel.newisland.toStone('X', ()=>{
+							cb2('restart stage');							
+						});
+					}, 3000);
+				});
+				return;
+			}
+			
+			if(cga.GetMapName() != '雪拉威森塔最上层'){
 				var useItem = cga.findItem('尼斯的护身符');
 				if(useItem != -1){
-					cga.travel.falan.toCastleHospital(()=>{
-						setTimeout(()=>{
-							cga.UseItem(useItem);
+					cga.UseItem(useItem);
+					cga.AsyncWaitNPCDialog((dlg)=>{
+						cga.ClickNPCDialog(4, 0);
+						cga.AsyncWaitMovement({map:'雪拉威森塔９９层', delay:1000, timeout:5000}, ()=>{
+							cga.TurnTo(103, 54);
 							cga.AsyncWaitNPCDialog((dlg)=>{
-								cga.ClickNPCDialog(4, 0);
-								cga.AsyncWaitMovement({map:'雪拉威森塔９９层', delay:1000, timeout:5000}, ()=>{
-									cga.TurnTo(103, 54);
-									cga.AsyncWaitNPCDialog((dlg)=>{
-										cga.ClickNPCDialog(1, 0);
-										cga.AsyncWaitMovement({map:'雪拉威森塔最上层', delay:1000, timeout:5000}, ()=>{
-											cb2('restart stage');
-										});
-									});
+								cga.ClickNPCDialog(1, 0);
+								cga.AsyncWaitMovement({map:'雪拉威森塔最上层', delay:1000, timeout:5000}, ()=>{
+									cb2('restart stage');	
 								});
 							});
-						}, 3000);
+						});
 					});
-					return;
 				}
+				return;
 			}
 			
 			cga.walkList([
