@@ -746,6 +746,12 @@ module.exports = new Promise(resolve => {
 			else reject();
 		}, 0));
 	});
+	cga.emogua.falan.toCastleClock = () => new Promise((resolve, reject) => {
+		cga.travel.falan.toCastleClock(r => setTimeout(() => {
+			if (r) resolve();
+			else reject();
+		}, 0));
+	}).then(() => cga.emogua.delay(1000));
 	cga.emogua.falan.toBank = () => new Promise((resolve, reject) => {
 		cga.travel.falan.toBank(r => setTimeout(() => {
 			if (r) resolve();

@@ -3,6 +3,7 @@
  */
 const captain = '弓箭の吉米花';  // 队长名字
 const teamNumber = 5;  // 队伍人数
+const isClock = false; // 是否打卡, 如果打卡必须艾尔莎岛启动
 const joinPoint = {x: 64, y: 98}; // 小岛集合点
 const protect = { // 遇敌保护条件
 	minHp: 400,
@@ -16,9 +17,7 @@ require('./wrapper').then(cga => {
 	console.log('半山');
 
 	cga.emogua.recursion(
-		() => (
-			cga.GetMapName() == '小岛' ? Promise.resolve() : cga.emogua.prepare({crystalName: '火风的水晶（5：5）', repairFlag: -1})
-		).then(() => {
+		() => cga.emogua.prepare({crystalName: '火风的水晶（5：5）', repairFlag: -1}).then(() => {
 			const currentTeamNumber = cga.emogua.getTeamNumber();
 			const isCaptain = cga.GetPlayerInfo().name == captain;
 			let mapName = cga.GetMapName();
@@ -35,7 +34,12 @@ require('./wrapper').then(cga => {
 						return cga.emogua.joinTeamBlock(joinPoint.x, joinPoint.y, captain);
 					}
 				}
-				if (mapName != '艾尔莎岛') {
+				if (isClock && mapName == '艾尔莎岛') {
+					return cga.emogua.falan.toCastleClock().then(
+						() => cga.emogua.autoWalk([41,91])
+					);
+				}
+				if (['法兰城','里谢里雅堡','艾尔莎岛'].indexOf(mapName) < 0) {
 					return cga.emogua.waitAfterBattle().then(cga.emogua.logBack);
 				}
 				return cga.emogua.falan.toStone('W1').then(
