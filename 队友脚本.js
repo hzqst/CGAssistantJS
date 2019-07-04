@@ -28,7 +28,47 @@ var cga = require('./cgaapi')(function(){
 	var waitLeader = ()=>{
 		
 	}
-	
+
+	// 装备保护==开始==
+	const getEmptyBagIndexes = (items) => {
+		const itemIndexes = items.map(e => e.pos);
+		const result = new Array();
+		for (let bagIndex = 8; bagIndex < 28; bagIndex++) {
+			if (itemIndexes.indexOf(bagIndex) < 0) {
+				result.push(bagIndex);
+			}
+		}
+		return result;
+	};
+	const protectEquipment = () => {
+		const allItems = cga.GetItemsInfo();
+		const equipments = allItems.filter(e => e.pos <= 4);
+		const items = allItems.filter(e => e.pos >= 8);
+		if (cga.isInNormalState()) {
+			let occupyCount = 0;
+			let emptyIndexes = getEmptyBagIndexes(items);
+			equipments.filter(item => { // 是否需要摘下来的已装备的装备
+				const durability = cga.getEquipEndurance(item);
+				return durability && durability[0] <= 30;
+			}).forEach(takeOff => {
+				const sameEquipment = items.find(i => { // 是否可以替换的背包内的装备
+					if (i.type == takeOff.type) {
+						const durability = cga.getEquipEndurance(item);
+						return durability && durability[0] > 30;
+					}
+					return false;
+				});
+				if (sameEquipment) {
+					cga.MoveItem(takeOff.pos, sameEquipment.pos, -1);
+				} else if (emptyIndexes[occupyCount]) {
+					cga.MoveItem(takeOff.pos, emptyIndexes[occupyCount++], -1);
+				}
+			});
+		}
+	};
+	setInterval(protectEquipment, 10000);
+	// 装备保护==结束==
+
 	var openbox = (cb)=>{
 		var box = cga.findItem('加强补给品');
 		if(box != -1){
