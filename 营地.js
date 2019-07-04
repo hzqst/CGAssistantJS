@@ -83,8 +83,17 @@ var cga = require('./cgaapi')(function(){
 			
 			var playerinfo = cga.GetPlayerInfo();
 			var petinfo = cga.GetPetInfo(playerinfo.petid);
-			
+
 			if(playerinfo.health > 0){
+				cga.LogBack();
+				process.exit(1);
+				return;
+			}
+			
+			var nowteamplayers = cga.getTeamPlayers();
+			
+			if(teammates.length > 1 && nowteamplayers.length < teammates.length)
+			{
 				cga.LogBack();
 				process.exit(1);
 				return;

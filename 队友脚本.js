@@ -44,11 +44,22 @@ var cga = require('./cgaapi')(function(){
 		type:1,
 		name :'圣骑士营地',
 		func:(cb)=>{
-			console.log('gathering');
+			
+			var waitAdd = ()=>{					
+				console.log('waitadd2');
+				cga.addTeammate(leaderName, (r)=>{
+					if(r){
+						cb(true);
+						return;
+					}
+					setTimeout(waitAdd, 1000);
+				});
+			}
+			
 			if(cga.GetMapName() == '圣骑士营地'){
-				cb(true);
+				waitAdd();
 			}  else {
-				cga.travel.falan.toCamp(cb);
+				cga.travel.falan.toCamp(waitAdd);
 			}
 		}
 	}
@@ -404,12 +415,9 @@ var cga = require('./cgaapi')(function(){
 	}
 
 	var start = ()=>{
-		if(cga.getTeamPlayers().length == 0 && leaderName && playerinfo.name != leaderName && gatherObject)
+		if(cga.getTeamPlayers().length == 0 && leaderName && gatherObject)
 		{
-			gatherObject.func(()=>{
-				cga.waitForMultipleLocation(waitArray);
-				loop();
-			});
+			gatherObject.func(start);
 			return;
 		}
 		
