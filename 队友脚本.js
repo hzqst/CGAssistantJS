@@ -316,6 +316,15 @@ var cga = require('./cgaapi')(function(){
 			process.exit(1);
 			return;
 		}
+		
+		var nowteamplayers = cga.getTeamPlayers();
+		
+		if(leaderName.length > 0 && !nowteamplayers.length)
+		{
+			cga.LogBack();
+			process.exit(1);
+			return;
+		}
 	
 		if(cga.getItemCount('加强补给品') >= 1){
 			openbox();
