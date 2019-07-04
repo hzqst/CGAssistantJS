@@ -666,7 +666,6 @@ module.exports = function(callback){
 				
 				if(isTeamLeader){
 					list.push(
-					[8, 21],
 					[8, 22],
 					[8, 21],
 					[8, 22],
@@ -857,19 +856,11 @@ module.exports = function(callback){
 	//参数1：回调函数function(result), result 为true或false
 	cga.travel.falan.toNewIsland = function(cb){
 		cga.travel.falan.toStone('C', function(r){
-			if(!r){
-				cb(false);
-				return;
-			}
-			const walkTo = [
+			cga.walkList([
 				[28, 88]
-			];
-			cga.walkList(walkTo, function(r){
-				if(!r){
-					cb(false);
-					return;
-				}
-				setTimeout(function(){
+			], (r)=>{
+				cga.AsyncWaitNPCDialog(function(dlg){
+					console.log(dlg)
 					cga.ClickNPCDialog(32, -1);
 					cga.AsyncWaitNPCDialog(function(dlg2){
 						cga.ClickNPCDialog(32, -1);
@@ -881,15 +872,14 @@ module.exports = function(callback){
 									if(dlg5.options == 12){											
 										cga.ClickNPCDialog(4, -1);
 										cga.AsyncWaitMovement({map:'？'}, function(r){
-											const walkTo_1 = [
+		
+											cga.walkList([
 												[19, 21, '法兰城遗迹'],
 												[96, 138, '盖雷布伦森林'],
 												[124, 168, '温迪尔平原'],
 												[264, 108, '艾尔莎岛'],
 												[141, 105]
-											];
-														
-											cga.walkList(walkTo_1, function(r){
+											], function(r){
 												if(!r){
 													cb(false);
 													return;

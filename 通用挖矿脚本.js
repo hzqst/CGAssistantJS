@@ -1,5 +1,10 @@
+var fs = require('fs');
+
 var cga = require('./cgaapi')(function(){
 	console.log('开始执行模块：通用挖矿脚本');
+
+	var configPath = __dirname+'/脚本设置';
+	var configName = configPath+'/通用挖矿脚本_'+cga.GetPlayerInfo().name+'.json';
 
 	var mineObject = null;
 	
@@ -206,7 +211,9 @@ var cga = require('./cgaapi')(function(){
 	},
 	];
 	
-	var saveBankObject = {
+	var doneArray = [
+	{
+		type: 1,
 		name: '存银行',
 		func: (cb)=>{
 			cga.travel.falan.toMineStore(mineObject.name, ()=>{
@@ -228,9 +235,8 @@ var cga = require('./cgaapi')(function(){
 				});
 			});
 		}
-	}
-
-	var sellStoreObject = {
+	},{
+		type: 2,
 		name: '卖店',
 		func: (cb)=>{
 			cga.travel.falan.toStone('C', ()=>{
@@ -260,6 +266,7 @@ var cga = require('./cgaapi')(function(){
 			});
 		}
 	}
+	]
 
 	var skill = cga.findPlayerSkill('挖掘');
 	if(!skill){
@@ -372,6 +379,77 @@ var cga = require('./cgaapi')(function(){
 		});
 	}
 
+	var saveConfig = ()=>{
+		try{
+			fs.mkdirSync(configPath);
+		}catch(e)
+		{
+
+		}
+		
+		fs.writeFileSync(configName, 
+		JSON.stringify({
+			level:mineObject.level,
+			done:doneObject.type,
+		}));
+	}
+
+	var readConfig = ()=>{
+
+		try{
+			var json = fs.readFileSync(configName, 'utf8');
+			
+			if(typeof json == 'string' && json.length > 0){
+				var obj = JSON.parse(json);
+				
+				for(var i in mineArray){
+					if(mineArray[i].level == obj.level){
+						mineObject = mineArray[i];
+						break;
+					}
+				}
+
+				for(var i in doneArray){
+					if(doneArray[i].type == obj.done){
+						doneObject = doneArray[i];
+						break;
+					}
+				}
+				if(mineObject != null && doneObject != null)
+					return true;
+			}
+		}catch(e)
+		{
+			
+		}
+		
+		return false;
+	}
+	
+	var clearConfig = ()=>{
+		try {
+			fs.unlinkSync(configName);
+			cga.SayWords('脚本设置已清除。', 0, 3, 1);
+		}catch(e)
+		{
+
+		}
+	}
+	
+	var waitClear = ()=>{
+		cga.waitTeammateSay((player, msg)=>{
+
+			if(player.is_me == true){
+				
+				if(msg == 'c'){
+					clearConfig();
+				}
+			}
+
+			return true;
+		});
+	}
+
 	var wait2 = ()=>{
 		cga.SayWords('欢迎使用CGA通用挖矿脚本，输入1存银行，输入2卖店。', 0, 3, 1);
 		
@@ -379,15 +457,17 @@ var cga = require('./cgaapi')(function(){
 
 			if(player.is_me == true){
 				
-				if(msg == '1'){
-					doneObject = saveBankObject;
-				}
-				else if(msg == '2'){
-					doneObject = sellStoreObject;
+				for(var i in doneArray){
+					if(doneArray[i].type == parseInt(msg)){
+						doneObject = doneArray[i];
+						break;
+					}
 				}
 				
 				if(doneObject != null){
-					cga.SayWords('您选择了'+doneObject.name+'。', 0, 3, 1);
+					cga.SayWords('您选择了'+doneObject.name+'。', 0, 3, 1);					
+					saveConfig();
+					waitClear();
 					doWork();
 					return false;
 				}
@@ -397,26 +477,35 @@ var cga = require('./cgaapi')(function(){
 		});
 	}
 	
-	cga.SayWords('欢迎使用CGA通用挖矿脚本，输入数字1~10挖1~10级矿。', 0, 3, 1);
-	
-	cga.waitTeammateSay((player, msg)=>{
+	if(readConfig())
+	{
+		cga.SayWords('脚本设置已恢复，继续挖'+mineObject.name+'并'+doneObject.name+'。输入“c”可清除设置。', 0, 3, 1);
+		waitClear();		
+		doWork();		
+	}
+	else
+	{
+		cga.SayWords('欢迎使用CGA通用挖矿脚本，输入数字1~10挖1~10级矿。', 0, 3, 1);
+		
+		cga.waitTeammateSay((player, msg)=>{
 
-		if(player.is_me == true){
-			
-			for(var i in mineArray){
-				if(mineArray[i].level == parseInt(msg)){
-					mineObject = mineArray[i];
-					break;
+			if(player.is_me == true){
+				
+				for(var i in mineArray){
+					if(mineArray[i].level == parseInt(msg)){
+						mineObject = mineArray[i];
+						break;
+					}
+				}
+				
+				if(mineObject != null){
+					cga.SayWords('您选择了挖'+mineObject.name+'。', 0, 3, 1);
+					wait2();				
+					return false;
 				}
 			}
-			
-			if(mineObject != null){
-				cga.SayWords('您选择了挖'+mineObject.name+'。', 0, 3, 1);
-				wait2();				
-				return false;
-			}
-		}
 
-		return true;
-	});
+			return true;
+		});
+	}
 });
