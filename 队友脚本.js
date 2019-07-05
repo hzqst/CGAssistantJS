@@ -31,7 +31,7 @@ var cga = require('./cgaapi')(function(){
 	var useFood = -1;
 	
 	var leaderName = '';
-
+	
 	var gatherArray = [
 	{
 		type:0,
@@ -56,9 +56,20 @@ var cga = require('./cgaapi')(function(){
 				});
 			}
 			
+			var retry = ()=>{
+				cga.walkList([
+				[8, 21],
+				], ()=>{
+					cga.TurnTo(7, 21);
+					cga.AsyncWaitMovement({map:'圣骑士营地', delay:1000, timeout:5000}, cb);
+				})
+			}
+			
 			if(cga.GetMapName() == '圣骑士营地'){
 				waitAdd();
-			}  else {
+			} else if(cga.GetMapIndex().index3 == 27101){
+				retry();
+			} else {
 				cga.travel.falan.toCamp(waitAdd);
 			}
 		}
@@ -258,31 +269,26 @@ var cga = require('./cgaapi')(function(){
 				setTimeout(cga.waitForMultipleLocation, 15000, waitArray);
 			});
 		}
-	},
+	}/*,
 	{
 		mapindex:27101,//辛希亚探索指挥部
 		pos:[7, 21],
 		leaveteam:true,
 		cb : ()=>{
 			
-			if(leaderName.length > 0){
-				
-				console.log('inposition');
-
-				var retry = ()=>{
-					
-					console.log('retry');
-					
-					cga.TurnTo(7, 21);
-					cga.AsyncWaitMovement({map:'圣骑士营地', delay:1000, timeout:5000}, (r)=>{
-						setTimeout(cga.waitForMultipleLocation, 1500, waitArray);
-					});
-				}
-				
-				retry();
-			} else {
+			if(!leaderName.length){
 				setTimeout(cga.waitForMultipleLocation, 1500, waitArray);
+				return;
 			}
+			var retry = ()=>{
+				console.log('retry');
+				cga.TurnTo(7, 21);
+				cga.AsyncWaitMovement({map:'圣骑士营地', delay:1000, timeout:5000}, (r)=>{
+					setTimeout(cga.waitForMultipleLocation, 1500, waitArray);
+				});
+			}
+			
+			retry();
 		}
 	},
 	{
@@ -313,7 +319,7 @@ var cga = require('./cgaapi')(function(){
 				setTimeout(cga.waitForMultipleLocation, 1500, waitArray);
 			}
 		}
-	}
+	}*/
 	];
 	
 	var check = ()=>{
@@ -323,30 +329,25 @@ var cga = require('./cgaapi')(function(){
 		var petinfo = cga.GetPetInfo(playerinfo.petid);
 		
 		if(playerinfo.health > 50){
-			cga.LogBack();
-			process.exit(1);
-			return;
+			return false;
 		}
 		
 		var nowteamplayers = cga.getTeamPlayers();
 		
-		if(leaderName.length > 0 && !nowteamplayers.length)
-		{
-			cga.LogBack();
-			process.exit(1);
-			return;
+		if(leaderName.length > 0 && !nowteamplayers.length){
+			return false;
 		}
-	
-		if(cga.getItemCount('加强补给品') >= 1){
+
+		if(cga.getItemCount('加强补给品') >= 1 && new Date().getTime() >= mute){
 			openbox();
 			mute = new Date().getTime() + 1000 * 3;
-			return;
+			return true;
 		}
 		
-		if(playerinfo.hp < playerinfo.maxhp * minHpPercent / 100){
+		if(playerinfo.hp < playerinfo.maxhp * minHpPercent / 100 && new Date().getTime() >= mute){
 			cga.SayWords('人物血量不够，需要回补!', 0, 3, 1);
 			mute = new Date().getTime() + 1000 * 15;
-			return;
+			return true;
 		}
 		if(useBottle > 0 && playerinfo.hp < playerinfo.maxhp - useBottle){
 			if(eatBottle.length > 0){
@@ -363,17 +364,17 @@ var cga = require('./cgaapi')(function(){
 					});
 					
 					mute = new Date().getTime() + 1000 * 15;
-					return;
+					return true;
 				}
 			}
 		}
 		
-		if(playerinfo.mp < playerinfo.maxmp * minMpPercent / 100){
+		if(playerinfo.mp < playerinfo.maxmp * minMpPercent / 100 && new Date().getTime() >= mute){
 			cga.SayWords('人物蓝量不够，需要回补!', 0, 3, 1);
 			mute = new Date().getTime() + 1000 * 15;
-			return;
+			return true;
 		}
-		if(useFood > 0 && playerinfo.mp < playerinfo.maxmp - useFood){
+		if(useFood > 0 && playerinfo.mp < playerinfo.maxmp - useFood && new Date().getTime() >= mute){
 			if(eatFood.length > 0){
 				var foodPos = cga.findItem(foodArray[useFood]);
 				if(foodPos != -1){
@@ -388,28 +389,36 @@ var cga = require('./cgaapi')(function(){
 					});
 					
 					mute = new Date().getTime() + 1000 * 15;
-					return;
+					return true;
 				}
 			}
 		}
 		
-		if(petinfo.hp < petinfo.maxhp* minHpPercent / 100){
+		if(petinfo.hp < petinfo.maxhp* minHpPercent / 100 && new Date().getTime() >= mute){
 			cga.SayWords('宠物血量不够，需要回补!', 0, 3, 1);
 			mute = new Date().getTime() + 1000 * 15;
-			return;
+			return true;
 		}
 		
-		if(petinfo.mp < petinfo.maxmp* minMpPercent / 100){
+		if(petinfo.mp < petinfo.maxmp* minMpPercent / 100 && new Date().getTime() >= mute){
 			cga.SayWords('宠物蓝量不够，需要回补!', 0, 3, 1);
 			mute = new Date().getTime() + 1000 * 15;
-			return;
+			return true;
 		}
+		
+		return true;
 	}
 	
 	var loop = ()=>{
 		
-		if(!cga.isInBattle() && new Date().getTime() >= mute )//15s内闭嘴
-			check();
+		if(!cga.isInBattle())
+		{
+			if(!check())
+			{
+				start();
+				return;
+			}
+		}
 		
 		setTimeout(loop, 1000);
 	}

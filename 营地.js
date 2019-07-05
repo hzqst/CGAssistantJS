@@ -262,7 +262,7 @@ var cga = require('./cgaapi')(function(){
 				}
 				
 				teammates = obj.teammates;
-				cga.isTeamLeader = isTeamLeader;
+				cga.isTeamLeader = obj.isTeamLeader;
 				
 				cga.SayWords('设置已读取，队伍列表：['+teammates.join(',')+']。', 0, 3, 1);
 
@@ -271,7 +271,7 @@ var cga = require('./cgaapi')(function(){
 			}
 		}catch(e)
 		{
-			console.log()
+			console.log(e)
 		}
 		
 		return false;
