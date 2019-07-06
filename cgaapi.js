@@ -2,7 +2,7 @@ var cga = require('bindings')('node_cga');
 var moment = require('moment');
 var PF = require('pathfinding');
 
-var is_array_contain = function(arr, val)
+global.is_array_contain = function(arr, val)
 {
     for (var i = 0; i < arr.length; i++)
     {
@@ -647,6 +647,22 @@ module.exports = function(callback){
 	}
 
 	cga.travel.falan.toCamp = (cb)=>{
+		var warp = ()=>{
+			var teamplayers = cga.getTeamPlayers();
+			var isTeamLeader = teamplayers.length > 0 && teamplayers[0].is_me == true ? true : false;
+			
+			if(isTeamLeader){
+				setTimeout(()=>{
+					cga.DoRequest(cga.REQUEST_TYPE_LEAVETEAM);
+					setTimeout(warp, 1500);
+				}, 1500);
+				return;
+			}
+			
+			cga.TurnTo(7, 21);
+			cga.AsyncWaitMovement({map:'圣骑士营地', delay:1000, timeout:5000}, cb);
+		}
+				
 		var stage2 = (r, err)=>{
 			if(!r)
 				throw new Error(err);
@@ -661,37 +677,10 @@ module.exports = function(callback){
 				[8, 21],
 				];
 				
-				var teamplayers = cga.getTeamPlayers();
-				var isTeamLeader = teamplayers.length > 0 && teamplayers[0].is_me == true ? true : false;
-				
-				if(isTeamLeader){
-					list.push(
-					[8, 22],
-					[8, 21],
-					[8, 22],
-					[8, 21],
-					);
-				}
-				
 				if(cga.GetMapName() == '里谢里雅堡')
 					list.unshift([41, 98, '法兰城']);
 				
-				cga.walkList(list, (r)=>{
-					
-					var go = ()=>{
-						cga.TurnTo(7, 21);
-						cga.AsyncWaitMovement({map:'圣骑士营地', delay:1000, timeout:5000}, cb);
-					}
-					
-					if(isTeamLeader){
-						setTimeout(()=>{
-							cga.DoRequest(cga.REQUEST_TYPE_LEAVETEAM);
-							setTimeout(go, 1500);
-						}, 1500);
-					} else {
-						go();
-					}
-				});
+				cga.walkList(list, warp);
 			} else {
 				cga.walkList([
 				[153, 241, '芙蕾雅'],
@@ -700,10 +689,15 @@ module.exports = function(callback){
 		}
 		
 		var mapname = cga.GetMapName();
-		if(mapname == '法兰城' || mapname == '里谢里雅堡')
+		if(mapname == '圣骑士营地'){
+			cb(true);
+		}else if(mapname == '辛希亚探索指挥部' && cga.GetMapIndex().index3 == 27101){
+			cga.walkList([[8, 21]], warp);
+		}else if(mapname == '法兰城' || mapname == '里谢里雅堡'){
 			stage2(true);
-		else
+		}else{
 			cga.travel.falan.toStone('C', stage2);
+		}
 	}
 
 	cga.travel.falan.toFabricStore = (cb)=>{
@@ -2480,6 +2474,7 @@ module.exports = function(callback){
 		var freqMoveDirTable = [ 4, 5, 6, 7, 0, 1, 2, 3 ];
 		var freqMoveDir = dir;
 		var pos = cga.GetMapXY();
+		var counter = 0;
 		var move = ()=>{
 			var result = true;
 			try{
@@ -2532,7 +2527,9 @@ module.exports = function(callback){
 					else
 						cga.ForceMove(freqMoveDirTable[freqMoveDir], false);
 				}
-				result = cb();
+				counter++;
+				if(counter % 4 == 0)
+					result = cb();
 			}
 			catch(e){
 				console.log(e);
@@ -2568,34 +2565,6 @@ module.exports = function(callback){
 		}
 		return teaminfo;
 	}
-		
-	cga.tradePlayer = (name, cb)=>{
-		var unit = cga.findPlayerUnit(name);
-		if(unit == null){
-			cb(false);
-			return;
-		}
-
-		setTimeout(()=>{
-			unit = cga.findPlayerUnit(name);
-			cga.TurnTo(unit.xpos, unit.ypos);
-			setTimeout(()=>{
-				cga.DoRequest(cga.REQUEST_TYPE_TRADE);
-				cga.AsyncWaitPlayerMenu(function(players){
-					for(var i in players){
-						if(players[i].name == name){
-							cga.PlayerMenuSelect(0);
-							cga.AsyncWaitTradeDialog(()=>{
-								cb(true);
-							}, 1500);
-							return;	
-						}
-					}
-					cb(false);
-				}, 1500);
-			}, 1500);
-		}, 1000);
-	}
 	
 	cga.addTeammate = (name, cb)=>{
 		var unit = cga.findPlayerUnit(name);
@@ -2603,6 +2572,7 @@ module.exports = function(callback){
 		if(unit == null || 
 		!cga.isDistanceClose(unit.xpos, unit.ypos, mypos.x, mypos.y) || 
 		(unit.xpos == mypos.x && unit.ypos == mypos.y)){
+			
 			cb(false);
 			return;
 		}
@@ -2734,6 +2704,30 @@ module.exports = function(callback){
 			if(listen == true)
 				cga.waitTeammateSay(cb);
 		}, 1000);
+	}
+	
+	cga.waitForChatInput = (cb)=>{
+		cga.waitTeammateSay((player, msg)=>{
+
+			if(player.is_me == true){				
+				if(cb(msg))
+					return false;
+			}
+
+			return true;
+		});
+	}
+	
+	cga.sayLongWords = (words, color, range, size)=>{
+
+		var splitCount = words.length / 128;
+		if(splitCount == 0)
+			splitCount = 1;
+		
+		for(var i = 0;i < splitCount; ++i){
+			cga.SayWords(words.substring(i * 128, i * 128+128), color, range, size);
+		}
+		
 	}
 	
 	cga.waitForLocation = (obj, cb)=>{
@@ -3275,6 +3269,6 @@ module.exports = function(callback){
 		
 		return false;
 	}
-		
+
 	return cga;
 }
