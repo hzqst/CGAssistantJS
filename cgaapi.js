@@ -3023,6 +3023,99 @@ module.exports = function(callback){
 			cga.walkMaze(target_map, cb, layerNameFilter);
 		}
 	}
+
+	/**
+	 * targetFinder返回unit object 或者 true都将停止搜索
+	 * cga.searchMap(units => units.find(u => u.unit_name == '守墓员' && u.type == 1) || cga.GetMapName() == '？？？', result => {
+	 * 	console.log(result);
+	 * });
+	 */
+	cga.searchMap = (targetFinder, cb, recursion = true) => {
+		const getMovablePoints = (map, start) => {
+			const foundedPoints = {};
+			foundedPoints[start.x + '-' + start.y] = start;
+			const findByNextPoints = (centre) => {
+				const nextPoints = [];
+				const push = (p) => {
+					if (p.x > map.x_bottom && p.x < map.x_size && p.y > map.y_bottom && p.y < map.y_size) {
+						if (map.matrix[p.y][p.x] === 0) {
+							const key = p.x + '-' + p.y;
+							if (!foundedPoints[key]) {
+								foundedPoints[key] = p;
+								nextPoints.push(p);
+							}
+						}
+					}
+				};
+				push({x: centre.x + 1, y: centre.y});
+				push({x: centre.x + 1, y: centre.y + 1});
+				push({x: centre.x, y: centre.y + 1});
+				push({x: centre.x - 1, y: centre.y + 1});
+				push({x: centre.x - 1, y: centre.y});
+				push({x: centre.x - 1, y: centre.y - 1});
+				push({x: centre.x, y: centre.y - 1});
+				push({x: centre.x + 1, y: centre.y - 1});
+				nextPoints.forEach(findByNextPoints);
+			};
+			findByNextPoints(start);
+			return foundedPoints;
+		};
+		const getFarthestEntry = (current) => {
+			return cga.getMapObjects().filter(e => [3,10].indexOf(e.cell) >= 0 && (e.mapx != current.x || e.mapy != current.y)).sort((a, b) => {
+				const distanceA = Math.abs(a.mapx - current.x) + Math.abs(a.mapy - current.y);
+				const distanceB = Math.abs(b.mapx - current.x) + Math.abs(b.mapy - current.y);
+				return distanceB - distanceA;
+			}).shift();
+		};
+		const getTarget = (noTargetCB) => {
+			const target = targetFinder(cga.GetMapUnits());
+			if (typeof target == 'object') {
+				const walkTo = cga.getRandomSpace(target.xpos,target.ypos);
+				if (walkTo) {
+					cga.walkList([walkTo], () => cb(target));
+				} else noTargetCB();
+			} else if (target === true) cb();
+			else noTargetCB();
+		};
+		const toNextPoint = (points, centre, toNextCB) => {
+			const remain = points.filter(p => {
+				const xd = Math.abs(p.x - centre.x);
+				const yd = Math.abs(p.y - centre.y);
+				p.d = xd + yd;
+				return !(xd < 12 && yd < 12);
+			}).sort((a,b) => a.d - b.d);
+			const next = remain.shift();
+			if (next) {
+				cga.walkList([[next.x,next.y]], () => getTarget(() => toNextPoint(remain,next,toNextCB)));
+			} else toNextCB();
+		};
+		const start = cga.GetMapXY();
+		let entry;
+		const findNext = (walls) => {
+			const current = cga.GetMapXY();
+			if (!entry && recursion) entry = getFarthestEntry(start);
+			toNextPoint(Object.values(getMovablePoints(walls, current)), current, () => {
+				if (typeof entry == 'object') {
+					const current = cga.GetMapXY();
+					const walklist = cga.calculatePath(current.x, current.y, entry.x, entry.y, '', null, null, []);
+					if (walklist.length > 0) cga.walkList(walklist, (r) => {
+						cga.searchMap(targetFinder, cb, recursion);
+					});
+					else cb();
+				} else cb();
+			});
+		};
+		getTarget(() => {
+			let walls = cga.buildMapCollisionMatrix();
+			if(walls.matrix[0][0] == 1
+				|| walls.matrix[walls.y_size-1][0] == 1
+				|| walls.matrix[walls.y_size-1][walls.x_size-1] == 1
+				|| walls.matrix[0][walls.x_size-1] == 1
+			) {
+				cga.downloadMap(walls.x_size,walls.y_size, () => findNext(cga.buildMapCollisionMatrix()));
+			} else findNext(walls);
+		});
+	}
 	
 	cga.getRandomSpace = (x, y)=>{
 		var walls = cga.buildMapCollisionMatrix(true);
