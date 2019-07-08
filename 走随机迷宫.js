@@ -1,6 +1,6 @@
 var cga = require('./cgaapi')(function(){
 	var loop = ()=>{
-		cga.walkRandomMaze('', (r)=>{
+		cga.walkRandomMaze(null, (r)=>{
 			if(r == true)
 				loop();
 		});

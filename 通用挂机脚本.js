@@ -159,7 +159,7 @@ var cga = require('./cgaapi')(function(){
 				process.exit(1);
 			}
 		});
-		
+
 		callSubPlugins('init');
 		mainPlugin.execute();
 	}

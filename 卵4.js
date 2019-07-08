@@ -1,37 +1,55 @@
 var cga = require('./cgaapi')(function(){
 	console.log('琥珀之卵4 起始地点：艾尔莎岛')
 	
-	var teammates = [ 'hzqst', '甜贝儿', '约德尔队长' ]//队长名字和队员名字
+	var teammates = ['你萌死了', '儒雅随和丶Mata川', '释明空法师', '迅捷崽种提莫', '偷梗忍者西西卡'  ]//队长名字和队员名字
 	
 	var playerinfo = cga.GetPlayerInfo();
 	
 	cga.isTeamLeader = (teammates[0] == playerinfo.name) ? true : false
-	cga.callZLZZ = false;
-	cga.callWYW = false;
+	var callZLZZ = false;
+	var callWYW = false;
 	cga.doneBOSS = false;
 	
-	cga.listen = ()=>{
-		cga.AsyncWaitChatMsg((r)=>{
+	cga.waitTeammateSay((player, msg)=>{
 
-			if(r.msg && r.msg.indexOf('长老之证x7 GET') >= 0 && r.msg.indexOf('[GP]') >= 0){
-				cga.callZLZZ = true;
+		if(player.is_me == true){
+			
+			if(msg.indexOf('长老之证x7 GET') >= 0 ){
+				callZLZZ = true;
 			}
-
-			if(cga.isTeamLeader){
-				if(r.msg && r.msg.indexOf('觉醒的文言抄本') >= 0 && r.msg.indexOf('[GP]') >= 0){
-					cga.callWYW = true;
-				}
+			
+			if(msg.indexOf('觉醒的文言抄本') >= 0 ){
+				callWYW = true;
 			}
+		}
 
-			cga.listen();
-		}, 1000);
+		return true;
+	});
+	
+	var walkMazeForward = (cb)=>{
+		cga.walkRandomMaze(null, (err)=>{
+			cb(err === true ? true : false);
+		}, (layerIndex)=>{
+			return '海底墓场外苑第'+(layerIndex + 1)+'地带';
+		});
 	}
 	
 	var goodToGoZLZZ = (cb)=>{
 		
-		if(cga.isTeamLeader)
-			cga.SayWords('去打大便，对话即可', 0, 3, 1);
-		
+		var findObj = (cb3)=>{
+			var objs = cga.getMapObjects();
+			var pos = cga.GetMapXY();
+			if(objs.length){
+				for(var i in objs){
+					if(objs[i].mapx != pos.x || objs[i].mapy != pos.y){
+						cb3(objs[0]);
+						return;
+					}
+				}
+			}
+			setTimeout(findObj, 1000, cb3);
+		}
+				
 		var battleAgain = ()=>{
 
 			if(cga.isInBattle()){
@@ -43,7 +61,7 @@ var cga = require('./cgaapi')(function(){
 				cb(true);
 				return;
 			}
-			if(cga.callZLZZ){
+			if(callZLZZ){
 				cb(true);
 				return;
 			}
@@ -53,8 +71,46 @@ var cga = require('./cgaapi')(function(){
 			
 			setTimeout(battleAgain, 5000);
 		};
+		
+		var retryNpc = (result)=>{
+			cga.TurnTo(result.xpos, result.ypos);
+			cga.AsyncWaitNPCDialog((dlg)=>{
+				if(dlg && dlg.message && (dlg.message.indexOf('已死的主人') >= 0 || dlg.message.indexOf('呼呼呼呼呼') >= 0)){
+					setTimeout(battleAgain, 1000);
+				}
+				else
+				{
+					setTimeout(retryNpc, 5000, result);
+				}
+			});
+		}
 
-		setTimeout(battleAgain, 5000);
+		var search = ()=>{
+			var blackList = [];
+			cga.searchMap(units => units.find(u => u.unit_name == '守墓员' && u.type == 1 && u.model_id != 0) || cga.GetMapName() == '？？？', result => {
+				console.log(result);
+				if(cga.GetMapName() == '？？？'){
+					goodToGoZLZZ(cb);
+					return;
+				}
+				
+				if(result && result.unit_name == '守墓员'){
+					retryNpc(result);
+				} else {
+					walkMazeForward(search);
+				}
+			});
+		}
+
+		if(cga.isTeamLeader){
+			findObj((obj)=>{
+				cga.walkList([
+					[obj.mapx, obj.mapy, '海底墓场外苑第1地带']
+				], search);
+			});
+		} else {
+			setTimeout(battleAgain, 5000);
+		}
 	}
 
 	var zhanglaozhizheng = (cb)=>{
@@ -189,7 +245,7 @@ var cga = require('./cgaapi')(function(){
 				[44, 41, '神殿　里侧大厅'],
 				[34, 34, 59535],
 				[48, 60, '约尔克神庙'],
-				[39, 22, null],
+				[39, 22],
 				], ()=>{
 					cga.TurnTo(39, 20);
 					cga.AsyncWaitNPCDialog((dlg)=>{
@@ -252,16 +308,7 @@ var cga = require('./cgaapi')(function(){
 	{//3
 		intro: '5.集齐7个【长老之证】后返回？？？，由持有7个【长老之证】的队员与荷特普(167.102)对话2次，选“是”交出【长老之证】并传送至盖雷布伦森林。',
 		workFunc: function(cb2){
-			var waitMap2 = ()=>{
-				
-				if(cga.GetMapName() == '盖雷布伦森林'){
-					cb2(true);
-					return;
-				}
-				
-				setTimeout(waitMap2, 5000);
-			}
-			
+
 			var sayshit = ()=>{
 				if(cga.getItemCount('长老之证') >= 7){
 					cga.TurnTo(131, 60);
@@ -271,39 +318,46 @@ var cga = require('./cgaapi')(function(){
 							cga.ClickNPCDialog(4, 0);
 							cga.AsyncWaitNPCDialog((dlg)=>{
 								cga.ClickNPCDialog(1, 0);
-								setTimeout(waitMap2, 5000);
+								cga.waitForLocation({map : '盖雷布伦森林'}, ()=>{
+									cb2(true);
+								});
 							});
 						});
 					});
 				} else {
-					setTimeout(waitMap2, 5000);
+					cga.waitForLocation({map : '盖雷布伦森林'}, ()=>{
+						cb2(true);
+					});
 				}
 			}
 			
-			cga.SayWords('已经集齐7个长老之证，请返回？？？', 0, 3, 1);
+			cga.SayWords('已经集齐7个长老之证，返回？？？', 0, 3, 1);
 			
-			var waitMap = ()=>{
-				
-				var curpos = cga.GetMapXY();
-				if(cga.GetMapName() == '？？？' && cga.isTeamLeader == true){
-					cga.walkList([
-						[131, 69, null],
-						[131, 61, null],
-						[130, 61, null],
-						[131, 61, null],
+			if(cga.isTeamLeader){
+				walkShit = ()=>{
+					if(cga.GetMapName() == '？？？')
+					{
+						cga.walkList([
+						[131, 61],
+						[130, 61],
+						[131, 61],
+						[130, 61],
+						[131, 61],
 						], (r)=>{
 							sayshit();
 						});
-					return;
+						return;
+					}
+					walkMazeForward(walkShit);
 				}
-				else if(cga.GetMapName() == '？？？' && cga.isTeamLeader == false && (curpos.x == 131 || curpos.x == 130) && curpos.y == 61){
-					setTimeout(sayshit, 1000);
-					return;
-				}
-				setTimeout(waitMap, 1000);
+				walkMazeForward(walkShit);				
+				return;
 			}
-			
-			setTimeout(waitMap, 5000);
+			else
+			{
+				cga.waitForLocation({map : '？？？', pos:[131, 60]}, sayshit);
+				return;
+			}
 		}
 	},
 	{//4
@@ -437,12 +491,12 @@ var cga = require('./cgaapi')(function(){
 					return;
 				}
 				
-				if(cga.doneBOSS && !cga.callWYW && (cga.getItemCount('觉醒的文言抄本') > 0)){
+				if(cga.doneBOSS && !callWYW && (cga.getItemCount('觉醒的文言抄本') > 0)){
 					cga.SayWords('觉醒的文言抄本 GET', 0, 3, 1);
-					cga.callWYW = true;
+					callWYW = true;
 				}
 
-				if(cga.doneBOSS && cga.callWYW == true){
+				if(cga.doneBOSS && callWYW){
 					//cga.LogBack();
 					setTimeout(cb2, 1000, true);
 					return;

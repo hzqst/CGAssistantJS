@@ -12,8 +12,7 @@ var cga = require('./cgaapi')(function(){
 				const walkTo = [
 					[47, 85, '召唤之间'],
 					[27, 8, '回廊'],
-					[23, 23],
-					[23, 19, '灵堂', null, null, true],
+					[23, 19, '灵堂'],
 					[30, 49],
 				];
 				cga.walkList(walkTo, cb);
@@ -30,8 +29,8 @@ var cga = require('./cgaapi')(function(){
 		
 		var huilang_to_hosiptal = (cb)=>{
 			const walkTo = [
-				[31, 48, '回廊', null, null, true],
-				[25, 22, null, null, null, true],
+				[31, 48, '回廊'],
+				[25, 22],
 			];
 			cga.walkList(walkTo, cb);
 		}

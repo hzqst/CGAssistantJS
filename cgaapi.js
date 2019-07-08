@@ -2467,13 +2467,10 @@ module.exports = function(callback){
 	
 	
 	cga.freqMove = function(dir, cb){
-		if(!cga.IsInGame()){
-			cb(new Error('not in game!'));
-			return;
-		}
 		var freqMoveDirTable = [ 4, 5, 6, 7, 0, 1, 2, 3 ];
 		var freqMoveDir = dir;
 		var pos = cga.GetMapXY();
+		var index3 = cga.GetMapIndex3();
 		var counter = 0;
 		var move = ()=>{
 			var result = true;
@@ -2845,9 +2842,37 @@ module.exports = function(callback){
 		setTimeout(cga.waitForMultipleLocation, 1000, arr);
 	}
 	
+	cga.buildMapTileMatrix = ()=>{
+		var wall = cga.GetMapTileTable(true);
+		var matrix = [];
+		for(var y = 0; y < wall.y_size; ++y){
+			if(!matrix[y])
+				matrix[y] = [];
+			for(var x = 0; x < wall.x_size; ++x){
+				matrix[y][x] = wall.cell[x + y * wall.x_size];
+			}
+		}
+		return {matrix : matrix, x_bottom : wall.x_bottom, y_bottom : wall.y_bottom, x_size : wall.x_size, y_size : wall.y_size};
+	}
+	
+	cga.buildMapCollisionRawMatrix = ()=>{
+		var wall = cga.GetMapCollisionTableRaw(true);
+		var matrix = [];
+		for(var y = 0; y < wall.y_size; ++y){
+			if(!matrix[y])
+				matrix[y] = [];
+			for(var x = 0; x < wall.x_size; ++x){
+				matrix[y][x] = wall.cell[x + y * wall.x_size];
+			}
+		}
+		return {matrix : matrix, x_bottom : wall.x_bottom, y_bottom : wall.y_bottom, x_size : wall.x_size, y_size : wall.y_size};
+	}
+	
 	cga.buildMapCollisionMatrix = (exitIsBlocked)=>{
 		var wall = cga.GetMapCollisionTable(true);
-		var objs = cga.GetMapObjectTable(true);
+		var objs = null;
+		if(exitIsBlocked == true)
+			objs = cga.GetMapObjectTable(true);
 		var matrix = [];
 		for(var y = 0; y < wall.y_size; ++y){
 			if(!matrix[y])
@@ -2906,52 +2931,53 @@ module.exports = function(callback){
 		}
 		return null;
 	}
+		
+	cga.downloadMapEx = (xfrom, yfrom, xsize, ysize, cb)=>{
+		var last_index3 = cga.GetMapIndex().index3;
+		var x = xfrom, y = yfrom;
+		var recursiveDownload = ()=>{
+			cga.RequestDownloadMap(x, y, x+24, y+24);
+			x += 24;
+			if(x > xsize){
+				y += 24;
+				x  = 0;
+			}
+			if(y > ysize){
+				
+				var waitDownloadEnd = (msg)=>{
+					if(!msg.index3 || last_index3 != msg.index3){
+						cb(false);
+						return
+					}
+					
+					if(msg.xtop >= xsize && msg.ytop >= ysize){
+						cb(true);
+						return
+					}
+
+					cga.AsyncWaitDownloadMap(waitDownloadEnd, 5000);
+				}
+				
+				cga.AsyncWaitDownloadMap(waitDownloadEnd, 5000);
+				return;
+			}
+			setTimeout(recursiveDownload, 500);
+		}
+		recursiveDownload();
+	}
 	
 	cga.downloadMap = (xsize, ysize, cb)=>{
-		var x = 0, y = 0;
-		var download = ()=>{
-			cga.RequestDownloadMap(x, y, x+24, y+24);
-			x += 24;
-			if(x > xsize){
-				y += 24;
-				x  = 0;
-			}
-			if(y > ysize){
-				setTimeout(cb, 1500, true);
-				return;
-			}
-			setTimeout(download, 500);
-		}
-		download();
+		cga.downloadMapEx(0, 0, xsize, ysize, cb);
 	}
 	
-	cga.downloadMapEx = (xfrom, yfrom, xsize, ysize, cb)=>{
-		var x = xfrom, y = yfrom;
-		var download = ()=>{
-			cga.RequestDownloadMap(x, y, x+24, y+24);
-			x += 24;
-			if(x > xsize){
-				y += 24;
-				x  = 0;
-			}
-			if(y > ysize){
-				setTimeout(cb, 1500, true);
-				return;
-			}
-			setTimeout(download, 500);
-		}
-		download();
-	}
-	
-	cga.walkMaze = (target_map, cb, layerNameFilter)=>{
-		
-		var walls = cga.buildMapCollisionMatrix();
+	cga.walkMaze = (target_map, cb, filter)=>{
 		
 		var objs = cga.getMapObjects();
 		
 		var pos = cga.GetMapXY();
 		
 		var newmap = null;
+
 		if(typeof target_map != 'string'){
 			var mapname = cga.GetMapName();
 			
@@ -2967,9 +2993,9 @@ module.exports = function(callback){
 				return;
 			}
 			
-			if(typeof layerNameFilter == 'function')
+			if(filter && (typeof filter.layerNameFilter == 'function'))
 			{
-				newmap = layerNameFilter(layerIndex, regex);
+				newmap = filter.layerNameFilter(layerIndex, regex);
 			}
 			else
 			{
@@ -2982,13 +3008,32 @@ module.exports = function(callback){
 		}
 
 		var target = null;
-		for(var i in objs){
-			if(objs[i].mapx == pos.x && objs[i].mapy == pos.y)
-				continue;
-			if(objs[i].cell == 3){
-				target = objs[i];
-				break;
-			}
+		
+		if(filter && (typeof filter.entryTileFilter == 'function'))
+		{
+			var tiles = cga.buildMapTileMatrix();
+			var colraw = cga.buildMapCollisionRawMatrix();
+			objs.forEach((obj)=>{
+				if(target == null && obj.cell == 3 && filter.entryTileFilter({
+					tile : tiles[obj.mapy][obj.mapx],
+					colraw : raw[obj.mapy][obj.mapx],
+					obj : obj,
+				}) == true ){
+					target = obj;
+					return;
+				}
+			});
+		}
+		else
+		{
+			objs.forEach((obj)=>{
+				if(obj.mapx == pos.x && obj.mapy == pos.y)
+					return;
+				if(target == null && obj.cell == 3){
+					target = obj;
+					return;
+				}
+			});
 		}
 		
 		if(target == null){
@@ -3008,22 +3053,39 @@ module.exports = function(callback){
 		});
 	}
 	
-	cga.walkRandomMaze = (target_map, cb, layerNameFilter)=>{
-		
+	cga.isMapDownloaded = ()=>{
 		var walls = cga.buildMapCollisionMatrix();
-		
+		var tiles = cga.buildMapTileMatrix();
 		if(walls.matrix[0][0] == 1 
 		|| walls.matrix[walls.y_size-1][0] == 1 
 		|| walls.matrix[walls.y_size-1][walls.x_size-1] == 1
 		|| walls.matrix[0][walls.x_size-1] == 1){
+			return false;
+		}
+		
+		for(var y = 0; y < walls.y_size; ++y){
+			for(var x = 0; x < walls.x_size ++x){
+				if(walls.matrix[y][x] == 0)
+					return false;
+			}
+		}
+		
+		return true;
+	}
+	
+	cga.walkRandomMaze = (target_map, cb, filter)=>{
+		if(cga.isMapDownloaded())
+		{
 			cga.downloadMap(walls.x_size,walls.y_size, ()=>{
-				cga.walkMaze(target_map, cb, layerNameFilter);
+				cga.walkMaze(target_map, cb, filter);
 			});
-		} else {
-			cga.walkMaze(target_map, cb, layerNameFilter);
+		} 
+		else
+		{
+			cga.walkMaze(target_map, cb, filter);
 		}
 	}
-
+	
 	/**
 	 * targetFinder返回unit object 或者 true都将停止搜索
 	 * cga.searchMap(units => units.find(u => u.unit_name == '守墓员' && u.type == 1) || cga.GetMapName() == '？？？', result => {
