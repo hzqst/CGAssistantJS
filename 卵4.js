@@ -1,7 +1,7 @@
 var cga = require('./cgaapi')(function(){
 	console.log('琥珀之卵4 起始地点：艾尔莎岛')
 	
-	var teammates = ['你萌死了', '儒雅随和丶Mata川', '释明空法师', '迅捷崽种提莫', '偷梗忍者西西卡'  ]//队长名字和队员名字
+	var teammates = ['hzqst', '甜贝儿', '约德尔队长', '迅捷崽种提莫', '偷梗忍者西西卡'  ]//队长名字和队员名字
 	
 	var playerinfo = cga.GetPlayerInfo();
 	
@@ -12,25 +12,29 @@ var cga = require('./cgaapi')(function(){
 	
 	cga.waitTeammateSay((player, msg)=>{
 
-		if(player.is_me == true){
-			
-			if(msg.indexOf('长老之证x7 GET') >= 0 ){
-				callZLZZ = true;
-			}
-			
-			if(msg.indexOf('觉醒的文言抄本') >= 0 ){
-				callWYW = true;
-			}
+		if(msg.indexOf('长老之证x7 GET') >= 0 ){
+			callZLZZ = true;
+		}
+		
+		if(msg.indexOf('觉醒的文言抄本') >= 0 ){
+			callWYW = true;
 		}
 
 		return true;
 	});
 	
 	var walkMazeForward = (cb)=>{
+		console.log('walkMazeForward')
 		cga.walkRandomMaze(null, (err)=>{
+			console.log(err);
 			cb(err === true ? true : false);
-		}, (layerIndex)=>{
-			return '海底墓场外苑第'+(layerIndex + 1)+'地带';
+		}, {
+			layerNameFilter : (layerIndex)=>{
+				return '海底墓场外苑第'+(layerIndex + 1)+'地带';
+			},
+			entryTileFilter : (e)=>{
+				return e.colraw == 0x462F || e.colraw == 0;
+			}
 		});
 	}
 	
@@ -75,7 +79,7 @@ var cga = require('./cgaapi')(function(){
 		var retryNpc = (result)=>{
 			cga.TurnTo(result.xpos, result.ypos);
 			cga.AsyncWaitNPCDialog((dlg)=>{
-				if(dlg && dlg.message && (dlg.message.indexOf('已死的主人') >= 0 || dlg.message.indexOf('呼呼呼呼呼') >= 0)){
+				if(dlg && dlg.message && (dlg.message.indexOf('已死的主人') >= 0 || dlg.message.indexOf('呼呼呼呼呼') >= 0 || dlg.message.indexOf('嘻嘻嘻嘻嘻嘻') >= 0)){
 					setTimeout(battleAgain, 1000);
 				}
 				else
@@ -87,7 +91,9 @@ var cga = require('./cgaapi')(function(){
 
 		var search = ()=>{
 			var blackList = [];
-			cga.searchMap(units => units.find(u => u.unit_name == '守墓员' && u.type == 1 && u.model_id != 0) || cga.GetMapName() == '？？？', result => {
+			cga.searchMap((units) => {
+				return units.find(u => u.unit_name == '守墓员' && u.type == 1 && u.model_id != 0) || cga.GetMapName() == '？？？'
+			}, (result) => {
 				console.log(result);
 				if(cga.GetMapName() == '？？？'){
 					goodToGoZLZZ(cb);
@@ -311,6 +317,7 @@ var cga = require('./cgaapi')(function(){
 
 			var sayshit = ()=>{
 				if(cga.getItemCount('长老之证') >= 7){
+					console.log('sayshit1');
 					cga.TurnTo(131, 60);
 					cga.AsyncWaitNPCDialog((dlg)=>{
 						cga.ClickNPCDialog(32, 0);
@@ -325,16 +332,15 @@ var cga = require('./cgaapi')(function(){
 						});
 					});
 				} else {
-					cga.waitForLocation({map : '盖雷布伦森林'}, ()=>{
+					console.log('sayshit2');
+					cga.waitForLocation({mapname : '盖雷布伦森林'}, ()=>{
 						cb2(true);
 					});
 				}
 			}
 			
-			cga.SayWords('已经集齐7个长老之证，返回？？？', 0, 3, 1);
-			
 			if(cga.isTeamLeader){
-				walkShit = ()=>{
+				var walkShit = ()=>{
 					if(cga.GetMapName() == '？？？')
 					{
 						cga.walkList([
@@ -355,7 +361,7 @@ var cga = require('./cgaapi')(function(){
 			}
 			else
 			{
-				cga.waitForLocation({map : '？？？', pos:[131, 60]}, sayshit);
+				cga.waitForLocation({mapname : '？？？', pos:[131, 60]}, sayshit);
 				return;
 			}
 		}
@@ -603,7 +609,7 @@ var cga = require('./cgaapi')(function(){
 			return (cga.getItemCount('琥珀之卵') >= 1) ? true : false;
 		},
 		function(){//长老之证
-			return (cga.getItemCount('长老之证') >= 7) ? true : false;
+			return (cga.getItemCount('长老之证') >= 7 || callZLZZ) ? true : false;
 		},
 		function(){
 			return false;
@@ -633,34 +639,28 @@ var cga = require('./cgaapi')(function(){
 
 	cga.SayWords('琥珀之卵4 脚本开始，输入‘0’从头（朵拉）开始任务，输入‘1’从打长老证之前开始任务，输入‘2’从荷普特开始任务，输入‘3’从祭坛守卫开始任务，输入‘4’从打完BOSS换保证书开始任务（必须有文言抄本）。', 0, 3, 1);
 	
-	var playerinfo = cga.GetPlayerInfo();
-	var chatheader = playerinfo.name+': ';
-	var waitStart = (r)=>{
+	cga.waitForChatInput((msg)=>{
 
-		if(r.msg && r.unit == playerinfo.unit_id && r.msg.indexOf(chatheader) >= 0){
-			var msg = r.msg.substr(r.msg.indexOf(chatheader) + chatheader.length);
-			if(msg.charAt(0) == '0')
-				task.jumpToStep = 0;
-			else if(msg.charAt(0) == '1')
-				task.jumpToStep = 2;
-			else if(msg.charAt(0) == '2')
-				task.jumpToStep = 4;
-			else if(msg.charAt(0) == '3')
-				task.jumpToStep = 6;
-			else if(msg.charAt(0) == '4')
-				task.jumpToStep = 9;
-			if(typeof task.jumpToStep != 'undefined'){
-				task.doTask(()=>{
-					console.log('ok');
-				});
-				return;
-			}
+		if(msg == '0')
+			task.jumpToStep = 0;
+		else if(msg == '1')
+			task.jumpToStep = 2;
+		else if(msg == '1.5')
+			task.jumpToStep = 3;
+		else if(msg == '2')
+			task.jumpToStep = 4;
+		else if(msg == '3')
+			task.jumpToStep = 6;
+		else if(msg == '4')
+			task.jumpToStep = 9;
+		
+		if(typeof task.jumpToStep != 'undefined'){
+			task.doTask(()=>{
+				console.log('ok');
+			});
+			return true;
 		}
-				
-		cga.AsyncWaitChatMsg(waitStart, 5000);
-	}
-	
-	cga.AsyncWaitChatMsg(waitStart, 5000);
-	
-	cga.listen();	
+		
+		return false;
+	});
 });

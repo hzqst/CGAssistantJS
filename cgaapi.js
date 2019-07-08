@@ -2966,12 +2966,13 @@ module.exports = function(callback){
 		recursiveDownload();
 	}
 	
-	cga.downloadMap = (xsize, ysize, cb)=>{
-		cga.downloadMapEx(0, 0, xsize, ysize, cb);
+	cga.downloadMap = (cb)=>{
+		var walls = cga.buildMapCollisionMatrix(true);
+		cga.downloadMapEx(0, 0, walls.xsize, walls.ysize, cb);
 	}
 	
 	cga.walkMaze = (target_map, cb, filter)=>{
-		
+
 		var objs = cga.getMapObjects();
 		
 		var pos = cga.GetMapXY();
@@ -3015,8 +3016,8 @@ module.exports = function(callback){
 			var colraw = cga.buildMapCollisionRawMatrix();
 			objs.forEach((obj)=>{
 				if(target == null && obj.cell == 3 && filter.entryTileFilter({
-					tile : tiles[obj.mapy][obj.mapx],
-					colraw : raw[obj.mapy][obj.mapx],
+					tile : tiles.matrix[obj.mapy][obj.mapx],
+					colraw : colraw.matrix[obj.mapy][obj.mapx],
 					obj : obj,
 				}) == true ){
 					target = obj;
@@ -3054,18 +3055,11 @@ module.exports = function(callback){
 	}
 	
 	cga.isMapDownloaded = ()=>{
-		var walls = cga.buildMapCollisionMatrix();
-		var tiles = cga.buildMapTileMatrix();
-		if(walls.matrix[0][0] == 1 
-		|| walls.matrix[walls.y_size-1][0] == 1 
-		|| walls.matrix[walls.y_size-1][walls.x_size-1] == 1
-		|| walls.matrix[0][walls.x_size-1] == 1){
-			return false;
-		}
+		var tiles = cga.buildMapTileMatrix(true);
 		
-		for(var y = 0; y < walls.y_size; ++y){
-			for(var x = 0; x < walls.x_size ++x){
-				if(walls.matrix[y][x] == 0)
+		for(var y = 0; y < tiles.y_size; ++y){
+			for(var x = 0; x < tiles.x_size; ++x){
+				if(tiles.matrix[y][x] == 0)
 					return false;
 			}
 		}
@@ -3074,9 +3068,9 @@ module.exports = function(callback){
 	}
 	
 	cga.walkRandomMaze = (target_map, cb, filter)=>{
-		if(cga.isMapDownloaded())
+		if(!cga.isMapDownloaded())
 		{
-			cga.downloadMap(walls.x_size,walls.y_size, ()=>{
+			cga.downloadMap(()=>{
 				cga.walkMaze(target_map, cb, filter);
 			});
 		} 
@@ -3092,7 +3086,8 @@ module.exports = function(callback){
 	 * 	console.log(result);
 	 * });
 	 */
-	cga.searchMap = (targetFinder, cb, recursion = true) => {
+	 //, recursion = true
+	cga.searchMap = (targetFinder, cb) => {
 		const getMovablePoints = (map, start) => {
 			const foundedPoints = {};
 			foundedPoints[start.x + '-' + start.y] = start;
@@ -3136,7 +3131,7 @@ module.exports = function(callback){
 				if (walkTo) {
 					cga.walkList([walkTo], () => cb(target));
 				} else noTargetCB();
-			} else if (target === true) cb();
+			} else if (target === true) cb(null);
 			else noTargetCB();
 		};
 		const toNextPoint = (points, centre, toNextCB) => {
@@ -3151,20 +3146,13 @@ module.exports = function(callback){
 				cga.walkList([[next.x,next.y]], () => getTarget(() => toNextPoint(remain,next,toNextCB)));
 			} else toNextCB();
 		};
-		const start = cga.GetMapXY();
-		let entry;
+		//const start = cga.GetMapXY();
+		//let entry = null;
 		const findNext = (walls) => {
 			const current = cga.GetMapXY();
-			if (!entry && recursion) entry = getFarthestEntry(start);
+			//if (!entry && recursion) entry = getFarthestEntry(start);
 			toNextPoint(Object.values(getMovablePoints(walls, current)), current, () => {
-				if (typeof entry == 'object') {
-					const current = cga.GetMapXY();
-					const walklist = cga.calculatePath(current.x, current.y, entry.x, entry.y, '', null, null, []);
-					if (walklist.length > 0) cga.walkList(walklist, (r) => {
-						cga.searchMap(targetFinder, cb, recursion);
-					});
-					else cb();
-				} else cb();
+				cb(null);
 			});
 		};
 		getTarget(() => {
