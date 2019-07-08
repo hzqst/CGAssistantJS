@@ -2968,7 +2968,7 @@ module.exports = function(callback){
 	
 	cga.downloadMap = (cb)=>{
 		var walls = cga.buildMapCollisionMatrix(true);
-		cga.downloadMapEx(0, 0, walls.xsize, walls.ysize, cb);
+		cga.downloadMapEx(0, 0, walls.x_size, walls.y_size, cb);
 	}
 	
 	cga.walkMaze = (target_map, cb, filter)=>{
@@ -3162,7 +3162,7 @@ module.exports = function(callback){
 				|| walls.matrix[walls.y_size-1][walls.x_size-1] == 1
 				|| walls.matrix[0][walls.x_size-1] == 1
 			) {
-				cga.downloadMap(walls.x_size,walls.y_size, () => findNext(cga.buildMapCollisionMatrix()));
+				cga.downloadMap(() => findNext(cga.buildMapCollisionMatrix()));
 			} else findNext(walls);
 		});
 	}
