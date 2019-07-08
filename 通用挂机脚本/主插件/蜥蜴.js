@@ -5,35 +5,43 @@ var teamMode = require('./../公共模块/组队模式');
 
 var cga = global.cga;
 var configTable = global.configTable;
-var exitPos = null;
 
 var walkMazeForward = (cb)=>{
 	var map = cga.GetMapName();
-	if(map == '黑龙沼泽'+(thisobj.layerLevel)+'区'){
+	if(map == '蜥蜴洞穴上层第'+(thisobj.layerLevel)+'层'){
 		cb(true);
 		return;
 	}
-	if(map == '肯吉罗岛'){
+	if(map == '蜥蜴洞穴'){
 		cb(false);
 		return;
 	}
 	cga.walkRandomMaze(null, (err)=>{
 		walkMazeForward(cb);
-	}, (layerIndex)=>{
-		return '黑龙沼泽'+(thisobj.layerIndex + 1)+'区';
+	}, {
+		layerNameFilter : (layerIndex)=>{
+			return '蜥蜴洞穴上层第'+(layerIndex + 1)+'层';
+		},
+		entryTileFilter : (e)=>{
+			return e.colraw == 0x2EE2 || e.colraw == 0;
+		}
 	});
 }
 
 var walkMazeBack = (cb)=>{
 	var map = cga.GetMapName();
-	if(map == '肯吉罗岛'){
+	if(map == '蜥蜴洞穴'){
 		cb(true);
 		return;
 	}
 	cga.walkRandomMaze(null, (err)=>{
 		walkMazeBack(cb);
-	}, (layerIndex)=>{
-		return layerIndex > 1 ? ('黑龙沼泽'+(layerIndex - 1)+'区') : '肯吉罗岛';
+	}, {
+		layerNameFilter : (layerIndex)=>{
+			return layerIndex > 1 ? ('蜥蜴洞穴上层第'+(layerIndex - 1)+'层') : '蜥蜴洞穴';
+		entryTileFilter : ()=>{
+			return e.colraw == 0x2EE0 || e.colraw == 0;
+		}
 	});
 }
 
@@ -56,65 +64,65 @@ var loop = ()=>{
 			supplyMode.func(loop);
 			return;
 		}
-		if(map == '圣骑士营地' && teamMode.is_enough_teammates()){
+		if(map == '蜥蜴洞穴'){
 			cga.walkList([
-				[36, 87, '肯吉罗岛'],
-				[424, 345, '黑龙沼泽1区'],
+			[12, 13, '肯吉罗岛'],
 			], loop);
 			return;
 		}
-		if(map == '黑龙沼泽1区')
+		if(map == '圣骑士营地' && teamMode.is_enough_teammates()){
+			cga.walkList([
+				[36, 87, '肯吉罗岛'],
+				[384, 245, '蜥蜴洞穴'],
+				[17, 4, '蜥蜴洞穴上层第1层'],
+			], loop);
+			return;
+		}
+		if(map == '蜥蜴洞穴上层第1层')
 		{
 			walkMazeForward((r)=>{
-				//意外传送回肯吉罗岛，迷宫刷新
+				//意外传送回蜥蜴洞穴，迷宫刷新
 				if(r != true){
 					loop();
 					return;
 				}
-				exitPos = cga.GetMapXY();
-				var randomSpace = cga.getRandomSpace(exitPos.x, exitPos.y);
-				cga.WalkTo(randomSpace[0], randomSpace[1]);
-				setTimeout(()=>{
-					cga.freqMove(0, ()=>{
-			
-						if(!cga.isInBattle())
-						{
-							var playerinfo = cga.GetPlayerInfo();
-							var ctx = {
-								playerinfo : playerinfo,
-								petinfo : cga.GetPetInfo(playerinfo.petid),
-								teamplayers : cga.getTeamPlayers(),
-								result : null,
-							}
-							
-							teamMode.battle(ctx);
-							
-							global.callSubPlugins('battle', ctx);
-							
-							if( ctx.result == 'supply' ){
-								
-								//回补路径：先走到exitPos上进入前一层，再往下走直到肯吉罗岛，最后走回营地
-								cga.walkList([
-								[exitPos.x, exitPos.y, thisobj.layerLevel > 1 ? ('黑龙沼泽'+(thisobj.layerLevel - 1)+'区') : '肯吉罗岛'],
-								],
-								(r, reason)=>{
-									walkMazeBack(()=>{
-										supplyMode.func(loop);
-									});
-								});
-								
-								return false;
-							}
-							else if( ctx.result == 'logback' ){
-								cga.LogBack();
-								setTimeout(loop, 1500);
-								return false;
-							}
-						}
-						
+				var xy = cga.GetMapXY();
+				var dir = cga.getRandomSpaceDir(xy.x, xy.y);
+				cga.freqMove(dir, (r)=>{
+					
+					if(cga.isInBattle())
 						return true;
-					});
-				}, 1500);
+				
+					var playerinfo = cga.GetPlayerInfo();
+					var ctx = {
+						playerinfo : playerinfo,
+						petinfo : cga.GetPetInfo(playerinfo.petid),
+						teamplayers : cga.getTeamPlayers(),
+						result : null,
+					}
+					
+					teamMode.battle(ctx);
+					
+					global.callSubPlugins('battle', ctx);
+					
+					if(cga.GetMapName() == '蜥蜴洞穴'){
+						ctx.result == 'supply';
+					}
+					
+					if( ctx.result == 'supply' ){
+
+						walkMazeBack(loop);
+						
+						return false;
+					}
+					else if( ctx.result == 'logback' ){
+						cga.LogBack();
+						setTimeout(loop, 1500);
+						return false;
+					}
+					
+					return true;
+				});
 			});
 			return;
 		}
@@ -158,7 +166,7 @@ module.exports = {
 	translate : (pair)=>{
 		
 		if(pair.field == 'layerLevel'){
-			pair.field = '黑龙练级层数';
+			pair.field = '蜥蜴练级层数';
 			pair.value = pair.value + '层';
 			pair.translated = true;
 			return true;
@@ -190,7 +198,7 @@ module.exports = {
 		thisobj.layerLevel = obj.layerLevel
 		
 		if(!thisobj.layerLevel){
-			console.error('读取配置：黑龙练级层数失败！');
+			console.error('读取配置：蜥蜴练级层数失败！');
 			return false;
 		}
 		
@@ -198,7 +206,7 @@ module.exports = {
 	},
 	inputcb : (cb)=>{
 		Async.series([supplyMode.inputcb, sellStore.inputcb, teamMode.inputcb, (cb2)=>{
-			var sayString = '【黑龙插件】请选择黑龙练级层数(1~100), 100代表龙顶:';
+			var sayString = '【蜥蜴插件】请选择蜥蜴练级层数(1~100):';
 			cga.sayLongWords(sayString, 0, 3, 1);
 			cga.waitForChatInput((msg)=>{
 				var val = parseInt(msg);
@@ -206,7 +214,7 @@ module.exports = {
 					configTable.layerLevel = val;
 					thisobj.layerLevel = val;
 					
-					var sayString2 = '当前已选择:黑龙'+thisobj.layerLevel+'层练级。';
+					var sayString2 = '当前已选择:蜥蜴'+thisobj.layerLevel+'层练级。';
 					cga.sayLongWords(sayString2, 0, 3, 1);
 					
 					cb2(null);

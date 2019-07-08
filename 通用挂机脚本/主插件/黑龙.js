@@ -5,7 +5,6 @@ var teamMode = require('./../公共模块/组队模式');
 
 var cga = global.cga;
 var configTable = global.configTable;
-var exitPos = null;
 
 var walkMazeForward = (cb)=>{
 	var map = cga.GetMapName();
@@ -19,8 +18,13 @@ var walkMazeForward = (cb)=>{
 	}
 	cga.walkRandomMaze(null, (err)=>{
 		walkMazeForward(cb);
-	}, (layerIndex)=>{
-		return '黑龙沼泽'+(thisobj.layerIndex + 1)+'区';
+	}, {
+		layerNameFilter : (layerIndex)=>{
+			return '黑龙沼泽'+(layerIndex + 1)+'区';
+		},
+		entryTileFilter : (e)=>{
+			return e.colraw == 0x2EE2 || e.colraw == 0;
+		}
 	});
 }
 
@@ -32,8 +36,13 @@ var walkMazeBack = (cb)=>{
 	}
 	cga.walkRandomMaze(null, (err)=>{
 		walkMazeBack(cb);
-	}, (layerIndex)=>{
-		return layerIndex > 1 ? ('黑龙沼泽'+(layerIndex - 1)+'区') : '肯吉罗岛';
+	}, {
+		layerNameFilter : (layerIndex)=>{
+			return layerIndex > 1 ? ('黑龙沼泽'+(layerIndex - 1)+'区') : '肯吉罗岛';
+		},
+		entryTileFilter : ()=>{
+			return e.colraw == 0x2EE0 || e.colraw == 0;
+		}
 	});
 }
 
@@ -71,50 +80,39 @@ var loop = ()=>{
 					loop();
 					return;
 				}
-				exitPos = cga.GetMapXY();
-				var randomSpace = cga.getRandomSpace(exitPos.x, exitPos.y);
-				cga.WalkTo(randomSpace[0], randomSpace[1]);
-				setTimeout(()=>{
-					cga.freqMove(0, ()=>{
+				var xy = cga.GetMapXY();
+				var dir = cga.getRandomSpaceDir(xy.x, xy.y);
+				cga.freqMove(dir, ()=>{
 			
-						if(!cga.isInBattle())
-						{
-							var playerinfo = cga.GetPlayerInfo();
-							var ctx = {
-								playerinfo : playerinfo,
-								petinfo : cga.GetPetInfo(playerinfo.petid),
-								teamplayers : cga.getTeamPlayers(),
-								result : null,
-							}
-							
-							teamMode.battle(ctx);
-							
-							global.callSubPlugins('battle', ctx);
-							
-							if( ctx.result == 'supply' ){
-								
-								//回补路径：先走到exitPos上进入前一层，再往下走直到肯吉罗岛，最后走回营地
-								cga.walkList([
-								[exitPos.x, exitPos.y, thisobj.layerLevel > 1 ? ('黑龙沼泽'+(thisobj.layerLevel - 1)+'区') : '肯吉罗岛'],
-								],
-								(r, reason)=>{
-									walkMazeBack(()=>{
-										supplyMode.func(loop);
-									});
-								});
-								
-								return false;
-							}
-							else if( ctx.result == 'logback' ){
-								cga.LogBack();
-								setTimeout(loop, 1500);
-								return false;
-							}
-						}
-						
+					if(cga.isInBattle())
 						return true;
-					});
-				}, 1500);
+					
+					var playerinfo = cga.GetPlayerInfo();
+					var ctx = {
+						playerinfo : playerinfo,
+						petinfo : cga.GetPetInfo(playerinfo.petid),
+						teamplayers : cga.getTeamPlayers(),
+						result : null,
+					}
+					
+					teamMode.battle(ctx);
+					
+					global.callSubPlugins('battle', ctx);
+					
+					if( ctx.result == 'supply' ){
+						
+						walkMazeBack(loop);
+						
+						return false;
+					}
+					else if( ctx.result == 'logback' ){
+						cga.LogBack();
+						setTimeout(loop, 1500);
+						return false;
+					}
+
+					return true;
+				});
 			});
 			return;
 		}

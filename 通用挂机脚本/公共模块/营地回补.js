@@ -1,8 +1,8 @@
 var supplyModeArray = [
 {
 	name : '资深护士回补',
-	func : (cb, unshift_list)=>{
-		var list = [
+	func : (cb)=>{
+		cga.walkList([
 			[551, 332, '圣骑士营地'],
 			[95, 72, '医院'],
 			[9, 11],
@@ -10,10 +10,7 @@ var supplyModeArray = [
 			[9, 11],
 			[9, 12],
 			[9, 11],
-		]
-		if(unshift_list instanceof Array && unshift_list.length)
-			list.unshift(unshift_list);		
-		cga.walkList(list, ()=>{
+		], ()=>{
 			cga.TurnTo(11,11);
 			setTimeout(()=>{
 				cga.callHosiptal = false;			
@@ -24,8 +21,8 @@ var supplyModeArray = [
 },
 {
 	name : '普通护士回补',
-	func : (cb, unshift_list)=>{
-		var list = [
+	func : (cb)=>{
+		cga.walkList([
 			[551, 332, '圣骑士营地'],
 			[95, 72, '医院'],
 			[18, 15],
@@ -33,10 +30,7 @@ var supplyModeArray = [
 			[18, 15],
 			[17, 15],
 			[18, 15],
-		]
-		if(unshift_list instanceof Array && unshift_list.length)
-			list.unshift(unshift_list);
-		cga.walkList(list, ()=>{
+		], ()=>{
 			cga.TurnTo(18,13);
 			setTimeout(()=>{
 				cga.callHosiptal = false;			

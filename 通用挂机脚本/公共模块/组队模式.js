@@ -57,8 +57,9 @@ var teamModeArray = [
 	},
 	battle : (ctx)=>{
 		
-		//人数不足，登出
-		if(ctx.teamplayers.length < thisobj.teammates.length)
+		//队长：人数不足，登出
+		//队员：人都跑光了，登出
+		if((ctx.teamplayers.length < thisobj.teammates.length && cga.isTeamLeader) || ctx.teamplayers.length == 0)
 		{
 			ctx.result = 'logback';
 			return;
