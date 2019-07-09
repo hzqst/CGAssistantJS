@@ -162,7 +162,7 @@ var loop = ()=>{
 	});
 }
 
-module.exports = {
+var thisobj = {
 	translate : (pair)=>{
 		
 		if(pair.field == 'layerLevel'){
@@ -228,3 +228,5 @@ module.exports = {
 	},
 	execute : loop,
 };
+
+module.exports = thisobj;
