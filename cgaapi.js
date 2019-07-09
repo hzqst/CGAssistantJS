@@ -2471,7 +2471,7 @@ module.exports = function(callback){
 		var freqMoveDir = dir;
 		var pos = cga.GetMapXY();
 		var index3 = cga.GetMapIndex().index;
-		
+		var counter = 0;
 		var move = ()=>{
 			var result = true;
 			try
