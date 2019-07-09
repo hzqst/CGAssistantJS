@@ -82,7 +82,7 @@ var loop = ()=>{
 				}
 				var xy = cga.GetMapXY();
 				var dir = cga.getRandomSpaceDir(xy.x, xy.y);
-				cga.freqMove(dir, ()=>{
+				cga.freqMove(dir, (r)=>{
 			
 					if(cga.isInBattle())
 						return true;
@@ -99,8 +99,8 @@ var loop = ()=>{
 					
 					global.callSubPlugins('battle', ctx);
 					
-					if( ctx.result == 'supply' ){
-						
+					if( !r || ctx.result == 'supply' ){
+
 						walkMazeBack(loop);
 						
 						return false;

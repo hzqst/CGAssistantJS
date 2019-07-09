@@ -104,12 +104,8 @@ var loop = ()=>{
 					teamMode.battle(ctx);
 					
 					global.callSubPlugins('battle', ctx);
-					
-					if(cga.GetMapName() == '蜥蜴洞穴'){
-						ctx.result == 'supply';
-					}
-					
-					if( ctx.result == 'supply' ){
+
+					if( !r || ctx.result == 'supply' ){
 
 						walkMazeBack(loop);
 						
