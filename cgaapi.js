@@ -2889,7 +2889,7 @@ module.exports = function(callback){
 			if(!matrix[y])
 				matrix[y] = [];
 			for(var x = 0; x < wall.x_size; ++x){
-				matrix[y][x] = wall.cell[x + y * wall.x_size];
+				matrix[y][x] = wall.cell[x + y * wall.x_size] == 1 ? 1 : 0;
 				if(exitIsBlocked == true){
 					if(objs.cell[x + y * objs.x_size] & 0xff){
 						matrix[y][x] = 1;
