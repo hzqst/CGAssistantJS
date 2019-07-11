@@ -15,14 +15,14 @@ var cga = require('./cgaapi')(function(){
 	cga.isTeamLeader = (teammates[0] == playerinfo.name) ? true : false
 	
 	var waitStage = (cb2)=>{
-		var teammate_state = [];
+		var teammate_state = {};
 		var teammate_ready = 0;
 		//var teamplayers = cga.getTeamPlayers();
 
 		cga.waitTeammateSay((player, msg)=>{
 
-			if(msg == '1' && teammate_state[player.index] !== true){
-				teammate_state[player.index] = true;
+			if(msg == '1' && teammate_state[player.name] !== true){
+				teammate_state[player.name] = true;
 				teammate_ready ++;
 			}
 
@@ -195,7 +195,7 @@ var cga = require('./cgaapi')(function(){
 					cb2('restart stage');
 					return;
 				}
-				cga.walkRandomMaze('', (err)=>{
+				cga.walkRandomMaze(null, (err)=>{
 					walkMaze(cb3);
 				});
 			}

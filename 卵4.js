@@ -1,14 +1,20 @@
 var cga = require('./cgaapi')(function(){
 	console.log('琥珀之卵4 起始地点：艾尔莎岛')
 	
-	var teammates = ['hzqst', '甜贝儿', '约德尔队长', '迅捷崽种提莫', '偷梗忍者西西卡'  ]//队长名字和队员名字
-	
 	var playerinfo = cga.GetPlayerInfo();
 	
+	var teammates = [];
+	
+	var teamplayers = cga.getTeamPlayers();
+
+	for(var i in teamplayers)
+		teammates[i] = teamplayers[i].name;
+	
 	cga.isTeamLeader = (teammates[0] == playerinfo.name) ? true : false
+	
 	var callZLZZ = false;
 	var callWYW = false;
-	cga.doneBOSS = false;
+	var doneBOSS = false;
 	
 	cga.waitTeammateSay((player, msg)=>{
 
@@ -287,24 +293,29 @@ var cga = require('./cgaapi')(function(){
 				cga.walkList([
 				[130, 50, '盖雷布伦森林'],
 				[246, 76, '路路耶博士的家'],
-				[3, 10, '？？？'],
-				[131, 61],
 				], ()=>{
-					cga.TurnTo(131, 59);
-					cga.AsyncWaitNPCDialog((dlg)=>{
-						cga.ClickNPCDialog(32, 0);
-						cga.AsyncWaitNPCDialog((dlg)=>{
-							if(dlg.message.indexOf('还不快点') == -1)
-							{
+					cga.WalkTo(3, 10);
+					cga.AsyncWaitMovement({map:['？？？'], delay:1000, timeout:10000}, (r)=>{
+						cga.walkList([
+						[131, 61],
+						], ()=>{
+							cga.TurnTo(131, 59);
+							cga.AsyncWaitNPCDialog((dlg)=>{
 								cga.ClickNPCDialog(32, 0);
 								cga.AsyncWaitNPCDialog((dlg)=>{
-									cga.ClickNPCDialog(1, 0);
-									zhanglaozhizheng(cb2);
+									if(dlg.message.indexOf('还不快点') == -1)
+									{
+										cga.ClickNPCDialog(32, 0);
+										cga.AsyncWaitNPCDialog((dlg)=>{
+											cga.ClickNPCDialog(1, 0);
+											zhanglaozhizheng(cb2);
+										});
+									} else {
+										cga.ClickNPCDialog(1, 0);
+										zhanglaozhizheng(cb2);
+									}
 								});
-							} else {
-								cga.ClickNPCDialog(1, 0);
-								zhanglaozhizheng(cb2);
-							}
+							});
 						});
 					});
 				});
@@ -486,7 +497,7 @@ var cga = require('./cgaapi')(function(){
 			var waitBOSS = ()=>{
 				if(cga.isInBattle())
 				{
-					cga.doneBOSS = true;
+					doneBOSS = true;
 					
 					if(cga.getItemCount('觉醒的文言抄本') > 0){
 						//cga.LogBack();
@@ -497,12 +508,12 @@ var cga = require('./cgaapi')(function(){
 					return;
 				}
 				
-				if(cga.doneBOSS && !callWYW && (cga.getItemCount('觉醒的文言抄本') > 0)){
+				if(doneBOSS && !callWYW && (cga.getItemCount('觉醒的文言抄本') > 0)){
 					cga.SayWords('觉醒的文言抄本 GET', 0, 3, 1);
 					callWYW = true;
 				}
 
-				if(cga.doneBOSS && callWYW){
+				if(doneBOSS && callWYW){
 					//cga.LogBack();
 					setTimeout(cb2, 1000, true);
 					return;
@@ -637,7 +648,7 @@ var cga = require('./cgaapi')(function(){
 	
 	task.anyStepDone = false;
 
-	cga.SayWords('琥珀之卵4 脚本开始，输入‘0’从头（朵拉）开始任务，输入‘1’从打长老证之前开始任务，输入‘2’从荷普特开始任务，输入‘3’从祭坛守卫开始任务，输入‘4’从打完BOSS换保证书开始任务（必须有文言抄本）。', 0, 3, 1);
+	cga.SayWords('欢迎使用琥珀之卵4（转职保证书）脚本，输入‘0’从头（朵拉）开始任务，输入‘1’从打长老证之前开始任务，输入‘2’从荷普特开始任务，输入‘3’从祭坛守卫开始任务，输入‘4’从打完BOSS换保证书开始任务（必须有文言抄本）。', 0, 3, 1);
 	
 	cga.waitForChatInput((msg)=>{
 
@@ -653,7 +664,7 @@ var cga = require('./cgaapi')(function(){
 			task.jumpToStep = 6;
 		else if(msg == '4')
 			task.jumpToStep = 9;
-		
+				
 		if(typeof task.jumpToStep != 'undefined'){
 			task.doTask(()=>{
 				console.log('ok');
