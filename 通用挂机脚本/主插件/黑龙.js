@@ -40,7 +40,7 @@ var walkMazeBack = (cb)=>{
 		layerNameFilter : (layerIndex)=>{
 			return layerIndex > 1 ? ('黑龙沼泽'+(layerIndex - 1)+'区') : '肯吉罗岛';
 		},
-		entryTileFilter : ()=>{
+		entryTileFilter : (e)=>{
 			return e.colraw == 0x2EE0 || e.colraw == 0;
 		}
 	});

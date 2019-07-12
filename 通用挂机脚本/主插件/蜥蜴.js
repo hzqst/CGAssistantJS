@@ -40,7 +40,7 @@ var walkMazeBack = (cb)=>{
 		layerNameFilter : (layerIndex)=>{
 			return layerIndex > 1 ? ('蜥蜴洞穴上层第'+(layerIndex - 1)+'层') : '蜥蜴洞穴';
 		},
-		entryTileFilter : ()=>{
+		entryTileFilter : (e)=>{
 			return e.colraw == 0x2EE0 || e.colraw == 0;
 		}
 	});
