@@ -289,6 +289,15 @@ var cga = require('./cgaapi')(function(){
 	{//2
 		intro: '2.前往盖雷布伦森林路路耶博士的家(244.76)，进入后再离开路路耶博士的家并传送至？？？。' + "\n" + '3.通过(142.69)或(122.69)处黄色传送石进入海底墓场外苑，寻找随机出现的守墓者并与之对话进入战斗。',
 		workFunc: function(cb2){
+			if(cga.needSupplyInitial({  })){
+				cga.travel.falan.toCastleHospital(()=>{
+					setTimeout(()=>{
+						cb2('restart stage');
+					}, 3000);
+				});
+				return;
+			}
+			
 			cga.travel.newisland.toStone('X', ()=>{
 				cga.walkList([
 				[130, 50, '盖雷布伦森林'],
@@ -431,6 +440,15 @@ var cga = require('./cgaapi')(function(){
 	{//6
 		intro: '7.前往梅布尔隘地，持有【琥珀之卵】、【逆十字】与祭坛守卫(211.116)对话进入？？？。',
 		workFunc: function(cb2){
+			if(cga.needSupplyInitial({  })){
+				cga.travel.falan.toCastleHospital(()=>{
+					setTimeout(()=>{
+						cb2('restart stage');
+					}, 3000);
+				});
+				return;
+			}
+			
 			cga.travel.newisland.toStone('X', ()=>{
 				cga.walkList([
 					[165, 153],

@@ -682,9 +682,15 @@ module.exports = function(callback){
 				
 				cga.walkList(list, warp);
 			} else {
-				cga.walkList([
+				
+				var list = [
 				[153, 241, '芙蕾雅'],
-				], cb);
+				];
+				
+				if(cga.GetMapName() == '里谢里雅堡')
+					list.unshift([41, 98, '法兰城']);
+				
+				cga.walkList(list, cb);
 			}
 		}
 		
@@ -1947,7 +1953,7 @@ module.exports = function(callback){
 	//参数1：物品名, 或#物品id
 	//参数2：是否包括装备栏
 	cga.getItemCount = function(name){
-		var includeEquipment = arguments[1] ? arguments[1] : false;
+		var includeEquipment = arguments[1] === true ? true : false;
 		var items = cga.getInventoryItems();
 		var count = 0;
 		if(name.charAt(0) == '#'){
