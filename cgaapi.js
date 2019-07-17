@@ -2367,24 +2367,27 @@ module.exports = function(callback){
 		});
 	}
 	
+	cga.getSellStoneItem = ()=>{
+		var pattern = /(.+)的卡片/;
+		var sellArray = []
+		cga.getInventoryItems().forEach((item)=>{
+			if(item.name == '魔石' || item.name == '卡片？' || pattern.exec(item.name) ){
+				sellArray.push({
+					itempos : item.pos,
+					itemid : item.itemid,
+					count : (item.count < 1) ? 1 : item.count,
+				});
+			}				
+		})		
+		return sellArray;
+	}
+	
 	cga.sellStone = (cb)=>{
 		cga.AsyncWaitNPCDialog(function(dlg){			
 			var numOpt = dlg.message.charAt(dlg.message.length-1);
 			cga.ClickNPCDialog(0, numOpt == '3' ? 1 : 0);
 			cga.AsyncWaitNPCDialog(function(dlg2){
-				var pattern = /(.+)的卡片/;
-				var sellArray = []
-				cga.getInventoryItems().forEach((item)=>{
-					if(item.name == '魔石' || item.name == '卡片？' || pattern.exec(item.name) )
-						sellArray.push({
-							itempos : item.pos,
-							itemid : item.itemid,
-							count : (item.count < 1) ? 1 : item.count,
-						});
-						
-				})
-
-				cga.SellNPCStore(sellArray);
+				cga.SellNPCStore(cga.getSellStoneItem());
 				setTimeout(cb, 1000, true);
 			});
 		});

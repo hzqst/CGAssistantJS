@@ -99,6 +99,9 @@ var loop = ()=>{
 					
 					global.callSubPlugins('battle', ctx);
 					
+					if(cga.GetMapName() == '肯吉罗岛')
+						ctx.result = 'supply';
+					
 					if( !r || ctx.result == 'supply' ){
 
 						walkMazeBack(loop);

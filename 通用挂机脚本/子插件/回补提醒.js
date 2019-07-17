@@ -26,27 +26,27 @@ var thisobj = {
 		if(ctx.playerinfo.hp < ctx.playerinfo.maxhp * thisobj.minHpPercent / 100 && curTime >= muteUntil){
 			cga.SayWords('人物血量不够，需要回补!', 0, 3, 1);
 			muteUntil = curTime + 1000 * thisobj.mute;
-			result = 'supply';
+			ctx.result = 'supply';
 			return;
 		}
 		if(ctx.playerinfo.mp < ctx.playerinfo.maxmp * thisobj.minMpPercent / 100 && curTime >= muteUntil){
 			cga.SayWords('人物蓝量不够，需要回补!', 0, 3, 1);
 			muteUntil = curTime + 1000 * thisobj.mute;
-			result = 'supply';
+			ctx.result = 'supply';
 			return true;
 		}
 
 		if(ctx.petinfo.hp < ctx.petinfo.maxhp * thisobj.minHpPercent / 100 && curTime >= muteUntil){
 			cga.SayWords('宠物血量不够，需要回补!', 0, 3, 1);
 			muteUntil = curTime + 1000 * thisobj.mute;
-			result = 'supply';
+			ctx.result = 'supply';
 			return true;
 		}
 		
 		if(ctx.petinfo.mp < ctx.petinfo.maxmp * thisobj.minMpPercent / 100 && curTime >= muteUntil){
 			cga.SayWords('宠物蓝量不够，需要回补!', 0, 3, 1);
 			muteUntil = curTime + 1000 * thisobj.mute;
-			result = 'supply';
+			ctx.result = 'supply';
 			return true;
 		}
 	},

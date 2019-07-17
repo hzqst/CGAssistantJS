@@ -56,6 +56,9 @@ var teamModeArray = [
 		}
 	},
 	battle : (ctx)=>{
+		//单练模式
+		if(thisobj.teammates.length == 0)
+			return;
 		
 		//队长：人数不足，登出
 		//队员：人都跑光了，登出

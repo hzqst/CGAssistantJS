@@ -1,7 +1,7 @@
 var cga = global.cga;
 var configTable = global.configTable;
 
-var openbox = (cb)=>{
+var openbox = ()=>{
 	var box = cga.findItem('加强补给品');
 	if(box != -1){
 		cga.AsyncWaitNPCDialog(function(dlg){
@@ -54,7 +54,11 @@ var waitArray = [
 				}
 			});
 		}
-		
+		else if(cga.getItemCount('加强补给品') > 0);
+		{
+			openbox();
+		}
+
 		setTimeout(cga.waitForMultipleLocation, 5000, waitArray);
 	}
 }
