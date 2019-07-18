@@ -23,7 +23,7 @@ var walkMazeForward = (cb)=>{
 			return '蜥蜴洞穴上层第'+(layerIndex + 1)+'层';
 		},
 		entryTileFilter : (e)=>{
-			return e.colraw == 0x2EE2 || e.colraw == 0;
+			return e.colraw == 0x2EE2;
 		}
 	});
 }

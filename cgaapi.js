@@ -2491,49 +2491,49 @@ module.exports = function(callback){
 				{
 					var curpos = cga.GetMapXY();
 					if(freqMoveDir == 0){
-						if(pos.x > curpos.x)
+						if(pos.x == curpos.x)
 							cga.ForceMove(freqMoveDir, false);
 						else
 							cga.ForceMove(freqMoveDirTable[freqMoveDir], false);
 					}
 					else if(freqMoveDir == 4){
-						if(pos.x < curpos.x)
+						if(pos.x == curpos.x)
 							cga.ForceMove(freqMoveDir, false);
 						else
 							cga.ForceMove(freqMoveDirTable[freqMoveDir], false);
 					}
 					else if(freqMoveDir == 2){
-						if(pos.y > curpos.y)
+						if(pos.y == curpos.y)
 							cga.ForceMove(freqMoveDir, false);
 						else
 							cga.ForceMove(freqMoveDirTable[freqMoveDir], false);
 					}
 					else if(freqMoveDir == 6){
-						if(pos.y < curpos.y)
+						if(pos.y == curpos.y)
 							cga.ForceMove(freqMoveDir, false);
 						else
 							cga.ForceMove(freqMoveDirTable[freqMoveDir], false);
 					}
 					else if(freqMoveDir == 1){
-						if(pos.x > curpos.x)
+						if(pos.x == curpos.x)
 							cga.ForceMove(freqMoveDir, false);
 						else
 							cga.ForceMove(freqMoveDirTable[freqMoveDir], false);
 					}
 					else if(freqMoveDir == 5){
-						if(pos.x < curpos.x)
+						if(pos.x == curpos.x)
 							cga.ForceMove(freqMoveDir, false);
 						else
 							cga.ForceMove(freqMoveDirTable[freqMoveDir], false);
 					}
 					else if(freqMoveDir == 3){
-						if(pos.y > curpos.y)
+						if(pos.y == curpos.y)
 							cga.ForceMove(freqMoveDir, false);
 						else
 							cga.ForceMove(freqMoveDirTable[freqMoveDir], false);
 					}
 					else if(freqMoveDir == 7){
-						if(pos.y < curpos.y)
+						if(pos.y == curpos.y)
 							cga.ForceMove(freqMoveDir, false);
 						else
 							cga.ForceMove(freqMoveDirTable[freqMoveDir], false);

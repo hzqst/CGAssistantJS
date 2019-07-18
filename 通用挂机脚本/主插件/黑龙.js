@@ -23,7 +23,7 @@ var walkMazeForward = (cb)=>{
 			return '黑龙沼泽'+(layerIndex + 1)+'区';
 		},
 		entryTileFilter : (e)=>{
-			return e.colraw == 0x2EE2 || e.colraw == 0;
+			return e.colraw == 0x2EE2;
 		}
 	});
 }
