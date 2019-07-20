@@ -12,10 +12,7 @@ var supplyModeArray = [
 			[9, 11],
 		], ()=>{
 			cga.TurnTo(11,11);
-			setTimeout(()=>{
-				cga.callHosiptal = false;			
-				cb();
-			}, 5000);
+			setTimeout(cb, 5000);
 		});
 	}
 },
@@ -32,10 +29,7 @@ var supplyModeArray = [
 			[18, 15],
 		], ()=>{
 			cga.TurnTo(18,13);
-			setTimeout(()=>{
-				cga.callHosiptal = false;			
-				cb();
-			}, 5000);
+			setTimeout(cb, 5000);
 		});
 	}
 }

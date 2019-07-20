@@ -97,6 +97,14 @@ var loop = ()=>{
 }
 
 module.exports = {
+	getDangerLevel : ()=>{
+		var map = cga.GetMapName();
+		
+		if(map == '肯吉罗岛' )
+			return 2;
+				
+		return 0;
+	},
 	translate : (pair)=>{
 		if(supplyMode.translate(pair))
 			return true;

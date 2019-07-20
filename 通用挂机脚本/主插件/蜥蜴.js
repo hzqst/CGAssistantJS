@@ -163,6 +163,17 @@ var loop = ()=>{
 }
 
 var thisobj = {
+	getDangerLevel : ()=>{
+		var map = cga.GetMapName();
+		
+		if(map == '肯吉罗岛' || map == '蜥蜴洞穴' )
+			return 1;
+				
+		if(map.indexOf('蜥蜴洞穴上层') >= 0)
+			return 2;
+		
+		return 0;
+	},
 	translate : (pair)=>{
 		
 		if(pair.field == 'layerLevel'){

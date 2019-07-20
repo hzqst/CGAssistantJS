@@ -55,8 +55,10 @@ var cga = require('./cgaapi')(function(){
 									cga.ClickNPCDialog(32, 0);
 									cga.AsyncWaitNPCDialog((dlg)=>{
 										cga.ClickNPCDialog(1, 0);
-										cga.SayWords('拿野草莓，然后传送至民家地下，与帕鲁凯斯对话获得“刀刃的碎片”。然后返回民家与队长重新组队！', 0, 3, 1);
-										setTimeout(cb2, 1500, true);
+										setTimeout(()=>{ 
+											cga.SayWords('拿野草莓，然后传送至民家地下，与帕鲁凯斯对话获得“刀刃的碎片”。然后返回民家与队长重新组队！', 0, 3, 1);
+											setTimeout(cb2, 1500, true);
+										}, 1500);
 									});
 								});
 							});
@@ -164,6 +166,10 @@ var cga = require('./cgaapi')(function(){
 	{//1
 		intro: '2.与米希安（9.4）对话，交出【野草莓】并传送至民家地下。3.调查连接时空的石盘（15.7），选“是”传送至民家地下。4.与战士帕鲁凯斯（15.7）对话，获得【刀刃碎片】。5.通过（5.3）处楼梯至民家，与历史学家雷伯雷翁（14.10）对话。通过（9.4）处楼梯返回民家地下。6.调查连接时空的石盘（15.10），选“是”传送至民家地下。',
 		workFunc: function(cb2){
+			
+			if(cga.getItemCount('野草莓') == 0){
+				throw new Error('执行出错，没有拿到野草莓，可能是因为没有开启者称号！')
+			}
 			
 			var wait = ()=>{
 				cga.WalkTo(9, 5);

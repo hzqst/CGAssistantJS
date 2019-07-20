@@ -1,13 +1,12 @@
 var cga = global.cga;
 var configTable = global.configTable;
-
 var callsupply = false;
 
 module.exports = {
 	init : ()=>{
 		cga.waitTeammateSay((player, msg)=>{
 
-			if(msg.indexOf('需要回补') >= 0){
+			if(msg.indexOf('需要回补') >= 0 && global.getMainPlugin().getDangerLevel() >= 1){
 				callsupply = true;
 			}
 			
@@ -18,7 +17,7 @@ module.exports = {
 		if(callsupply)
 		{
 			ctx.result = 'supply';
-			callsupply = false;
+			ctx.reason = '监听回补';
 		}
 	},
 	loadconfig : (obj, cb)=>{

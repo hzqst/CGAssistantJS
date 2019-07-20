@@ -38,6 +38,10 @@ var cga = require('./cgaapi')(function(){
 	var mainPlugin = null;
 	var subPlugins = [];
 	
+	global.getMainPlugin = ()=>{
+		return mainPlugin;
+	}
+	
 	global.callSubPlugins = (func, arg)=>{
 		for(var i in subPlugins){
 			if(typeof subPlugins[i][func] == 'function')
@@ -46,7 +50,7 @@ var cga = require('./cgaapi')(function(){
 	}
 	
 	global.callSubPluginsAsync = (func, arg, cb)=>{
-		throw new Error('not impl yet')
+		
 		/*var funcs = [];
 		for(var i in subPlugins){
 			if(typeof subPlugins[i][func] == 'function')

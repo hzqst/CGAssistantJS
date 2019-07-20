@@ -11,7 +11,6 @@ var loop = ()=>{
 	var mapindex = cga.GetMapIndex().index3;
 	
 	if(cga.isTeamLeader == true || !cga.getTeamPlayers().length){
-		console.log('bbb');
 		if(map == '医院' && mapindex == 44692){
 			sellStore.object.func(loop);
 			return;
@@ -55,7 +54,6 @@ var loop = ()=>{
 			return;
 		}
 		if(map == '圣骑士营地' && teamMode.object.is_enough_teammates()){
-			console.log('aaa');
 			cga.walkList([
 				[36, 87, '肯吉罗岛'],
 				[467, 201],
@@ -63,7 +61,6 @@ var loop = ()=>{
 			return;
 		}
 	} else {
-		console.log('ddd');
 		if(!cga.isInBattle())
 		{
 			var playerinfo = cga.GetPlayerInfo();
@@ -90,7 +87,7 @@ var loop = ()=>{
 		setTimeout(loop, 1500);
 		return;
 	}
-	console.log('ccc');
+
 	cga.travel.falan.toCamp(()=>{
 		cga.walkList([
 		cga.isTeamLeader ? [96, 86] : [97, 86],
@@ -101,6 +98,14 @@ var loop = ()=>{
 }
 
 module.exports = {
+	getDangerLevel : ()=>{
+		var map = cga.GetMapName();
+		
+		if(map == '肯吉罗岛' )
+			return 2;
+				
+		return 0;
+	},
 	translate : (pair)=>{
 		if(supplyMode.translate(pair))
 			return true;

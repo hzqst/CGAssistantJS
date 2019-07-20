@@ -96,13 +96,13 @@ var loop = ()=>{
 					}
 					
 					teamMode.battle(ctx);
-					
+
 					global.callSubPlugins('battle', ctx);
 					
 					if(cga.GetMapName() == '肯吉罗岛')
 						ctx.result = 'supply';
 					
-					if( !r || ctx.result == 'supply' ){
+					if( ctx.result == 'supply' ){
 
 						walkMazeBack(loop);
 						
@@ -156,6 +156,17 @@ var loop = ()=>{
 }
 
 var thisobj = {
+	getDangerLevel : ()=>{
+		var map = cga.GetMapName();
+		
+		if(map == '肯吉罗岛' )
+			return 1;
+		
+		if(map.indexOf('黑龙沼泽') >= 0)
+			return 2;
+		
+		return 0;
+	},
 	translate : (pair)=>{
 		
 		if(pair.field == 'layerLevel'){

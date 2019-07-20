@@ -1421,9 +1421,9 @@ module.exports = function(callback){
 					});
 					return;
 				}
-			} else if(curMap == '艾尔莎岛' && stone == 'X'){
+			} else if(curMap == '艾尔莎岛'){
 				cga.walkList([
-				[140, 105],
+				stone == 'X' ? [140, 105] : [158, 94],
 				], ()=>{
 					cga.travel.newisland.toStoneInternal(stone, cb, r);
 				});
@@ -2577,6 +2577,8 @@ module.exports = function(callback){
 			}
 			if(playerinfo.unitid == teaminfo[i].unit_id){
 				teaminfo[i].name = playerinfo.name;
+				teaminfo[i].level = playerinfo.level;
+				teaminfo[i].injury = playerinfo.health > 0 ? 1 : 0;
 				teaminfo[i].is_me = true;
 			}
 		}

@@ -113,7 +113,14 @@ var loop = ()=>{
 }
 
 var thisobj = {
-	execute : loop,
+	getDangerLevel : ()=>{
+		var map = cga.GetMapName();
+		
+		if(map == '芙蕾雅' )
+			return 1;
+
+		return 0;
+	},
 	translate : (pair)=>{
 		
 		if(pair.field == 'gatherObject'){
@@ -190,6 +197,7 @@ var thisobj = {
 			return false;
 		});
 	},
+	execute : loop,
 };
 
 module.exports = thisobj;

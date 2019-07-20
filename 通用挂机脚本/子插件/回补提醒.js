@@ -27,12 +27,14 @@ var thisobj = {
 			cga.SayWords('人物血量不够，需要回补!', 0, 3, 1);
 			muteUntil = curTime + 1000 * thisobj.mute;
 			ctx.result = 'supply';
+			ctx.reason = '人物血量不够';
 			return;
 		}
 		if(ctx.playerinfo.mp < ctx.playerinfo.maxmp * thisobj.minMpPercent / 100 && curTime >= muteUntil){
 			cga.SayWords('人物蓝量不够，需要回补!', 0, 3, 1);
 			muteUntil = curTime + 1000 * thisobj.mute;
 			ctx.result = 'supply';
+			ctx.reason = '人物蓝量不够';
 			return true;
 		}
 
@@ -40,6 +42,7 @@ var thisobj = {
 			cga.SayWords('宠物血量不够，需要回补!', 0, 3, 1);
 			muteUntil = curTime + 1000 * thisobj.mute;
 			ctx.result = 'supply';
+			ctx.reason = '宠物血量不够';
 			return true;
 		}
 		
@@ -47,6 +50,7 @@ var thisobj = {
 			cga.SayWords('宠物蓝量不够，需要回补!', 0, 3, 1);
 			muteUntil = curTime + 1000 * thisobj.mute;
 			ctx.result = 'supply';
+			ctx.reason = '宠物蓝量不够';
 			return true;
 		}
 	},

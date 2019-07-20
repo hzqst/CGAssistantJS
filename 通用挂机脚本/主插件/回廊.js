@@ -109,6 +109,14 @@ var loop = ()=>{
 }
 
 module.exports = {
+	getDangerLevel : ()=>{
+		var map = cga.GetMapName();
+		
+		if(map == '过去与现在的回廊' )
+			return 2;
+		
+		return 0;
+	},
 	translate : (pair)=>{
 		if(sellStore.translate(pair))
 			return true;

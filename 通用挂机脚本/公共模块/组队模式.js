@@ -22,6 +22,11 @@ var teamModeArray = [
 	},
 	wait_for_teammates : (cb)=>{
 
+		if(!cga.isTeamLeader && !thisobj.teammates.length){
+			cb(true);
+			return;
+		}
+
 		if(!cga.isTeamLeader){
 			
 			var waitAdd = ()=>{					
@@ -65,6 +70,7 @@ var teamModeArray = [
 		if((ctx.teamplayers.length < thisobj.teammates.length && cga.isTeamLeader) || ctx.teamplayers.length == 0)
 		{
 			ctx.result = 'logback';
+			ctx.reason = '人数不足，登出';
 			return;
 		}
 	}
@@ -72,7 +78,11 @@ var teamModeArray = [
 {
 	name : '自由组队',
 	is_enough_teammates : ()=>{//人数是否足够？
-		if(!cga.isTeamLeader && thisobj.minTeamMemberCount <= 1){
+		if(thisobj.minTeamMemberCount <= 1){
+			return true;
+		}
+		
+		if(!cga.isTeamLeader){
 			return true;
 		}
 		
@@ -85,6 +95,12 @@ var teamModeArray = [
 		return false;
 	},
 	wait_for_teammates : (cb)=>{
+		
+		if(thisobj.minTeamMemberCount <= 1){
+			cb(true);
+			return;
+		}
+		
 		if(!cga.isTeamLeader){
 			cb(true);
 			return;
@@ -98,17 +114,23 @@ var teamModeArray = [
 				return;
 			}
 			
-			cga.SayWords('等待队友中。。。，队伍人数大于等于'+thisobj.minTeamMemberCount+'人即可发车！');
+			cga.SayWords('等待队友中...队伍人数大于等于'+thisobj.minTeamMemberCount+'人即可发车！', 0, 3, 1 );
 			setTimeout(wait, 5000);
 		}
 		
 		wait();
 	},
 	battle : (ctx)=>{
+		
+		//单练模式
+		if(thisobj.minTeamMemberCount <= 1)
+			return;
+		
 		//人数不足，回补
 		if(ctx.teamplayers.length < thisobj.minTeamMemberCount)
 		{
 			ctx.result = 'supply';
+			ctx.reason = '人数不足，回补';
 			return;
 		}
 	}
@@ -177,13 +199,13 @@ var thisobj = {
 		
 		if(thisobj.object.name == '自由组队'){
 			configTable.minTeamMemberCount = obj.minTeamMemberCount;
-			thisobj.minTeamMemberCount = obj.minTeammateCount;
+			thisobj.minTeamMemberCount = obj.minTeamMemberCount;
 			if(!(thisobj.minTeamMemberCount > 0)){
 				console.error('读取配置：队伍最小人数失败！');
 				return false;
 			}
 			
-			cga.isTeamLeader = (thisobj.teammates[0] == playerinfo.name);
+			cga.isTeamLeader = true;
 		}
 		
 		return true;
