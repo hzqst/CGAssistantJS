@@ -20,7 +20,6 @@ var cga = require('./cgaapi')(function(){
 	var waitStage = (cb2)=>{
 		var teammate_state = [];
 		var teammate_ready = 0;
-		//var teamplayers = cga.getTeamPlayers();
 
 		cga.waitTeammateSay((player, msg)=>{
 

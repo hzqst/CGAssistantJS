@@ -2856,8 +2856,8 @@ module.exports = function(callback){
 			}
 			
 			if(passCheck){
-				obj.cb();
-				return;
+				if(obj.cb() == true)
+					return;
 			}
 		}
 		

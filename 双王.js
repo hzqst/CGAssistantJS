@@ -333,6 +333,7 @@ var cga = require('./cgaapi')(function(){
 				mapindex: 24069, 
 				cb : ()=>{
 					cb2(true);
+					return true;
 				}
 			},
 			{
@@ -340,6 +341,7 @@ var cga = require('./cgaapi')(function(){
 				mapname: '诅咒的迷宫 地下11楼', 
 				cb : ()=>{
 					cb2(true);
+					return true;
 				}
 			}
 			];
@@ -348,17 +350,14 @@ var cga = require('./cgaapi')(function(){
 				cga.TurnTo(22, 14);
 				cga.AsyncWaitNPCDialog((dlg)=>{
 					if(cga.isInBattle()){
-						cga.waitForMultipleLocation(nextMap);
 						return;
 					}
 					if(dlg instanceof TypeError){
-						cga.waitForMultipleLocation(nextMap);
 						return;
 					}
 					cga.ClickNPCDialog(1, 0);
-					
-					cga.waitForMultipleLocation(nextMap);
 				});
+				cga.waitForMultipleLocation(nextMap);
 			}
 			
 			var wait15 = (counter)=>{
@@ -425,8 +424,12 @@ var cga = require('./cgaapi')(function(){
 					mapindex: 24018, 
 					pos:[22, 14], 
 					cb : ()=>{
-						if(checkSkill())
+						if(checkSkill()){
 							fuckBOSS();
+							return true;
+						}
+						
+						return false;
 					}
 				}));
 			}
@@ -459,6 +462,7 @@ var cga = require('./cgaapi')(function(){
 				mapindex: 24070, 
 				cb : ()=>{
 					cb2(true);
+					return true;
 				}
 			},
 			{
@@ -466,6 +470,7 @@ var cga = require('./cgaapi')(function(){
 				mapname: '诅咒的迷宫 地下21楼', 
 				cb : ()=>{
 					cb2(true);
+					return true;
 				}
 			}
 			];
@@ -474,17 +479,14 @@ var cga = require('./cgaapi')(function(){
 				cga.TurnTo(26, 17);
 				cga.AsyncWaitNPCDialog((dlg)=>{
 					if(cga.isInBattle()){
-						cga.waitForMultipleLocation(nextMap);
 						return;
 					}
 					if(dlg instanceof TypeError){
-						cga.waitForMultipleLocation(nextMap);
 						return;
 					}
 					cga.ClickNPCDialog(1, 0);
-					
-					cga.waitForMultipleLocation(nextMap);
 				});
+				cga.waitForMultipleLocation(nextMap);
 			}
 			
 			var wait15 = (counter)=>{
@@ -543,7 +545,7 @@ var cga = require('./cgaapi')(function(){
 					if(checkSkill()){
 						fuckBOSS();
 					} else {
-						cga.SayWords("拥有拥有任意Lv.8四属性攻击魔法（单体/强力/超强）、吸血魔法与BOSS对话可直接通过，如果15秒内没有队员对话则直接开始战斗！", 0, 3, 1);
+						cga.SayWords("拥有任意Lv.8四属性攻击魔法（单体/强力/超强）、吸血魔法与BOSS对话可直接通过，如果15秒内没有队员对话则直接开始战斗！", 0, 3, 1);
 						setTimeout(wait15, 1000, 15);
 					}
 				});
@@ -556,8 +558,12 @@ var cga = require('./cgaapi')(function(){
 					mapindex: 24028, 
 					pos:[26, 17], 
 					cb : ()=>{
-						if(checkSkill())
+						if(checkSkill()){
 							fuckBOSS();
+							return true;
+						}
+						
+						return false;
 					}
 				}));
 			}
@@ -598,6 +604,7 @@ var cga = require('./cgaapi')(function(){
 				mapindex: 24071, 
 				cb : ()=>{
 					cb2(true);
+					return true;
 				}
 			},
 			{
@@ -605,6 +612,7 @@ var cga = require('./cgaapi')(function(){
 				mapname: '诅咒的迷宫 地下31楼', 
 				cb : ()=>{
 					cb2(true);
+					return true;
 				}
 			}
 			];
@@ -613,17 +621,14 @@ var cga = require('./cgaapi')(function(){
 				cga.TurnTo(20, 21);
 				cga.AsyncWaitNPCDialog((dlg)=>{
 					if(cga.isInBattle()){
-						cga.waitForMultipleLocation(nextMap);
 						return;
 					}
-					if(dlg instanceof TypeError){						
-						cga.waitForMultipleLocation(nextMap);
+					if(dlg instanceof TypeError){
 						return;
 					}
 					cga.ClickNPCDialog(1, 0);
-					
-					cga.waitForMultipleLocation(nextMap);
 				});
+				cga.waitForMultipleLocation(nextMap);
 			}
 			
 			var wait15 = (counter)=>{
@@ -699,8 +704,12 @@ var cga = require('./cgaapi')(function(){
 					mapindex: 24038, 
 					pos:[20, 21], 
 					cb : ()=>{
-						if(checkSkill())
+						if(checkSkill()){
 							fuckBOSS();
+							return true;
+						}
+						
+						return false;
 					}
 				}));
 			}
@@ -733,6 +742,7 @@ var cga = require('./cgaapi')(function(){
 				mapindex: 24072, 
 				cb : ()=>{
 					cb2(true);
+					return true;
 				}
 			},
 			{
@@ -740,6 +750,7 @@ var cga = require('./cgaapi')(function(){
 				mapname: '诅咒的迷宫 地下41楼', 
 				cb : ()=>{
 					cb2(true);
+					return true;
 				}
 			}
 			];
@@ -748,17 +759,14 @@ var cga = require('./cgaapi')(function(){
 				cga.TurnTo(15, 18);
 				cga.AsyncWaitNPCDialog((dlg)=>{
 					if(cga.isInBattle()){
-						cga.waitForMultipleLocation(nextMap);
 						return;
 					}
 					if(dlg instanceof TypeError){
-						cga.waitForMultipleLocation(nextMap);
 						return;
 					}
 					cga.ClickNPCDialog(1, 0);
-					
-					cga.waitForMultipleLocation(nextMap);
 				});
+				cga.waitForMultipleLocation(nextMap);
 			}
 			
 			var wait15 = (counter)=>{
@@ -832,8 +840,12 @@ var cga = require('./cgaapi')(function(){
 					mapindex: 24048, 
 					pos:[15, 18], 
 					cb : ()=>{
-						if(checkSkill())
+						if(checkSkill()){
 							fuckBOSS();
+							return true;
+						}
+						
+						return false;
 					}
 				}));
 			}
@@ -873,6 +885,7 @@ var cga = require('./cgaapi')(function(){
 				mapindex: 24073, 
 				cb : ()=>{
 					cb2(true);
+					return true;
 				}
 			},
 			{
@@ -880,6 +893,7 @@ var cga = require('./cgaapi')(function(){
 				mapname: '诅咒的迷宫 地下51楼', 
 				cb : ()=>{
 					cb2(true);
+					return true;
 				}				
 			}
 			];
@@ -888,16 +902,14 @@ var cga = require('./cgaapi')(function(){
 				cga.TurnTo(22, 14);
 				cga.AsyncWaitNPCDialog((dlg)=>{
 					if(cga.isInBattle()){
-						cga.waitForMultipleLocation(nextMap);
 						return;
 					}
 					if(dlg instanceof TypeError){
-						cga.waitForMultipleLocation(nextMap);
 						return;
 					}
 					cga.ClickNPCDialog(1, 0);
-					cga.waitForMultipleLocation(nextMap);
 				});
+				cga.waitForMultipleLocation(nextMap);
 			}
 			
 			var wait15 = (counter)=>{
@@ -969,8 +981,12 @@ var cga = require('./cgaapi')(function(){
 					mapindex: 24058, 
 					pos:[22, 14], 
 					cb : ()=>{
-						if(checkSkill())
+						if(checkSkill()){
 							fuckBOSS();
+							return true;
+						}
+						
+						return false;
 					}
 				}));
 			}
@@ -986,6 +1002,7 @@ var cga = require('./cgaapi')(function(){
 				mapindex: 24074, 
 				cb : ()=>{
 					cb2(true);
+					return true;
 				}
 			},
 			];
@@ -994,17 +1011,14 @@ var cga = require('./cgaapi')(function(){
 				cga.TurnTo(24, 19);
 				cga.AsyncWaitNPCDialog((dlg)=>{
 					if(cga.isInBattle()){
-						cga.waitForMultipleLocation(nextMap);
 						return;
 					}
 					if(dlg instanceof TypeError){
-						cga.waitForMultipleLocation(nextMap);
 						return;
 					}
 					cga.ClickNPCDialog(1, 0);
-					
-					cga.waitForMultipleLocation(nextMap);
 				});
+				cga.waitForMultipleLocation(nextMap);
 			}
 			
 			var go = ()=>{
