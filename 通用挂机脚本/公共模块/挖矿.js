@@ -202,7 +202,6 @@ var mineArray = [
 var cga = global.cga;
 var configTable = global.configTable;
 
-var playerinfo = cga.GetPlayerInfo();
 
 var thisobj = {
 	func : (cb) =>{
@@ -251,9 +250,9 @@ var thisobj = {
 			var index = parseInt(msg);
 			if(index >= 1 && mineArray[index - 1]){
 				configTable.mineObject = index - 1;
-				mineObject = mineArray[index - 1];
+				thisobj.object = mineArray[index - 1];
 				
-				var sayString2 = '当前已选择:[' + mineObject.name + ']。';
+				var sayString2 = '当前已选择:[' + thisobj.object.name + ']。';
 				cga.sayLongWords(sayString2, 0, 3, 1);
 				
 				cb(null);

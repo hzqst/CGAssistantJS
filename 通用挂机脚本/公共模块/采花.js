@@ -1,109 +1,114 @@
 var mineArray = [
-	{
+{
 		level : 1,
-		name : '印度轻木',
+		name : '苹果薄荷',
 		func : (cb)=>{
 			cga.travel.falan.toStone('W1', (r)=>{
 				cga.walkList([
 					[22, 87, '芙蕾雅'],
-					[361, 184],
+					[500, 85],
 				], cb);
 			});
 		}		
 	},
 	{
 		level : 2,
-		name : '枞',
+		name : '柠檬草',
 		func : (cb)=>{
 			cga.travel.falan.toStone('W1', (r)=>{
 				cga.walkList([
 					[22, 87, '芙蕾雅'],
-					[451, 163],
+					[515, 100],
 				], cb);
 			});
-		}
+		}		
 	},
 	{
 		level : 3,
-		name : '黄月木',
+		name : '蝴蝶花',
 		func : (cb)=>{
 			cga.travel.falan.toStone('W1', (r)=>{
 				cga.walkList([
 					[22, 87, '芙蕾雅'],
-					[361, 182],
+					[505, 120],
 				], cb);
 			});
-		}
+		}		
 	},
 	{
 		level : 4,
-		name : '铁杉',
+		name : '果梨',
 		func : (cb)=>{
-			cga.travel.falan.toWeiNuoYa((r)=>{
+			cga.travel.falan.toStone('W1', (r)=>{
 				cga.walkList([
-					[5, 1, '村长家的小房间'],
-					[0, 5, '村长的家'],
-					[10, 16, '维诺亚村'],
-					[67, 46, '芙蕾雅'],
-					[416, 440],
+					[22, 87, '芙蕾雅'],
+					[510, 130],
 				], cb);
 			});
-		}
+		}		
 	},
 	{
 		level : 5,
-		name : '琵琶木',
+		name : '桃木',
 		func : (cb)=>{
-			cga.travel.falan.toWeiNuoYa((r)=>{
+			cga.travel.falan.toStone('W1', (r)=>{
 				cga.walkList([
-					[5, 1, '村长家的小房间'],
-					[0, 5, '村长的家'],
-					[10, 16, '维诺亚村'],
-					[67, 46, '芙蕾雅'],
-					[347, 410],
+					[22, 87, '芙蕾雅'],
+					[521, 126],
 				], cb);
 			});
-		}
+		}		
 	},
 	{
 		level : 6,
-		name : '赤松',
+		name : '番红花',
 		func : (cb)=>{
-			cga.travel.falan.toWeiNuoYa((r)=>{
+			cga.travel.falan.toStone('W1', (r)=>{
 				cga.walkList([
-					[5, 1, '村长家的小房间'],
-					[0, 5, '村长的家'],
-					[10, 16, '维诺亚村'],
-					[67, 46, '芙蕾雅'],
-					[400, 550],
+					[22, 87, '芙蕾雅'],
+					[503, 132],
 				], cb);
 			});
-		}
+		}		
 	},
 	{
 		level : 7,
-		name : '朴',
+		name : '百里香',
 		func : (cb)=>{
 			cga.travel.falan.toJieNuoWa((r)=>{
 				cga.walkList([
 					[14, 6, '村长的家'],
 					[1, 9, '杰诺瓦镇'],
-					[24, 39, '莎莲娜'],
-					[183, 459],
+					[71, 19, '莎莲娜'],
+					[267, 561],
 				], cb);
 			});
 		}
 	},
 	{
 		level : 8,
-		name : '杉',
+		name : '瞿麦',
+		func : (cb)=>{
+			cga.travel.falan.toJieNuoWa((r)=>{
+				cga.walkList([
+					[14, 6, '村长的家'],
+					[1, 9, '杰诺瓦镇'],
+					[71, 19, '莎莲娜'],
+					[262, 574],
+				], cb);
+			});
+		}
+	},
+	{
+		level : 9,
+		name : '茴香',
 		func : (cb)=>{
 			cga.travel.falan.toJieNuoWa((r)=>{
 				cga.walkList([
 					[14, 6, '村长的家'],
 					[1, 9, '杰诺瓦镇'],
 					[24, 39, '莎莲娜'],
-					[161, 354],
+					[178, 510],
 				], cb);
 			});
 		}
@@ -199,7 +204,7 @@ var thisobj = {
 		return true;
 	},
 	inputcb : (cb)=>{
-		var sayString = '【采集插件】请选择要伐的木:';
+		var sayString = '【采集插件】请选择要采的花:';
 		for(var i in mineArray){
 			if(i != 0)
 				sayString += ', ';
@@ -214,7 +219,6 @@ var thisobj = {
 				
 				var sayString2 = '当前已选择:[' + thisobj.object.name + ']。';
 				cga.sayLongWords(sayString2, 0, 3, 1);
-				
 				
 				cb(null);
 				

@@ -29,6 +29,7 @@ var gatherArray = [
 ]
 
 var loop = ()=>{
+		
 	var skill = cga.findPlayerSkill(gatherObject.skill);
 	if(!skill){
 		errmsg = '你没有'+gatherObject.skill+'技能';
@@ -36,12 +37,12 @@ var loop = ()=>{
 		throw new Error(errmsg);
 		return;
 	}
-	if(mineObject.object && skill.lv < mineObject.object.level){
-		var errmsg = gatherObject.skill+'技能等级不够，挖'+mineObject.name+'需要'+mineObject.level+'级，而你只有'+skill.lv+'级';
+	/*if(mineObject.object && skill.lv < mineObject.object.level){
+		var errmsg = gatherObject.skill+'技能等级不够，挖'+mineObject.object.name+'需要'+mineObject.object.level+'级，而你只有'+skill.lv+'级';
 		cga.SayWords(errmsg , 0, 3, 1);
 		throw new Error(errmsg);
 		return;
-	}
+	}*/
 	
 	var playerInfo = cga.GetPlayerInfo();
 	if(playerInfo.mp < playerInfo.maxmp)
@@ -118,6 +119,9 @@ var thisobj = {
 		
 		if(map == '芙蕾雅' )
 			return 1;
+		
+		if(map == '莎莲娜' )
+			return 2;
 
 		return 0;
 	},
@@ -187,7 +191,7 @@ var thisobj = {
 				var sayString2 = '当前已选择:[' + gatherObject.name + ']。';
 				cga.sayLongWords(sayString2, 0, 3, 1);
 				
-				if(!mineObject)
+				if(mineObject === null)
 					mineObject = require(gatherObject.path);
 				
 				Async.series([mineObject.inputcb, doneObject.inputcb, healObject.inputcb], cb);

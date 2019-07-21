@@ -321,6 +321,8 @@ var thisobj = {
 				return false;
 			});
 		}
+		
+		stage1();
 	}
 }
 
