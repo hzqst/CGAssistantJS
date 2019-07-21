@@ -36,9 +36,10 @@ var battle = ()=>{
 
 	global.callSubPlugins('battle', ctx);
 
-	if( ctx.result == 'supply' ){
+	if(ctx.result == 'supply' && supplyMode.isLogBack())
+		ctx.result = 'logback';
 
-		console.log(ctx.reason);
+	if( ctx.result == 'supply' ){
 
 		supplyMode.func(loop);
 		
@@ -71,7 +72,7 @@ var loop = ()=>{
 		{
 			cga.freqMove(thisobj.battleArea.dir, ()=>{
 				
-				if(!cga.isInBattle()) {
+				if(cga.isInNormalState()) {
 					if(!battle())
 						return false;
 				}
@@ -91,7 +92,7 @@ var loop = ()=>{
 			return;
 		}
 	} else {
-		if(!cga.isInBattle()) {
+		if(cga.isInNormalState()) {
 			if(!battle())
 				return;
 		}
@@ -100,11 +101,9 @@ var loop = ()=>{
 		return;
 	}
 
-	if(cga.needSupplyInitial())
+	if(cga.needSupplyInitial() && supplyMode.isInitialSupply())
 	{
-		cga.travel.falan.toCastleHospital(()=>{
-			setTimeout(loop, 5000);
-		});
+		supplyMode.func(loop);
 		return;
 	}
 	

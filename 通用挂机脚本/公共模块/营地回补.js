@@ -1,6 +1,6 @@
 var supplyModeArray = [
 {
-	name : '资深护士回补',
+	name : '圣骑士营地资深护士回补',
 	func : (cb)=>{
 		cga.walkList([
 			[551, 332, '圣骑士营地'],
@@ -14,10 +14,12 @@ var supplyModeArray = [
 			cga.TurnTo(11,11);
 			setTimeout(cb, 5000);
 		});
-	}
+	},
+	isLogBack : false,
+	isInitialSupply : false,
 },
 {
-	name : '普通护士回补',
+	name : '圣骑士营地普通护士回补',
 	func : (cb)=>{
 		cga.walkList([
 			[551, 332, '圣骑士营地'],
@@ -31,7 +33,72 @@ var supplyModeArray = [
 			cga.TurnTo(18,13);
 			setTimeout(cb, 5000);
 		});
-	}
+	},
+	isLogBack : false,
+	isInitialSupply : false,
+},
+{
+	name : '登出飞碟回补',
+	func : (cb)=>{
+		if(cga.GetMapName() == '圣骑士营地'){
+			cga.walkList([
+				[95, 72, '医院'],
+				[9, 11],
+				[9, 12],
+				[9, 11],
+				[9, 12],
+				[9, 11],
+			], ()=>{
+				cga.TurnTo(11,11);
+				setTimeout(cb, 5000);
+			});
+			return;
+		}
+		
+		cga.travel.falan.toCastleHospital(()=>{
+			setTimeout(cb, 5000);
+		});
+	},
+	isLogBack : true,
+	isInitialSupply : true,
+},
+{
+	name : '登出，到曙光营地医院回补',
+	func : (cb)=>{
+		
+		if(cga.GetMapName() == '圣骑士营地'){
+			cga.walkList([
+				[95, 72, '医院'],
+				[9, 11],
+				[9, 12],
+				[9, 11],
+				[9, 12],
+				[9, 11],
+			], ()=>{
+				cga.TurnTo(11,11);
+				setTimeout(cb, 5000);
+			});
+			return;
+		}
+		
+		cga.travel.falan.toCamp(()=>{
+			cga.walkList([
+			[42, 56, '曙光营地医院'],
+			[11, 8]
+			], ()=>{
+				cga.TurnTo(11, 6);
+				setTimeout(()=>{
+					cga.walkList([
+					[1, 8, '曙光骑士团营地'],
+					], ()=>{
+						cga.travel.falan.toCamp(cb);
+					});
+				}, 5000);
+			})
+		}, true);
+	},
+	isLogBack : true,
+	isInitialSupply : true,
 }
 ]
 
@@ -42,9 +109,15 @@ var thisobj = {
 	func : (cb)=>{
 		thisobj.object.func(cb);
 	},
+	isLogBack : ()=>{
+		return thisobj.object.isLogBack;
+	},
+	isInitialSupply : ()=>{
+		return thisobj.object.isInitialSupply;
+	},
 	translate : (pair)=>{
 		if(pair.field == 'supplyMode'){
-			pair.field = '回补护士';
+			pair.field = '回补方式';
 			pair.value = supplyModeArray[pair.value].name;
 			pair.translated = true;
 			return true;
@@ -61,14 +134,14 @@ var thisobj = {
 		}
 		
 		if(!thisobj.object){
-			console.error('读取配置：回补护士失败！');
+			console.error('读取配置：回补方式失败！');
 			return false;			
 		}
 		
 		return true;
 	},
 	inputcb : (cb)=>{
-		var sayString = '【营地插件】请选择回补护士:';
+		var sayString = '【营地插件】请选择回补方式:';
 		for(var i in supplyModeArray){
 			if(i != 0)
 				sayString += ', ';

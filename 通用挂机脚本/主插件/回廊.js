@@ -4,6 +4,7 @@ var teamMode = require('./../公共模块/组队模式');
 
 var cga = global.cga;
 var configTable = global.configTable;
+var sellStoreArray = ['不卖石', '卖石'];
 
 var battle = (checkTeam)=>{
 	var playerinfo = cga.GetPlayerInfo();
@@ -54,7 +55,7 @@ var loop = ()=>{
 			
 			cga.freqMove(0, ()=>{
 				
-				if(!cga.isInBattle()) {
+				if(cga.isInNormalState()) {
 					if(!battle(true))
 						return false;
 				}
@@ -64,7 +65,7 @@ var loop = ()=>{
 			return;
 		}
 	} else {
-		if(!cga.isInBattle()) {
+		if(cga.isInNormalState()) {
 			if(!battle(true))
 				return;
 		}
@@ -118,9 +119,14 @@ module.exports = {
 		return 0;
 	},
 	translate : (pair)=>{
-		if(sellStore.translate(pair))
-			return true;
 		
+		if(pair.field == 'sellStore'){
+			pair.field = '是否卖石';
+			pair.value = pair.value == 1 ? '卖石' : '不卖石';
+			pair.translated = true;
+			return true;
+		}
+				
 		if(teamMode.translate(pair))
 			return true;
 		
@@ -128,16 +134,40 @@ module.exports = {
 	},
 	loadconfig : (obj)=>{
 
-		if(!sellStore.loadconfig(obj))
-			return false;
-		
 		if(!teamMode.loadconfig(obj))
 			return false;
+		
+		configTable.sellStore = obj.sellStore;
+		thisobj.sellStore = obj.sellStore
+		
+		if(!thisobj.sellStore){
+			console.error('读取配置：是否卖石失败！');
+			return false;
+		}
 		
 		return true;
 	},
 	inputcb : (cb)=>{
-		Async.series([sellStore.inputcb, teamMode.inputcb], cb);
+		Async.series([sellStore.inputcb, teamMode.inputcb, (cb2)=>{
+			var sayString = '【回廊插件】请选择是否卖石: 0不卖石 1卖石';
+			cga.sayLongWords(sayString, 0, 3, 1);
+			cga.waitForChatInput((msg)=>{
+				var val = parseInt(msg);
+				if(val >= 0 && val <= 1){
+					configTable.sellStore = val;
+					thisobj.sellStore = val;
+					
+					var sayString2 = '当前已选择:'+sellStoreArray[thisobj.sellStore]+'。';
+					cga.sayLongWords(sayString2, 0, 3, 1);
+					
+					cb2(null);
+					
+					return true;
+				}
+				
+				return false;
+			});
+		}], cb);
 	},
 	execute : loop,
 };

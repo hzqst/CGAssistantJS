@@ -646,7 +646,7 @@ module.exports = function(callback){
 		});	
 	}
 
-	cga.travel.falan.toCamp = (cb)=>{
+	cga.travel.falan.toCamp = (cb, noWarp)=>{
 		var warp = ()=>{
 			var teamplayers = cga.getTeamPlayers();
 			var isTeamLeader = teamplayers.length > 0 && teamplayers[0].is_me == true ? true : false;
@@ -663,35 +663,31 @@ module.exports = function(callback){
 			cga.AsyncWaitMovement({map:'圣骑士营地', delay:1000, timeout:5000}, cb);
 		}
 				
-		var stage2 = (r, err)=>{
+		var castle_2_camp = (r, err)=>{
 			if(!r)
 				throw new Error(err);
 			
-			if(cga.getItemCount('承认之戒') > 0){
-				var list = [
-				[153, 241, '芙蕾雅'],
-				[513,282, '曙光骑士团营地'],
-				[55,47, '辛希亚探索指挥部'],
-				[7,4, '辛希亚探索指挥部', 91, 6],
-				[95, 9, 27101],
-				[8, 21],
-				];
-				
-				if(cga.GetMapName() == '里谢里雅堡')
-					list.unshift([41, 98, '法兰城']);
-				
-				cga.walkList(list, warp);
-			} else {
-				
-				var list = [
-				[153, 241, '芙蕾雅'],
-				];
-				
-				if(cga.GetMapName() == '里谢里雅堡')
-					list.unshift([41, 98, '法兰城']);
-				
-				cga.walkList(list, cb);
+			var list = (cga.getItemCount('承认之戒') > 0 && noWarp !== true) ? [
+			[55,47, '辛希亚探索指挥部'],
+			[7,4, '辛希亚探索指挥部', 91, 6],
+			[95, 9, 27101],
+			[8, 21],
+			] : [
+			
+			];
+			
+			if(cga.GetMapName() == '里谢里雅堡'){
+				list.unshift([513, 282, '曙光骑士团营地']);
+				list.unshift([153, 241, '芙蕾雅']);
+				list.unshift([41, 98, '法兰城']);
+			} else if(cga.GetMapName() == '法兰城'){
+				list.unshift([513, 282, '曙光骑士团营地']);
+				list.unshift([153, 241, '芙蕾雅']);
+			} else if(cga.GetMapName() == '芙蕾雅'){
+				list.unshift([513, 282, '曙光骑士团营地']);
 			}
+			
+			cga.walkList(list, warp);
 		}
 		
 		var mapname = cga.GetMapName();
@@ -699,10 +695,10 @@ module.exports = function(callback){
 			cb(true);
 		}else if(mapname == '辛希亚探索指挥部' && cga.GetMapIndex().index3 == 27101){
 			cga.walkList([[8, 21]], warp);
-		}else if(mapname == '法兰城' || mapname == '里谢里雅堡'){
-			stage2(true);
+		}else if(mapname == '法兰城' || mapname == '里谢里雅堡' || mapname == '芙蕾雅' || mapname == '曙光骑士团营地'){
+			castle_2_camp(true);
 		}else{
-			cga.travel.falan.toStone('C', stage2);
+			cga.travel.falan.toStone('C', castle_2_camp);
 		}
 	}
 

@@ -15,7 +15,9 @@ var supplyModeArray = [
 			cga.TurnTo(37, 43);
 			setTimeout(cb, 5000);
 		});
-	}
+	},
+	isLogBack : false,
+	isInitialSupply : false,
 },
 {
 	name : '艾夏岛医院,普通护士回补',
@@ -33,7 +35,9 @@ var supplyModeArray = [
 			cga.TurnTo(37, 46);
 			setTimeout(cb, 5000);
 		});
-	}
+	},
+	isLogBack : false,
+	isInitialSupply : false,
 },
 {
 	name : '登出飞碟回补',
@@ -41,8 +45,10 @@ var supplyModeArray = [
 		cga.travel.falan.toCastleHospital(()=>{
 			setTimeout(cb, 5000);
 		});
-	}
-}
+	},
+	isLogBack : true,
+	isInitialSupply : true,
+},
 ]
 
 var cga = global.cga;
@@ -51,6 +57,12 @@ var configTable = global.configTable;
 var thisobj = {
 	func : (cb)=>{
 		thisobj.object.func(cb);
+	},
+	isLogBack : ()=>{
+		return thisobj.object.isLogBack;
+	},
+	isInitialSupply : ()=>{
+		return thisobj.object.isInitialSupply;
 	},
 	translate : (pair)=>{
 		if(pair.field == 'supplyMode'){

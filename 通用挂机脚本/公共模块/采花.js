@@ -114,39 +114,15 @@ var mineArray = [
 		}
 	},
 	{
-		level : 9,
-		name : '丝柏',
-		func : (cb)=>{
-			cga.travel.falan.toABNSCun(function(r){
-				if(!r){
-					cb(r);
-					return;
-				}
-				cga.walkList([
-					[5, 4, '村长的家'],
-					[6, 13, 4312],
-					[6, 13, '阿巴尼斯村'],
-					[37, 71, '莎莲娜'],
-					[105, 158],
-				], cb);
-			});
-		}
-	},
-	{
 		level : 10,
-		name : '梣',
+		name : '七叶树',
 		func : (cb)=>{
-			cga.travel.falan.toABNSCun(function(r){
-				if(!r){
-					cb(r);
-					return;
-				}
+			cga.travel.falan.toJieNuoWa((r)=>{
 				cga.walkList([
-					[5, 4, '村长的家'],
-					[6, 13, 4312],
-					[6, 13, '阿巴尼斯村'],
-					[37, 71, '莎莲娜'],
-					[231, 147],
+					[14, 6, '村长的家'],
+					[1, 9, '杰诺瓦镇'],
+					[71, 18, '莎莲娜'],
+					[329, 455],
 				], cb);
 			});
 		}

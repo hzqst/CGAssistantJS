@@ -146,6 +146,26 @@ var mineArray = [
 			});
 		}
 	},
+	{
+		level : 8,
+		name : '魔法红萝卜',
+		func : (cb)=>{
+			cga.travel.falan.toABNSCun(function(r){
+				if(!r){
+					cb(r);
+					return;
+				}
+				cga.walkList([
+					[5, 4, '村长的家'],
+					[6, 13, 4312],
+					[6, 13, '阿巴尼斯村'],
+					[37, 71, '莎莲娜'],
+					[117, 100, '魔法大学'],
+					[32, 167],
+				], cb);
+			});
+		}
+	},
 ];
 
 var cga = global.cga;
