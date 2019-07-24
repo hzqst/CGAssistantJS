@@ -210,9 +210,6 @@ var thisobj = {
 	check_done : ()=>{
 		return cga.getInventoryItems().length >= 20
 	},
-	check_drop : ()=>{
-
-	},
 	translate : (pair)=>{
 		if(pair.field == 'mineObject'){
 			pair.field = '要挖的矿';

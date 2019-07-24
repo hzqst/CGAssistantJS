@@ -28,6 +28,27 @@ var gatherArray = [
 },
 ]
 
+var check_drop : ()=>{
+	var dropItemPos = -1;
+	var pattern = /(.+)的卡片/;
+	cga.getInventoryItems().forEach((item)=>{
+		if(dropItemPos != -1)
+			return;
+		if(item.name == '魔石' || item.name == '卡片？' || pattern.exec(item.name) ){
+			dropItemPos = item.pos;
+			return;
+		}
+		if(mineObject.object &&	mineObject.object.extra_dropping && mineObject.object.extra_dropping(item))
+		{
+			dropItemPos = item.pos;
+			return;
+		}
+	});
+	
+	if(dropItemPos != -1)
+		cga.DropItem(dropItemPos);
+}
+
 var loop = ()=>{
 		
 	var skill = cga.findPlayerSkill(gatherObject.skill);
@@ -81,7 +102,7 @@ var loop = ()=>{
 				return;
 			}
 			
-			mineObject.check_drop();
+			check_drop();
 			
 			waitwait(cb);
 		}, 10000);

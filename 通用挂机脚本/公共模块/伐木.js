@@ -181,21 +181,6 @@ var thisobj = {
 	check_done : ()=>{
 		return cga.getInventoryItems().length >= 20
 	},
-	check_drop : ()=>{
-		var dropItemPos = -1;
-		var pattern = /(.+)的卡片/;
-		cga.getInventoryItems().forEach((item)=>{
-			if(dropItemPos != -1)
-				return;
-			if(item.name == '魔石' || item.name == '卡片？' || pattern.exec(item.name) ){
-				dropItemPos = item.pos;
-				return;
-			}
-		});
-		
-		if(dropItemPos != -1)
-			cga.DropItem(dropItemPos);
-	},
 	translate : (pair)=>{
 		if(pair.field == 'mineObject'){
 			pair.field = '要伐的木';
