@@ -11,6 +11,7 @@ var waitArray = [
 			cga.SayWords('卖石完毕...', 0, 3, 1);
 			setTimeout(cga.waitForMultipleLocation, 5000, waitArray);
 		});
+		return true;
 	}
 },
 {
@@ -22,6 +23,7 @@ var waitArray = [
 			cga.SayWords('卖石完毕...', 0, 3, 1);
 			setTimeout(cga.waitForMultipleLocation, 5000, waitArray);
 		});
+		return true;
 	}
 },
 {
@@ -33,6 +35,7 @@ var waitArray = [
 			cga.SayWords('卖石完毕...', 0, 3, 1);
 			setTimeout(cga.waitForMultipleLocation, 5000, waitArray);
 		});
+		return true;
 	}
 }
 ];

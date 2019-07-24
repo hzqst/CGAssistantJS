@@ -109,7 +109,7 @@ var loop = ()=>{
 	});
 }
 
-module.exports = {
+var thisobj = {
 	getDangerLevel : ()=>{
 		var map = cga.GetMapName();
 		
@@ -171,3 +171,5 @@ module.exports = {
 	},
 	execute : loop,
 };
+
+module.exports = thisobj;

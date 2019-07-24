@@ -16,6 +16,7 @@ module.exports = {
 	battle : (ctx)=>{
 		if(callsupply)
 		{
+			callsupply = false;
 			ctx.result = 'supply';
 			ctx.reason = '监听回补';
 		}

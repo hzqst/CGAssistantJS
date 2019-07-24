@@ -44,6 +44,9 @@ var loop = ()=>{
 						ctx.result = 'logback';
 					
 					if( ctx.result == 'supply' ){
+						
+						console.log(ctx);
+						
 						supplyMode.func(loop);
 						return false;
 					}
@@ -117,7 +120,7 @@ var loop = ()=>{
 	});
 }
 
-module.exports = {
+var thisobj = {
 	getDangerLevel : ()=>{
 		var map = cga.GetMapName();
 		
@@ -185,3 +188,5 @@ module.exports = {
 	},
 	execute : loop,
 };
+
+module.exports = thisobj;

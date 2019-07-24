@@ -60,6 +60,7 @@ var waitArray = [
 		}
 
 		setTimeout(cga.waitForMultipleLocation, 5000, waitArray);
+		return true;
 	}
 }
 ];
