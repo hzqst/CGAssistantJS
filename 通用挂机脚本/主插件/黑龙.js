@@ -50,7 +50,7 @@ var walkMazeBack = (cb)=>{
 			return layerIndex > 1 ? ('黑龙沼泽'+(layerIndex - 1)+'区') : '肯吉罗岛';
 		},
 		entryTileFilter : (e)=>{
-			return e.colraw == 0x2EE0 || e.colraw == 0;
+			return (cga.GetMapName() == '黑龙沼泽1区') ? (e.colraw == 0) : (e.colraw == 0x2EE0);
 		}
 	});
 }

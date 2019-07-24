@@ -49,7 +49,7 @@ var walkMazeBack = (cb)=>{
 			return layerIndex > 1 ? ('蜥蜴洞穴上层第'+(layerIndex - 1)+'层') : '蜥蜴洞穴';
 		},
 		entryTileFilter : (e)=>{
-			return e.colraw == 0x2EE0 || e.colraw == 0;
+			return (cga.GetMapName() == '蜥蜴洞穴上层第1层') ? (e.colraw == 0) : (e.colraw == 0x2EE0);
 		}
 	});
 }

@@ -9,7 +9,7 @@ var thisobj = {
 			], ()=>{
 				cga.TurnTo(30, 77);
 				cga.sellStone(()=>{
-					setTimeout(cb, 1000, true);
+					setTimeout(cb, cga.getTeamPlayers().length ? 5000 : 3000, true);
 				});
 			});
 		}
