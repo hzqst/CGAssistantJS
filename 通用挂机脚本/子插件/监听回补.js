@@ -7,6 +7,9 @@ module.exports = {
 		cga.waitTeammateSay((player, msg)=>{
 
 			if(msg.indexOf('需要回补') >= 0 && global.getMainPlugin().getDangerLevel() >= 1){
+				
+				console.log('aa');
+				
 				callsupply = true;
 			}
 			

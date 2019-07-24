@@ -36,8 +36,8 @@ var battle = ()=>{
 
 	global.callSubPlugins('battle', ctx);
 
-	if(ctx.result == 'supply' && supplyMode.isLogBack())
-		ctx.result = 'logback';
+	//if(ctx.result == 'supply' && supplyMode.isLogBack())
+	//	ctx.result = 'logback';
 
 	if( ctx.result == 'supply' ){
 
@@ -148,11 +148,8 @@ var thisobj = {
 	getDangerLevel : ()=>{
 		var map = cga.GetMapName();
 
-		if(map == '盖雷布伦森林' )
+		if(map == '方堡盆地' )
 			return 1;
-
-		if(map == '布拉基姆高地' )
-			return 2;
 		
 		return 0;
 	},
@@ -199,7 +196,7 @@ var thisobj = {
 	inputcb : (cb)=>{
 		Async.series([supplyMode.inputcb, teamMode.inputcb, (cb2)=>{
 			
-			var sayString = '【高地插件】请选择练级地点:';
+			var sayString = '【盆地插件】请选择练级地点:';
 			for(var i in battleAreaArray){
 				if(i != 0)
 					sayString += ', ';
