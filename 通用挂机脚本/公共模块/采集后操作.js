@@ -63,6 +63,12 @@ var doneArray = [
 									itemid : item.itemid,
 									count : (item.count < 1) ? 1 : item.count,
 								});
+							} else if(mineObject && mineObject.extra_selling && mineObject.extra_selling(item)){
+								sellArray.push({
+									itempos : item.pos,
+									itemid : item.itemid,
+									count : item.count / 20,
+								});
 							}
 						})
 

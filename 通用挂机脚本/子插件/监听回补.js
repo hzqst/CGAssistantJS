@@ -8,8 +8,6 @@ module.exports = {
 
 			if(msg.indexOf('需要回补') >= 0 && global.getMainPlugin().getDangerLevel() >= 1){
 				
-				console.log('aa');
-				
 				callsupply = true;
 			}
 			

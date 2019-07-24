@@ -33,6 +33,9 @@ var mineArray = [
 					[361, 182],
 				], cb);
 			});
+		},
+		extra_selling : (item)=>{
+			return item.name == '印度轻木';
 		}
 	},
 	{

@@ -37,12 +37,12 @@ var loop = ()=>{
 		throw new Error(errmsg);
 		return;
 	}
-	/*if(mineObject.object && skill.lv < mineObject.object.level){
+	if(mineObject.object && skill.lv < mineObject.object.level){
 		var errmsg = gatherObject.skill+'技能等级不够，挖'+mineObject.object.name+'需要'+mineObject.object.level+'级，而你只有'+skill.lv+'级';
 		cga.SayWords(errmsg , 0, 3, 1);
 		throw new Error(errmsg);
 		return;
-	}*/
+	}
 	
 	var playerInfo = cga.GetPlayerInfo();
 	if(playerInfo.mp < playerInfo.maxmp)
