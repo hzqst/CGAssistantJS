@@ -153,9 +153,10 @@ var loop = ()=>{
 				ctx.result = 'logback';
 			
 			if( ctx.result == 'supply' ){
-				
+				cga.SayWords(ctx.reason, 0, 3, 1);
 			}
 			else if( ctx.result == 'logback' ){
+				cga.SayWords(ctx.reason, 0, 3, 1);
 				cga.LogBack();
 				setTimeout(loop, 1500);
 				return;

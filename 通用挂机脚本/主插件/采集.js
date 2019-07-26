@@ -1,4 +1,6 @@
 var Async = require('async');
+var cga = global.cga;
+var configTable = global.configTable;
 
 var gatherObject = null;
 var mineObject = null;
