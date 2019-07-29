@@ -8,7 +8,7 @@ require('../wrapper').then(cga => {
 			cga.emogua.dropItems([i.pos]);
 		}
 	});
-	let timer = Date().now();
+	let timer = Date.now();
 	cga.emogua.logBack().then(
 		() => cga.emogua.prepare({rechargeFlag: 2})
 	).then(
@@ -23,7 +23,7 @@ require('../wrapper').then(cga => {
 	).then(
 		() => cga.emogua.talkNpc(1, cga.emogua.talkNpcSelectorYes)
 	).then(
-		() => timer = Date().now()
+		() => timer = Date.now()
 	).then(cga.emogua.logBack).then(
 		() => cga.emogua.falan.toStone('E1')
 	).then(
@@ -58,7 +58,7 @@ require('../wrapper').then(cga => {
 	).then(
 		() => cga.emogua.talkNpc(6, cga.emogua.talkNpcSelectorYes)
 	).then(
-		() => timer = Date().now()
+		() => timer = Date.now()
 	).then(
 		() => cga.emogua.autoWalkList([
 			[6,13,'亚留特村'],
@@ -105,7 +105,7 @@ require('../wrapper').then(cga => {
 		])
 	).then(
 		() => cga.emogua.waitUntil(() => {
-			return (Date().now() - timer) >= 3603000
+			return (Date.now() - timer) >= 3603000
 		}, 3000)
 	).then(
 		() => cga.emogua.talkNpc(6, cga.emogua.talkNpcSelectorYes)
