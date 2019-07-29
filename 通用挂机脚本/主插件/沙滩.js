@@ -1,5 +1,6 @@
 var supplyMode = require('./../公共模块/营地回补');
 var sellStore = require('./../公共模块/营地卖石');
+var sellStore2 = require('./../公共模块/里堡卖石');
 var teamMode = require('./../公共模块/组队模式');
 var Async = require('async');
 

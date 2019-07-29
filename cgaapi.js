@@ -78,6 +78,14 @@ module.exports = function(callback){
 		return (cga.GetWorldStatus() == 9 && cga.GetGameStatus() == 3) ? true : false;
 	}
 	
+	cga.FileNameEscape = (str)=>{
+		return str.replace(/[\\/:\*\?"<>|]/g, (c)=>{return {'\\':'%5C','/':'%2F',':':'%3A','*':'%2A','?':'%3F','"':'%22','<':'%3C','>':'%3E','|':'%7C'}[c];});
+	}
+
+	cga.FileNameUnescape = (str)=>{
+		return str.replace(/%(5C|2F|3A|2A|3F|22|3C|3E|7C)/g, (c)=>{ return {'%5C':'\\','%2F':'/','%3A':':','%2A':'*','%3F':'?','%22':'"','%3C':'<','%3E':'>','%7C':'|'}[c];});
+	}
+	
 	//deprecated
 	cga.keepStartWork = function(skill_index, subskill_index){
 		var started = cga.StartWork(skill_index, subskill_index);

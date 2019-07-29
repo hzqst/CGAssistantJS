@@ -5,9 +5,9 @@ var Async = require('async');
 var cga = require('./cgaapi')(function(){
 	
 	global.cga = cga;
-	
+		
 	var configPath = __dirname+'/脚本设置';
-	var configName = configPath+'/通用挂机脚本_'+cga.GetPlayerInfo().name+'.json';
+	var configName = configPath+'/通用挂机脚本_'+cga.FileNameEscape(cga.GetPlayerInfo().name)+'.json';
 	
 	var pluginPath = __dirname+'/通用挂机脚本/主插件';
 	var pluginEnumList = fs.readdirSync(pluginPath);
@@ -290,13 +290,17 @@ var cga = require('./cgaapi')(function(){
 					cb(null);
 			},
 			(cb)=>{
-				Async.everySeries(subPlugins, (sub, cb2)=>{
-					if(typeof sub.inputcb == 'function')
-						sub.inputcb(cb2);
-					else
-						cb2(null);
-				}, cb);
-			},
+				if(subPlugins.length > 0){
+					Async.everySeries(subPlugins, (sub, cb2)=>{
+						if(typeof sub.inputcb == 'function')
+							sub.inputcb(cb2);
+						else
+							cb2(null);
+					}, cb);
+				} else {
+					cb(null);
+				}
+			},			
 			(cb)=>{
 				saveConfig(cb)
 			}
