@@ -3,7 +3,7 @@ const captain = '';  // 队长名字
 const teamNumber = 5;  // 队伍人数
 require('../wrapper').then(cga => {
 	console.log('雪山开传送');
-	cga.emogua.autoBattle(cga.emogua.AutoBattlePreset.getCommonAttack());
+	cga.emogua.autoBattle(cga.emogua.AutoBattlePreset.getAttackSets());
 	cga.emogua.waitMessageUntil(chat => {
 		if (chat.msg && chat.msg.indexOf('开传送') >= 0) {
 			const npc = cga.GetMapUnits().find(u => u.unit_name.indexOf('传送石管理') >= 0);
