@@ -49,6 +49,8 @@ require('../wrapper').then(cga => {
 							[473,316]
 						])
 					).then(
+						() => cga.emogua.leaveTeam()
+					).then(
 						() => cga.emogua.talkNpc(472, 316, cga.emogua.talkNpcSelectorYes, '维诺亚洞穴 地下1楼')
 					);
 				} else if (cga.GetMapName() == '维诺亚洞穴 地下1楼') {
@@ -93,8 +95,8 @@ require('../wrapper').then(cga => {
 					).then(
 						() => cga.emogua.autoWalkList([
 							[3, 9, '奇利村'],
-							[50, 63, '村长的家'],
-							[10, 15, '村长的家'],
+							[50, 63, '*'],
+							[10, 15, '*'],
 							[5, 3, '奇利村的传送点'],
 							[13, 9]
 						])
@@ -108,8 +110,8 @@ require('../wrapper').then(cga => {
 						() => cga.emogua.delay(15000)
 					).then(
 						() => cga.emogua.autoWalkList([
-							[7, 6, '村长的家'],
-							[7, 1, '村长的家'],
+							[7, 6, '*'],
+							[7, 1, '*'],
 							[1, 8, '奇利村'],
 							[79, 76, '索奇亚'],
 							[356, 334, '角笛大风穴'],
