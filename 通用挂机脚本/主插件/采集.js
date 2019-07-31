@@ -30,7 +30,7 @@ var gatherArray = [
 },
 ]
 
-var check_drop : ()=>{
+var check_drop = ()=>{
 	var dropItemPos = -1;
 	var pattern = /(.+)的卡片/;
 	cga.getInventoryItems().forEach((item)=>{
