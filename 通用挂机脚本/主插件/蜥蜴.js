@@ -3,6 +3,7 @@ var supplyMode = require('./../公共模块/营地回补');
 var sellStore = require('./../公共模块/营地卖石');
 var sellStore2 = require('./../公共模块/里堡卖石');
 var teamMode = require('./../公共模块/组队模式');
+var logbackEx = require('./../公共模块/登出防卡住');
 
 var cga = global.cga;
 var configTable = global.configTable;
@@ -137,8 +138,9 @@ var loop = ()=>{
 						return false;
 					}
 					else if( ctx.result == 'logback' ){
-						cga.LogBack();
-						setTimeout(loop, 1500);
+
+						logbackEx.func(loop);
+						
 						return false;
 					}
 					
@@ -166,12 +168,10 @@ var loop = ()=>{
 				ctx.result = 'logback';
 			
 			if( ctx.result == 'supply' ){
-				
+				//队员不会对回补有反应
 			}
 			else if( ctx.result == 'logback' ){
-				cga.LogBack();
-				setTimeout(loop, 1500);
-				return;
+				//队员不会对回补有反应
 			}
 		}
 		setTimeout(loop, 1500);

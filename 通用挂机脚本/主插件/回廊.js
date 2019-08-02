@@ -1,12 +1,13 @@
 var Async = require('async');
 var sellStore = require('./../公共模块/里堡卖石');
 var teamMode = require('./../公共模块/组队模式');
+var logbackEx = require('./../公共模块/登出防卡住');
 
 var cga = global.cga;
 var configTable = global.configTable;
 var sellStoreArray = ['不卖石', '卖石'];
 
-var battle = (checkTeam)=>{
+var battleWrapper = (checkTeam, isLeader)=>{
 	var playerinfo = cga.GetPlayerInfo();
 	var ctx = {
 		playerinfo : playerinfo,
@@ -20,13 +21,15 @@ var battle = (checkTeam)=>{
 
 	global.callSubPlugins('battle', ctx);
 
-	if( ctx.result == 'supply' || ctx.result == 'logback' ){
+	if(isLeader){
 		
-		cga.LogBack();
-		setTimeout(loop, 1500);
-		return false;
+		if( ctx.result == 'supply' || ctx.result == 'logback' ){
+			
+			logbackEx.func(loop);
+			
+			return false;
+		}
 	}
-	
 	return true;
 }
 
@@ -44,7 +47,7 @@ var loop = ()=>{
 				}
 				else
 				{
-					if(!battle(false))
+					if(!battleWrapper(false, true))
 						return;
 					
 					cga.WalkTo(10, 20);
@@ -56,7 +59,7 @@ var loop = ()=>{
 			cga.freqMove(0, ()=>{
 				
 				if(cga.isInNormalState()) {
-					if(!battle(true))
+					if(!battleWrapper(true, true))
 						return false;
 				}
 				
@@ -66,7 +69,7 @@ var loop = ()=>{
 		}
 	} else {
 		if(cga.isInNormalState()) {
-			if(!battle(true))
+			if(!battleWrapper(true, false))
 				return;
 		}
 		

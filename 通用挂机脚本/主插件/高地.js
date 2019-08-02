@@ -1,6 +1,7 @@
 var Async = require('async');
 var supplyMode = require('./../公共模块/高地回补');
 var teamMode = require('./../公共模块/组队模式');
+var logbackEx = require('./../公共模块/登出防卡住');
 
 var battleAreaArray = [
 {
@@ -23,7 +24,7 @@ var battleAreaArray = [
 var cga = global.cga;
 var configTable = global.configTable;
 
-var battle = ()=>{
+var battleWrapper = (isLeader)=>{
 	var playerinfo = cga.GetPlayerInfo();
 	var ctx = {
 		playerinfo : playerinfo,
@@ -39,16 +40,20 @@ var battle = ()=>{
 	if(ctx.result == 'supply' && supplyMode.isLogBack())
 		ctx.result = 'logback';
 
-	if( ctx.result == 'supply' ){
+	if(isLeader)
+	{
+		if( ctx.result == 'supply' ){
 
-		supplyMode.func(loop);
-		
-		return false;
-	}
-	else if( ctx.result == 'logback' ){
-		cga.LogBack();
-		setTimeout(loop, 1500);
-		return false;
+			supplyMode.func(loop);
+			
+			return false;
+		}
+		else if( ctx.result == 'logback' ){
+			
+			logbackEx.func(loop);
+			
+			return false;
+		}
 	}
 	
 	return true;
@@ -73,7 +78,7 @@ var loop = ()=>{
 			cga.freqMove(thisobj.battleArea.dir, ()=>{
 				
 				if(cga.isInNormalState()) {
-					if(!battle())
+					if(!battleWrapper(true))
 						return false;
 				}
 				
@@ -93,7 +98,7 @@ var loop = ()=>{
 		}
 	} else {
 		if(cga.isInNormalState()) {
-			if(!battle())
+			if(!battleWrapper(false))
 				return;
 		}
 		
