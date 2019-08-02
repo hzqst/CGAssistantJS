@@ -40,6 +40,8 @@ module.exports = function(callback){
 	cga.REQUEST_TYPE_LEAVETEAM = 12;
 	cga.REQUEST_TYPE_TRADE_CONFIRM = 13;
 	cga.REQUEST_TYPE_TRADE_REFUSE = 14;
+	cga.REQUEST_TYPE_REBIRTH_ON = 16;
+	cga.REQUEST_TYPE_REBIRTH_OFF = 17;
 	
 	cga.ENABLE_FLAG_PK = 0;
 	cga.ENABLE_FLAG_TEAMCHAT = 1;
@@ -800,8 +802,8 @@ module.exports = function(callback){
 		}
 		if(mine == '幻之钢'){
 			mineExchange = (cb2)=>{
-				cga.walkList([[26, 11]], function(r){
-					cga.TurnTo(30, 7);
+				cga.walkList([[26, 10]], function(r){
+					cga.TurnTo(28, 10);
 					cb2(true);
 				});
 			}
