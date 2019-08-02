@@ -60,7 +60,14 @@ var loop = ()=>{
 	
 	if(cga.isTeamLeader == true || !cga.getTeamPlayers().length){
 		if(map == '医院' && mapindex == 44692){
-			sellStore.func(loop);
+			if(thisobj.sellStore == 1){
+				sellStore.func(loop);
+			} else {
+				cga.walkList([
+					[9, 20],
+					[0, 20, '圣骑士营地'],
+				], loop);
+			}
 			return;
 		} 
 		if(map == '工房'){
