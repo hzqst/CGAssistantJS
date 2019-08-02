@@ -8,7 +8,7 @@ var thisobj = {
 			{
 				cga.LogBack();
 				
-				setTimeout(loop, 1500);
+				setTimeout(cb, 1500);
 				return true;
 			}
 
