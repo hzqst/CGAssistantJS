@@ -133,7 +133,7 @@ var mineArray = [
 },
 {
 	level : 7,
-	name : '幻之钢条',
+	name : '幻之钢',
 	func : (cb)=>{
 		cga.travel.falan.toJieNuoWa((r)=>{
 			cga.walkList([
@@ -149,7 +149,7 @@ var mineArray = [
 },
 {
 	level : 8,
-	name : '幻之银条',
+	name : '幻之银',
 	func : (cb)=>{
 		cga.travel.falan.toJieNuoWa((r)=>{
 			cga.walkList([
@@ -165,7 +165,7 @@ var mineArray = [
 },
 {
 	level : 9,
-	name : '勒格耐席鉧条',
+	name : '勒格耐席鉧',
 	func : (cb)=>{
 		cga.travel.falan.toABNSCun((r)=>{
 			cga.walkList([
