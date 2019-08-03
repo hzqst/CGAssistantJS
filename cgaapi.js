@@ -3012,7 +3012,7 @@ module.exports = function(callback){
 			
 			var regex = mapname.match(/([^\d]*)(\d+)([^\d]*)/);
 			var layerIndex = 0;
-			console.log(regex);
+
 			if(regex && regex.length >= 3){
 				layerIndex = parseInt(regex[2]);
 			}
