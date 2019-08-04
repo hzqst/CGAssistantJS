@@ -816,7 +816,7 @@ module.exports = function(callback){
 				});
 			}
 		}
-		if(mine == '勒格耐席姆'){
+		if(mine == '勒格耐席鉧'){
 			mineExchange = (cb2)=>{
 				cga.walkList([[23, 7]], function(r){
 					cga.TurnTo(22, 6);

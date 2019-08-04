@@ -3,6 +3,7 @@ var configTable = global.configTable;
 
 var thisobj = {
 	func : (cb)=>{
+		console.log('logout');
 		cga.waitForChatInput((msg)=>{
 			if(msg == '登出防卡住' && cga.isInNormalState())
 			{
