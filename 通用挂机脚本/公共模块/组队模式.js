@@ -215,9 +215,8 @@ var thisobj = {
 			var sayString = '【公共插件】请选择队伍最小人数 (1~5):';
 
 			cga.sayLongWords(sayString, 0, 3, 1);
-			cga.waitForChatInput((msg)=>{
-				var index = parseInt(msg);
-				if(index >= 1 && index <= 5){
+			cga.waitForChatInput((msg, index)=>{
+				if(index !== null && index >= 1 && index <= 5){
 					configTable.minTeamMemberCount = index;
 					thisobj.minTeamMemberCount = index;
 					
@@ -239,9 +238,8 @@ var thisobj = {
 			sayString += '('+ (parseInt(i)+1) + ')' + teamModeArray[i].name;
 		}
 		cga.sayLongWords(sayString, 0, 3, 1);
-		cga.waitForChatInput((msg)=>{
-			var index = parseInt(msg);
-			if(index >= 1 && teamModeArray[index - 1]){
+		cga.waitForChatInput((msg, index)=>{
+			if(index !== null && index >= 1 && teamModeArray[index - 1]){
 				configTable.teamMode = index - 1;
 				thisobj.object = teamModeArray[index - 1];
 				

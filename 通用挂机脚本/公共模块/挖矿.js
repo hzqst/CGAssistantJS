@@ -243,9 +243,8 @@ var thisobj = {
 			sayString += '('+ (parseInt(i)+1) + ')' + mineArray[i].name;
 		}
 		cga.sayLongWords(sayString, 0, 3, 1);
-		cga.waitForChatInput((msg)=>{
-			var index = parseInt(msg);
-			if(index >= 1 && mineArray[index - 1]){
+		cga.waitForChatInput((msg, val)=>{
+			if(index !== null && index >= 1 && mineArray[index - 1]){
 				configTable.mineObject = index - 1;
 				thisobj.object = mineArray[index - 1];
 				

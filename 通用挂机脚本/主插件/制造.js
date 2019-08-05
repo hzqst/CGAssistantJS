@@ -119,10 +119,8 @@ var thisobj = {
 				sayString += '('+ (parseInt(i)+1) + ')' + craftSkillList[i].name;
 			}
 			cga.sayLongWords(sayString, 0, 3, 1);
-			cga.waitForChatInput((msg)=>{
-				var pattern=/^[1-9]\d*$|^0$/;
-				var index = parseInt(msg);
-				if(pattern.test(msg) && index >= 1 && craftSkillList[index - 1]){
+			cga.waitForChatInput((msg, index)=>{
+				if(index !== null && index >= 1 && craftSkillList[index - 1]){
 					configTable.craftType = craftSkillList[index - 1].name;
 					thisobj.craftSkill = craftSkillList[index - 1];
 					thisobj.craftItemList = cga.GetCraftsInfo(thisobj.craftSkill.index);
@@ -145,10 +143,8 @@ var thisobj = {
 				sayString += '('+ (parseInt(i)+1) + ')' + thisobj.craftItemList[i].name;
 			}
 			cga.sayLongWords(sayString, 0, 3, 1);
-			cga.waitForChatInput((msg)=>{
-				var pattern=/^[1-9]\d*$|^0$/;
-				var index = parseInt(msg);
-				if(pattern.test(msg) && index >= 1 && thisobj.craftItemList[index - 1]){
+			cga.waitForChatInput((msg, index)=>{
+				if(index !== null && index >= 1 && thisobj.craftItemList[index - 1]){
 					configTable.craftItem = thisobj.craftItemList[index - 1].name;
 					thisobj.craftItem = thisobj.craftItemList[index - 1];
 					

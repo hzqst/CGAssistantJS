@@ -174,9 +174,8 @@ var thisobj = {
 		Async.series([supplyMode.inputcb, teamMode.inputcb, (cb2)=>{
 			var sayString = '【沙滩插件】请选择是否卖石: 0不卖石 1卖石';
 			cga.sayLongWords(sayString, 0, 3, 1);
-			cga.waitForChatInput((msg)=>{
-				var val = parseInt(msg);
-				if(val >= 0 && val <= 1){
+			cga.waitForChatInput((msg, val)=>{
+				if(val !== null && val >= 0 && val <= 1){
 					configTable.sellStore = val;
 					thisobj.sellStore = val;
 					

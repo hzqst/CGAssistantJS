@@ -57,9 +57,8 @@ var thisobj = {
 			sayString += '('+ (parseInt(i)+1) + ')' + supplyModeArray[i].name;
 		}
 		cga.sayLongWords(sayString, 0, 3, 1);
-		cga.waitForChatInput((msg)=>{
-			var index = parseInt(msg);
-			if(index >= 1 && supplyModeArray[index - 1]){
+		cga.waitForChatInput((msg, index)=>{
+			if(index !== null && index >= 1 && supplyModeArray[index - 1]){
 				configTable.supplyMode = index - 1;
 				thisobj.object = supplyModeArray[index - 1];
 				

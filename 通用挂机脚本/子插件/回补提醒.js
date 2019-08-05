@@ -77,9 +77,8 @@ var thisobj = {
 		var ask = (cb2, name, varName)=>{
 			var sayString = '【回补提醒插件】请选择'+name+'小于百分之几回补(0~100):';
 			cga.sayLongWords(sayString, 0, 3, 1);
-			cga.waitForChatInput((msg)=>{
-				var val = parseInt(msg);
-				if(val >= 0 && val <= 100){
+			cga.waitForChatInput((msg, val)=>{
+				if(val !== null && val >= 0 && val <= 100){
 					configTable[varName] = val;
 					thisobj[varName] = val;
 					

@@ -56,9 +56,8 @@ var thisobj = {
 	inputcb : (cb)=>{
 		var sayString = '【采集插件】请选择采集数量(组):';
 		cga.sayLongWords(sayString, 0, 3, 1);
-		cga.waitForChatInput((msg)=>{
-			var val = parseInt(msg);
-			if(val >= 1 && val <= 20){
+		cga.waitForChatInput((msg, val)=>{
+			if(val !== null && val >= 1 && val <= 20){
 				configTable.gatherCount = val;
 				thisobj.gatherCount = val;
 				thisobj.object.gatherCount = val;

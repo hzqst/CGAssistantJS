@@ -259,9 +259,8 @@ var thisobj = {
 		Async.series([supplyMode.inputcb, teamMode.inputcb, (cb2)=>{
 			var sayString = '【黑龙插件】请选择是否卖石: 0不卖石 1卖石';
 			cga.sayLongWords(sayString, 0, 3, 1);
-			cga.waitForChatInput((msg)=>{
-				var val = parseInt(msg);
-				if(val >= 0 && val <= 1){
+			cga.waitForChatInput((msg, val)=>{
+				if(val !== null && val >= 0 && val <= 1){
 					configTable.sellStore = val;
 					thisobj.sellStore = val;
 					
@@ -278,9 +277,8 @@ var thisobj = {
 		}, (cb2)=>{
 			var sayString = '【黑龙插件】请选择黑龙练级层数(1~100), 100代表龙顶:';
 			cga.sayLongWords(sayString, 0, 3, 1);
-			cga.waitForChatInput((msg)=>{
-				var val = parseInt(msg);
-				if(val >= 1 && val <= 100){
+			cga.waitForChatInput((msg, val)=>{
+				if(val !== null && val >= 1 && val <= 100){
 					configTable.layerLevel = val;
 					thisobj.layerLevel = val;
 					

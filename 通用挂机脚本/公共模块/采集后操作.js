@@ -311,9 +311,8 @@ var thisobj = {
 				sayString += '('+ (parseInt(i)+1) + ')' + doneArray[i].name;
 			}
 			cga.sayLongWords(sayString, 0, 3, 1);
-			cga.waitForChatInput((msg)=>{
-				var index = parseInt(msg);
-				if(index >= 1 && doneArray[index - 1]){
+			cga.waitForChatInput((msg, index)=>{
+				if(index !== null && index >= 1 && doneArray[index - 1]){
 					configTable.doneObject = index - 1;
 					thisobj.object = doneArray[index - 1];
 					

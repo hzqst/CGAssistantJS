@@ -659,7 +659,7 @@ module.exports = function(callback){
 	cga.travel.falan.toCamp = (cb, noWarp)=>{
 		var warp = ()=>{
 			var teamplayers = cga.getTeamPlayers();
-			var isTeamLeader = teamplayers.length > 0 && teamplayers[0].is_me == true ? true : false;
+			var isTeamLeader = (teamplayers.length > 0 && teamplayers[0].is_me) == true ? true : false;
 			
 			if(isTeamLeader){
 				setTimeout(()=>{
@@ -672,12 +672,14 @@ module.exports = function(callback){
 			cga.TurnTo(7, 21);
 			cga.AsyncWaitMovement({map:'圣骑士营地', delay:1000, timeout:5000}, cb);
 		}
-				
+
 		var castle_2_camp = (r, err)=>{
 			if(!r)
 				throw new Error(err);
 			
-			var list = (cga.getItemCount('承认之戒') > 0 && noWarp !== true) ? [
+			var shouldWarp = (cga.getItemCount('承认之戒') > 0 && noWarp !== true) ? true : false;
+			
+			var list = shouldWarp ? [
 			[55,47, '辛希亚探索指挥部'],
 			[7,4, '辛希亚探索指挥部', 91, 6],
 			[95, 9, 27101],
@@ -685,7 +687,7 @@ module.exports = function(callback){
 			] : [
 			
 			];
-			
+
 			if(cga.GetMapName() == '里谢里雅堡'){
 				list.unshift([513, 282, '曙光骑士团营地']);
 				list.unshift([153, 241, '芙蕾雅']);
@@ -697,7 +699,7 @@ module.exports = function(callback){
 				list.unshift([513, 282, '曙光骑士团营地']);
 			}
 			
-			cga.walkList(list, warp);
+			cga.walkList(list, (shouldWarp) ? warp : cb);
 		}
 		
 		var mapname = cga.GetMapName();
@@ -2734,8 +2736,10 @@ module.exports = function(callback){
 	cga.waitForChatInput = (cb)=>{
 		cga.waitTeammateSay((player, msg)=>{
 
-			if(player.is_me == true){				
-				if(cb(msg))
+			if(player.is_me == true){
+				var pattern_number=/^[1-9]\d*$|^0$/;
+				
+				if(cb(msg, pattern_number.test(msg) ? parseInt(msg) : null ))
 					return false;
 			}
 

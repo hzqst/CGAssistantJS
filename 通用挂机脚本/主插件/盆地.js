@@ -205,9 +205,8 @@ var thisobj = {
 				sayString += '('+ (parseInt(i)+1) + ')' + battleAreaArray[i].name;
 			}
 			cga.sayLongWords(sayString, 0, 3, 1);
-			cga.waitForChatInput((msg)=>{
-				var index = parseInt(msg);
-				if(index >= 1 && battleAreaArray[index - 1]){
+			cga.waitForChatInput((msg, index)=>{
+				if(index !== null && index >= 1 && battleAreaArray[index - 1]){
 					configTable.battleArea = index - 1;
 					thisobj.battleArea = battleAreaArray[index - 1];
 					
