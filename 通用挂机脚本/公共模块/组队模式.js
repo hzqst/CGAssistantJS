@@ -194,7 +194,7 @@ var thisobj = {
 				return false;
 			}
 			
-			cga.isTeamLeader = (thisobj.teammates[0] == playerinfo.name);
+			cga.isTeamLeader = (thisobj.teammates[0] == playerinfo.name) ? true : false;
 		}
 		
 		if(thisobj.object.name == '自由组队'){
@@ -255,7 +255,7 @@ var thisobj = {
 					thisobj.teammates = teammates;
 					configTable.teammates = teammates;
 					
-					cga.isTeamLeader = (teammates[0] == playerinfo.name);
+					cga.isTeamLeader = (teammates[0] == playerinfo.name) ? true : false;
 
 					var sayString3 = '队伍成员:[' + thisobj.teammates.join(', ') + ']。';
 					cga.sayLongWords(sayString3, 0, 3, 1);
@@ -263,6 +263,9 @@ var thisobj = {
 					cb(null);
 				}
 				else if(thisobj.object.name == '自由组队'){
+					
+					cga.isTeamLeader = true;
+					
 					stage2(cb);
 				}
 				

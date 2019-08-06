@@ -294,7 +294,10 @@ var thisobj = {
 			});
 		}], cb);
 	},
-	execute : loop,
+	execute : ()=>{
+		logbackEx.init();
+		loop();
+	},
 };
 
 module.exports = thisobj;

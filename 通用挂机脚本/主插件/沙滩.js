@@ -192,8 +192,9 @@ var thisobj = {
 		}], cb);
 	},
 	execute : ()=>{
+		logbackEx.init();
 		loop();
-	}
+	},
 };
 
 module.exports = thisobj;
