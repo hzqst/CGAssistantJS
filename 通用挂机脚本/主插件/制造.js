@@ -3,6 +3,7 @@ var cga = global.cga;
 var configTable = global.configTable;
 
 var healObject = require('./../公共模块/治疗自己');
+var rebirthArray = ['不变身', '变身'];
 
 var craftSkillList = cga.GetSkillsInfo().filter((sk)=>{
 	return (sk.name.indexOf('制') == 0 || sk.name.indexOf('造') == 0 );
@@ -27,6 +28,9 @@ var loop = ()=>{
 	var craft = ()=>{
 		cga.SetImmediateDoneWork((thisobj.craft_count > 0) ? true : false);
 
+		if(thisobj.rebirth == 1)
+			cga.DoRequest(cga.REQUEST_TYPE_REBIRTH_ON);
+		
 		var r = cga.craftNamedItem(thisobj.craftItem.name, 
 		typeof thisobj.addExtraItem == 'string' ? cga.getInventoryItems().find((eq)=>{
 		return eq.name == thisobj.addExtraItem;
@@ -81,6 +85,13 @@ var thisobj = {
 			return true;
 		}
 		
+		if(pair.field == 'rebirth'){
+			pair.field = '是否变身';
+			pair.value = pair.value == 1 ? '变身' : '不变身';
+			pair.translated = true;
+			return true;
+		}
+		
 		if(healObject.translate(pair))
 			return true;
 		
@@ -118,6 +129,14 @@ var thisobj = {
 		if(obj.addExtraItem){
 			configTable.addExtraItem = obj.addExtraItem;
 			thisobj.addExtraItem = obj.addExtraItem;
+		}
+		
+		configTable.rebirth = obj.rebirth;
+		thisobj.rebirth = obj.rebirth
+		
+		if(!thisobj.rebirth){
+			console.error('读取配置：是否变身失败！');
+			return false;
 		}
 		
 		if(!healObject.loadconfig(obj))
@@ -216,7 +235,28 @@ var thisobj = {
 			});
 		}
 		
-		Async.series([stage1, stage2, stage3, healObject.inputcb], cb);
+		var stage4 = (cb2)=>{
+			
+			var sayString = '【制造插件】请选择是否精灵变身: 0不变身 1变身';
+			cga.sayLongWords(sayString, 0, 3, 1);
+			cga.waitForChatInput((msg, val)=>{
+				if(val !== null && val >= 0 && val <= 1){
+					configTable.rebirth = val;
+					thisobj.rebirth = val;
+					
+					var sayString2 = '当前已选择:'+rebirthArray[thisobj.rebirth]+'。';
+					cga.sayLongWords(sayString2, 0, 3, 1);
+					
+					cb2(null);
+					
+					return true;
+				}
+				
+				return false;
+			});
+		}
+		
+		Async.series([stage1, stage2, stage3, stage4, healObject.inputcb], cb);
 	},
 	execute : ()=>{
 		callSubPlugins('init');
