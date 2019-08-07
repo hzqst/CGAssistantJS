@@ -190,11 +190,13 @@ var loop = ()=>{
 		return;
 	}
 	
-	cga.travel.falan.toCamp(()=>{
-		cga.walkList([
-		cga.isTeamLeader ? [96, 86] : [97, 86],
-		], ()=>{
-			teamMode.wait_for_teammates(loop);
+	callSubPluginsAsync('prepare', ()=>{
+		cga.travel.falan.toCamp(()=>{
+			cga.walkList([
+			cga.isTeamLeader ? [96, 86] : [97, 86],
+			], ()=>{
+				teamMode.wait_for_teammates(loop);
+			});
 		});
 	});
 }
@@ -304,6 +306,7 @@ var thisobj = {
 		}], cb);
 	},
 	execute : ()=>{
+		callSubPlugins('init');
 		logbackEx.init();
 		loop();
 	},

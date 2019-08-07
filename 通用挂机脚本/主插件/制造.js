@@ -27,7 +27,10 @@ var loop = ()=>{
 	var craft = ()=>{
 		cga.SetImmediateDoneWork((thisobj.craft_count > 0) ? true : false);
 
-		var r = cga.craftNamedItem(thisobj.craftItem.name);
+		var r = cga.craftNamedItem(thisobj.craftItem.name, 
+		typeof thisobj.addExtraItem == 'string' ? cga.getInventoryItems().find((eq)=>{
+		return eq.name == thisobj.addExtraItem;
+		} ) : -1 );
 		if(r !== true){
 			if(r instanceof Error){
 				cga.SayWords(r.message, 0, 3, 1);
@@ -71,6 +74,13 @@ var thisobj = {
 			return true;
 		}
 		
+		if(pair.field == 'addExtraItem'){
+			pair.field = '添加宝石';
+			pair.value = pair.value;
+			pair.translated = true;
+			return true;
+		}
+		
 		if(healObject.translate(pair))
 			return true;
 		
@@ -104,7 +114,12 @@ var thisobj = {
 			console.error('读取配置：制造物品失败！');
 			return false;
 		}
-
+		
+		if(obj.addExtraItem){
+			configTable.addExtraItem = obj.addExtraItem;
+			thisobj.addExtraItem = obj.addExtraItem;
+		}
+		
 		if(!healObject.loadconfig(obj))
 			return false;
 
@@ -159,9 +174,54 @@ var thisobj = {
 			});
 		}
 		
-		Async.series([stage1, stage2, healObject.inputcb], cb);
+		var stage3 = (cb2)=>{
+			
+			cga.getInventoryItems().forEach((eq)=>{
+				if(eq.type == 38)
+					itemObjects[eq.name] = 1;
+			})
+						
+			var itemObjects = {};
+			var itemArray = [];
+			var index = 0;
+			for(var name in itemObjects){
+				if(index != 0)
+					sayString += ', ';
+				sayString += '('+ (index+1) + ')' + name;
+				itemArray[index] = name;
+				index ++;
+			}
+			
+			if(!itemArray.length){
+				cb2(null);
+				return;
+			}
+			
+			var sayString = '【制造插件】请选择制造时添加的宝石:';
+			
+			cga.sayLongWords(sayString, 0, 3, 1);
+			cga.waitForChatInput((msg, index)=>{
+				if(index !== null && index >= 1 && itemArray[index - 1]){
+					configTable.addExtraItem = itemArray[index - 1];
+					thisobj.addExtraItem = itemArray[index - 1];
+					
+					var sayString2 = '当前已选择:[' + thisobj.addExtraItem + ']。';
+					cga.sayLongWords(sayString2, 0, 3, 1);
+					
+					cb2(null);
+					return true;
+				}
+				
+				return false;
+			});
+		}
+		
+		Async.series([stage1, stage2, stage3, healObject.inputcb], cb);
 	},
-	execute : loop,
+	execute : ()=>{
+		callSubPlugins('init');
+		loop();
+	},
 };
 
 module.exports = thisobj;

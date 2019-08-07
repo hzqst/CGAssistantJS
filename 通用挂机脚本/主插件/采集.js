@@ -224,7 +224,10 @@ var thisobj = {
 			return false;
 		});
 	},
-	execute : loop,
+	execute : ()=>{
+		callSubPlugins('init');
+		loop();
+	},
 };
 
 module.exports = thisobj;

@@ -135,7 +135,7 @@ var mineArray = [
 	level : 7,
 	name : '幻之钢',
 	func : (cb)=>{
-		cga.travel.falan.toJieNuoWa((r)=>{
+		cga.travel.falan.toTeleRoom('杰诺瓦镇', ()=>{
 			cga.walkList([
 				[14, 6, '村长的家'],
 				[1, 9, '杰诺瓦镇'],
@@ -151,7 +151,7 @@ var mineArray = [
 	level : 8,
 	name : '幻之银',
 	func : (cb)=>{
-		cga.travel.falan.toJieNuoWa((r)=>{
+		cga.travel.falan.toTeleRoom('杰诺瓦镇', ()=>{
 			cga.walkList([
 				[14, 6, '村长的家'],
 				[1, 9, '杰诺瓦镇'],
@@ -167,7 +167,7 @@ var mineArray = [
 	level : 9,
 	name : '勒格耐席鉧',
 	func : (cb)=>{
-		cga.travel.falan.toABNSCun((r)=>{
+		cga.travel.falan.toTeleRoom('阿巴尼斯村', ()=>{
 			cga.walkList([
 				[5, 4, '村长的家'],
 				[6, 13, 4312],
@@ -184,7 +184,7 @@ var mineArray = [
 	level : 10,
 	name : '奥利哈钢',
 	func : (cb)=>{
-		cga.travel.falan.toABNSCun((r)=>{
+		cga.travel.falan.toTeleRoom('阿巴尼斯村', ()=>{
 			cga.walkList([
 				[5, 4, '村长的家'],
 				[6, 13, 4312],

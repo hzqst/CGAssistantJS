@@ -42,7 +42,7 @@ var mineArray = [
 		level : 4,
 		name : '铁杉',
 		func : (cb)=>{
-			cga.travel.falan.toWeiNuoYa((r)=>{
+			cga.travel.falan.toTeleRoom('维诺亚村', (r)=>{
 				cga.walkList([
 					[5, 1, '村长家的小房间'],
 					[0, 5, '村长的家'],
@@ -57,7 +57,7 @@ var mineArray = [
 		level : 5,
 		name : '琵琶木',
 		func : (cb)=>{
-			cga.travel.falan.toWeiNuoYa((r)=>{
+			cga.travel.falan.toTeleRoom('维诺亚村', (r)=>{
 				cga.walkList([
 					[5, 1, '村长家的小房间'],
 					[0, 5, '村长的家'],
@@ -72,7 +72,7 @@ var mineArray = [
 		level : 6,
 		name : '赤松',
 		func : (cb)=>{
-			cga.travel.falan.toWeiNuoYa((r)=>{
+			cga.travel.falan.toTeleRoom('维诺亚村', (r)=>{
 				cga.walkList([
 					[5, 1, '村长家的小房间'],
 					[0, 5, '村长的家'],
@@ -87,7 +87,7 @@ var mineArray = [
 		level : 7,
 		name : '朴',
 		func : (cb)=>{
-			cga.travel.falan.toJieNuoWa((r)=>{
+			cga.travel.falan.toTeleRoom('杰诺瓦镇', (r)=>{
 				cga.walkList([
 					[14, 6, '村长的家'],
 					[1, 9, '杰诺瓦镇'],
@@ -101,7 +101,7 @@ var mineArray = [
 		level : 8,
 		name : '杉',
 		func : (cb)=>{
-			cga.travel.falan.toJieNuoWa((r)=>{
+			cga.travel.falan.toTeleRoom('杰诺瓦镇', (r)=>{
 				cga.walkList([
 					[14, 6, '村长的家'],
 					[1, 9, '杰诺瓦镇'],
@@ -115,11 +115,7 @@ var mineArray = [
 		level : 9,
 		name : '丝柏',
 		func : (cb)=>{
-			cga.travel.falan.toABNSCun(function(r){
-				if(!r){
-					cb(r);
-					return;
-				}
+			cga.travel.falan.toTeleRoom('阿巴尼斯村', (r)=>{
 				cga.walkList([
 					[5, 4, '村长的家'],
 					[6, 13, 4312],
@@ -134,11 +130,7 @@ var mineArray = [
 		level : 10,
 		name : '梣',
 		func : (cb)=>{
-			cga.travel.falan.toABNSCun(function(r){
-				if(!r){
-					cb(r);
-					return;
-				}
+			cga.travel.falan.toTeleRoom('阿巴尼斯村', (r)=>{
 				cga.walkList([
 					[5, 4, '村长的家'],
 					[6, 13, 4312],
@@ -153,11 +145,7 @@ var mineArray = [
 		level : 8,
 		name : '魔法红萝卜',
 		func : (cb)=>{
-			cga.travel.falan.toABNSCun(function(r){
-				if(!r){
-					cb(r);
-					return;
-				}
+			cga.travel.falan.toTeleRoom('阿巴尼斯村', ()=>{
 				cga.walkList([
 					[5, 4, '村长的家'],
 					[6, 13, 4312],

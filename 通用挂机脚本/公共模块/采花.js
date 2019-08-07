@@ -75,7 +75,7 @@ var mineArray = [
 		level : 7,
 		name : '百里香',
 		func : (cb)=>{
-			cga.travel.falan.toJieNuoWa((r)=>{
+			cga.travel.falan.toTeleRoom('杰诺瓦镇', ()=>{
 				cga.walkList([
 					[14, 6, '村长的家'],
 					[1, 9, '杰诺瓦镇'],
@@ -89,7 +89,7 @@ var mineArray = [
 		level : 8,
 		name : '瞿麦',
 		func : (cb)=>{
-			cga.travel.falan.toJieNuoWa((r)=>{
+			cga.travel.falan.toTeleRoom('杰诺瓦镇', ()=>{
 				cga.walkList([
 					[14, 6, '村长的家'],
 					[1, 9, '杰诺瓦镇'],
@@ -103,7 +103,7 @@ var mineArray = [
 		level : 9,
 		name : '茴香',
 		func : (cb)=>{
-			cga.travel.falan.toJieNuoWa((r)=>{
+			cga.travel.falan.toTeleRoom('杰诺瓦镇', ()=>{
 				cga.walkList([
 					[14, 6, '村长的家'],
 					[1, 9, '杰诺瓦镇'],
@@ -117,7 +117,7 @@ var mineArray = [
 		level : 10,
 		name : '七叶树',
 		func : (cb)=>{
-			cga.travel.falan.toJieNuoWa((r)=>{
+			cga.travel.falan.toTeleRoom('杰诺瓦镇', ()=>{
 				cga.walkList([
 					[14, 6, '村长的家'],
 					[1, 9, '杰诺瓦镇'],

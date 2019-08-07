@@ -69,9 +69,6 @@ module.exports = {
 	init : ()=>{
 		cga.waitForMultipleLocation(waitArray);
 	},
-	battle : (ctx)=>{
-	
-	},
 	loadconfig : (obj, cb)=>{
 		return true;
 	},

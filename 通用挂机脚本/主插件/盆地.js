@@ -137,11 +137,13 @@ var loop = ()=>{
 		return;
 	}
 	
-	cga.travel.newisland.toStone('X', ()=>{
-		cga.walkList([
-		cga.isTeamLeader ? [144, 106] : [143, 106],
-		], ()=>{
-			teamMode.wait_for_teammates(loop);
+	callSubPluginsAsync('prepare', ()=>{
+		cga.travel.newisland.toStone('X', ()=>{
+			cga.walkList([
+			cga.isTeamLeader ? [144, 106] : [143, 106],
+			], ()=>{
+				teamMode.wait_for_teammates(loop);
+			});
 		});
 	});
 }
@@ -223,6 +225,7 @@ var thisobj = {
 		}], cb);
 	},
 	execute : ()=>{
+		callSubPlugins('init');
 		logbackEx.init();
 		loop();
 	},

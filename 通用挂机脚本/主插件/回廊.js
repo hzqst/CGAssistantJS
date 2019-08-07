@@ -76,11 +76,7 @@ var loop = ()=>{
 		setTimeout(loop, 1500);
 		return;
 	}
-	if(map != '里谢里雅堡'){
-		cga.travel.falan.toStone('C', loop);
-		return;
-	}
-	
+
 	if(cga.needSupplyInitial())
 	{
 		cga.travel.falan.toCastleHospital(()=>{
@@ -88,27 +84,35 @@ var loop = ()=>{
 		});
 		return;
 	}
-
-	if(cga.getSellStoneItem().length > 0)
-	{
-		sellStore.func(loop);
-		return;
-	}
 	
-	cga.walkList([
-	[52, 72]
-	], ()=>{
-		cga.TurnTo(54, 72);
-		cga.AsyncWaitNPCDialog((dlg)=>{
-			cga.ClickNPCDialog(32, 0);
-			cga.AsyncWaitNPCDialog((dlg2)=>{
-				cga.ClickNPCDialog(4, 0);
-				cga.AsyncWaitNPCDialog((dlg3)=>{
+	callSubPluginsAsync('prepare', ()=>{
+	
+		if(map != '里谢里雅堡'){
+			cga.travel.falan.toStone('C', loop);
+			return;
+		}
+		
+		if(cga.getSellStoneItem().length > 0)
+		{
+			sellStore.func(loop);
+			return;
+		}
+		
+		cga.walkList([
+		[52, 72]
+		], ()=>{
+			cga.TurnTo(54, 72);
+			cga.AsyncWaitNPCDialog((dlg)=>{
+				cga.ClickNPCDialog(32, 0);
+				cga.AsyncWaitNPCDialog((dlg2)=>{
 					cga.ClickNPCDialog(4, 0);
-					cga.AsyncWaitMovement({map:'过去与现在的回廊', delay:1000, timeout:5000}, loop);
+					cga.AsyncWaitNPCDialog((dlg3)=>{
+						cga.ClickNPCDialog(4, 0);
+						cga.AsyncWaitMovement({map:'过去与现在的回廊', delay:1000, timeout:5000}, loop);
+					});
 				});
 			});
-		});
+		});	
 	});
 }
 
@@ -172,6 +176,7 @@ var thisobj = {
 		}], cb);
 	},
 	execute : ()=>{
+		callSubPlugins('init');
 		logbackEx.init();
 		loop();
 	},
