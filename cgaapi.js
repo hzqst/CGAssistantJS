@@ -151,7 +151,7 @@ module.exports = function(callback){
 	}
 	
 	//制造物品，参数：物品名
-	cga.craftNamedItem = function(itemname){
+	cga.craftNamedItem = function(itemname, addExtraItem){
 
 		var info = cga.getItemCraftInfo(itemname);
 		if(!info)
@@ -176,6 +176,8 @@ module.exports = function(callback){
 				return new Error('制造' +itemname+' 所需物品 ' +required_item+'不足！');
 			}
 		}
+		if(typeof addExtraItem == 'number' && addExtraItem >= 8 && addExtraItem < 100)
+			arr.push(addExtraItem);
 		//console.log(info.skill.index);
 		//console.log(info.craft.index);
 		//console.log(arr);
@@ -185,25 +187,15 @@ module.exports = function(callback){
 	}
 
 	cga.getInventoryItems = function(){
-		var items = cga.GetItemsInfo();
-		var newitems = new Array();
-		for(var i in items)
-		{
-			if(items[i].pos >= 8)
-				newitems.push(items[i]);
-		}
-		return newitems;
+		return cga.GetItemsInfo().filter((item)=>{
+			return item.pos >= 8 && item.pos < 100;
+		});
 	}
 	
 	cga.getEquipItems = function(){
-		var items = cga.GetItemsInfo();
-		var newitems = new Array();
-		for(var i in items)
-		{
-			if(items[i].pos < 8)
-				newitems.push(items[i]);
-		}
-		return newitems;
+		return cga.GetItemsInfo().filter((item)=>{
+			return item.pos >= 0 && item.pos < 8;
+		});
 	}
 	
 	cga.getEquipEndurance = (item)=>{
@@ -266,19 +258,23 @@ module.exports = function(callback){
 	
 	cga.travel.falan = {};
 	
-	cga.travel.falan.xy2name = function(x, y){
-		if(x == 242 && y == 100)
+	cga.travel.falan.xy2name = function(x, y, mapname){
+		if(x == 242 && y == 100 && mapname == '法兰城')
 			return 'E1';
-		if(x == 141 && y == 148)
+		if(x == 141 && y == 148 && mapname == '法兰城')
 			return 'S1';
-		if(x == 63 && y == 79)
+		if(x == 63 && y == 79 && mapname == '法兰城')
 			return 'W1';
-		if(x == 233 && y == 78)
+		if(x == 233 && y == 78 && mapname == '法兰城')
 			return 'E2';
-		if(x == 162 && y == 130)
+		if(x == 162 && y == 130 && mapname == '法兰城')
 			return 'S2';
-		if(x == 72 && y == 123)
+		if(x == 72 && y == 123 && mapname == '法兰城')
 			return 'W2';
+		if(x == 46 && y == 16 && mapname == '市场三楼 - 修理专区')
+			return 'M3';
+		if(x == 46 && y == 16 && mapname == '市场一楼 - 宠物交易区')
+			return 'M1';
 		return false;
 	}
 	
@@ -336,10 +332,20 @@ module.exports = function(callback){
 				return;
 			}
 			
-			var curStone = cga.travel.falan.xy2name(curXY.x, curXY.y);
+			var curStone = cga.travel.falan.xy2name(curXY.x, curXY.y, curMap);
 			if(curStone) {
 				var turn = false;
-				if(stone.length >= 2 && curStone.charAt(1) == stone.charAt(1)) {
+				if(stone == 'M1' || stone == 'M3') {
+					turn = true;
+				}
+				else if(stone.length >= 2 && curStone.charAt(1) == stone.charAt(1)) {
+					if(curStone == stone){
+						cb(true);
+						return;
+					}
+					turn = true;
+				}
+				else if(stone.length >= 2 && curStone.charAt(1) == stone.charAt(1)) {
 					if(curStone == stone){
 						cb(true);
 						return;
@@ -370,6 +376,14 @@ module.exports = function(callback){
 		}
 		
 		if(curMap.indexOf('市场') >= 0 && curXY.x == 46 && curXY.y == 16){
+			if(stone == 'M1' && curMap == '市场一楼 - 宠物交易区'){
+				cb(true);
+				return;
+			}
+			if(stone == 'M3' && curMap == '市场三楼 - 修理专区'){
+				cb(true);
+				return;
+			}
 			cga.turnDir(6);
 			cga.AsyncWaitMovement({map:desiredMap, delay:1000, timeout:5000}, function(r){
 				cga.travel.falan.toStoneInternal(stone, cb, r);
@@ -390,7 +404,7 @@ module.exports = function(callback){
 			})
 			return;
 		}
-		if(curMap == '里谢里雅堡' && curXY.x == 41){//&& curXY.y == 91
+		if(curMap == '里谢里雅堡'){
 			if(stone == 'C'){
 				cb(true);
 				return;
@@ -404,7 +418,11 @@ module.exports = function(callback){
 				[40, 98, '法兰城'],
 				[162, 130]
 			];
-			if(stone.length == 1)
+			if(stone == 'M1')
+				walks = walkOutOfCastle_2;
+			else if(stone == 'M3')
+				walks = walkOutOfCastle_1;
+			else if(stone.length == 1)
 				walks = walkOutOfCastle_2;
 			else if(stone.length >= 2 && stone.charAt(1) == '1')
 				walks = walkOutOfCastle_1; 
@@ -549,7 +567,7 @@ module.exports = function(callback){
 			}
 
 			var xy = cga.GetMapXY();
-			var stone = cga.travel.falan.xy2name(xy.x, xy.y);
+			var stone = cga.travel.falan.xy2name(xy.x, xy.y, '法兰城');
 			cga.walkList([
 			[238, 111, '银行'],
 			[11, 8],
@@ -906,324 +924,46 @@ module.exports = function(callback){
 			});
 		});	
 	}
-		
-	//前往启程之间
-	//参数1：回调函数function(result), result 为true或false
-	cga.travel.falan.toTeleRoom = (cb)=>{
+	
+	cga.travel.falan.toTeleRoomTemplate = (villageName, npcPos, npcPos2, cb)=>{
 		cga.travel.falan.toStone('C', (r)=>{
 			if(!r){
 				cb(false);
 				return;
 			}
-			cga.walkList([
-			[41, 50, '里谢里雅堡 1楼'],
-			[45, 20, '启程之间'],
-			], (r)=>{
-				if(!r){
-					cb(false);
-					return;
-				}
-				cb(true);
-			});
-		});
-	}
-	
-	//前往亚留特村
-	//参数1：回调函数function(result), result 为true或false
-	cga.travel.falan.toYaliute = function(cb){
-		cga.travel.falan.toTeleRoom(function(r){
-			if(!r){
-				cb(r);
-				return;
-			}
-			cga.walkList([
-			[44, 23]
-			], function(r){
-				if(!r){
-					cb(r);
-					return;
-				}
-				cga.TurnTo(44,20);
-				cga.AsyncWaitNPCDialog(function(dlg){
-					if(dlg.message.indexOf('费用是') == -1){
-						cb(false, new Error('无法使用前往亚留特村的传送石'));
-						return;
-					}
-					cga.ClickNPCDialog(4, -1);
-					cga.AsyncWaitMovement({map:'亚留特村的传送点', delay:1000, timeout:5000}, function(r){
-						cb(r);
-						return;
-					});
-				});
-			});
-		});
-	}
-	
-	//去伊尔村
-	cga.travel.falan.toYiErCun = function(cb){
-		cga.travel.falan.toTeleRoom(function(r){
-			if(!r){
-				cb(r);
-				return;
-			}
-			cga.walkList([
-			[44, 33]
-			], function(r){
-				if(!r){
-					cb(r);
-					return;
-				}
-				cga.TurnTo(44,32);
-				cga.AsyncWaitNPCDialog(function(dlg){
-					if(dlg.message.indexOf('个金币') == -1){
-						cb(false, new Error('无法使用前往伊尔村的传送石'));
-						return;
-					}
-					cga.ClickNPCDialog(4, -1);
-					cga.AsyncWaitMovement({map:'伊尔村的传送点', delay:1000, timeout:5000}, function(r){
-						cb(r);
-						return;
-					});
-				});
-			});
-		});
-	}
-	
-	//去圣拉鲁卡村
-	cga.travel.falan.toShengLaLuKaCun = function(cb){
-		cga.travel.falan.toTeleRoom(function(r){
-			if(!r){
-				cb(r);
-				return;
-			}
-		
-			cga.walkList([
-			[43, 44],
-			], function(r){
-				if(!r){
-					cb(r);
-					return;
-				}
-				cga.TurnTo(45,42);
-				cga.AsyncWaitNPCDialog(function(dlg){
-					if(dlg.message.indexOf('个金币') == -1){
-						cb(false, new Error('无法使用前往圣拉鲁卡村的传送石'));
-						return;
-					}
-					cga.ClickNPCDialog(4, -1);
-					cga.AsyncWaitMovement({map:'圣拉鲁卡村的传送点', delay:1000, timeout:5000}, function(r){
-						cb(r);
-						return;
-					});
-				});
-			});
-		});
-	}
-		
-	//前往维诺亚村
-	//参数1：回调函数function(result), result 为true或false
-	cga.travel.falan.toWeiNuoYa = function(cb){
-		cga.travel.falan.toTeleRoom(function(r){
-			if(!r){
-				cb(r);
-				return;
-			}
-
+			
 			var teamplayers = cga.getTeamPlayers();
 			var isTeamLeader = teamplayers.length > 0 && teamplayers[0].is_me == true ? true : false;
-
-			cga.walkList(
-			isTeamLeader ? 
-			[
-			[9, 22],
-			[9, 23],
-			[9, 22],
-			[9, 23],
-			[9, 22],
-			]
-			:
-			[
-			[9, 22],
-			], function(r){
+			
+			var list = [
+			[41, 50, '里谢里雅堡 1楼'],
+			[45, 20, '启程之间']
+			];
+			
+			if(isTeamLeader){
+				list.push(npcPos);
+				list.push(npcPos2);
+				list.push(npcPos);
+				list.push(npcPos2);				
+				list.push(npcPos);
+			} else {
+				list.push(npcPos);
+			}
+			
+			cga.walkList(list, (r)=>{
 				if(!r){
-					cb(r);
+					cb(false);
 					return;
 				}
 				var go = ()=>{
 					cga.TurnTo(8, 22);
 					cga.AsyncWaitNPCDialog(function(dlg){
-						if(dlg.message.indexOf('费用是') == -1){
-							cb(false, new Error('无法使用前往维诺亚村的传送石'));
+						if(typeof dlg.message == 'string' && (dlg.message.indexOf('对不起') >= 0 || dlg.message.indexOf('很抱歉') >= 0)){
+							cb(false, new Error('无法使用前往'+villageName+'的传送石'));
 							return;
 						}
 						cga.ClickNPCDialog(4, -1);
-						cga.AsyncWaitMovement({map:'维诺亚村的传送点', delay:1000, timeout:5000}, function(r){
-							cb(r);
-							return;
-						});
-					});
-				}
-				if(isTeamLeader){
-					setTimeout(()=>{
-						cga.DoRequest(cga.REQUEST_TYPE_LEAVETEAM);
-						setTimeout(go, 1500);
-					}, 1500);
-				} else {
-					go();
-				}
-			});
-		});
-	}
-		
-	//前往奇利村
-	//参数1：回调函数function(result), result 为true或false
-	cga.travel.falan.toQiLiCun = function(cb){
-		cga.travel.falan.toTeleRoom(function(r){
-			if(!r){
-				cb(r);
-				return;
-			}
-		
-			var teamplayers = cga.getTeamPlayers();
-			var isTeamLeader = teamplayers.length > 0 && teamplayers[0].is_me == true ? true : false;
-
-			cga.walkList(
-			isTeamLeader ? 
-			[
-			[9, 33],
-			[8, 33],
-			[9, 33],
-			[8, 33],
-			[9, 33],
-			]
-			:
-			[
-			[9, 33],
-			], function(r){
-				if(!r){
-					cb(r);
-					return;
-				}
-				var go = ()=>{
-					cga.TurnTo(8, 32);
-					cga.AsyncWaitNPCDialog(function(dlg){
-						if(dlg.message.indexOf('利用需要') == -1){
-							cb(false, new Error('无法使用前往奇利的传送石'));
-							return;
-						}
-						cga.ClickNPCDialog(4, -1);
-						cga.AsyncWaitMovement({map:'奇利村的传送点', delay:1000, timeout:5000}, function(r){
-							cb(r);
-							return;
-						});
-					});
-				}
-				if(isTeamLeader){
-					setTimeout(()=>{
-						cga.DoRequest(cga.REQUEST_TYPE_LEAVETEAM);
-						setTimeout(go, 1500);
-					}, 1500);
-				} else {
-					go();
-				}
-			});
-		});
-	}
-		
-	//前往加纳村
-	//参数1：回调函数function(result), result 为true或false
-	cga.travel.falan.toJiaNaCun = function(cb){
-		cga.travel.falan.toTeleRoom(function(r){
-			if(!r){
-				cb(r);
-				return;
-			}
-		
-			var teamplayers = cga.getTeamPlayers();
-			var isTeamLeader = teamplayers.length > 0 && teamplayers[0].is_me == true ? true : false;
-
-			cga.walkList(
-			isTeamLeader ? 
-			[
-			[9, 44],
-			[8, 44],
-			[9, 44],
-			[8, 44],
-			[9, 44],
-			]
-			:
-			[
-			[9, 44],
-			], function(r){
-				if(!r){
-					cb(r);
-					return;
-				}
-				var go = ()=>{
-					cga.TurnTo(8, 43);
-					cga.AsyncWaitNPCDialog(function(dlg){
-						if(dlg.message.indexOf('费用是') == -1){
-							cb(false, new Error('无法使用前往加纳村的传送石'));
-							return;
-						}
-						cga.ClickNPCDialog(4, -1);
-						cga.AsyncWaitMovement({map:'加纳村的传送点', delay:1000, timeout:5000}, function(r){
-							cb(r);
-							return;
-						});
-					});
-				}
-				if(isTeamLeader){
-					setTimeout(()=>{
-						cga.DoRequest(cga.REQUEST_TYPE_LEAVETEAM);
-						setTimeout(go, 1500);
-					}, 1500);
-				} else {
-					go();
-				}
-			});
-		});
-	}
-		
-	//前往杰诺瓦村
-	//参数1：回调函数function(result), result 为true或false
-	cga.travel.falan.toJieNuoWa = function(cb){
-		cga.travel.falan.toTeleRoom(function(r){
-			if(!r){
-				cb(r);
-				return;
-			}
-			
-			var teamplayers = cga.getTeamPlayers();
-			var isTeamLeader = teamplayers.length > 0 && teamplayers[0].is_me == true ? true : false;
-
-			cga.walkList(
-			isTeamLeader ? 
-			[
-			[15, 4],
-			[15, 5],
-			[15, 4],
-			[15, 5],
-			[15, 4],
-			]
-			:
-			[
-			[15, 4],
-			], function(r){
-				if(!r){
-					cb(r);
-					return;
-				}
-				
-				var go = ()=>{
-					cga.TurnTo(16, 4);
-					cga.AsyncWaitNPCDialog(function(dlg){
-						if(dlg.message.indexOf('费用是') == -1){
-							cb(false, new Error('无法使用前往杰诺瓦镇的传送石'));
-							return;
-						}
-						cga.ClickNPCDialog(4, -1);
-						cga.AsyncWaitMovement({map:'杰诺瓦镇的传送点', delay:1000, timeout:5000}, function(r){
+						cga.AsyncWaitMovement({map:villageName+'的传送点', delay:1000, timeout:5000}, function(r){
 							cb(r);
 							return;
 						});
@@ -1241,61 +981,44 @@ module.exports = function(callback){
 		});
 	}
 	
-	//前往阿巴尼斯村
-	//参数1：回调函数function(result), result 为true或false
-	cga.travel.falan.toABNSCun = function(cb){
-		cga.travel.falan.toTeleRoom(function(r){
-			if(!r){
-				cb(r);
-				return;
-			}
-			
-			var teamplayers = cga.getTeamPlayers();
-			var isTeamLeader = teamplayers.length > 0 && teamplayers[0].is_me == true ? true : false;
-
-			cga.walkList(
-			isTeamLeader ? 
-			[
-			[37, 4],
-			[37, 5],
-			[37, 4],
-			[37, 5],
-			[37, 4],
-			]
-			:
-			[
-			[37, 4],
-			], function(r){
-				if(!r){
-					cb(r);
-					return;
-				}
-				var go = ()=>{
-					cga.TurnTo(38, 4);
-					cga.AsyncWaitNPCDialog(function(dlg){
-						if(dlg.message.indexOf('利用需要') == -1){
-							cb(false, new Error('无法使用前往阿巴尼斯村的传送石'));
-							return;
-						}
-						cga.ClickNPCDialog(4, -1);
-						cga.AsyncWaitMovement({map:'阿巴尼斯村的传送点', delay:1000, timeout:5000}, function(r){
-							cb(r);
-							return;
-						});
-					});
-				}
-				if(isTeamLeader){
-					setTimeout(()=>{
-						cga.DoRequest(cga.REQUEST_TYPE_LEAVETEAM);
-						setTimeout(go, 1500);
-					}, 1500);
-				} else {
-					go();
-				}
-			});
-		});
+	cga.travel.falan.toTeleRoom = (villageName, cb)=>{
+		switch(villageName){
+			case '亚留特村':
+				cga.travel.falan.toTeleRoomTemplate('亚留特村', [43, 23], [43, 22], [44, 22], cb);
+				break;
+			case '伊尔村':
+				cga.travel.falan.toTeleRoomTemplate('伊尔村', [43, 33], [43, 32], [44, 32], cb);
+				break;
+			case '圣拉鲁卡村':
+				cga.travel.falan.toTeleRoomTemplate('伊尔村', [43, 44], [43, 43], [44, 43], cb);
+				break;
+			case '维诺亚村':
+				cga.travel.falan.toTeleRoomTemplate('伊尔村', [9, 22], [9, 23], [8, 22], cb);
+				break;
+			case '奇利村':
+				cga.travel.falan.toTeleRoomTemplate('奇利村', [9, 33], [8, 33], [8, 32], cb);
+				break;
+			case '奇利村':
+				cga.travel.falan.toTeleRoomTemplate('奇利村', [9, 33], [8, 33], [8, 32], cb);
+				break;
+			case '加纳村':
+				cga.travel.falan.toTeleRoomTemplate('加纳村', [9, 44], [8, 44], [8, 43], cb);
+				break;
+			case '杰诺瓦镇':
+				cga.travel.falan.toTeleRoomTemplate('杰诺瓦镇', [15, 4], [15, 5], [16, 4], cb);
+				break;
+			case '阿巴尼斯村':
+				cga.travel.falan.toTeleRoomTemplate('阿巴尼斯村', [37, 4], [37, 5], [38, 4], cb);
+				break;
+			case '蒂娜村':
+				cga.travel.falan.toTeleRoomTemplate('蒂娜村', [25, 4], [25, 5], [26, 4], cb);
+				break;
+			default:
+				throw new Error('未知的村子名称');
+		}
+		
 	}
-
+	
 	//前往传送石。出发地：任何地方。
 	//参数1：传送石所在城市名，如：法兰城
 	//参数2：传送石名称
@@ -2428,12 +2151,36 @@ module.exports = function(callback){
 					if(arr[i].name == itemname && arr[i].count < maxcount)
 						return 100+i;
 				}
-			} else {			
+			} else {
 				return 100+i;
-			}				
+			}
 		}
 		
-		return -1;		
+		return -1;
+	}
+	
+	cga.findInventoryEmptySlot = (itemname, maxcount) =>{
+		
+		var items = cga.GetItemsInfo();
+
+		var arr = [];
+
+		for(var i = 0; i < items.length; ++i){
+			arr[items[i].pos-8] = items[i];
+		}
+		
+		for(var i = 0; i < 20; ++i){
+			if(typeof arr[i] != 'undefined'){
+				if(typeof itemname == 'string' && maxcount > 0){
+					if(arr[i].name == itemname && arr[i].count < maxcount)
+						return 8+i;
+				}
+			} else {
+				return 8+i;
+			}
+		}
+		
+		return -1;
 	}
 
 	cga.saveToBankOnce = (itemname, maxcount, cb)=>{
@@ -3245,6 +2992,8 @@ module.exports = function(callback){
 		
 	cga.tradeInternal = (stuff, checkParty, resolve, playerName) => {
 		
+		var savePartyName = null;
+		
 		var waitDialog = ()=>{
 			
 			var getInTradeStuffs = false;
@@ -3329,7 +3078,7 @@ module.exports = function(callback){
 
 					if (state == cga.TRADE_STATE_READY || state == cga.TRADE_STATE_CONFIRM) {
 						getInTradeStuffs = true;
-						if (!checkParty || tradeStuffsChecked || checkParty(playerName ? playerName : partyName, receivedStuffs)) {
+						if (!checkParty || tradeStuffsChecked || checkParty(playerName ? playerName : savePartyName, receivedStuffs)) {
 							tradeStuffsChecked = true;
 							console.log('confirm');
 							cga.DoRequest(cga.REQUEST_TYPE_TRADE_CONFIRM);
@@ -3370,6 +3119,8 @@ module.exports = function(callback){
 			console.log('AsyncWaitTradeDialog');
 			console.log(partyName);
 			console.log(partyLevel);
+			
+			savePartyName = partyName;
 			
 			if (partyLevel > 0) {
 				waitDialog();
