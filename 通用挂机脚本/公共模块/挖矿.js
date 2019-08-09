@@ -69,22 +69,28 @@ var mineArray = [
 	level : 4,
 	name : '纯银',
 	func : (cb)=>{
-		cga.travel.falan.toStone('S', (r)=>{
+		var retry = ()=>{
 			cga.walkList([
-				[153, 241, '芙蕾雅'],
 				[473, 316],
-			], function(r){
+			], (r)=>{
 				cga.TurnTo(471, 316);
 				cga.AsyncWaitNPCDialog(()=>{
 					cga.ClickNPCDialog(4, -1);
-					cga.AsyncWaitMovement({map:'维诺亚洞穴 地下1楼', delay:1000, timeout:5000}, function(r){
+					cga.AsyncWaitMovement({map:'维诺亚洞穴 地下1楼', delay:1000, timeout:5000}, (err)=>{
+						if(err){
+							retry();
+							return;
+						}
 						cga.walkList([
 						[49, 66],
 						], cb);	
-					});					
-				});					
+					});
+				});
 			});
-		});
+		}
+		cga.walkList([
+			[153, 241, '芙蕾雅'],
+		], retry);
 	}
 },
 {
@@ -92,20 +98,30 @@ var mineArray = [
 	name : '金',
 	func : (cb)=>{
 		cga.travel.falan.toStone('S', (r)=>{
+			
+			var retry = ()=>{
+				cga.walkList([
+					[473, 316],
+				], (r)=>{
+					cga.TurnTo(471, 316);
+					cga.AsyncWaitNPCDialog(()=>{
+						cga.ClickNPCDialog(4, -1);
+						cga.AsyncWaitMovement({map:'维诺亚洞穴 地下1楼', delay:1000, timeout:5000}, (err)=>{
+							if(err){
+								retry();
+								return;
+							}
+							cga.walkList([
+							[52, 11],
+							], cb);	
+						});
+					});
+				});
+			}
+			
 			cga.walkList([
 				[153, 241, '芙蕾雅'],
-				[473, 316],
-			], function(r){
-				cga.TurnTo(471, 316);
-				cga.AsyncWaitNPCDialog(()=>{
-					cga.ClickNPCDialog(4, -1);
-					cga.AsyncWaitMovement({map:'维诺亚洞穴 地下1楼', delay:1000, timeout:5000}, function(r){
-						cga.walkList([
-						[52, 11],
-						], cb);	
-					});					
-				});					
-			});
+			], retry);
 		});
 	}
 },
@@ -113,22 +129,28 @@ var mineArray = [
 	level : 6,
 	name : '白金',
 	func : (cb)=>{
-		cga.travel.falan.toStone('S', (r)=>{
+		var retry = ()=>{
 			cga.walkList([
-				[153, 241, '芙蕾雅'],
 				[473, 316],
-			], function(r){
+			], (r)=>{
 				cga.TurnTo(471, 316);
 				cga.AsyncWaitNPCDialog(()=>{
 					cga.ClickNPCDialog(4, -1);
-					cga.AsyncWaitMovement({map:'维诺亚洞穴 地下1楼', delay:1000, timeout:5000}, function(r){
+					cga.AsyncWaitMovement({map:'维诺亚洞穴 地下1楼', delay:1000, timeout:5000}, (err)=>{
+						if(err){
+							retry();
+							return;
+						}
 						cga.walkList([
 						[8, 69],
 						], cb);	
-					});					
-				});					
+					});
+				});
 			});
-		});
+		}
+		cga.walkList([
+			[153, 241, '芙蕾雅'],
+		], retry);
 	}
 },
 {

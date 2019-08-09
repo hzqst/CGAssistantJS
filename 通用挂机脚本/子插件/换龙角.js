@@ -22,7 +22,7 @@ var waitArray = [
 			cga.AsyncWaitNPCDialog((err, dlg)=>{
 				if(dlg && dlg.message.indexOf('非常好') >= 0){
 					cga.ClickNPCDialog(32, 0);
-					cga.AsyncWaitNPCDialog(function(dlg){
+					cga.AsyncWaitNPCDialog(()=>{
 						cga.ClickNPCDialog(1, 0);
 					});
 				}

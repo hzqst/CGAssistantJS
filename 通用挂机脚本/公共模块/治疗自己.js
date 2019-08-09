@@ -18,11 +18,11 @@ var thisobj = {
 		}
 
 		cga.StartWork(skill_heal.index, skill_heal.lv-1);
-		cga.AsyncWaitPlayerMenu(function(players){
+		cga.AsyncWaitPlayerMenu((err, players)=>{
 			cga.PlayerMenuSelect(0);
-			cga.AsyncWaitUnitMenu(function(units){
+			cga.AsyncWaitUnitMenu((err, units)=>{
 				cga.UnitMenuSelect(0);
-				cga.AsyncWaitWorkingResult(function(r){
+				cga.AsyncWaitWorkingResult((err, r)=>{
 					if(playerinfo.health != 0)
 						thisobj.func(cb);
 					else

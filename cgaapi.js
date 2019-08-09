@@ -242,7 +242,7 @@ module.exports = function(callback){
 	
 	cga.travel.falan = {};
 	
-	cga.travel.falan.xy2name = function(x, y, mapname){
+	cga.travel.falan.xy2name = (x, y, mapname)=>{
 		if(x == 242 && y == 100 && mapname == '法兰城')
 			return 'E1';
 		if(x == 141 && y == 148 && mapname == '法兰城')
@@ -259,7 +259,7 @@ module.exports = function(callback){
 			return 'M3';
 		if(x == 46 && y == 16 && mapname == '市场一楼 - 宠物交易区')
 			return 'M1';
-		return false;
+		return null;
 	}
 	
 	cga.travel.falan.isvalid = function(stone){
@@ -798,7 +798,7 @@ module.exports = function(callback){
 							cga.AsyncWaitNPCDialog(()=>{
 								cga.ClickNPCDialog(32, -1);
 								cga.AsyncWaitNPCDialog((err, dlg)=>{
-									if(dlg5.options == 12){
+									if(dlg && dlg.options == 12){
 										cga.ClickNPCDialog(4, -1);
 										cga.AsyncWaitMovement({map:'？'}, ()=>{
 											cga.walkList([
@@ -806,7 +806,6 @@ module.exports = function(callback){
 												[96, 138, '盖雷布伦森林'],
 												[124, 168, '温迪尔平原'],
 												[264, 108, '艾尔莎岛'],
-												[141, 105]
 											], cb);
 										});
 									} else {
@@ -824,20 +823,29 @@ module.exports = function(callback){
 	//从法兰城到阿凯鲁法
 	cga.travel.falan.toAKLF = (cb)=>{
 		
+		if(cga.GetMapName() == '阿凯鲁法村'){
+			cb(null);
+			return;
+		}
+		
 		var stage3 = ()=>{
 			cga.walkList([
 				[20, 53],
 			], (r)=>{
 				cga.TurnTo(18, 53);
-				cga.ClickNPCDialog(4, -1);
-				cga.AsyncWaitMovement({map:'港湾管理处'}, (r)=>{
-					cga.walkList([
-						[22, 31, '阿凯鲁法'],
-						[28, 30],
-					], ()=>{
-						cga.TurnTo(30, 30);
-						cga.ClickNPCDialog(4, -1);
-						cga.AsyncWaitMovement({map:'阿凯鲁法村'}, cb);
+				cga.AsyncWaitNPCDialog(()=>{
+					cga.ClickNPCDialog(4, -1);
+					cga.AsyncWaitMovement({map:'港湾管理处'}, ()=>{
+						cga.walkList([
+							[22, 31, '阿凯鲁法'],
+							[28, 30],
+						], ()=>{
+							cga.TurnTo(30, 30);
+							cga.AsyncWaitNPCDialog(()=>{
+								cga.ClickNPCDialog(4, -1);
+								cga.AsyncWaitMovement({map:'阿凯鲁法村'}, cb);
+							});
+						});
 					});
 				});
 			});
@@ -847,27 +855,24 @@ module.exports = function(callback){
 			cga.TurnTo(71, 26);
 			cga.AsyncWaitNPCDialog((err, dlg)=>{
 				
-				if(dlg.message.indexOf('现在正在停靠在阿凯鲁法港') >= 0 && dlg.options == 12){												
-					cga.AsyncWaitMovement({map:'往伊尔栈桥'}, (r)=>{
+				if(dlg && dlg.message.indexOf('现在正停靠在阿凯鲁法港') >= 0 && dlg.options == 12){
+					cga.ClickNPCDialog(4, -1);
+					cga.AsyncWaitMovement({map:'往伊尔栈桥'}, ()=>{
 						stage3();
 					});
 					return;
 				}
 				
-				setTimeout(retry, 5000);
-			});			
+				setTimeout(retry2, 5000);
+			});
 		}
 		
 		var retry = ()=>{
-			
 			cga.TurnTo(53, 50);
 			cga.AsyncWaitNPCDialog((err, dlg)=>{
-				
-				if(dlg.options == 12){												
-					cga.AsyncWaitMovement({map:'艾欧奇亚号'}, (r)=>{
-						
-						retry2();
-					});
+				if(dlg && dlg.options == 12){
+					cga.ClickNPCDialog(4, -1);
+					cga.AsyncWaitMovement({map:'艾欧奇亚号'}, retry2);
 					return;
 				}
 				
@@ -884,7 +889,7 @@ module.exports = function(callback){
 				cga.TurnTo(60, 71);
 				cga.AsyncWaitNPCDialog(()=>{
 					cga.ClickNPCDialog(4, -1);
-					cga.AsyncWaitMovement({map:'伊尔'}, (r)=>{
+					cga.AsyncWaitMovement({map:'伊尔'}, ()=>{
 						cga.walkList([
 							[30, 21, '港湾管理处'],
 							[23, 25],
@@ -894,7 +899,7 @@ module.exports = function(callback){
 								cga.ClickNPCDialog(32, -1);
 								cga.AsyncWaitNPCDialog(()=>{
 									cga.ClickNPCDialog(4, -1);
-									cga.AsyncWaitMovement({map:'往阿凯鲁法栈桥'}, (r)=>{
+									cga.AsyncWaitMovement({map:'往阿凯鲁法栈桥'}, ()=>{
 										cga.walkList([
 											[51, 50],
 										], retry);
@@ -905,9 +910,118 @@ module.exports = function(callback){
 					});
 				}, 1000);	
 			});
-		});	
+		});
 	}
 	
+	cga.travel.AKLF = {};
+	
+	cga.travel.AKLF.tofalan = (cb)=>{
+		if(cga.GetMapName() != '阿凯鲁法村'){
+			cb(new Error('必须从阿凯鲁法村启动'));
+			return;
+		}
+
+		var stage4 = ()=>{
+			cga.walkList([
+				[47, 83, '村长的家'],
+				[14, 17, '伊尔村的传送点'],
+				[20, 10],
+			], (r)=>{
+				cga.TurnTo(22, 10);
+				cga.AsyncWaitNPCDialog(()=>{
+					cga.ClickNPCDialog(4, -1);
+					cga.AsyncWaitMovement({map:'启程之间'}, ()=>{
+						cga.walkList([
+							[25, 24, '里谢里雅堡 1楼'],
+							[74, 40, '里谢里雅堡'],
+						], cb);
+					});
+				});
+			});
+		}
+		
+		var stage3 = ()=>{
+			cga.walkList([
+				[19, 55],
+			], (r)=>{
+				cga.TurnTo(19, 53);
+				cga.AsyncWaitNPCDialog(()=>{
+					cga.ClickNPCDialog(4, -1);
+					cga.AsyncWaitMovement({map:'港湾管理处'}, ()=>{
+						cga.walkList([
+							[9, 22, '伊尔'],
+							[24, 19],
+						], ()=>{
+							cga.TurnTo(24, 17);
+							cga.AsyncWaitNPCDialog(()=>{
+								cga.ClickNPCDialog(4, -1);
+								cga.AsyncWaitMovement({map:'伊尔村'}, stage4);
+							});
+						});
+					});
+				});
+			});
+		}
+		
+		var retry2 = ()=>{
+			cga.TurnTo(71, 26);
+			cga.AsyncWaitNPCDialog((err, dlg)=>{				
+				if(dlg && dlg.message.indexOf('现在正停靠在伊尔村') >= 0 && dlg.options == 12){
+					cga.ClickNPCDialog(4, -1);
+					cga.AsyncWaitMovement({map:'往阿凯鲁法栈桥'}, ()=>{
+						stage3();
+					});
+					return;
+				}
+				
+				setTimeout(retry2, 5000);
+			});
+		}
+
+		var retry = ()=>{
+			cga.TurnTo(53, 50);
+			cga.AsyncWaitNPCDialog((err, dlg)=>{
+				if(dlg && dlg.options == 12){
+					cga.ClickNPCDialog(4, -1);
+					cga.AsyncWaitMovement({map:'艾欧奇亚号'}, retry2);
+					return;
+				}
+				
+				setTimeout(retry, 5000);
+			});
+		}
+		
+		cga.walkList([
+			[57, 176],
+		], ()=>{
+			cga.TurnTo(55, 176);
+			cga.AsyncWaitNPCDialog(()=>{
+				cga.ClickNPCDialog(4, -1);
+				cga.AsyncWaitMovement({map:'阿凯鲁法'}, ()=>{
+					cga.walkList([
+					[16, 15, '港湾管理处'],
+					[15, 12],
+					], ()=>{
+						cga.TurnTo(17, 12);
+						cga.AsyncWaitNPCDialog(()=>{
+							cga.ClickNPCDialog(32, -1);
+							cga.AsyncWaitNPCDialog(()=>{
+								cga.ClickNPCDialog(4, -1);
+								cga.AsyncWaitMovement({map:'往伊尔栈桥'}, ()=>{
+									cga.walkList([
+									[51, 50],
+									], retry);
+								});
+							});
+						});
+					});
+				});
+			});
+		});
+		
+		
+	}
+		
 	cga.travel.falan.toTeleRoomTemplate = (villageName, npcPos, npcPos2, npcPos3, cb)=>{
 		cga.travel.falan.toStone('C', ()=>{
 			var teamplayers = cga.getTeamPlayers();
@@ -937,10 +1051,7 @@ module.exports = function(callback){
 							return;
 						}
 						cga.ClickNPCDialog(4, -1);
-						cga.AsyncWaitMovement({map:villageName+'的传送点', delay:1000, timeout:5000}, (err, reason)=>{
-							cb(err, reason);
-							return;
-						});
+						cga.AsyncWaitMovement({map:villageName+'的传送点', delay:1000, timeout:5000}, cb);
 					});
 				}
 				if(isTeamLeader){
@@ -996,10 +1107,7 @@ module.exports = function(callback){
 		return cga.promisify(cga.travel.falan.toTeleRoom, [city]);
 	}
 	
-	//前往该城市。出发地：任何地方。
-	//参数1：城市名，如：艾尔莎岛
-	//参数2：回调函数function(result), result 为true或false
-	cga.travel.toCity = function(city, cb){
+	cga.travel.falan.toCity = function(city, cb){
 		switch(city){
 			case '新城':case '艾尔莎岛':
 				cga.travel.falan.toNewIsland(cb);
@@ -1015,16 +1123,16 @@ module.exports = function(callback){
 		
 	cga.travel.newisland.isSettled = true;
 	
-	cga.travel.newisland.xy2name = function(x, y){
-		if(x == 140 && y == 105)
+	cga.travel.newisland.xy2name = function(x, y, mapname){
+		if(x == 140 && y == 105 && mapname == '艾尔莎岛')
 			return 'X';
-		if(x == 158 && y == 94)
+		if(x == 158 && y == 94 && mapname == '艾夏岛')
 			return 'A';
-		if(x == 84 && y == 112)
+		if(x == 84 && y == 112 && mapname == '艾夏岛')
 			return 'B';
-		if(x == 164 && y == 159)
+		if(x == 164 && y == 159 && mapname == '艾夏岛')
 			return 'C';
-		if(x == 151 && y == 97)
+		if(x == 151 && y == 97 && mapname == '艾夏岛')
 			return 'D';
 		return false;
 	}
@@ -1039,37 +1147,15 @@ module.exports = function(callback){
 		}
 		return false;
 	}
-	
-	cga.travel.newisland.name2xy = function(stone){
-		switch(stone.toUpperCase()){
-			case 'X': return [140, 105];
-			break;
-			case 'A': return [158, 94];
-			break;
-			case 'B': return [84, 112];
-			break;
-			case 'C': return [164, 159];
-			break;
-			case 'D': return [151, 97];
-			break;
-		}
-		return false;
-	}
-	
-	cga.travel.newisland.toStoneInternal = (stone, cb, r)=>{
-		if(!r){
-			cb(false);
-			return;
-		}
 
+	cga.travel.newisland.toStoneInternal = (stone, cb)=>{
 		var curXY = cga.GetMapXY();
 		var curMap = cga.GetMapName();
 		const desiredMap = ['艾尔莎岛', '艾夏岛'];
 		if(curMap == '艾尔莎岛' || curMap == '艾夏岛'){
 			
-			var curStone = cga.travel.newisland.xy2name(curXY.x, curXY.y);
-			if(curStone !== false) {
-
+			var curStone = cga.travel.newisland.xy2name(curXY.x, curXY.y, curMap);
+			if(curStone !== null) {
 				var turn = false;
 				if(stone.length >= 2 && curStone.charAt(1) == stone.charAt(1)) {
 					if(curStone == stone){
@@ -1090,7 +1176,7 @@ module.exports = function(callback){
 							cga.walkList([
 							[158, 94],
 							], ()=>{
-								cga.travel.newisland.toStoneInternal(stone, cb, r);
+								cga.travel.newisland.toStoneInternal(stone, cb);
 							});
 							return;
 						}
@@ -1099,7 +1185,7 @@ module.exports = function(callback){
 								cga.walkList([
 								[140, 105],
 								], ()=>{
-									cga.travel.newisland.toStoneInternal(stone, cb, r);
+									cga.travel.newisland.toStoneInternal(stone, cb);
 								});
 								return;
 							}
@@ -1111,8 +1197,12 @@ module.exports = function(callback){
 						case 'C':cga.turnDir(5);break;
 						case 'D':cga.turnDir(4);break;
 					}
-					cga.AsyncWaitMovement({map:desiredMap, delay:1000, timeout:5000}, function(r){
-						cga.travel.newisland.toStoneInternal(stone, cb, r);
+					cga.AsyncWaitMovement({map:desiredMap, delay:1000, timeout:5000}, (err, reason)=>{
+						if(err){
+							cb(err, reason);
+							return;
+						}
+						cga.travel.newisland.toStoneInternal(stone, cb);
 					});
 					return;
 				}
@@ -1120,7 +1210,7 @@ module.exports = function(callback){
 				cga.walkList([
 				stone == 'X' ? [140, 105] : [158, 94],
 				], ()=>{
-					cga.travel.newisland.toStoneInternal(stone, cb, r);
+					cga.travel.newisland.toStoneInternal(stone, cb);
 				});
 				return;
 			}
@@ -1128,8 +1218,12 @@ module.exports = function(callback){
 
 		if(cga.travel.newisland.isSettled){
 			cga.LogBack();
-			cga.AsyncWaitMovement({map:desiredMap, delay:1000, timeout:5000}, function(r){
-				cga.travel.newisland.toStoneInternal(stone, cb, r);
+			cga.AsyncWaitMovement({map:desiredMap, delay:1000, timeout:5000}, (err, reason)=>{
+				if(err){
+					cb(err, reason);
+					return;
+				}
+				cga.travel.newisland.toStoneInternal(stone, cb);
 			});
 		}
 	}
@@ -1141,8 +1235,8 @@ module.exports = function(callback){
 			cb(new Error('无效的目的地名称'));
 			return;
 		}
-		
-		cga.travel.newisland.toStoneInternal(stone, cb, true);
+
+		cga.travel.newisland.toStoneInternal(stone, cb);
 	}
 	
 	cga.travel.newisland.toPUB = (cb)=>{
@@ -1194,7 +1288,7 @@ module.exports = function(callback){
 			return 'N';
 		if(x == 118 && y == 214)
 			return 'S';
-		return false;
+		return null;
 	}
 	
 	cga.travel.gelaer.isvalid = function(stone){
@@ -1204,40 +1298,24 @@ module.exports = function(callback){
 		}
 		return false;
 	}
-	
-	cga.travel.gelaer.name2xy = function(stone){
-		switch(stone.toUpperCase()){
-			case 'N': return [120, 107];
-			break;
-			case 'S': return [118, 214];
-			break;
-		}
-		return false;
-	}
-	
-	cga.travel.gelaer.toStoneInternal = function(stone, cb, r){
-		if(!r){
-			cb(false);
-			return;
-		}
+
+	cga.travel.gelaer.toStoneInternal = (stone, cb)=>{
 		var curXY = cga.GetMapXY();
 		var curMap = cga.GetMapName();
 		const desiredMap = ['哥拉尔镇'];
-		if(curMap == '哥拉尔镇'){
-			
+		if(curMap == '哥拉尔镇'){			
 			var curStone = cga.travel.gelaer.xy2name(curXY.x, curXY.y);
-			if(curStone) {
-				//console.log(curStone);
+			if(curStone !== null) {
 				var turn = false;
 				if(stone.length >= 2 && curStone.charAt(1) == stone.charAt(1)) {
 					if(curStone == stone){
-						cb(true);
+						cb(null);
 						return;
 					}
 					turn = true;
 				} else if(stone.length < 2){
 					if(curStone.charAt(0) == stone.charAt(0)){
-						cb(true);
+						cb(null);
 						return;
 					}
 					turn = true;
@@ -1247,8 +1325,12 @@ module.exports = function(callback){
 						case 'N':cga.turnDir(6);break;
 						case 'S':cga.turnDir(0);break;
 					}
-					cga.AsyncWaitMovement({map:desiredMap, delay:1000, timeout:5000}, function(r){
-						cga.travel.gelaer.toStoneInternal(stone, cb, r);
+					cga.AsyncWaitMovement({map:desiredMap, delay:1000, timeout:5000}, (err, reason)=>{
+						if(err){
+							cb(err, reason);
+							return;
+						}
+						cga.travel.gelaer.toStoneInternal(stone, cb);
 					});
 					return;
 				}
@@ -1257,48 +1339,40 @@ module.exports = function(callback){
 
 		if(cga.travel.gelaer.isSettled){
 			cga.LogBack();
-			cga.AsyncWaitMovement({map:desiredMap, delay:1000, timeout:5000}, function(r){
-				cga.travel.gelaer.toStoneInternal(stone, cb, r);
+			cga.AsyncWaitMovement({map:desiredMap, delay:1000, timeout:5000}, (err, reason)=>{
+				if(err){
+					cb(err, reason);
+					return;
+				}
+				cga.travel.gelaer.toStoneInternal(stone, cb);
 			});
 		}
 	}
 	
 	//参数1：传送石名称，有效参数：N S
 	//参数2：回调函数function(result), result 为true或false
-	cga.travel.gelaer.toStone = function(stone, cb){
+	cga.travel.gelaer.toStone = (stone, cb)=>{
 		if(!cga.travel.gelaer.isvalid(stone)){
 			cb(new Error('无效的目的地名称'));
 			return;
 		}
 		
-		cga.travel.gelaer.toStoneInternal(stone, cb, true);
+		cga.travel.gelaer.toStoneInternal(stone, cb);
 	}
 	
-	//前往到法兰城西医院
-	//参数1：回调函数function(result), result 为true或false
-	cga.travel.gelaer.toHospital = function(cb){
-		cga.travel.gelaer.toStone('N', function(r){
-			if(!r){
-				cb(false);
-				return;
-			}
-
-			const walkToHospital_1 = [
+	//前往到哥拉尔医院
+	cga.travel.gelaer.toHospital = (cb)=>{
+		cga.travel.gelaer.toStone('N', ()=>{
+			cga.walkList([
 				[165, 91, '医院']
 				[29, 27],
-			];
-
-			cga.walkList(walkToHospital_1, function(r){
-				if(!r){
-					cb(false);
-					return;
-				}
+			], ()=>{
 				cga.TurnTo(30, 26);
 				cb(true);
 			});
 		});
 	}
-		
+
 	//按照数组中的坐标行走
 	//参数1：数组 ，例子: 
 	/*const list = [
@@ -1311,8 +1385,7 @@ module.exports = function(callback){
 		[193, 52, null],
 		[195, 50, '职业介绍所']
 	];*/
-	//参数2：回调函数function(result), result 为true或false, reason=2为战斗
-	
+
 	cga.calculatePath = (curX, curY, targetX, targetY, targetMap, dstX, dstY, newList)=>{
 		var walls = cga.buildMapCollisionMatrix();
 		var grid = new PF.Grid(walls.matrix);
@@ -1942,8 +2015,8 @@ module.exports = function(callback){
 			}
 			else
 			{
-				cga.AsyncWaitWorkingResult(function(r){
-					setTimeout(function(){//delay a bit
+				cga.AsyncWaitWorkingResult((err, result)=>{
+					setTimeout(()=>{
 						cga.assessAllItems(cb);
 					}, 100);
 				}, 30000);
@@ -2368,7 +2441,7 @@ module.exports = function(callback){
 	}
 		
 	cga.waitTeammateSay = (cb)=>{
-		cga.AsyncWaitChatMsg((r)=>{
+		cga.AsyncWaitChatMsg((err, r)=>{
 			
 			if(!r.msg){
 				cga.waitTeammateSay(cb);
@@ -2652,14 +2725,19 @@ module.exports = function(callback){
 			}
 			if(y > ysize){
 				
-				var waitDownloadEnd = (msg)=>{
-					if(!msg.index3 || last_index3 != msg.index3){
-						cb(false);
+				var waitDownloadEnd = (err, msg)=>{
+					if(err){
+						cb(err);
+						return;
+					}
+					
+					if(last_index3 != msg.index3){
+						cb(new Error('地图发生变化，下载失败'));
 						return
 					}
 					
 					if(msg.xtop >= xsize && msg.ytop >= ysize){
-						cb(true);
+						cb(null);
 						return
 					}
 
@@ -2932,7 +3010,7 @@ module.exports = function(callback){
 			
 			var waitTradeMsg = ()=>{
 				
-				cga.AsyncWaitChatMsg((r)=>{
+				cga.AsyncWaitChatMsg((err, r)=>{
 					console.log('AsyncWaitChatMsg');
 					console.log(r);
 
@@ -2967,7 +3045,7 @@ module.exports = function(callback){
 			
 			var waitTradeStuffs = ()=>{
 				
-				cga.AsyncWaitTradeStuffs((type, args) => {
+				cga.AsyncWaitTradeStuffs((err, type, args) => {
 				
 					console.log('AsyncWaitTradeStuffs');
 					console.log(type);
@@ -3001,7 +3079,7 @@ module.exports = function(callback){
 			}
 			
 			var waitTradeState = () => {
-				cga.AsyncWaitTradeState((state) => {
+				cga.AsyncWaitTradeState((err, state) => {
 					console.log('AsyncWaitTradeState');
 					console.log(state);
 
@@ -3044,7 +3122,7 @@ module.exports = function(callback){
 			);
 		}
 		
-		cga.AsyncWaitTradeDialog((partyName, partyLevel) => {
+		cga.AsyncWaitTradeDialog((err, partyName, partyLevel) => {
 			console.log('AsyncWaitTradeDialog');
 			console.log(partyName);
 			console.log(partyLevel);
@@ -3061,7 +3139,7 @@ module.exports = function(callback){
 	};
 
 	cga.positiveTrade = (name, stuff, checkParty, resolve) => {
-		cga.AsyncWaitPlayerMenu(players => {
+		cga.AsyncWaitPlayerMenu(err, players => {
 			if (!(players instanceof Array)) players = [];
 			var player = players.find((e, index) => typeof name == 'number' ? index == name : e.name == name);
 			if (player) {
@@ -3085,7 +3163,7 @@ module.exports = function(callback){
 		
 		cga.EnableFlags(cga.ENABLE_FLAG_TRADE, true)
 		
-		cga.AsyncWaitPlayerMenu(players => {
+		cga.AsyncWaitPlayerMenu(err, players => {
 			if (!(players instanceof Array)) players = [];
 			var player = players.find((e, index) => typeof name == 'number' ? index == name : e.name == name);
 			if (player) {

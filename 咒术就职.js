@@ -55,7 +55,7 @@ var cga = require('./cgaapi')(function(){
 					cga.SayWords('咒术', 0, 3, 1);
 						cga.AsyncWaitNPCDialog(()=>{
 							cga.ClickNPCDialog(1, 0);
-							cga.AsyncWaitMovement({map:15006, delay:1000, timeout:5000}, (r)=>{
+							cga.AsyncWaitMovement({map:15006, delay:1000, timeout:5000}, ()=>{
 								cga.walkList([
 								[38, 37, '咒术师的秘密住处'],
 								[12, 7],
@@ -311,7 +311,7 @@ var cga = require('./cgaapi')(function(){
 					cga.SayWords('咒术', 0, 3, 1);
 						cga.AsyncWaitNPCDialog(()=>{
 							cga.ClickNPCDialog(1, 0);
-							cga.AsyncWaitMovement({map:15006, delay:1000, timeout:5000}, (r)=>{
+							cga.AsyncWaitMovement({map:15006, delay:1000, timeout:5000}, ()=>{
 								cga.walkList([
 								[38, 37, '咒术师的秘密住处'],
 								[12, 7],

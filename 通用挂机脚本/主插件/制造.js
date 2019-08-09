@@ -55,9 +55,9 @@ var loop = ()=>{
 			return;
 		}
 
-		cga.AsyncWaitWorkingResult((r)=>{
+		cga.AsyncWaitWorkingResult((err, r)=>{
 
-			if(r.success){
+			if(r && r.success){
 				thisobj.craft_count ++;
 				console.log('已造' + thisobj.craft_count + '次！');
 			}

@@ -199,14 +199,14 @@ var cga = require('./cgaapi')(function(){
 					cga.TurnTo(9, 4);
 					cga.AsyncWaitNPCDialog(()=>{
 						cga.ClickNPCDialog(1, 0);
-						cga.AsyncWaitMovement({map:4331, delay:1000, timeout:5000}, function(r){
+						cga.AsyncWaitMovement({map:4331, delay:1000, timeout:5000}, ()=>{
 							cga.walkList([
 							[14, 7],
 							], ()=>{
 								cga.TurnTo(15, 7);
 								cga.AsyncWaitNPCDialog(()=>{
 									cga.ClickNPCDialog(4, 0);
-									cga.AsyncWaitMovement({map:4332, delay:1000, timeout:5000}, function(r){
+									cga.AsyncWaitMovement({map:4332, delay:1000, timeout:5000}, ()=>{
 										cga.walkList([
 										[14, 7],
 										], ()=>{
@@ -222,7 +222,7 @@ var cga = require('./cgaapi')(function(){
 														cga.TurnTo(15, 10);
 														cga.AsyncWaitNPCDialog(()=>{
 															cga.ClickNPCDialog(4, 0);
-															cga.AsyncWaitMovement({map:4335, delay:1000, timeout:5000}, function(r){
+															cga.AsyncWaitMovement({map:4335, delay:1000, timeout:5000}, ()=>{
 																cga.walkList([
 																[7, 3, 4320],
 																], ()=>{
@@ -280,7 +280,7 @@ var cga = require('./cgaapi')(function(){
 				[54, 162, null, null, null, true],
 				], ()=>{
 					cga.TurnTo(54, 161);
-					cga.AsyncWaitMovement({map:'诅咒的迷宫', delay:1000, timeout:5000}, function(r){
+					cga.AsyncWaitMovement({map:'诅咒的迷宫', delay:1000, timeout:5000}, ()=>{
 						setTimeout(wait, 1000);
 					});
 				});
@@ -289,8 +289,8 @@ var cga = require('./cgaapi')(function(){
 			var go2 = ()=>{
 				var retry = ()=>{
 					cga.TurnTo(54, 161);
-					cga.AsyncWaitMovement({map:'诅咒的迷宫', delay:1000, timeout:5000}, function(r){
-						if(!r){
+					cga.AsyncWaitMovement({map:'诅咒的迷宫', delay:1000, timeout:5000}, (err)=>{
+						if(err){
 							cga.walkList([ [54, 162], [55, 162], [54, 162], [55, 162] ], retry);
 							return;
 						}

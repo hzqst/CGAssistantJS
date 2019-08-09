@@ -346,7 +346,5 @@ var cga = require('./cgaapi')(function(){
 	]
 	);
 	
-	task.doTask(()=>{
-		console.log('ok');
-	});
+	task.doTask();
 });
