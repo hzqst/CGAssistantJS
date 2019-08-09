@@ -44,11 +44,11 @@ var cga = require('./cgaapi')(function(){
 				[30, 81, null]
 				], ()=>{
 					cga.TurnTo(30, 79);
-					cga.AsyncWaitNPCDialog(function(dlg){
+					cga.AsyncWaitNPCDialog(()=>{
 						cga.ClickNPCDialog(32, 0);
-						cga.AsyncWaitNPCDialog(function(dlg2){
+						cga.AsyncWaitNPCDialog(()=>{
 							cga.ClickNPCDialog(4, 0);
-							cga.AsyncWaitNPCDialog(function(dlg3){
+							cga.AsyncWaitNPCDialog(()=>{
 								cga.ClickNPCDialog(1, 0);
 								cga.AsyncWaitMovement({map:'追忆之路', delay:1000, timeout:5000}, function(r){
 									cb(true);
@@ -78,42 +78,42 @@ var cga = require('./cgaapi')(function(){
 			cga.EnableFlags(cga.ENABLE_FLAG_JOINTEAM, false);
 			cga.EnableFlags(cga.ENABLE_FLAG_TEAMCHAT, true);
 			
-			cga.AsyncWaitNPCDialog(function(dlg){
+			cga.AsyncWaitNPCDialog(()=>{
 				cga.ClickNPCDialog(1, 0);
 				setTimeout(battleAgain, 5000, ()=>{
 					cga.walkList([
 					[15, 100, null]
 					], ()=>{
 						cga.TurnTo(15, 98);
-						cga.AsyncWaitNPCDialog(function(dlg){
+						cga.AsyncWaitNPCDialog(()=>{
 							cga.ClickNPCDialog(1, 0);
 							setTimeout(battleAgain, 5000, ()=>{
 								cga.walkList([
 								[15, 89, null]
 								], ()=>{
 									cga.TurnTo(15, 87);
-									cga.AsyncWaitNPCDialog(function(dlg){
+									cga.AsyncWaitNPCDialog(()=>{
 										cga.ClickNPCDialog(1, 0);
 										setTimeout(battleAgain, 5000, ()=>{
 											cga.walkList([
 											[15, 78, null]
 											], ()=>{
 												cga.TurnTo(15, 76);
-												cga.AsyncWaitNPCDialog(function(dlg){
+												cga.AsyncWaitNPCDialog(()=>{
 													cga.ClickNPCDialog(1, 0);
 													setTimeout(battleAgain, 5000, ()=>{
 														cga.walkList([
 														[15, 67, null]
 														], ()=>{
 															cga.TurnTo(15, 67);
-															cga.AsyncWaitNPCDialog(function(dlg){
+															cga.AsyncWaitNPCDialog(()=>{
 																cga.ClickNPCDialog(1, 0);
 																setTimeout(battleAgain, 5000, ()=>{
 																	cga.walkList([
 																	[15, 56, null]
 																	], ()=>{
 																		cga.TurnTo(15, 54);
-																		cga.AsyncWaitNPCDialog(function(dlg){
+																		cga.AsyncWaitNPCDialog(()=>{
 																			cga.ClickNPCDialog(1, 0);
 																			setTimeout(battleAgain, 5000, ()=>{
 																				cga.walkList([
@@ -124,9 +124,9 @@ var cga = require('./cgaapi')(function(){
 																				[15, 5, null],
 																				], ()=>{
 																					cga.TurnTo(15, 4);
-																					cga.AsyncWaitNPCDialog(function(dlg){
+																					cga.AsyncWaitNPCDialog(()=>{
 																						cga.ClickNPCDialog(32, 0);
-																						cga.AsyncWaitNPCDialog(function(dlg){
+																						cga.AsyncWaitNPCDialog(()=>{
 																							cga.ClickNPCDialog(1, 0);
 																							setTimeout(cb, 1000, true);
 																						});
@@ -173,9 +173,9 @@ var cga = require('./cgaapi')(function(){
 			
 			setTimeout(waitToEnd, 5000, ()=>{
 				cga.TurnTo(15, 4);
-				cga.AsyncWaitNPCDialog(function(dlg){
+				cga.AsyncWaitNPCDialog(()=>{
 					cga.ClickNPCDialog(32, 0);
-					cga.AsyncWaitNPCDialog(function(dlg){
+					cga.AsyncWaitNPCDialog(()=>{
 						cga.ClickNPCDialog(1, 0);
 						setTimeout(cb, 1000, true);
 					});

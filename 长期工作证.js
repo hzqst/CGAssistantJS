@@ -8,11 +8,11 @@ var cga = require('./cgaapi')(function(){
 			[231, 83, null],
 			], ()=>{
 				cga.TurnTo(233, 83);
-				cga.AsyncWaitNPCDialog((dlg)=>{
+				cga.AsyncWaitNPCDialog(()=>{
 					cga.ClickNPCDialog(32, 0);
-					cga.AsyncWaitNPCDialog((dlg)=>{
+					cga.AsyncWaitNPCDialog(()=>{
 						cga.ClickNPCDialog(32, 0);
-						cga.AsyncWaitNPCDialog((dlg)=>{
+						cga.AsyncWaitNPCDialog(()=>{
 							cga.ClickNPCDialog(4, 0);
 							cga.walkList([
 							[230, 82, null],
@@ -30,29 +30,29 @@ var cga = require('./cgaapi')(function(){
 	
 	var retryRoutine = (cb) => {
 		cga.TurnTo(38, 7);
-		cga.AsyncWaitNPCDialog((dlg)=>{
+		cga.AsyncWaitNPCDialog(()=>{
 			cga.ClickNPCDialog(32, 0);
-			cga.AsyncWaitNPCDialog((dlg)=>{
+			cga.AsyncWaitNPCDialog(()=>{
 				cga.ClickNPCDialog(32, 0);
-				cga.AsyncWaitNPCDialog((dlg)=>{
+				cga.AsyncWaitNPCDialog(()=>{
 					cga.ClickNPCDialog(4, 0);
-					cga.AsyncWaitNPCDialog((dlg)=>{
-						if(dlg.message.indexOf('适当休息') >= 0){
+					cga.AsyncWaitNPCDialog((err, dlg)=>{
+						if(dlg && dlg.message.indexOf('适当休息') >= 0){
 							cb(false, new Error('已经领完可以领取的所有包裹！'));
 							return;
 						}
 						cga.ClickNPCDialog(32, 0);
-						cga.AsyncWaitNPCDialog((dlg)=>{
-							if(dlg.message.indexOf('伊尔村') >= 0 &&
+						cga.AsyncWaitNPCDialog((err, dlg)=>{
+							if(dlg && dlg.message.indexOf('伊尔村') >= 0 &&
 							dlg.message.indexOf('圣拉鲁卡村') >= 0 &&
 							dlg.message.indexOf('维诺亚村') >= 0 &&
 							dlg.message.indexOf('奇利村') >= 0 &&
 							dlg.message.indexOf('加纳村') >= 0
 							){
 								cga.ClickNPCDialog(32, 0);
-								cga.AsyncWaitNPCDialog((dlg)=>{
+								cga.AsyncWaitNPCDialog(()=>{
 									cga.ClickNPCDialog(4, 0);
-									cga.AsyncWaitNPCDialog((dlg)=>{
+									cga.AsyncWaitNPCDialog(()=>{
 										cga.ClickNPCDialog(1, 0);
 										if(cga.getItemCount('蜗牛的包裹') > 0)
 											cb(true);
@@ -72,7 +72,7 @@ var cga = require('./cgaapi')(function(){
 	}
 	
 	var stage1 = (cb)=>{
-		cga.travel.falan.toYiErCun((r)=>{
+		cga.travel.falan.toTeleRoom('伊尔村', (r)=>{
 			cga.walkList([
 				[12, 17, '村长的家'],
 				[6, 13, '伊尔村'],
@@ -86,7 +86,7 @@ var cga = require('./cgaapi')(function(){
 	}
 	
 	var stage2 = (cb)=>{
-		cga.travel.falan.toShengLaLuKaCun((r)=>{
+		cga.travel.falan.toTeleRoom('圣拉鲁卡村', (r)=>{
 			cga.walkList([
 				[8, 4, null],
 				[7, 3, '村长的家'],
@@ -101,7 +101,7 @@ var cga = require('./cgaapi')(function(){
 	}
 	
 	var stage3 = (cb)=>{
-		cga.travel.falan.toWeiNuoYa((r)=>{
+		cga.travel.falan.toTeleRoom('维诺亚村', (r)=>{
 			cga.walkList([
 				[5, 1, '村长家的小房间'],
 				[0, 5, '村长的家'],
@@ -116,7 +116,7 @@ var cga = require('./cgaapi')(function(){
 	}
 	
 	var stage4 = (cb)=>{
-		cga.travel.falan.toQiLiCun((r)=>{
+		cga.travel.falan.toTeleRoom('奇利村', (r)=>{
 			cga.walkList([
 			[7, 6, 3214],
 			[7, 1, 3212],
@@ -131,7 +131,7 @@ var cga = require('./cgaapi')(function(){
 	}
 	
 	var stage5 = (cb)=>{
-		cga.travel.falan.toJiaNaCun((r)=>{
+		cga.travel.falan.toTeleRoom('加纳村', (r)=>{
 			cga.walkList([
 			[5, 12, '村长的家'],
 			[1, 9, '加纳村'],
@@ -139,7 +139,7 @@ var cga = require('./cgaapi')(function(){
 			[704, 148],
 			], function(r){
 				cga.TurnTo(706, 148);
-				cga.AsyncWaitNPCDialog((dlg)=>{
+				cga.AsyncWaitNPCDialog(()=>{
 					if(cga.GetPlayerInfo().punchclock >= 3600)
 						cga.ClickNPCDialog(4, 0);
 					else

@@ -18,11 +18,11 @@ var cga = require('./cgaapi')(function(){
 				[53, 23],
 				], ()=>{
 					cga.TurnTo(53, 21);
-					cga.AsyncWaitNPCDialog((dlg)=>{
+					cga.AsyncWaitNPCDialog(()=>{
 						cga.ClickNPCDialog(32, 0);
-						cga.AsyncWaitNPCDialog((dlg)=>{
+						cga.AsyncWaitNPCDialog(()=>{
 							cga.ClickNPCDialog(4, 0);
-							cga.AsyncWaitNPCDialog((dlg)=>{
+							cga.AsyncWaitNPCDialog(()=>{
 								cga.ClickNPCDialog(1, 0);
 								setTimeout(cb2, 1500, true);
 							});
@@ -39,7 +39,7 @@ var cga = require('./cgaapi')(function(){
 			//补血
 			cga.travel.falan.toCastleHospital(()=>{
 				setTimeout(()=>{
-					cga.travel.falan.toABNSCun(()=>{//去莎莲娜西方洞窟
+					cga.travel.falan.toTeleRoom('阿巴尼斯村', ()=>{
 						cga.walkList([
 						[5, 4, '村长的家'],
 						[6, 13, 4312],
@@ -51,9 +51,9 @@ var cga = require('./cgaapi')(function(){
 						[13, 11],
 						], ()=>{
 							cga.TurnTo(13, 9);
-							cga.AsyncWaitNPCDialog((dlg)=>{
+							cga.AsyncWaitNPCDialog(()=>{
 								cga.ClickNPCDialog(32, 0);
-								cga.AsyncWaitNPCDialog((dlg)=>{
+								cga.AsyncWaitNPCDialog(()=>{
 									cga.ClickNPCDialog(1, 0);
 									setTimeout(cb2, 1000, true);
 								});
@@ -124,7 +124,7 @@ var cga = require('./cgaapi')(function(){
 												[13, 6]
 												], ()=>{
 													cga.TurnTo(13, 4);
-													cga.AsyncWaitNPCDialog((dlg)=>{
+													cga.AsyncWaitNPCDialog(()=>{
 														cga.ClickNPCDialog(4, 0);
 														setTimeout(cb2, 1000, true);
 													});
@@ -151,9 +151,9 @@ var cga = require('./cgaapi')(function(){
 						[53, 23],
 						], ()=>{
 							cga.TurnTo(53, 21);
-							cga.AsyncWaitNPCDialog((dlg)=>{
+							cga.AsyncWaitNPCDialog(()=>{
 								cga.ClickNPCDialog(32, 0);
-								cga.AsyncWaitNPCDialog((dlg)=>{
+								cga.AsyncWaitNPCDialog(()=>{
 									cga.ClickNPCDialog(1, 0);
 									setTimeout(cb2, 1500, true);
 								});
@@ -184,7 +184,7 @@ var cga = require('./cgaapi')(function(){
 						[20, 18],
 					], ()=>{
 						cga.TurnTo(20, 16);
-						cga.AsyncWaitNPCDialog((dlg)=>{
+						cga.AsyncWaitNPCDialog(()=>{
 							cga.ClickNPCDialog(1, 0);
 							setTimeout(waitBOSS, 1500);
 						});
@@ -228,11 +228,11 @@ var cga = require('./cgaapi')(function(){
 		intro: '6.战斗胜利后与饥饿的贝尔对话，获得【签名】并传送出贝尔的隐居地。',
 		workFunc: function(cb2){
 			cga.TurnTo(20, 16);
-			cga.AsyncWaitNPCDialog((dlg)=>{
+			cga.AsyncWaitNPCDialog(()=>{
 				cga.ClickNPCDialog(32, 0);
-				cga.AsyncWaitNPCDialog((dlg)=>{
+				cga.AsyncWaitNPCDialog(()=>{
 					cga.ClickNPCDialog(32, 0);
-					cga.AsyncWaitNPCDialog((dlg)=>{
+					cga.AsyncWaitNPCDialog(()=>{
 						cga.ClickNPCDialog(1, 0);
 						setTimeout(cb2, 1000, true);
 					});

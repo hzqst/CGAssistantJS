@@ -47,18 +47,18 @@ var cga = require('./cgaapi')(function(){
 			[21, 96],
 			], ()=>{
 				cga.TurnTo(23, 96);
-				cga.AsyncWaitNPCDialog((dlg)=>{
+				cga.AsyncWaitNPCDialog(()=>{
 					cga.ClickNPCDialog(4, 0);
-					cga.AsyncWaitNPCDialog((dlg)=>{
+					cga.AsyncWaitNPCDialog(()=>{
 						cga.ClickNPCDialog(32, 0);
-						cga.AsyncWaitNPCDialog((dlg)=>{
+						cga.AsyncWaitNPCDialog(()=>{
 							cga.ClickNPCDialog(1, 0);
 							cga.AsyncWaitMovement({x:28, y:96, delay:1000, timeout:5000}, ()=>{
 								cga.walkList([
 								[58, 92],
 								], ()=>{
 									cga.TurnTo(58, 94);
-									cga.AsyncWaitNPCDialog((dlg)=>{
+									cga.AsyncWaitNPCDialog(()=>{
 										cga.ClickNPCDialog(1, 0);
 										cga.AsyncWaitMovement({x:75, y:93, delay:1000, timeout:5000}, ()=>{
 											cga.walkList([
@@ -69,7 +69,7 @@ var cga = require('./cgaapi')(function(){
 													[163, 77],
 													], ()=>{
 														cga.TurnTo(165, 77);
-														cga.AsyncWaitNPCDialog((dlg)=>{
+														cga.AsyncWaitNPCDialog(()=>{
 															cga.ClickNPCDialog(1, 0);
 															cga.AsyncWaitMovement({map:'白色方舟·第二层', delay:1000, timeout:5000}, cb);
 														});
@@ -94,7 +94,7 @@ var cga = require('./cgaapi')(function(){
 					[152, 88],
 					], ()=>{
 						cga.TurnTo(154, 88);
-						cga.AsyncWaitNPCDialog((dlg)=>{
+						cga.AsyncWaitNPCDialog(()=>{
 							cga.ClickNPCDialog(1, 0);
 							cga.AsyncWaitMovement({map:'白色方舟·第三层', delay:1000, timeout:5000}, cb);
 						});
@@ -111,7 +111,7 @@ var cga = require('./cgaapi')(function(){
 					[88, 40],
 					], ()=>{
 						cga.TurnTo(90, 40);
-						cga.AsyncWaitNPCDialog((dlg)=>{
+						cga.AsyncWaitNPCDialog(()=>{
 							cga.ClickNPCDialog(1, 0);
 							cga.AsyncWaitMovement({map:'白色方舟·第四层', delay:1000, timeout:5000}, cb);
 						});
@@ -138,18 +138,18 @@ var cga = require('./cgaapi')(function(){
 			[21, 108],
 			], ()=>{
 				cga.TurnTo(23, 108);
-				cga.AsyncWaitNPCDialog((dlg)=>{
+				cga.AsyncWaitNPCDialog(()=>{
 					cga.ClickNPCDialog(4, 0);
-					cga.AsyncWaitNPCDialog((dlg)=>{
+					cga.AsyncWaitNPCDialog(()=>{
 						cga.ClickNPCDialog(32, 0);
-						cga.AsyncWaitNPCDialog((dlg)=>{
+						cga.AsyncWaitNPCDialog(()=>{
 							cga.ClickNPCDialog(1, 0);
 							cga.AsyncWaitMovement({x:28, y:108, delay:1000, timeout:5000}, ()=>{
 								cga.walkList([
 								[60, 141],
 								], ()=>{
 									cga.TurnTo(60, 142);
-									cga.AsyncWaitNPCDialog((dlg)=>{
+									cga.AsyncWaitNPCDialog(()=>{
 										cga.ClickNPCDialog(1, 0);
 										cga.AsyncWaitMovement({x:74, y:141, delay:1000, timeout:5000}, ()=>{
 											cga.walkList([
@@ -160,7 +160,7 @@ var cga = require('./cgaapi')(function(){
 													[147, 138],
 													], ()=>{
 														cga.TurnTo(149, 136);
-														cga.AsyncWaitNPCDialog((dlg)=>{
+														cga.AsyncWaitNPCDialog(()=>{
 															cga.ClickNPCDialog(1, 0);
 															cga.AsyncWaitMovement({map:'白色方舟·第二层', delay:1000, timeout:5000}, cb);
 														});
@@ -185,7 +185,7 @@ var cga = require('./cgaapi')(function(){
 					[152, 108],
 					], ()=>{
 						cga.TurnTo(154, 108);
-						cga.AsyncWaitNPCDialog((dlg)=>{
+						cga.AsyncWaitNPCDialog(()=>{
 							cga.ClickNPCDialog(1, 0);
 							cga.AsyncWaitMovement({map:'白色方舟·第三层', delay:1000, timeout:5000}, cb);
 						});
@@ -202,7 +202,7 @@ var cga = require('./cgaapi')(function(){
 					[37, 121],
 					], ()=>{
 						cga.TurnTo(37, 119);
-						cga.AsyncWaitNPCDialog((dlg)=>{
+						cga.AsyncWaitNPCDialog(()=>{
 							cga.ClickNPCDialog(1, 0);
 							cga.AsyncWaitMovement({map:'白色方舟·第四层', delay:1000, timeout:5000}, cb);
 						});
@@ -229,18 +229,18 @@ var cga = require('./cgaapi')(function(){
 			[21, 92],
 			], ()=>{
 				cga.TurnTo(23, 92);
-				cga.AsyncWaitNPCDialog((dlg)=>{
+				cga.AsyncWaitNPCDialog(()=>{
 					cga.ClickNPCDialog(4, 0);
-					cga.AsyncWaitNPCDialog((dlg)=>{
+					cga.AsyncWaitNPCDialog(()=>{
 						cga.ClickNPCDialog(32, 0);
-						cga.AsyncWaitNPCDialog((dlg)=>{
+						cga.AsyncWaitNPCDialog(()=>{
 							cga.ClickNPCDialog(1, 0);
 							cga.AsyncWaitMovement({x:28, y:92, delay:1000, timeout:5000}, ()=>{
 								cga.walkList([
 								[59, 63],
 								], ()=>{
 									cga.TurnTo(61, 63);
-									cga.AsyncWaitNPCDialog((dlg)=>{
+									cga.AsyncWaitNPCDialog(()=>{
 										cga.ClickNPCDialog(1, 0);
 										cga.AsyncWaitMovement({x:75, y:57, delay:1000, timeout:5000}, ()=>{
 											cga.walkList([
@@ -251,7 +251,7 @@ var cga = require('./cgaapi')(function(){
 													[136, 48],
 													], ()=>{
 														cga.TurnTo(138, 48);
-														cga.AsyncWaitNPCDialog((dlg)=>{
+														cga.AsyncWaitNPCDialog(()=>{
 															cga.ClickNPCDialog(1, 0);
 															cga.AsyncWaitMovement({map:'白色方舟·第二层', delay:1000, timeout:5000}, cb);
 														});
@@ -276,7 +276,7 @@ var cga = require('./cgaapi')(function(){
 					[84, 88],
 					], ()=>{
 						cga.TurnTo(86, 88);
-						cga.AsyncWaitNPCDialog((dlg)=>{
+						cga.AsyncWaitNPCDialog(()=>{
 							cga.ClickNPCDialog(1, 0);
 							cga.AsyncWaitMovement({map:'白色方舟·第三层', delay:1000, timeout:5000}, cb);
 						});
@@ -293,7 +293,7 @@ var cga = require('./cgaapi')(function(){
 					[101, 17],
 					], ()=>{
 						cga.TurnTo(101, 15);
-						cga.AsyncWaitNPCDialog((dlg)=>{
+						cga.AsyncWaitNPCDialog(()=>{
 							cga.ClickNPCDialog(1, 0);
 							cga.AsyncWaitMovement({map:'白色方舟·第四层', delay:1000, timeout:5000}, cb);
 						});
@@ -320,18 +320,18 @@ var cga = require('./cgaapi')(function(){
 			[21, 104],
 			], ()=>{
 				cga.TurnTo(23, 104);
-				cga.AsyncWaitNPCDialog((dlg)=>{
+				cga.AsyncWaitNPCDialog(()=>{
 					cga.ClickNPCDialog(4, 0);
-					cga.AsyncWaitNPCDialog((dlg)=>{
+					cga.AsyncWaitNPCDialog(()=>{
 						cga.ClickNPCDialog(32, 0);
-						cga.AsyncWaitNPCDialog((dlg)=>{
+						cga.AsyncWaitNPCDialog(()=>{
 							cga.ClickNPCDialog(1, 0);
 							cga.AsyncWaitMovement({x:28, y:104, delay:1000, timeout:5000}, ()=>{
 								cga.walkList([
 								[60, 121],
 								], ()=>{
 									cga.TurnTo(60, 123);
-									cga.AsyncWaitNPCDialog((dlg)=>{
+									cga.AsyncWaitNPCDialog(()=>{
 										cga.ClickNPCDialog(1, 0);
 										cga.AsyncWaitMovement({x:75, y:121, delay:1000, timeout:5000}, ()=>{
 											cga.walkList([
@@ -342,7 +342,7 @@ var cga = require('./cgaapi')(function(){
 													[164, 110],
 													], ()=>{
 														cga.TurnTo(164, 108);
-														cga.AsyncWaitNPCDialog((dlg)=>{
+														cga.AsyncWaitNPCDialog(()=>{
 															cga.ClickNPCDialog(1, 0);
 															cga.AsyncWaitMovement({map:'白色方舟·第二层', delay:1000, timeout:5000}, cb);
 														});
@@ -435,13 +435,13 @@ var cga = require('./cgaapi')(function(){
 				[35, 96],
 				], ()=>{
 					cga.TurnTo(35, 94);
-					cga.AsyncWaitNPCDialog((dlg)=>{
+					cga.AsyncWaitNPCDialog(()=>{
 						cga.ClickNPCDialog(4, 0);
-						cga.AsyncWaitNPCDialog((dlg)=>{
+						cga.AsyncWaitNPCDialog(()=>{
 							cga.ClickNPCDialog(32, 0);
-							cga.AsyncWaitNPCDialog((dlg)=>{
+							cga.AsyncWaitNPCDialog(()=>{
 								cga.ClickNPCDialog(32, 0);
-								cga.AsyncWaitNPCDialog((dlg)=>{
+								cga.AsyncWaitNPCDialog(()=>{
 									cga.ClickNPCDialog(1, 0);
 									cga.AsyncWaitMovement({map:'辛梅尔', delay:1000, timeout:5000}, ()=>{
 										cga.walkList([
@@ -449,7 +449,7 @@ var cga = require('./cgaapi')(function(){
 										[165, 82]
 										], ()=>{
 											cga.TurnTo(165, 80);
-											cga.AsyncWaitNPCDialog((dlg)=>{
+											cga.AsyncWaitNPCDialog(()=>{
 												cga.ClickNPCDialog(4, 0);
 												cga.AsyncWaitMovement({map:'白色方舟·第一层', delay:1000, timeout:5000}, cb2);
 											});

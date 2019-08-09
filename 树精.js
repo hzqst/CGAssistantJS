@@ -42,9 +42,9 @@ var cga = require('./cgaapi')(function(){
 						
 			var go_1 = ()=>{
 				cga.TurnTo(7, 5);
-				cga.AsyncWaitNPCDialog((dlg)=>{
+				cga.AsyncWaitNPCDialog(()=>{
 					cga.ClickNPCDialog(4, 0);
-					cga.AsyncWaitNPCDialog((dlg)=>{
+					cga.AsyncWaitNPCDialog(()=>{
 						cga.ClickNPCDialog(1, 0);
 						cga.SayWords('拿火把，完成请加队然后说“1”！', 0, 3, 1);
 						setTimeout(()=>{
@@ -91,13 +91,13 @@ var cga = require('./cgaapi')(function(){
 
 				var retry = ()=>{
 					cga.TurnTo(7, 5);
-					cga.AsyncWaitNPCDialog((dlg)=>{
-						if(dlg instanceof TypeError){
+					cga.AsyncWaitNPCDialog((err)=>{
+						if(err){
 							retry();
 							return;
 						}
 						cga.ClickNPCDialog(4, 0);
-						cga.AsyncWaitNPCDialog((dlg)=>{
+						cga.AsyncWaitNPCDialog(()=>{
 							cga.ClickNPCDialog(1, 0);
 							setTimeout(()=>{
 								cga.WalkTo(5, 5);
@@ -132,14 +132,12 @@ var cga = require('./cgaapi')(function(){
 			}
 			
 			if(cga.isTeamLeader){
-				cga.travel.falan.toWeiNuoYa(()=>{
-					wait();
-				});
+				cga.travel.falan.toTeleRoom('维诺亚村', wait);
 			} else {
 				var retry = ()=>{
 					cga.TurnTo(8, 22);
-					cga.AsyncWaitNPCDialog(function(dlg){
-						if(dlg instanceof TypeError){
+					cga.AsyncWaitNPCDialog(function(err){
+						if(err){
 							cga.walkList([ [9, 23], [9, 22] ], retry);
 							return;
 						}
@@ -252,7 +250,7 @@ var cga = require('./cgaapi')(function(){
 					}
 					setTimeout(()=>{
 						cga.TurnTo(26, 12);
-						cga.AsyncWaitNPCDialog((dlg)=>{
+						cga.AsyncWaitNPCDialog(()=>{
 							cga.SayWords('拿到树苗后请自行完成后续任务！前往法兰城凯蒂夫人的店，鉴定树苗并将其交给维诺亚村村长的家“村长卡丹”，即可完成任务！', 0, 3, 1);
 							setTimeout(cb2, 1000, true);
 						});
@@ -269,8 +267,8 @@ var cga = require('./cgaapi')(function(){
 					}
 					setTimeout(()=>{
 						cga.TurnTo(26, 12);
-						cga.AsyncWaitNPCDialog((dlg)=>{
-							if(dlg instanceof TypeError){
+						cga.AsyncWaitNPCDialog((err)=>{
+							if(err){
 								cga.walkList([ [26, 13], [27, 13] ], retry);
 								return;
 							}
@@ -301,9 +299,9 @@ var cga = require('./cgaapi')(function(){
 				], ()=>{
 						var itemArray = cga.findItemArray('树苗？');
 						cga.TurnTo(16, 12);
-						cga.AsyncWaitNPCDialog(function(dlg){
+						cga.AsyncWaitNPCDialog(()=>{
 							cga.SellNPCStore(itemArray);
-							cga.AsyncWaitNPCDialog(function(dlg3){
+							cga.AsyncWaitNPCDialog(()=>{
 								cb2(true);
 							});
 						});
@@ -314,16 +312,16 @@ var cga = require('./cgaapi')(function(){
 	{//4
 		intro: '7.前往维诺亚村村长的家（40.36）与村长卡丹（16.7）对话，选“是”交出【生命之花】获得晋阶资格，任务完结。',
 		workFunc: function(cb2){
-			cga.travel.falan.toWeiNuoYa(()=>{
+			cga.travel.falan.toTeleRoom('维诺亚村', ()=>{
 				cga.walkList([
 				[5, 1, '村长家的小房间'],
 				[0, 5, '村长的家'],
 				[15, 8],
 				], ()=>{
 					cga.TurnTo(16, 7);
-					cga.AsyncWaitNPCDialog(function(dlg){
+					cga.AsyncWaitNPCDialog(()=>{
 						cga.ClickNPCDialog(4, 0);
-						cga.AsyncWaitNPCDialog(function(dlg3){
+						cga.AsyncWaitNPCDialog(()=>{
 							cb2(true);
 						});
 					});

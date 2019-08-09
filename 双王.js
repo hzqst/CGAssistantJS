@@ -43,17 +43,17 @@ var cga = require('./cgaapi')(function(){
 			
 			var go_1 = ()=>{
 				cga.TurnTo(14, 10);
-				cga.AsyncWaitNPCDialog((dlg)=>{
+				cga.AsyncWaitNPCDialog(()=>{
 					cga.ClickNPCDialog(32, 0);
-					cga.AsyncWaitNPCDialog((dlg)=>{
+					cga.AsyncWaitNPCDialog(()=>{
 						cga.ClickNPCDialog(32, 0);
-						cga.AsyncWaitNPCDialog((dlg)=>{
+						cga.AsyncWaitNPCDialog(()=>{
 							cga.ClickNPCDialog(32, 0);
-							cga.AsyncWaitNPCDialog((dlg)=>{
+							cga.AsyncWaitNPCDialog(()=>{
 								cga.ClickNPCDialog(4, 0);
-								cga.AsyncWaitNPCDialog((dlg)=>{
+								cga.AsyncWaitNPCDialog(()=>{
 									cga.ClickNPCDialog(32, 0);
-									cga.AsyncWaitNPCDialog((dlg)=>{
+									cga.AsyncWaitNPCDialog(()=>{
 										cga.ClickNPCDialog(1, 0);
 										setTimeout(()=>{ 
 											cga.SayWords('拿野草莓，然后传送至民家地下，与帕鲁凯斯对话获得“刀刃的碎片”。然后返回民家与队长重新组队！', 0, 3, 1);
@@ -89,21 +89,21 @@ var cga = require('./cgaapi')(function(){
 			var go2 = ()=>{
 				var retry = ()=>{
 					cga.TurnTo(14, 10);
-					cga.AsyncWaitNPCDialog((dlg)=>{
-						if(dlg instanceof TypeError){
+					cga.AsyncWaitNPCDialog((err)=>{
+						if(err){
 							cga.walkList([ [13, 11], [13, 10] ], retry);
 							return;
 						}
 						cga.ClickNPCDialog(32, 0);
-						cga.AsyncWaitNPCDialog((dlg)=>{
+						cga.AsyncWaitNPCDialog(()=>{
 							cga.ClickNPCDialog(32, 0);
-							cga.AsyncWaitNPCDialog((dlg)=>{
+							cga.AsyncWaitNPCDialog(()=>{
 								cga.ClickNPCDialog(32, 0);
-								cga.AsyncWaitNPCDialog((dlg)=>{
+								cga.AsyncWaitNPCDialog(()=>{
 									cga.ClickNPCDialog(4, 0);
-									cga.AsyncWaitNPCDialog((dlg)=>{
+									cga.AsyncWaitNPCDialog(()=>{
 										cga.ClickNPCDialog(32, 0);
-										cga.AsyncWaitNPCDialog((dlg)=>{
+										cga.AsyncWaitNPCDialog(()=>{
 											cga.ClickNPCDialog(1, 0);
 											setTimeout(cb2, 1500, true);
 										});
@@ -141,8 +141,8 @@ var cga = require('./cgaapi')(function(){
 			var wait2 = ()=>{
 				var retry = ()=>{
 					cga.TurnTo(38, 4);
-					cga.AsyncWaitNPCDialog(function(dlg){
-						if(dlg instanceof TypeError){
+					cga.AsyncWaitNPCDialog(function(err){
+						if(err){
 							cga.walkList([ [37, 5], [37, 4] ], retry);
 							return;
 						}
@@ -155,7 +155,7 @@ var cga = require('./cgaapi')(function(){
 			}
 			
 			if(cga.isTeamLeader){
-				cga.travel.falan.toABNSCun(()=>{
+				cga.travel.falan.toTeleRoom('阿巴尼斯村', ()=>{
 					wait();
 				});
 			} else {
@@ -197,21 +197,21 @@ var cga = require('./cgaapi')(function(){
 				[9, 5],				
 				], ()=>{
 					cga.TurnTo(9, 4);
-					cga.AsyncWaitNPCDialog((dlg)=>{
+					cga.AsyncWaitNPCDialog(()=>{
 						cga.ClickNPCDialog(1, 0);
 						cga.AsyncWaitMovement({map:4331, delay:1000, timeout:5000}, function(r){
 							cga.walkList([
 							[14, 7],
 							], ()=>{
 								cga.TurnTo(15, 7);
-								cga.AsyncWaitNPCDialog((dlg)=>{
+								cga.AsyncWaitNPCDialog(()=>{
 									cga.ClickNPCDialog(4, 0);
 									cga.AsyncWaitMovement({map:4332, delay:1000, timeout:5000}, function(r){
 										cga.walkList([
 										[14, 7],
 										], ()=>{
 											cga.TurnTo(15, 7);
-											cga.AsyncWaitNPCDialog((dlg)=>{
+											cga.AsyncWaitNPCDialog(()=>{
 												cga.ClickNPCDialog(1, 0);
 												setTimeout(()=>{
 													cga.walkList([
@@ -220,7 +220,7 @@ var cga = require('./cgaapi')(function(){
 													[14, 10],
 													], ()=>{
 														cga.TurnTo(15, 10);
-														cga.AsyncWaitNPCDialog((dlg)=>{
+														cga.AsyncWaitNPCDialog(()=>{
 															cga.ClickNPCDialog(4, 0);
 															cga.AsyncWaitMovement({map:4335, delay:1000, timeout:5000}, function(r){
 																cga.walkList([
@@ -348,11 +348,11 @@ var cga = require('./cgaapi')(function(){
 			
 			var fuckBOSS = ()=>{
 				cga.TurnTo(22, 14);
-				cga.AsyncWaitNPCDialog((dlg)=>{
+				cga.AsyncWaitNPCDialog((err)=>{
 					if(cga.isInBattle()){
 						return;
 					}
-					if(dlg instanceof TypeError){
+					if(err){
 						return;
 					}
 					cga.ClickNPCDialog(1, 0);
@@ -477,11 +477,11 @@ var cga = require('./cgaapi')(function(){
 			
 			var fuckBOSS = ()=>{
 				cga.TurnTo(26, 17);
-				cga.AsyncWaitNPCDialog((dlg)=>{
+				cga.AsyncWaitNPCDialog((err)=>{
 					if(cga.isInBattle()){
 						return;
 					}
-					if(dlg instanceof TypeError){
+					if(err){
 						return;
 					}
 					cga.ClickNPCDialog(1, 0);
@@ -619,11 +619,11 @@ var cga = require('./cgaapi')(function(){
 			
 			var fuckBOSS = ()=>{
 				cga.TurnTo(20, 21);
-				cga.AsyncWaitNPCDialog((dlg)=>{
+				cga.AsyncWaitNPCDialog((err)=>{
 					if(cga.isInBattle()){
 						return;
 					}
-					if(dlg instanceof TypeError){
+					if(err){
 						return;
 					}
 					cga.ClickNPCDialog(1, 0);
@@ -757,11 +757,11 @@ var cga = require('./cgaapi')(function(){
 			
 			var fuckBOSS = ()=>{
 				cga.TurnTo(15, 18);
-				cga.AsyncWaitNPCDialog((dlg)=>{
+				cga.AsyncWaitNPCDialog((err)=>{
 					if(cga.isInBattle()){
 						return;
 					}
-					if(dlg instanceof TypeError){
+					if(err){
 						return;
 					}
 					cga.ClickNPCDialog(1, 0);
@@ -900,11 +900,11 @@ var cga = require('./cgaapi')(function(){
 			
 			var fuckBOSS = ()=>{
 				cga.TurnTo(22, 14);
-				cga.AsyncWaitNPCDialog((dlg)=>{
+				cga.AsyncWaitNPCDialog((err)=>{
 					if(cga.isInBattle()){
 						return;
 					}
-					if(dlg instanceof TypeError){
+					if(err){
 						return;
 					}
 					cga.ClickNPCDialog(1, 0);
@@ -1009,11 +1009,11 @@ var cga = require('./cgaapi')(function(){
 			
 			var fuckBOSS = ()=>{
 				cga.TurnTo(24, 19);
-				cga.AsyncWaitNPCDialog((dlg)=>{
+				cga.AsyncWaitNPCDialog((err)=>{
 					if(cga.isInBattle()){
 						return;
 					}
-					if(dlg instanceof TypeError){
+					if(err){
 						return;
 					}
 					cga.ClickNPCDialog(1, 0);
@@ -1072,8 +1072,8 @@ var cga = require('./cgaapi')(function(){
 
 			var fuckBOSS = ()=>{
 				cga.TurnTo(21, 12);
-				cga.AsyncWaitNPCDialog((dlg)=>{
-					if(dlg instanceof TypeError){
+				cga.AsyncWaitNPCDialog((err)=>{
+					if(err){
 						fuckBOSS();
 						return;
 					}
@@ -1149,7 +1149,7 @@ var cga = require('./cgaapi')(function(){
 			var index = cga.GetMapIndex().index3;
 			return (index == 24074 || index == 24078) ? true : false;
 		},
-		function(){//shuangwang
+		function(){
 			return false;
 		},
 	]

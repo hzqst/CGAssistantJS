@@ -60,13 +60,13 @@ var cga = require('./cgaapi')(function(){
 				[101, 64, null, null, null, true],
 				], ()=>{
 					cga.TurnTo(102, 64);
-					cga.AsyncWaitNPCDialog((dlg)=>{
+					cga.AsyncWaitNPCDialog(()=>{
 						cga.ClickNPCDialog(32, 0);
-						cga.AsyncWaitNPCDialog((dlg)=>{
+						cga.AsyncWaitNPCDialog(()=>{
 							cga.ClickNPCDialog(32, 0);
-							cga.AsyncWaitNPCDialog((dlg)=>{
+							cga.AsyncWaitNPCDialog(()=>{
 								cga.ClickNPCDialog(4, 0);
-								cga.AsyncWaitNPCDialog((dlg)=>{
+								cga.AsyncWaitNPCDialog(()=>{
 									cga.SayWords('请选择“是”路线，完成请说“1”！', 0, 3, 1);
 								});
 							});
@@ -83,11 +83,11 @@ var cga = require('./cgaapi')(function(){
 				if(name == '雪拉威森塔５２层' && pos.x == 101 && (pos.y == 64 || pos.y == 65)){
 					setTimeout(()=>{
 						cga.TurnTo(102, 64);
-						cga.AsyncWaitNPCDialog((dlg)=>{
+						cga.AsyncWaitNPCDialog(()=>{
 							cga.ClickNPCDialog(32, 0);
-							cga.AsyncWaitNPCDialog((dlg)=>{
+							cga.AsyncWaitNPCDialog(()=>{
 								cga.ClickNPCDialog(32, 0);
-								cga.AsyncWaitNPCDialog((dlg)=>{
+								cga.AsyncWaitNPCDialog(()=>{
 									cga.ClickNPCDialog(4, 0);
 									setTimeout(()=>{
 										cga.SayWords('1', 0, 3, 1);
@@ -119,9 +119,9 @@ var cga = require('./cgaapi')(function(){
 				if(name == '艾尔莎岛' && (pos.x == 164 || pos.x == 165) && pos.y == 153){
 					setTimeout(()=>{
 						cga.TurnTo(165, 154);
-						cga.AsyncWaitNPCDialog((dlg)=>{
+						cga.AsyncWaitNPCDialog(()=>{
 							cga.ClickNPCDialog(32, 0);
-							cga.AsyncWaitNPCDialog((dlg)=>{
+							cga.AsyncWaitNPCDialog(()=>{
 								cga.ClickNPCDialog(4, 0);
 								setTimeout(wait3, 1500);
 							});
@@ -167,7 +167,7 @@ var cga = require('./cgaapi')(function(){
 				[85, 44, null, null, null, true],
 				], ()=>{
 					cga.TurnTo(83, 44);
-					cga.AsyncWaitNPCDialog((dlg)=>{
+					cga.AsyncWaitNPCDialog(()=>{
 						cga.ClickNPCDialog(4, 0);
 						cga.SayWords('请拿取藏宝图，完成请说“1”！', 0, 3, 1);
 					});
@@ -182,7 +182,7 @@ var cga = require('./cgaapi')(function(){
 				if(name == '雪拉威森塔５４层' && pos.x == 85 && (pos.y == 44 || pos.y == 45)){
 					setTimeout(()=>{
 						cga.TurnTo(83, 44);
-						cga.AsyncWaitNPCDialog((dlg)=>{
+						cga.AsyncWaitNPCDialog(()=>{
 							cga.ClickNPCDialog(4, 0);
 							setTimeout(()=>{
 								cga.SayWords('1', 0, 3, 1);
@@ -218,7 +218,7 @@ var cga = require('./cgaapi')(function(){
 				], ()=>{
 					cga.SayWords('跟NPC对话进入即可学习因果报应！', 0, 3, 1);
 					cga.TurnTo(102, 64);
-					cga.AsyncWaitNPCDialog((dlg)=>{
+					cga.AsyncWaitNPCDialog((err, dlg)=>{
 						if(dlg.message.indexOf('请到这边') >= 0){
 							cga.ClickNPCDialog(1, 0);
 							cb2(true);
@@ -233,7 +233,7 @@ var cga = require('./cgaapi')(function(){
 				if(name == '雪拉威森塔５２层' && pos.x == 101 && (pos.y == 64 || pos.y == 65)){
 					setTimeout(()=>{
 						cga.TurnTo(102, 64);
-						cga.AsyncWaitNPCDialog((dlg)=>{
+						cga.AsyncWaitNPCDialog((err, dlg)=>{
 							if(dlg.message.indexOf('请到这边') >= 0){
 								cga.ClickNPCDialog(1, 0);
 								cb2(true);

@@ -102,11 +102,11 @@ var loop = ()=>{
 		[52, 72]
 		], ()=>{
 			cga.TurnTo(54, 72);
-			cga.AsyncWaitNPCDialog((dlg)=>{
+			cga.AsyncWaitNPCDialog(()=>{
 				cga.ClickNPCDialog(32, 0);
-				cga.AsyncWaitNPCDialog((dlg2)=>{
+				cga.AsyncWaitNPCDialog(()=>{
 					cga.ClickNPCDialog(4, 0);
-					cga.AsyncWaitNPCDialog((dlg3)=>{
+					cga.AsyncWaitNPCDialog(()=>{
 						cga.ClickNPCDialog(4, 0);
 						cga.AsyncWaitMovement({map:'过去与现在的回廊', delay:1000, timeout:5000}, loop);
 					});

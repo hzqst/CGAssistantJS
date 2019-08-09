@@ -4,7 +4,7 @@ var configTable = global.configTable;
 var openbox = ()=>{
 	var box = cga.findItem('加强补给品');
 	if(box != -1){
-		cga.AsyncWaitNPCDialog(function(dlg){
+		cga.AsyncWaitNPCDialog(()=>{
 			cga.ClickNPCDialog(4, 0);
 			setTimeout(openbox, 1500);
 		});
@@ -19,36 +19,32 @@ var waitArray = [
 	cb : ()=>{
 		if(cga.getItemCount('龙角') >= 30){
 			cga.TurnTo(475, 208);
-			cga.AsyncWaitNPCDialog(function(dlg){
-				if(typeof dlg.message == 'string' && 
-				dlg.message.indexOf('非常好') >= 0){
+			cga.AsyncWaitNPCDialog((err, dlg)=>{
+				if(dlg && dlg.message.indexOf('非常好') >= 0){
 					cga.ClickNPCDialog(32, 0);
 					cga.AsyncWaitNPCDialog(function(dlg){
 						cga.ClickNPCDialog(1, 0);
 					});
 				}
-				else if(typeof dlg.message == 'string' && 
-				dlg.message.indexOf('滚开') >= 0){
+				else if(dlg && dlg.message.indexOf('滚开') >= 0){
 					openbox();
 				}
-				else if(typeof dlg.message == 'string' && 
-				dlg.message.indexOf('新的增援') >= 0){
+				else if(dlg && dlg.message.indexOf('新的增援') >= 0){
 					cga.ClickNPCDialog(32, 0);
-					cga.AsyncWaitNPCDialog(function(dlg){
+					cga.AsyncWaitNPCDialog(()=>{
 						cga.ClickNPCDialog(32, 0);
-						cga.AsyncWaitNPCDialog(function(dlg){
+						cga.AsyncWaitNPCDialog(()=>{
 							cga.ClickNPCDialog(32, 0);
-							cga.AsyncWaitNPCDialog(function(dlg){
+							cga.AsyncWaitNPCDialog(()=>{
 								cga.ClickNPCDialog(1, 0);
 								
 							});
 						});
 					});
 				}
-				else if(typeof dlg.message == 'string' && 
-				dlg.message.indexOf('哦？不错') >= 0){
+				else if(dlg && dlg.message.indexOf('哦？不错') >= 0){
 					cga.ClickNPCDialog(32, 0);
-					cga.AsyncWaitNPCDialog(function(dlg){
+					cga.AsyncWaitNPCDialog(()=>{
 						cga.ClickNPCDialog(1, 0);
 					});
 				}

@@ -84,7 +84,7 @@ var cga = require('./cgaapi')(function(){
 		
 		var retryNpc = (result)=>{
 			cga.TurnTo(result.xpos, result.ypos);
-			cga.AsyncWaitNPCDialog((dlg)=>{
+			cga.AsyncWaitNPCDialog((err, dlg)=>{
 				if(dlg && dlg.message && (dlg.message.indexOf('已死的主人') >= 0 || dlg.message.indexOf('呼呼呼呼呼') >= 0 || dlg.message.indexOf('嘻嘻嘻嘻嘻嘻') >= 0)){
 					setTimeout(battleAgain, 1000);
 				}
@@ -231,11 +231,11 @@ var cga = require('./cgaapi')(function(){
 				[31, 21],
 				], ()=>{
 					cga.TurnTo(30, 20);
-					cga.AsyncWaitNPCDialog((dlg)=>{
+					cga.AsyncWaitNPCDialog(()=>{
 						cga.SayWords('朵拉', 0, 3, 1);
-						cga.AsyncWaitNPCDialog((dlg)=>{
+						cga.AsyncWaitNPCDialog(()=>{
 							cga.ClickNPCDialog(4, 0);
-							cga.AsyncWaitNPCDialog((dlg)=>{
+							cga.AsyncWaitNPCDialog(()=>{
 								cga.ClickNPCDialog(1, 0);
 								setTimeout(()=>{
 									cb2(true);
@@ -260,19 +260,19 @@ var cga = require('./cgaapi')(function(){
 				[39, 22],
 				], ()=>{
 					cga.TurnTo(39, 20);
-					cga.AsyncWaitNPCDialog((dlg)=>{
+					cga.AsyncWaitNPCDialog(()=>{
 						cga.ClickNPCDialog(32, 0);
-						cga.AsyncWaitNPCDialog((dlg)=>{
+						cga.AsyncWaitNPCDialog(()=>{
 							cga.ClickNPCDialog(32, 0);
-							cga.AsyncWaitNPCDialog((dlg)=>{
+							cga.AsyncWaitNPCDialog(()=>{
 								cga.ClickNPCDialog(32, 0);
-								cga.AsyncWaitNPCDialog((dlg)=>{
+								cga.AsyncWaitNPCDialog(()=>{
 									cga.ClickNPCDialog(32, 0);
-									cga.AsyncWaitNPCDialog((dlg)=>{
+									cga.AsyncWaitNPCDialog(()=>{
 										cga.ClickNPCDialog(32, 0);
-										cga.AsyncWaitNPCDialog((dlg)=>{
+										cga.AsyncWaitNPCDialog(()=>{
 											cga.ClickNPCDialog(32, 0);
-											cga.AsyncWaitNPCDialog((dlg)=>{
+											cga.AsyncWaitNPCDialog(()=>{
 												cga.ClickNPCDialog(1, 0);
 												setTimeout(cb2, 1000, true);
 											});
@@ -309,13 +309,13 @@ var cga = require('./cgaapi')(function(){
 						[131, 61],
 						], ()=>{
 							cga.TurnTo(131, 59);
-							cga.AsyncWaitNPCDialog((dlg)=>{
+							cga.AsyncWaitNPCDialog(()=>{
 								cga.ClickNPCDialog(32, 0);
-								cga.AsyncWaitNPCDialog((dlg)=>{
-									if(dlg.message.indexOf('还不快点') == -1)
+								cga.AsyncWaitNPCDialog((err, dlg)=>{
+									if(dlg && dlg.message.indexOf('还不快点') == -1)
 									{
 										cga.ClickNPCDialog(32, 0);
-										cga.AsyncWaitNPCDialog((dlg)=>{
+										cga.AsyncWaitNPCDialog(()=>{
 											cga.ClickNPCDialog(1, 0);
 											zhanglaozhizheng(cb2);
 										});
@@ -339,11 +339,11 @@ var cga = require('./cgaapi')(function(){
 				if(cga.getItemCount('长老之证') >= 7){
 					console.log('sayshit1');
 					cga.TurnTo(131, 60);
-					cga.AsyncWaitNPCDialog((dlg)=>{
+					cga.AsyncWaitNPCDialog(()=>{
 						cga.ClickNPCDialog(32, 0);
-						cga.AsyncWaitNPCDialog((dlg)=>{
+						cga.AsyncWaitNPCDialog(()=>{
 							cga.ClickNPCDialog(4, 0);
-							cga.AsyncWaitNPCDialog((dlg)=>{
+							cga.AsyncWaitNPCDialog(()=>{
 								cga.ClickNPCDialog(1, 0);
 								cga.waitForLocation({map : '盖雷布伦森林'}, ()=>{
 									cb2(true);
@@ -396,13 +396,13 @@ var cga = require('./cgaapi')(function(){
 				], (r)=>{
 					cga.task.waitForNPC('荷特普', function(){
 						cga.TurnTo(92, 138);
-						cga.AsyncWaitNPCDialog(function(dlg){
+						cga.AsyncWaitNPCDialog(()=>{
 							cga.ClickNPCDialog(32, -1);
-							cga.AsyncWaitNPCDialog(function(dlg2){
+							cga.AsyncWaitNPCDialog(()=>{
 								cga.ClickNPCDialog(32, -1);
-								cga.AsyncWaitNPCDialog(function(dlg2){
+								cga.AsyncWaitNPCDialog(()=>{
 									cga.ClickNPCDialog(32, -1);
-									cga.AsyncWaitNPCDialog(function(dlg2){
+									cga.AsyncWaitNPCDialog(()=>{
 										cga.ClickNPCDialog(1, -1);
 										setTimeout(()=>{
 											cb2(true);
@@ -424,9 +424,9 @@ var cga = require('./cgaapi')(function(){
 					[56, 32],
 				], (r)=>{
 					cga.TurnTo(56, 31);
-					cga.AsyncWaitNPCDialog(function(dlg){
+					cga.AsyncWaitNPCDialog(()=>{
 						cga.ClickNPCDialog(32, -1);
-						cga.AsyncWaitNPCDialog(function(dlg2){
+						cga.AsyncWaitNPCDialog(()=>{
 							cga.ClickNPCDialog(1, -1);
 							setTimeout(()=>{
 								cb2(true);
@@ -454,18 +454,18 @@ var cga = require('./cgaapi')(function(){
 					[165, 153],
 				], (r)=>{
 					cga.TurnTo(165, 154);
-					cga.AsyncWaitNPCDialog(function(dlg){
+					cga.AsyncWaitNPCDialog(()=>{
 						cga.ClickNPCDialog(32, -1);
-						cga.AsyncWaitNPCDialog(function(dlg2){
+						cga.AsyncWaitNPCDialog(()=>{
 							cga.ClickNPCDialog(8, -1);
 							cga.AsyncWaitMovement({map:['梅布尔隘地'], delay:1000, timeout:10000}, function(r){
 								cga.walkList([
 									[211, 117],
 								], (r)=>{
 									cga.TurnTo(212, 116);
-									cga.AsyncWaitNPCDialog(function(dlg){
+									cga.AsyncWaitNPCDialog(()=>{
 										cga.ClickNPCDialog(32, -1);
-										cga.AsyncWaitNPCDialog(function(dlg2){
+										cga.AsyncWaitNPCDialog(()=>{
 											cga.ClickNPCDialog(1, -1);
 											cga.AsyncWaitMovement({map:['？？？'], delay:1000, timeout:10000}, function(r){
 												cb2(r);
@@ -563,21 +563,21 @@ var cga = require('./cgaapi')(function(){
 						[221, 187, null],
 						], ()=>{
 							cga.TurnTo(222, 188);
-							cga.AsyncWaitNPCDialog(function(dlg){
+							cga.AsyncWaitNPCDialog(()=>{
 								cga.ClickNPCDialog(32, -1);
-								cga.AsyncWaitNPCDialog(function(dlg){
+								cga.AsyncWaitNPCDialog(()=>{
 									cga.ClickNPCDialog(32, -1);
-									cga.AsyncWaitNPCDialog(function(dlg){
+									cga.AsyncWaitNPCDialog(()=>{
 										cga.ClickNPCDialog(32, -1);
-										cga.AsyncWaitNPCDialog(function(dlg){
+										cga.AsyncWaitNPCDialog(()=>{
 											cga.ClickNPCDialog(32, -1);
-											cga.AsyncWaitNPCDialog(function(dlg){
+											cga.AsyncWaitNPCDialog(()=>{
 												cga.ClickNPCDialog(32, -1);
-												cga.AsyncWaitNPCDialog(function(dlg){
+												cga.AsyncWaitNPCDialog(()=>{
 													cga.ClickNPCDialog(32, -1);
-													cga.AsyncWaitNPCDialog(function(dlg){
+													cga.AsyncWaitNPCDialog(()=>{
 														cga.ClickNPCDialog(8, -1);
-														cga.AsyncWaitNPCDialog(function(dlg){
+														cga.AsyncWaitNPCDialog(()=>{
 															cga.ClickNPCDialog(1, -1);
 
 															setTimeout(waitBOSS, 1500);															
@@ -605,13 +605,13 @@ var cga = require('./cgaapi')(function(){
 				[244, 74],
 				], ()=>{
 					cga.TurnTo(245, 73);
-					cga.AsyncWaitNPCDialog((dlg)=>{
+					cga.AsyncWaitNPCDialog(()=>{
 						cga.ClickNPCDialog(32, 0);
-						cga.AsyncWaitNPCDialog((dlg)=>{
+						cga.AsyncWaitNPCDialog(()=>{
 							cga.ClickNPCDialog(32, 0);
-							cga.AsyncWaitNPCDialog((dlg)=>{
+							cga.AsyncWaitNPCDialog(()=>{
 								cga.ClickNPCDialog(32, 0);
-								cga.AsyncWaitNPCDialog((dlg)=>{
+								cga.AsyncWaitNPCDialog(()=>{
 									cga.ClickNPCDialog(1, 0);
 									setTimeout(()=>{
 										

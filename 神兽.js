@@ -89,15 +89,13 @@ var cga = require('./cgaapi')(function(){
 				[11, 5],
 				], ()=>{
 					cga.TurnTo(11, 4);
-					cga.AsyncWaitNPCDialog((dlg)=>{
+					cga.AsyncWaitNPCDialog(()=>{
 						cga.ClickNPCDialog(1, 0);
-						cga.AsyncWaitNPCDialog((dlg)=>{
-							cga.AsyncWaitNPCDialog((dlg)=>{
-								cga.SayWords('拿贝兹雷姆之钥，完成请说“1”！', 0, 3, 1);
-								setTimeout(()=>{
-									cga.SayWords('1', 0, 3, 1);
-								}, 1000);							
-							});
+						cga.AsyncWaitNPCDialog(()=>{
+							cga.SayWords('拿贝兹雷姆之钥，完成请说“1”！', 0, 3, 1);
+							setTimeout(()=>{
+								cga.SayWords('1', 0, 3, 1);
+							}, 1000);
 						});
 					});
 				});
@@ -164,9 +162,7 @@ var cga = require('./cgaapi')(function(){
 			}
 			
 			if(cga.isTeamLeader){
-				cga.travel.falan.toJieNuoWa(()=>{
-					wait();
-				});
+				cga.travel.falan.toTeleRoom('杰诺瓦镇', wait);
 			} else {
 				wait2();
 			}

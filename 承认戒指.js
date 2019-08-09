@@ -56,11 +56,11 @@ var cga = require('./cgaapi')(function(){
 				[5, 4],
 				], (r)=>{
 					cga.TurnTo(5, 2);
-					cga.AsyncWaitNPCDialog((dlg)=>{
+					cga.AsyncWaitNPCDialog(()=>{
 						cga.ClickNPCDialog(32, 0);
-						cga.AsyncWaitNPCDialog((dlg)=>{
+						cga.AsyncWaitNPCDialog(()=>{
 							cga.ClickNPCDialog(4, 0);
-							cga.AsyncWaitNPCDialog((dlg)=>{
+							cga.AsyncWaitNPCDialog(()=>{
 								cga.SayWords('请拿取“信笺”，完成请说“1”！', 0, 3, 1)
 							});
 						});
@@ -96,7 +96,7 @@ var cga = require('./cgaapi')(function(){
 					[94, 6],
 				], ()=>{
 					cga.TurnTo(95, 7);
-					cga.AsyncWaitNPCDialog((dlg)=>{
+					cga.AsyncWaitNPCDialog(()=>{
 						cga.ClickNPCDialog(4, 0);
 						cga.SayWords('请换取团长的证明，完成请说“1”！', 0, 3, 1)
 					});
@@ -119,7 +119,7 @@ var cga = require('./cgaapi')(function(){
 			[39, 22],
 			], ()=>{
 				cga.TurnTo(41, 22);
-				cga.AsyncWaitNPCDialog((dlg)=>{
+				cga.AsyncWaitNPCDialog(()=>{
 					cga.ClickNPCDialog(1, 0);
 					setTimeout(()=>{
 						cga.walkList([
@@ -158,7 +158,7 @@ var cga = require('./cgaapi')(function(){
 			[13, 14]
 			], ()=>{
 				cga.TurnTo(14, 14);
-				cga.AsyncWaitNPCDialog((dlg)=>{
+				cga.AsyncWaitNPCDialog(()=>{
 					cga.ClickNPCDialog(1, 0);
 					setTimeout(waitBOSS, 1500);
 				});
@@ -173,9 +173,9 @@ var cga = require('./cgaapi')(function(){
 			[13, 14]
 			], ()=>{
 				cga.TurnTo(14, 14);
-				cga.AsyncWaitNPCDialog((dlg)=>{
+				cga.AsyncWaitNPCDialog(()=>{
 					cga.ClickNPCDialog(32, 0);
-					cga.AsyncWaitNPCDialog((dlg)=>{
+					cga.AsyncWaitNPCDialog(()=>{
 						cga.ClickNPCDialog(1, 0);
 						setTimeout(cb2, 1500, true);
 					});

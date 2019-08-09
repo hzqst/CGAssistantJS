@@ -75,7 +75,7 @@ var mineArray = [
 				[473, 316],
 			], function(r){
 				cga.TurnTo(471, 316);
-				cga.AsyncWaitNPCDialog(function(dlg){
+				cga.AsyncWaitNPCDialog(()=>{
 					cga.ClickNPCDialog(4, -1);
 					cga.AsyncWaitMovement({map:'维诺亚洞穴 地下1楼', delay:1000, timeout:5000}, function(r){
 						cga.walkList([
@@ -97,7 +97,7 @@ var mineArray = [
 				[473, 316],
 			], function(r){
 				cga.TurnTo(471, 316);
-				cga.AsyncWaitNPCDialog(function(dlg){
+				cga.AsyncWaitNPCDialog(()=>{
 					cga.ClickNPCDialog(4, -1);
 					cga.AsyncWaitMovement({map:'维诺亚洞穴 地下1楼', delay:1000, timeout:5000}, function(r){
 						cga.walkList([
@@ -119,7 +119,7 @@ var mineArray = [
 				[473, 316],
 			], function(r){
 				cga.TurnTo(471, 316);
-				cga.AsyncWaitNPCDialog(function(dlg){
+				cga.AsyncWaitNPCDialog(()=>{
 					cga.ClickNPCDialog(4, -1);
 					cga.AsyncWaitMovement({map:'维诺亚洞穴 地下1楼', delay:1000, timeout:5000}, function(r){
 						cga.walkList([

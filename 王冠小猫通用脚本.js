@@ -375,7 +375,7 @@ var cga = require('./cgaapi')(function(){
 			[103, 19],
 			], ()=>{
 				cga.TurnTo(105, 17);
-				cga.AsyncWaitNPCDialog((dlg)=>{
+				cga.AsyncWaitNPCDialog((err, dlg)=>{
 					if(mineObject.type != 3){
 						cga.SayWords(mineObject.type == 1 ? '男' : '女', 0, 3, 1);
 						cga.AsyncWaitNPCDialog((dlg)=>{

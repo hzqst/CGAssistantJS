@@ -6,14 +6,14 @@ var doneArray = [
 	name: '换条存银行',
 	func: (cb, mineObject)=>{
 		cga.travel.falan.toMineStore(mineObject.name, ()=>{
-			cga.AsyncWaitNPCDialog(function(dlg){
+			cga.AsyncWaitNPCDialog(()=>{
 				cga.ClickNPCDialog(0, 0);
-				cga.AsyncWaitNPCDialog(function(dlg2){
+				cga.AsyncWaitNPCDialog(()=>{
 					var exchangeCount = cga.getItemCount(mineObject.name) / 20;
 					var r = cga.BuyNPCStore([{index:0, count:exchangeCount}]);
-					cga.AsyncWaitNPCDialog(function(dlg3){
+					cga.AsyncWaitNPCDialog(()=>{
 						cga.travel.falan.toBank(()=>{
-							cga.AsyncWaitNPCDialog(function(dlg){
+							cga.AsyncWaitNPCDialog(()=>{
 								cga.saveToBankAll(mineObject.name+'条', 20, (r)=>{
 									cb(r);
 								});
@@ -29,7 +29,7 @@ var doneArray = [
 	name: '直接存银行',
 	func: (cb, mineObject)=>{
 		cga.travel.falan.toBank(()=>{
-			cga.AsyncWaitNPCDialog(function(dlg){
+			cga.AsyncWaitNPCDialog(()=>{
 				cga.saveToBankAll(mineObject.name, 20, (r)=>{
 					cb(r);
 				});
@@ -45,9 +45,9 @@ var doneArray = [
 			[30, 79],
 			], ()=>{
 				cga.TurnTo(30, 77);
-				cga.AsyncWaitNPCDialog(function(dlg){			
+				cga.AsyncWaitNPCDialog(()=>{	
 					cga.ClickNPCDialog(0, 0);
-					cga.AsyncWaitNPCDialog(function(dlg2){
+					cga.AsyncWaitNPCDialog(()=>{
 
 						var sell = cga.findItemArray(mineObject.name);
 						var sellArray = sell.map((item)=>{
@@ -73,7 +73,7 @@ var doneArray = [
 						})
 
 						cga.SellNPCStore(sellArray);
-						cga.AsyncWaitNPCDialog(function(dlg3){
+						cga.AsyncWaitNPCDialog(()=>{
 							cga.walkList([
 							[27, 82]
 							], ()=>{

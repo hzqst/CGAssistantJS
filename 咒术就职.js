@@ -53,7 +53,7 @@ var cga = require('./cgaapi')(function(){
 					cga.TurnTo(31, 22);
 					setTimeout(()=>{
 					cga.SayWords('咒术', 0, 3, 1);
-						cga.AsyncWaitNPCDialog((dlg)=>{
+						cga.AsyncWaitNPCDialog(()=>{
 							cga.ClickNPCDialog(1, 0);
 							cga.AsyncWaitMovement({map:15006, delay:1000, timeout:5000}, (r)=>{
 								cga.walkList([
@@ -65,9 +65,9 @@ var cga = require('./cgaapi')(function(){
 								[12, 7],
 								], ()=>{
 									cga.TurnTo(14, 7);
-									cga.AsyncWaitNPCDialog((dlg)=>{
+									cga.AsyncWaitNPCDialog(()=>{
 										cga.ClickNPCDialog(4, 0);
-										cga.AsyncWaitNPCDialog((dlg)=>{
+										cga.AsyncWaitNPCDialog(()=>{
 											cga.SayWords('拿咒器红念珠，完成请说“1”！', 0, 3, 1);
 											setTimeout(()=>{
 												cga.SayWords('1', 0, 3, 1);
@@ -86,13 +86,13 @@ var cga = require('./cgaapi')(function(){
 			var go2 = ()=>{
 				var retry = ()=>{
 					cga.TurnTo(14, 7);
-					cga.AsyncWaitNPCDialog((dlg)=>{
-						if(dlg instanceof TypeError){
+					cga.AsyncWaitNPCDialog((err)=>{
+						if(err){
 							retry();
 							return;
 						}
 						cga.ClickNPCDialog(4, 0);
-						cga.AsyncWaitNPCDialog((dlg)=>{
+						cga.AsyncWaitNPCDialog(()=>{
 							cga.SayWords('1', 0, 3, 1);
 							setTimeout(()=>{								
 								cb2(true);
@@ -117,8 +117,8 @@ var cga = require('./cgaapi')(function(){
 			var wait2 = ()=>{
 				var retry = ()=>{
 					cga.TurnTo(16, 4);
-					cga.AsyncWaitNPCDialog(function(dlg){
-						if(dlg instanceof TypeError){
+					cga.AsyncWaitNPCDialog(function(err){
+						if(err){
 							cga.walkList([ [16, 5], [15, 5] ], retry);
 							return;
 						}
@@ -142,7 +142,7 @@ var cga = require('./cgaapi')(function(){
 			}
 			
 			if(cga.isTeamLeader){
-				cga.travel.falan.toJieNuoWa(()=>{
+				cga.travel.falan.toTeleRoom('杰诺瓦镇', ()=>{
 					wait();
 				});
 			} else {
@@ -162,14 +162,14 @@ var cga = require('./cgaapi')(function(){
 				[35, 2],
 				], ()=>{
 					cga.TurnTo(35, 1);
-					cga.AsyncWaitNPCDialog((dlg)=>{
+					cga.AsyncWaitNPCDialog(()=>{
 						cga.ClickNPCDialog(4, 0);
 						setTimeout(()=>{
 							cga.walkList([
 							[36, 9],
 							], ()=>{
 								cga.TurnTo(36, 10);
-								cga.AsyncWaitNPCDialog((dlg)=>{
+								cga.AsyncWaitNPCDialog(()=>{
 									cga.ClickNPCDialog(4, 0);
 									cga.AsyncWaitMovement({x:36, y:11, delay:1000, timeout:5000}, ()=>{
 										cga.walkList([
@@ -181,14 +181,14 @@ var cga = require('./cgaapi')(function(){
 										[40, 10],
 										], ()=>{
 											cga.TurnTo(41, 10);
-											cga.AsyncWaitNPCDialog((dlg)=>{
+											cga.AsyncWaitNPCDialog(()=>{
 												cga.ClickNPCDialog(4, 0);
 												setTimeout(()=>{
 													cga.walkList([
 													[40,16],
 													], ()=>{
 														cga.TurnTo(40, 17);
-														cga.AsyncWaitNPCDialog((dlg)=>{
+														cga.AsyncWaitNPCDialog(()=>{
 															cga.ClickNPCDialog(4, 0);
 															cga.AsyncWaitMovement({x:40, y:18, delay:1000, timeout:5000}, ()=>{
 																cga.walkList([
@@ -199,7 +199,7 @@ var cga = require('./cgaapi')(function(){
 																[11, 35],
 																], ()=>{
 																	cga.TurnTo(12, 35);
-																	cga.AsyncWaitNPCDialog((dlg)=>{
+																	cga.AsyncWaitNPCDialog(()=>{
 																		cga.ClickNPCDialog(4, 0);
 																		setTimeout(()=>{
 																			cga.walkList([
@@ -207,7 +207,7 @@ var cga = require('./cgaapi')(function(){
 																			[23, 20],
 																			], ()=>{
 																				cga.TurnTo(23, 19);
-																				cga.AsyncWaitNPCDialog((dlg)=>{
+																				cga.AsyncWaitNPCDialog(()=>{
 																					cga.ClickNPCDialog(4, 0);
 																					cga.AsyncWaitMovement({x:23, y:18, delay:1000, timeout:5000}, ()=>{
 																						cga.walkList([
@@ -273,9 +273,9 @@ var cga = require('./cgaapi')(function(){
 		intro: '9.与罗蕾儿（23.10）对话，选“是”获得【神器·紫念珠】。再次与罗蕾儿对话传送回豪宅（32.45）处。',
 		workFunc: function(cb2){
 			cga.TurnTo(23, 10);
-			cga.AsyncWaitNPCDialog((dlg)=>{
+			cga.AsyncWaitNPCDialog((err)=>{
 				
-				if(dlg instanceof TypeError){
+				if(err){
 					cga.walkList([ [23, 11], [22, 11] ], ()=>{
 						cb2('restart stage');
 					});
@@ -283,9 +283,9 @@ var cga = require('./cgaapi')(function(){
 				}
 				
 				cga.ClickNPCDialog(32, 0);
-				cga.AsyncWaitNPCDialog((dlg)=>{
+				cga.AsyncWaitNPCDialog(()=>{
 					cga.ClickNPCDialog(32, 0);
-					cga.AsyncWaitNPCDialog((dlg)=>{
+					cga.AsyncWaitNPCDialog(()=>{
 						cga.ClickNPCDialog(4, 0);
 						setTimeout(cb2, 1000, true);
 					});
@@ -309,7 +309,7 @@ var cga = require('./cgaapi')(function(){
 					cga.TurnTo(31, 22);
 					setTimeout(()=>{
 					cga.SayWords('咒术', 0, 3, 1);
-						cga.AsyncWaitNPCDialog((dlg)=>{
+						cga.AsyncWaitNPCDialog(()=>{
 							cga.ClickNPCDialog(1, 0);
 							cga.AsyncWaitMovement({map:15006, delay:1000, timeout:5000}, (r)=>{
 								cga.walkList([
@@ -321,9 +321,9 @@ var cga = require('./cgaapi')(function(){
 								[12, 7],
 								], ()=>{
 									cga.TurnTo(14, 7);
-									cga.AsyncWaitNPCDialog((dlg)=>{
+									cga.AsyncWaitNPCDialog(()=>{
 										cga.ClickNPCDialog(4, 0);
-										cga.AsyncWaitNPCDialog((dlg)=>{
+										cga.AsyncWaitNPCDialog(()=>{
 											cb2(true);
 										});										
 									});
@@ -337,13 +337,13 @@ var cga = require('./cgaapi')(function(){
 			var go2 = ()=>{
 				var retry = ()=>{
 					cga.TurnTo(14, 7);
-					cga.AsyncWaitNPCDialog((dlg)=>{
-						if(dlg instanceof TypeError){
+					cga.AsyncWaitNPCDialog((err)=>{
+						if(err){
 							retry();
 							return;
 						}
 						cga.ClickNPCDialog(4, 0);
-						cga.AsyncWaitNPCDialog((dlg)=>{
+						cga.AsyncWaitNPCDialog((err)=>{
 							cb2(true);
 						});
 					});
@@ -365,8 +365,8 @@ var cga = require('./cgaapi')(function(){
 			var wait2 = ()=>{
 				var retry = ()=>{
 					cga.TurnTo(16, 4);
-					cga.AsyncWaitNPCDialog(function(dlg){
-						if(dlg instanceof TypeError){
+					cga.AsyncWaitNPCDialog((err)=>{
+						if(err){
 							cga.walkList([ [16, 5], [15, 5] ], retry);
 							return;
 						}
@@ -390,13 +390,9 @@ var cga = require('./cgaapi')(function(){
 			}
 			
 			if(cga.isTeamLeader){
-				cga.travel.falan.toJieNuoWa(()=>{
-					wait();
-				});
+				cga.travel.falan.toTeleRoom('杰诺瓦镇', wait);
 			} else {
-				cga.travel.falan.toJieNuoWa(()=>{
-					wait3();
-				});
+				cga.travel.falan.toTeleRoom('杰诺瓦镇', wait3);
 			}
 
 		}
