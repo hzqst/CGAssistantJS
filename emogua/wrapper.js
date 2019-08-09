@@ -1608,7 +1608,7 @@ module.exports = new Promise(resolve => {
 				).then(
 					() => cga.emogua.waitNPCDialog(dialog => {
 						if (dialog.type === 2) {
-							cga.ClickNPCDialog(-1, teamDialog.message.split('\n').findIndex(e => e === name) - 2);
+							cga.ClickNPCDialog(-1, dialog.message.split('\n').findIndex(e => e === name) - 2);
 							return cga.emogua.delay(1000);
 						}
 					})
