@@ -443,7 +443,7 @@ module.exports = new Promise(resolve => {
 	};
 	// destination '艾尔莎岛' || [147, 189]
 	cga.emogua.waitDestination = (destination, timeout = 3200, timer = Date.now()) => {
-		if (Date.now() - timer > timeout) {
+		if ((Date.now() - timer) > timeout) {
 			console.log('不能抵达目的地->' + destination);
 			return Promise.reject();
 		}

@@ -32,7 +32,7 @@ require('../wrapper').then(cga => {
 											() => cga.emogua.recursion(
 												(timer) => cga.emogua.trade(tradeParty.unit_name, {
 													itemFilter: e => result.received.items.findIndex(r => e.itemid == r.itemid) >= 0
-												}).then(tr => tr.success === true || timer > 15000 ? Promise.reject() : cga.emogua.delay(3000))
+												}).then(tr => tr.success === true || (Date.now() - timer) > 120000 ? Promise.reject() : cga.emogua.delay(3000))
 											)
 										);
 									}
