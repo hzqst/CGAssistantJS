@@ -31,10 +31,21 @@ var loop = ()=>{
 		if(thisobj.rebirth == 1)
 			cga.DoRequest(cga.REQUEST_TYPE_REBIRTH_ON);
 		
-		var r = cga.craftNamedItem(thisobj.craftItem.name, 
-		typeof thisobj.addExtraItem == 'string' ? cga.getInventoryItems().find((eq)=>{
-		return eq.name == thisobj.addExtraItem;
-		} ) : -1 );
+		var extraItem =  -1;
+		if( typeof thisobj.addExtraItem == 'string' ){
+			extraItem = cga.getInventoryItems().find((eq)=>{
+			return eq.name == thisobj.addExtraItem;
+			} );
+			
+			if( extraItem == undefined ){
+				cga.SayWords('缺少宝石 '+thisobj.addExtraItem, 0, 3, 1);
+				console.log('缺少宝石 '+thisobj.addExtraItem);
+				setTimeout(loop, 5000);
+				return;
+			}
+		}
+
+		var r = cga.craftNamedItem(thisobj.craftItem.name, extraItem.pos );
 		if(r !== true){
 			if(r instanceof Error){
 				cga.SayWords(r.message, 0, 3, 1);
@@ -44,7 +55,7 @@ var loop = ()=>{
 			return;
 		}
 
-		cga.AsyncWaitWorkingResult(function(r){
+		cga.AsyncWaitWorkingResult((r)=>{
 
 			if(r.success){
 				thisobj.craft_count ++;
