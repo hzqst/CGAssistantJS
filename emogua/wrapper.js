@@ -464,11 +464,11 @@ module.exports = new Promise(resolve => {
 		);
 	};
 	cga.emogua.waitNPCDialog = (action, timeout = 2000) => new Promise(
-		resolve => cga.AsyncWaitNPCDialog(dialog => setTimeout(() => resolve(action(dialog)), 0), timeout)
+		resolve => cga.AsyncWaitNPCDialog((error, dialog) => setTimeout(() => resolve(action(dialog ? dialog : {})), 0), timeout)
 	);
 	cga.emogua.waitMessage = (check, timeout) => new Promise((resolve, reject) => {
-		cga.AsyncWaitChatMsg(chat => setTimeout(() => {
-			const checkResult = check(chat);
+		cga.AsyncWaitChatMsg((error, chat) => setTimeout(() => {
+			const checkResult = check(chat ? chat : {});
 			if (checkResult instanceof Promise) checkResult.then(resolve).catch(reject);
 			else if (checkResult) resolve();
 			else reject();
@@ -1376,7 +1376,7 @@ module.exports = new Promise(resolve => {
 	 */
 	const tradeInternal = (params = {}, callback, partyName, initiative = false) => {
 		const receivedStuffs = {items: [], gold: 0, pets: [], partyName: partyName};
-		const waitReceivedStuffsRecursively = (timeout = 15000) => cga.AsyncWaitTradeStuffs((type, args) => setTimeout(() => {
+		const waitReceivedStuffsRecursively = (timeout = 15000) => cga.AsyncWaitTradeStuffs((error, type, args) => setTimeout(() => {
 			const success = typeof type == 'number';
 			if (success) {
 				waitReceivedStuffsRecursively(2000);
@@ -1389,7 +1389,7 @@ module.exports = new Promise(resolve => {
 				}
 			}
 		}, 0), timeout);
-		const waitTradeStateRecursively = (timeout = 15000, lastState) => cga.AsyncWaitTradeState((state) => setTimeout(() => {
+		const waitTradeStateRecursively = (timeout = 15000, lastState) => cga.AsyncWaitTradeState((error, state) => setTimeout(() => {
 			if (typeof state == 'number' && state == cga.TRADE_STATE_READY) {
 				if (!params.partyStuffsChecker || (typeof params.partyStuffsChecker == 'function' && params.partyStuffsChecker(receivedStuffs))) {
 					if (!initiative) {
@@ -1429,12 +1429,12 @@ module.exports = new Promise(resolve => {
 	};
 	cga.emogua.trade = (partyName, params = {}) => new Promise((resolve) => {
 		cga.DoRequest(cga.REQUEST_TYPE_TRADE);
-		cga.AsyncWaitPlayerMenu(players => setTimeout(() => {
+		cga.AsyncWaitPlayerMenu((error, players) => setTimeout(() => {
 			if (!(players instanceof Array)) players = [];
 			var player = players.find(p => (typeof partyName == 'number') ? p.index == partyName : p.name == partyName);
 			if (player) {
 				cga.PlayerMenuSelect(player.index);
-				cga.AsyncWaitTradeDialog((partyName, partyLevel) => setTimeout(() => {
+				cga.AsyncWaitTradeDialog((error, partyName, partyLevel) => setTimeout(() => {
 					if (typeof partyLevel == 'number') {
 						tradeInternal(params, resolve, player.name, true);
 					} else {
@@ -1446,7 +1446,7 @@ module.exports = new Promise(resolve => {
 	}).then(result => cga.emogua.delay(300).then(() => result));;
 	cga.emogua.waitTrade = (params = {}) => new Promise((resolve) => {
 		cga.EnableFlags(cga.ENABLE_FLAG_TRADE, true);
-		cga.AsyncWaitTradeDialog((partyName, partyLevel) => setTimeout(() => {
+		cga.AsyncWaitTradeDialog((error, partyName, partyLevel) => setTimeout(() => {
 			cga.EnableFlags(cga.ENABLE_FLAG_TRADE, false);
 			if (typeof partyLevel == 'number') {
 				tradeInternal(params, resolve, partyName);
@@ -1731,7 +1731,7 @@ module.exports = new Promise(resolve => {
 		return Promise.resolve();
 	};
 	cga.emogua.waitWorkResult = (timeout = 45000) => new Promise((resolve, reject) => {
-		cga.AsyncWaitWorkingResult(r => setTimeout(() => resolve(r), 0), timeout);
+		cga.AsyncWaitWorkingResult((error, r) => setTimeout(() => resolve(r ? r : {}), 0), timeout);
 	});
 	let craftOnce = false;
 	cga.emogua.craft = (name) => {
@@ -1864,14 +1864,14 @@ module.exports = new Promise(resolve => {
 		const needHealTeammate = cga.getTeamPlayers().find(p => p.injury > 0);
 		if (needHealTeammate && skill && cga.GetPlayerInfo().mp >= requireMp) {
 			cga.StartWork(skill.index, skill.lv-1);
-			cga.AsyncWaitPlayerMenu(players => setTimeout(() => {
+			cga.AsyncWaitPlayerMenu((error, players) => setTimeout(() => {
 				if (players && players.length > 0) {
 					const index = players.findIndex(p => p.name == needHealTeammate.name);
 					if (typeof index == 'number') {
 						cga.PlayerMenuSelect(index);
-						cga.AsyncWaitUnitMenu(units => setTimeout(() => {
+						cga.AsyncWaitUnitMenu((error, units) => setTimeout(() => {
 							cga.UnitMenuSelect(0);
-							cga.AsyncWaitWorkingResult(r => setTimeout(resolve, 0));
+							cga.AsyncWaitWorkingResult((error, r) => setTimeout(resolve, 0));
 						}, 0));
 					} else resolve();
 				} else resolve();
@@ -2665,7 +2665,7 @@ module.exports = new Promise(resolve => {
 	};
 	let AutoBattleFirstRoundTimeout = 0;
 	const waitBattleAction = () => {
-		cga.AsyncWaitBattleAction(state => {
+		cga.AsyncWaitBattleAction((error, state) => {
 			if (typeof state == 'number') {
 				if (BattleActionFlags.END & state) {
 					setTimeout(cga.emogua.overlap, 2500);
