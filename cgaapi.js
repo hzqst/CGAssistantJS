@@ -122,7 +122,7 @@ module.exports = function(callback){
 		cga.GetSkillsInfo().forEach((sk)=>{
 			if(sk.type == 1)
 			{
-				var craftInfo = cga.GetCraftsInfo(skills[i].index).find((craft)=>{
+				var craftInfo = cga.GetCraftsInfo(sk.index).find((craft)=>{
 					return craft.name == itemname;
 				});
 				if(craftInfo != undefined){
