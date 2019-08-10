@@ -37,21 +37,8 @@ var loop = ()=>{
 					cga.DoRequest(cga.REQUEST_TYPE_REBIRTH_ON);
 				}
 			}
-			
-			var extraItem =  -1;
-			if( typeof thisobj.addExtraItem == 'string' ){
-				extraItem = cga.getInventoryItems().find((eq)=>{
-				return eq.name == thisobj.addExtraItem;
-				} );
-				
-				if( extraItem == undefined ){
-					throw new Error('缺少宝石 '+thisobj.addExtraItem);				
-					setTimeout(loop, 5000);
-					return;
-				}
-			}
 
-			cga.craftNamedItem(thisobj.craftItem.name, extraItem.pos );
+			cga.craftNamedItem(thisobj.craftItem.name, thisobj.addExtraItem );
 		}catch(e){
 			cga.SayWords(e.message, 0, 3, 1);
 			console.log(e);
