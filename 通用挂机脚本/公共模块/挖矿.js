@@ -262,15 +262,15 @@ var thisobj = {
 		for(var i in mineArray){
 			if(i != 0)
 				sayString += ', ';
-			sayString += '('+ (parseInt(i)+1) + ')' + (typeof mineArray[i].display_name == 'string' ? mineArray[i].display_name : mineArray[i].name);;
+			sayString += '('+ (parseInt(i)+1) + ')' + (typeof mineArray[i].display_name == 'string' ? mineArray[i].display_name : mineArray[i].name);
 		}
 		cga.sayLongWords(sayString, 0, 3, 1);
-		cga.waitForChatInput((msg, val)=>{
+		cga.waitForChatInput((msg, index)=>{
 			if(index !== null && index >= 1 && mineArray[index - 1]){
 				configTable.mineObject = index - 1;
 				thisobj.object = mineArray[index - 1];
 				
-				var sayString2 = '当前已选择:[' + (typeof thisobj.object.display_name == 'string' ? thisobj.object.display_name : thisobj.object.name) ']。';
+				var sayString2 = '当前已选择:[' + (typeof thisobj.object.display_name == 'string' ? thisobj.object.display_name : thisobj.object.name) + ']。';
 				cga.sayLongWords(sayString2, 0, 3, 1);
 				
 				cb(null);
