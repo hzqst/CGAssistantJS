@@ -49,13 +49,15 @@ var cga = require('./cgaapi')(function(){
 		}
 	}
 	
-	global.callSubPluginsAsync = (func, arg, cb)=>{
-		
-		/*var funcs = [];
+	global.callSubPluginsAsync = (func, cb)=>{
+
+		var funcs = [];
 		for(var i in subPlugins){
 			if(typeof subPlugins[i][func] == 'function')
-				subPlugins[i][func](arg, cb);
-		}*/
+				funcs.push(subPlugins[i][func]);
+		}
+		
+		Async.series(funcs, cb);
 	}
 	
 	var saveConfig = (cb)=>{
@@ -104,6 +106,7 @@ var cga = require('./cgaapi')(function(){
 		catch(e)
 		{
 			if(e.code != 'ENOENT'){
+				clearConfig();
 				console.log(e)
 			}
 		}
@@ -164,7 +167,6 @@ var cga = require('./cgaapi')(function(){
 			}
 		});
 
-		callSubPlugins('init');
 		mainPlugin.execute();
 	}
 		
@@ -291,7 +293,7 @@ var cga = require('./cgaapi')(function(){
 			},
 			(cb)=>{
 				if(subPlugins.length > 0){
-					Async.everySeries(subPlugins, (sub, cb2)=>{
+					Async.eachSeries(subPlugins, (sub, cb2)=>{
 						if(typeof sub.inputcb == 'function')
 							sub.inputcb(cb2);
 						else

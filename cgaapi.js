@@ -88,6 +88,13 @@ module.exports = function(callback){
 		});
 		fn.apply(null, args);
 	});
+	
+	cga.getMapInfo = () => {
+		const info = cga.GetMapXY();
+		info.indexes = cga.GetMapIndex();
+		info.name = cga.GetMapName();
+		return info;
+	};
 		
 	//判断是否在战斗状态
 	cga.isInBattle = function(){
@@ -587,6 +594,7 @@ module.exports = function(callback){
 
 	cga.travel.falan.toCamp = (cb, noWarp)=>{
 		var warp = ()=>{
+			
 			var teamplayers = cga.getTeamPlayers();
 			var isTeamLeader = (teamplayers.length > 0 && teamplayers[0].is_me) == true ? true : false;
 			
@@ -602,9 +610,7 @@ module.exports = function(callback){
 			cga.AsyncWaitMovement({map:'圣骑士营地', delay:1000, timeout:5000}, cb);
 		}
 
-		var castle_2_camp = (r, err)=>{
-			if(!r)
-				throw new Error(err);
+		var castle_2_camp = ()=>{
 			
 			var shouldWarp = (cga.getItemCount('承认之戒') > 0 && noWarp !== true) ? true : false;
 			
@@ -633,7 +639,7 @@ module.exports = function(callback){
 		
 		var mapname = cga.GetMapName();
 		if(mapname == '圣骑士营地'){
-			cb(true);
+			cb(null);
 			return;
 		}
 
@@ -643,7 +649,7 @@ module.exports = function(callback){
 		}
 		
 		if(mapname == '法兰城' || mapname == '里谢里雅堡' || mapname == '芙蕾雅' || mapname == '曙光骑士团营地'){
-			castle_2_camp(true);
+			castle_2_camp(null);
 		}else{
 			cga.travel.falan.toStone('C', castle_2_camp);
 		}
@@ -2443,6 +2449,7 @@ module.exports = function(callback){
 	}
 		
 	cga.waitTeammateSay = (cb)=>{
+		
 		cga.AsyncWaitChatMsg((err, r)=>{
 			
 			if(!r || !r.msg){
@@ -2803,13 +2810,13 @@ module.exports = function(callback){
 			var tiles = cga.buildMapTileMatrix();
 			var colraw = cga.buildMapCollisionRawMatrix();
 			objs.forEach((obj)=>{
-				if(target == null && obj.cell == 3 && filter.entryTileFilter({
+				if(target == null && obj.cell == 3 && obj.mapx < colraw.x_size && obj.mapy < colraw.y_size && filter.entryTileFilter({
 					tile : tiles.matrix[obj.mapy][obj.mapx],
 					colraw : colraw.matrix[obj.mapy][obj.mapx],
 					obj : obj,
 				}) == true ){
 					target = obj;
-					return;
+					return false;
 				}
 			});
 		}
@@ -2820,7 +2827,7 @@ module.exports = function(callback){
 					return;
 				if(target == null && obj.cell == 3){
 					target = obj;
-					return;
+					return false;
 				}
 			});
 		}
