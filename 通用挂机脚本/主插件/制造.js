@@ -47,14 +47,14 @@ var loop = ()=>{
 		}
 
 		cga.AsyncWaitWorkingResult((err, r)=>{
-
-			console.log(r);
+			//console.log(err);
+			//console.log(r);
 			if(r && r.success){
 				thisobj.craft_count ++;
 				console.log('已造' + thisobj.craft_count + '次！');
 			}
 			craft();
-		}, 30000);
+		}, 60000);
 	}
 	
 	craft();

@@ -19,11 +19,10 @@ var walkMazeForward = (cb)=>{
 		cb(false);
 		return;
 	}
-	cga.walkRandomMaze(null, (r, err)=>{
-		//龙顶?
-
+	cga.walkRandomMaze(null, (err)=>{
 		if(r == false && err.message == '无法找到迷宫的出口' && cga.GetMapName().indexOf('黑龙沼泽') >= 0)
 		{
+			
 			cb(true);
 			return;
 		}
@@ -44,7 +43,7 @@ var walkMazeBack = (cb)=>{
 		cb(true);
 		return;
 	}
-	cga.walkRandomMaze(null, (r, err)=>{
+	cga.walkRandomMaze(null, (err)=>{
 		walkMazeBack(cb);
 	}, {
 		layerNameFilter : (layerIndex)=>{

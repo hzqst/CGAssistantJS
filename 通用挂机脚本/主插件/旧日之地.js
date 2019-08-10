@@ -43,7 +43,7 @@ var walkMazeBack = (cb)=>{
 		cb(true);
 		return;
 	}
-	cga.walkRandomMaze(null, (r, err)=>{
+	cga.walkRandomMaze(null, (err)=>{
 		walkMazeBack(cb);
 	}, {
 		layerNameFilter : (layerIndex)=>{

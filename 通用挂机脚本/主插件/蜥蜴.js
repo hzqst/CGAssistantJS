@@ -19,7 +19,7 @@ var walkMazeForward = (cb)=>{
 		cb(false);
 		return;
 	}
-	cga.walkRandomMaze(null, (r, err)=>{
+	cga.walkRandomMaze(null, (err)=>{
 		//龙顶?
 		if(r == false && err.message == '无法找到迷宫的出口' && cga.GetMapName().indexOf('蜥蜴洞穴上层') >= 0)
 		{
@@ -43,7 +43,7 @@ var walkMazeBack = (cb)=>{
 		cb(true);
 		return;
 	}
-	cga.walkRandomMaze(null, (r, err)=>{
+	cga.walkRandomMaze(null, (err)=>{
 		walkMazeBack(cb);
 	}, {
 		layerNameFilter : (layerIndex)=>{
