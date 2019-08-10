@@ -118,7 +118,7 @@ module.exports = function(callback){
 
 	//获取制造物品名为itemname的物品所需要的材料信息，返回材料信息object或null
 	cga.getItemCraftInfo = function(itemname){
-		var findCraftInfo = null;
+		var result = null;
 		cga.GetSkillsInfo().forEach((sk)=>{
 			if(sk.type == 1)
 			{
@@ -126,12 +126,12 @@ module.exports = function(callback){
 					return craft.name == itemname;
 				});
 				if(craftInfo != undefined){
-					findCraftInfo = craftInfo;
+					result = {craft : craftInfo, skill : sk};
 					return false;
 				}
 			}
 		});		
-		return findCraftInfo;
+		return result;
 	}
 
 	//鉴定物品，参数：物品位置
@@ -195,7 +195,7 @@ module.exports = function(callback){
 			if(find_required != undefined){
 				itemArray.push(find_required.pos);
 			} else {
-				throw new Error('制造' +craftItemName+'所需宝石' +mat.name+'不足！');
+				throw new Error('制造' +extraItemName+'所需宝石' +mat.name+'不足！');
 			}
 		}
 		

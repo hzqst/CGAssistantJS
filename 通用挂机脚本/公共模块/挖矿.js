@@ -15,50 +15,57 @@ var mineArray = [
 	level : 2,
 	name : '铁',
 	func : (cb)=>{
-		cga.travel.falan.toStone('W1', (r)=>{
+		var retry = ()=>{
 			cga.walkList([
-				[22, 87, '芙蕾雅'],
-				[351, 145, '国营第24坑道 地下1楼'],
-				[22, 22, '国营第24坑道 地下2楼'],
-				[22, 21],
+				[473, 316],
 			], (r)=>{
-				cga.TurnTo(22, 20);
-				setTimeout(()=>{
-					cga.walkList([
-						[23, 13, '国营第24坑道  地下3楼'],
-						[29, 3, '国营第24坑道  地下4楼'],
-						[19, 36],
-					], cb);
-				}, 1000);				
+				cga.TurnTo(471, 316);
+				cga.AsyncWaitNPCDialog(()=>{
+					cga.ClickNPCDialog(4, -1);
+					cga.AsyncWaitMovement({map:'维诺亚洞穴 地下1楼', delay:1000, timeout:5000}, (err)=>{
+						if(err){
+							retry();
+							return;
+						}
+						cga.walkList([
+						[20, 14],
+						], cb);	
+					});
+				});
 			});
-		});
+		}
+		cga.walkList([
+			[153, 241, '芙蕾雅'],
+		], retry);
 	},
-	prerequisite : ()=>{
-		return cga.getItemCount('矿山钥匙') > 0;
-	},
-	prerequisite_info : '需要矿山钥匙！'
 },
 {
 	level : 3,
 	name : '银',
 	func : (cb)=>{
-		cga.travel.falan.toStone('W1', (r)=>{
+		var retry = ()=>{
 			cga.walkList([
-				[22, 87, '芙蕾雅'],
-				[351, 145, '国营第24坑道 地下1楼'],
-				[22, 22, '国营第24坑道 地下2楼'],
-				[22, 21],
+				[473, 316],
 			], (r)=>{
-				cga.TurnTo(22, 20);
-				setTimeout(()=>{
-					cga.walkList([
-						[23, 13, '国营第24坑道  地下3楼'],
-						[6, 3, '国营第24坑道  地下4楼'],
-						[24, 17],
-					], cb);
-				}, 1000);
+				cga.TurnTo(471, 316);
+				cga.AsyncWaitNPCDialog(()=>{
+					cga.ClickNPCDialog(4, -1);
+					cga.AsyncWaitMovement({map:'维诺亚洞穴 地下1楼', delay:1000, timeout:5000}, (err)=>{
+						if(err){
+							retry();
+							return;
+						}
+						cga.walkList([
+						[20, 59, '维诺亚洞穴 地下2楼'],
+						[37, 32],
+						], cb);	
+					});
+				});
 			});
-		});
+		}
+		cga.walkList([
+			[153, 241, '芙蕾雅'],
+		], retry);
 	},
 	prerequisite : ()=>{
 		return cga.getItemCount('矿山钥匙') > 0;
@@ -180,7 +187,7 @@ var mineArray = [
 				[24, 39, '莎莲娜'],
 				[196, 443, '莎莲娜海底洞窟 地下1楼'],
 				[14, 41, '莎莲娜海底洞窟 地下2楼'],
-				[11, 47],
+				[12, 6],
 			], cb);
 		});
 	}

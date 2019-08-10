@@ -209,13 +209,14 @@ var thisobj = {
 		}
 		
 		var stage3 = (cb2)=>{
+									
+			var itemObjects = {};
 			
 			cga.getInventoryItems().forEach((eq)=>{
 				if(eq.type == 38)
 					itemObjects[eq.name] = 1;
 			})
-						
-			var itemObjects = {};
+			
 			var itemArray = [];
 			var index = 0;
 			for(var name in itemObjects){
@@ -232,7 +233,11 @@ var thisobj = {
 			}
 			
 			var sayString = '【制造插件】请选择制造时添加的宝石:';
-			
+			for(var i in itemArray){
+				if(i != 0)
+					sayString += ', ';
+				sayString += '('+ (parseInt(i)+1) + ')' + itemArray[i].name;
+			}
 			cga.sayLongWords(sayString, 0, 3, 1);
 			cga.waitForChatInput((msg, index)=>{
 				if(index !== null && index >= 1 && itemArray[index - 1]){
