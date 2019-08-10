@@ -16,8 +16,6 @@ var thisobj = {
 		});
 	},
 	func : (cb)=>{
-		console.log('logback');
-		
 		thisobj.readyToLogBack = true;
 		thisobj.callbackAfterLogBack = cb;
 

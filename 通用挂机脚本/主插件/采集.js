@@ -6,6 +6,7 @@ var gatherObject = null;
 var mineObject = null;
 var doneObject = require('./../公共模块/采集后操作');
 var healObject = require('./../公共模块/治疗自己');
+var supplyObject = require('./../公共模块/通用登出回补');
 
 var gatherArray = [
 {
@@ -57,22 +58,20 @@ var loop = ()=>{
 	if(!skill){
 		errmsg = '你没有'+gatherObject.skill+'技能';
 		cga.SayWords(errmsg , 0, 3, 1);
-		throw new Error(errmsg);
+		//throw new Error(errmsg);
 		return;
 	}
 	if(mineObject.object && skill.lv < mineObject.object.level){
 		var errmsg = gatherObject.skill+'技能等级不够，挖'+mineObject.object.name+'需要'+mineObject.object.level+'级，而你只有'+skill.lv+'级';
 		cga.SayWords(errmsg , 0, 3, 1);
-		throw new Error(errmsg);
+		//throw new Error(errmsg);
 		return;
 	}
 	
 	var playerInfo = cga.GetPlayerInfo();
 	if(playerInfo.mp < playerInfo.maxmp)
 	{
-		cga.travel.falan.toCastleHospital(()=>{
-			setTimeout(loop, 3000);
-		});
+		supplyObject.func(loop);		
 		return;
 	}
 	
@@ -88,7 +87,7 @@ var loop = ()=>{
 	}
 	
 	var waitwait = (cb)=>{
-		cga.AsyncWaitWorkingResult((r)=>{
+		cga.AsyncWaitWorkingResult(()=>{
 			var playerInfo = cga.GetPlayerInfo();
 			if(playerInfo.mp == 0){
 				cb('restart');
@@ -142,6 +141,9 @@ var thisobj = {
 		
 		if(map == '芙蕾雅' )
 			return 1;
+		
+		if(map == '米内葛尔岛' )
+			return 2;
 		
 		if(map == '莎莲娜' )
 			return 2;

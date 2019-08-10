@@ -157,6 +157,49 @@ var mineArray = [
 			});
 		}
 	},
+	{
+		level : 5,
+		name : '琵琶木',
+		display_name : '琵琶木阿凯鲁法',
+		func : (cb)=>{
+			if(cga.GetMapName() != '阿凯鲁法村')
+				throw new Error('必须从阿凯鲁法村启动');
+			
+			cga.walkList([
+				[178, 227, '米内葛尔岛'],
+				[206, 347],
+			], cb);
+		}
+	},
+
+	{
+		level : 6,
+		name : '赤松',
+		display_name : '赤松阿凯鲁法',
+		func : (cb)=>{
+			if(cga.GetMapName() != '阿凯鲁法村')
+				throw new Error('必须从阿凯鲁法村启动');
+			
+			cga.walkList([
+				[178, 227, '米内葛尔岛'],
+				[154, 395],
+			], cb);
+		}
+	},
+	{
+		level : 8,
+		name : '单木',
+		display_name : '单木阿凯鲁法',
+		func : (cb)=>{
+			if(cga.GetMapName() != '阿凯鲁法村')
+				throw new Error('必须从阿凯鲁法村启动');
+			
+			cga.walkList([
+				[178, 227, '米内葛尔岛'],
+				[250, 402],
+			], cb);
+		}
+	},
 ];
 
 var cga = global.cga;
@@ -199,7 +242,7 @@ var thisobj = {
 		for(var i in mineArray){
 			if(i != 0)
 				sayString += ', ';
-			sayString += '('+ (parseInt(i)+1) + ')' + mineArray[i].name;
+			sayString += '('+ (parseInt(i)+1) + ')' + (typeof mineArray[i].display_name == 'string' ? mineArray[i].display_name : mineArray[i].name);
 		}
 		cga.sayLongWords(sayString, 0, 3, 1);
 		cga.waitForChatInput((msg, index)=>{
@@ -207,10 +250,9 @@ var thisobj = {
 				configTable.mineObject = index - 1;
 				thisobj.object = mineArray[index - 1];
 				
-				var sayString2 = '当前已选择:[' + thisobj.object.name + ']。';
+				var sayString2 = '当前已选择:[' + (typeof thisobj.object.display_name == 'string' ? thisobj.object.display_name : thisobj.object.name) + ']。';
 				cga.sayLongWords(sayString2, 0, 3, 1);
-				
-				
+
 				cb(null);
 				
 				return true;

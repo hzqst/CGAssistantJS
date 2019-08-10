@@ -127,6 +127,20 @@ var mineArray = [
 			});
 		}
 	},
+	{
+		level : 8,
+		name : '赛希尔叶',
+		display_name : '赛希尔叶阿凯鲁法村',
+		func : (cb)=>{
+			if(cga.GetMapName() != '阿凯鲁法村')
+				throw new Error('必须从阿凯鲁法村启动');
+			
+			cga.walkList([
+				[178, 227, '米内葛尔岛'],
+				[293, 314],
+			], cb);
+		}
+	},
 ];
 
 var cga = global.cga;
@@ -169,7 +183,7 @@ var thisobj = {
 		for(var i in mineArray){
 			if(i != 0)
 				sayString += ', ';
-			sayString += '('+ (parseInt(i)+1) + ')' + mineArray[i].name;
+			sayString += '('+ (parseInt(i)+1) + ')' + (typeof mineArray[i].display_name == 'string' ? mineArray[i].display_name : mineArray[i].name);
 		}
 		cga.sayLongWords(sayString, 0, 3, 1);
 		cga.waitForChatInput((msg, index)=>{
@@ -177,7 +191,7 @@ var thisobj = {
 				configTable.mineObject = index - 1;
 				thisobj.object = mineArray[index - 1];
 				
-				var sayString2 = '当前已选择:[' + thisobj.object.name + ']。';
+				var sayString2 = '当前已选择:[' + (typeof thisobj.object.display_name == 'string' ? thisobj.object.display_name : thisobj.object.name) + ']。';
 				cga.sayLongWords(sayString2, 0, 3, 1);
 				
 				cb(null);

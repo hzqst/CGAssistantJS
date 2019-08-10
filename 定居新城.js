@@ -14,7 +14,7 @@ var cga = require('./cgaapi')(function(){
 	};
 	
 	if(cga.GetMapName() == '阿凯鲁法村'){
-		cga.travel.AKLF.tofalan(()=>{
+		cga.travel.AKLF.toFalan(()=>{
 			cga.travel.falan.toCity('艾尔莎岛', next);
 		});
 	}

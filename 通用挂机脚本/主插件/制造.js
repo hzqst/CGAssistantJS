@@ -28,29 +28,33 @@ var loop = ()=>{
 	var craft = ()=>{
 		cga.SetImmediateDoneWork((thisobj.craft_count > 0) ? true : false);
 
-		if(thisobj.rebirth == 1)
-			cga.DoRequest(cga.REQUEST_TYPE_REBIRTH_ON);
-		
-		var extraItem =  -1;
-		if( typeof thisobj.addExtraItem == 'string' ){
-			extraItem = cga.getInventoryItems().find((eq)=>{
-			return eq.name == thisobj.addExtraItem;
-			} );
+		try
+		{
+			if(thisobj.rebirth == 1){
+				if(cga.GetPlayerInfo().punchclock == 0){
+					throw new Error('卡时不足，无法精灵变身');
+				} else {
+					cga.DoRequest(cga.REQUEST_TYPE_REBIRTH_ON);
+				}
+			}
 			
-			if( extraItem == undefined ){
-				cga.SayWords('缺少宝石 '+thisobj.addExtraItem, 0, 3, 1);
-				console.log('缺少宝石 '+thisobj.addExtraItem);
-				setTimeout(loop, 5000);
-				return;
+			var extraItem =  -1;
+			if( typeof thisobj.addExtraItem == 'string' ){
+				extraItem = cga.getInventoryItems().find((eq)=>{
+				return eq.name == thisobj.addExtraItem;
+				} );
+				
+				if( extraItem == undefined ){
+					throw new Error('缺少宝石 '+thisobj.addExtraItem);				
+					setTimeout(loop, 5000);
+					return;
+				}
 			}
-		}
 
-		var r = cga.craftNamedItem(thisobj.craftItem.name, extraItem.pos );
-		if(r !== true){
-			if(r instanceof Error){
-				cga.SayWords(r.message, 0, 3, 1);
-				console.log(r);
-			}
+			cga.craftNamedItem(thisobj.craftItem.name, extraItem.pos );
+		}catch(e){
+			cga.SayWords(e.message, 0, 3, 1);
+			console.log(e);
 			setTimeout(loop, 5000);
 			return;
 		}

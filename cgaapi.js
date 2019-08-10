@@ -915,7 +915,9 @@ module.exports = function(callback){
 	
 	cga.travel.AKLF = {};
 	
-	cga.travel.AKLF.tofalan = (cb)=>{
+	cga.travel.AKLF.isSettled = true;
+	
+	cga.travel.AKLF.toFalan = (cb)=>{
 		if(cga.GetMapName() != '阿凯鲁法村'){
 			cb(new Error('必须从阿凯鲁法村启动'));
 			return;
@@ -2443,7 +2445,7 @@ module.exports = function(callback){
 	cga.waitTeammateSay = (cb)=>{
 		cga.AsyncWaitChatMsg((err, r)=>{
 			
-			if(!r.msg){
+			if(!r || !r.msg){
 				cga.waitTeammateSay(cb);
 				return;
 			}
@@ -2498,12 +2500,12 @@ module.exports = function(callback){
 	
 	cga.sayLongWords = (words, color, range, size)=>{
 
-		var splitCount = words.length / 128;
+		var splitCount = words.length / 100;
 		if(splitCount == 0)
 			splitCount = 1;
 		
 		for(var i = 0;i < splitCount; ++i){
-			cga.SayWords(words.substring(i * 128, i * 128+128), color, range, size);
+			cga.SayWords(words.substring(i * 100, i * 100 + 100), color, range, size);
 		}
 		
 	}
@@ -2776,7 +2778,7 @@ module.exports = function(callback){
 			}
 			
 			if(layerIndex == 0){
-				cb(false, new Error('无法从地图名中解析出楼层'));
+				cb(new Error('无法从地图名中解析出楼层'));
 				return;
 			}
 			
@@ -2824,18 +2826,18 @@ module.exports = function(callback){
 		}
 		
 		if(target == null){
-			cb(false, new Error('无法找到迷宫的出口'));
+			cb(new Error('无法找到迷宫的出口'));
 			return;
 		}
 
 		var walklist = cga.calculatePath(pos.x, pos.y, target.mapx, target.mapy, newmap, null, null, []);
 		if(walklist.length == 0){
-			cb(false, new Error('无法计算到迷宫出口的路径'));
+			cb(new Error('无法计算到迷宫出口的路径'));
 			return;
 		}
 
-		cga.walkList(walklist, (r, reason)=>{
-			cb(r, reason);
+		cga.walkList(walklist, (err, reason)=>{
+			cb(err, reason);
 			return;
 		});
 	}
@@ -2915,7 +2917,7 @@ module.exports = function(callback){
 			if (typeof target == 'object') {
 				const walkTo = cga.getRandomSpace(target.xpos,target.ypos);
 				if (walkTo) {
-					cga.walkList([walkTo], () => cb(target));
+					cga.walkList([walkTo], () => cb(null, target));
 				} else noTargetCB();
 			} else if (target === true) cb(null);
 			else noTargetCB();

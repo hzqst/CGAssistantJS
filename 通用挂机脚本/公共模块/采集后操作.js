@@ -38,7 +38,7 @@ var doneArray = [
 	}
 },
 {
-	name: '卖店',
+	name: '飞碟卖店',
 	func: (cb, mineObject)=>{
 		cga.travel.falan.toStone('C', ()=>{
 			cga.walkList([
@@ -268,7 +268,60 @@ var doneArray = [
 			});
 		});
 	}
-}
+},
+{
+	name: '阿凯鲁法卖店',
+	func: (cb, mineObject)=>{
+		if(cga.GetMapName() != '阿凯鲁法村'){
+			cga.LogBack();
+			setTimeout(thisobj.object.func, 1000, mineObject);
+			return;
+		}
+		cga.walkList([
+			[158, 139, '拉那杂货店'],
+			[12, 11],
+		], ()=>{
+			cga.TurnTo(12, 9);
+			cga.AsyncWaitNPCDialog(()=>{	
+				cga.ClickNPCDialog(0, 0);
+				cga.AsyncWaitNPCDialog(()=>{
+
+					var sell = cga.findItemArray(mineObject.name);
+					var sellArray = sell.map((item)=>{
+						item.count /= 20;
+						return item;
+					});
+
+					var pattern = /(.+)的卡片/;
+					cga.getInventoryItems().forEach((item)=>{
+						if(item.name == '魔石' || item.name == '卡片？' || pattern.exec(item.name) ){
+							sellArray.push({
+								itempos : item.pos,
+								itemid : item.itemid,
+								count : (item.count < 1) ? 1 : item.count,
+							});
+						} else if(mineObject && mineObject.extra_selling && mineObject.extra_selling(item)){
+							sellArray.push({
+								itempos : item.pos,
+								itemid : item.itemid,
+								count : item.count / 20,
+							});
+						}
+					})
+
+					cga.SellNPCStore(sellArray);
+					cga.AsyncWaitNPCDialog(()=>{
+						cga.walkList([
+						[15, 24, '阿凯鲁法村']
+						], ()=>{
+							cb(true);
+						});
+					});
+				});
+			});
+		});
+	}
+},
 ]
 
 var thisobj = {
