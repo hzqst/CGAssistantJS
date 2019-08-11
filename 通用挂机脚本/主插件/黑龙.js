@@ -20,9 +20,8 @@ var walkMazeForward = (cb)=>{
 		return;
 	}
 	cga.walkRandomMaze(null, (err)=>{
-		if(r == false && err.message == '无法找到迷宫的出口' && cga.GetMapName().indexOf('黑龙沼泽') >= 0)
+		if(err && err.message == '无法找到迷宫的出口' && cga.GetMapName().indexOf('黑龙沼泽') >= 0)
 		{
-			
 			cb(true);
 			return;
 		}

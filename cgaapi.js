@@ -2374,7 +2374,7 @@ module.exports = function(callback){
 				cga.DoRequest(cga.REQUEST_TYPE_JOINTEAM);
 				cga.AsyncWaitNPCDialog((err, dlg)=>{
 					var stripper = "你要和谁组成队伍？";
-					if(dlg.message && dlg.message.indexOf(stripper) >= 0){
+					if(dlg && dlg.message && dlg.message.indexOf(stripper) >= 0){
 						var strip = dlg.message.substr(dlg.message.indexOf(stripper) + stripper.length);
 						strip = strip.replace(/\\z/g,"|");
 						strip = strip.replace(/\\n/g,"|");
@@ -2420,7 +2420,7 @@ module.exports = function(callback){
 					cga.DoRequest(cga.REQUEST_TYPE_KICKTEAM);
 					cga.AsyncWaitNPCDialog((err, dlg)=>{
 						var stripper = "你要把谁踢出队伍？";
-						if(dlg.message && dlg.message.indexOf(stripper) >= 0){
+						if(dlg && dlg.message && dlg.message.indexOf(stripper) >= 0){
 							var strip = dlg.message.substr(dlg.message.indexOf(stripper) + stripper.length);
 							strip = strip.replace(/\\z/g,"|");
 							strip = strip.replace(/\\n/g,"|");

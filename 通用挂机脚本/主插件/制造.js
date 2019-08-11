@@ -224,7 +224,7 @@ var thisobj = {
 			for(var i in itemArray){
 				if(i != 0)
 					sayString += ', ';
-				sayString += '('+ (parseInt(i)+1) + ')' + itemArray[i].name;
+				sayString += '('+ (parseInt(i)+1) + ')' + itemArray[i];
 			}
 			cga.sayLongWords(sayString, 0, 3, 1);
 			cga.waitForChatInput((msg, index)=>{
