@@ -193,10 +193,16 @@ module.exports = function(callback){
 				return (inv.name == extraItemName);
 			});
 			if(find_required != undefined){
-				itemArray.push(find_required.pos);
+				itemArray[5] = find_required.pos;
 			} else {
-				throw new Error('制造' +extraItemName+'所需宝石' +mat.name+'不足！');
+				throw new Error('制造' +extraItemName+'所需宝石' +extraItemName+'不足！');
 			}
+		}
+		
+		for(var i = 0; i < 6; ++i)
+		{
+			if(typeof itemArray[i] != 'number')
+				itemArray[i] = -1;
 		}
 		
 		cga.StartWork(info.skill.index, info.craft.index);
