@@ -73,18 +73,13 @@ const repairLoop = (flags, cb)=>{
 	var words = '';
 	var item = cga.getInventoryItems().filter(flags == 0 ? repairFilter : ((flags & 1) ? repairFilterArmor : repairFilterWeapon) );
 	if (item.length) {
-		if (item[0].type >= 0 && item[0].type <= 6){
+		if (item[0].type >= 0 && item[0].type <= 6)
 			words = '修理武器';
-			flags |= 1;
-		}
-		else if (item[0].type >= 7 && item[0].type <= 14){
+		else if (item[0].type >= 7 && item[0].type <= 14)
 			words = '修理防具';
-			flags |= 2;
-		}
 	}
 	
-	if(!words.length)
-	{
+	if(!words.length) {
 		setTimeout(cb, 1000);
 		return;
 	}
@@ -99,19 +94,41 @@ const repairLoop = (flags, cb)=>{
 		if(result.success == true){
 			
 		}
-		cga.waitTrade({
+		else
+		{
+			//重新请求修理
+			setTimeout(repairLoop, 1000, flags, cb);
+			return;
+		}
+		
+		//等待接收修理好的装备
+		var waitReceive = ()=>{
+			cga.waitTrade({
 
-		}, (playerName, received)=>{
-			return (tradePlayerName == playerName);
-		}, (result)=>{
-			if(result.success == true){
-				
-			}
-			if(flags == 3)
-				setTimeout(cb, 1000);
-			else
-				setTimeout(repairLoop, 1000, flags, cb);
-		});
+			}, (playerName, received)=>{
+				return (tradePlayerName == playerName);
+			}, (result)=>{
+				if(result.success == true){
+					//接收成功，继续修理其他类型的装备，或者全部都修理完成的情况下结束修理
+					if(words == '修理武器')
+						flags |= 1;
+					else if(words == '修理防具')
+						flags |= 2;
+					
+					if(flags == 3)
+					setTimeout(cb, 1000);
+				else
+					setTimeout(repairLoop, 1000, flags, cb);
+				}
+				else
+				{
+					//接收失败，重新接收
+					waitReceive();
+				}				
+			});
+		}
+		
+		waitReceive();
 	});
 	
 	cga.SayWords(words, 0, 3, 1);

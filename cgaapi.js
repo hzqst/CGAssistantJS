@@ -3144,7 +3144,7 @@ module.exports = function(callback){
 			
 			savePartyName = partyName;
 			
-			if (partyLevel > 0) {
+			if (!err && partyLevel > 0) {
 				waitDialog();
 			} else {					
 				cga.DoRequest(cga.REQUEST_TYPE_TRADE_REFUSE);

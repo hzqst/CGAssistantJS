@@ -26,7 +26,7 @@ var loop = ()=>{
 	}
 
 	var craft = ()=>{
-		cga.SetImmediateDoneWork((thisobj.craft_count > 0) ? true : false);
+		cga.SetImmediateDoneWork((thisobj.craftedCount > 0) ? true : false);
 
 		try
 		{
@@ -50,8 +50,12 @@ var loop = ()=>{
 			//console.log(err);
 			//console.log(r);
 			if(r && r.success){
-				thisobj.craft_count ++;
-				console.log('已造' + thisobj.craft_count + '次！');
+				thisobj.craftedCount ++;
+				console.log('已造' + thisobj.craftedCount + '件！');
+				if(thisobj.craftedCount >= thisobj.craftedCount){
+					cga.SayWords('已达到设定的制造数量！', 0, 3, 1);
+					return;
+				}
 			}
 			craft();
 		}, 60000);
@@ -61,7 +65,7 @@ var loop = ()=>{
 }
 
 var thisobj = {
-	craft_count : 0,
+	craftedCount : 0,
 	getDangerLevel : ()=>{
 		return 0;
 	},
@@ -88,6 +92,12 @@ var thisobj = {
 			return true;
 		}
 		
+		if(pair.field == 'craftCount'){
+			pair.field = '制造数量';
+			pair.value = pair.value;
+			pair.translated = true;
+			return true;
+		}
 		if(pair.field == 'rebirth'){
 			pair.field = '是否变身';
 			pair.value = pair.value == 1 ? '变身' : '不变身';
@@ -139,6 +149,14 @@ var thisobj = {
 		
 		if(!thisobj.rebirth){
 			console.error('读取配置：是否变身失败！');
+			return false;
+		}
+		
+		configTable.craftCount = obj.craftCount;
+		thisobj.craftCount = obj.craftCount
+		
+		if(!thisobj.craftCount){
+			console.error('读取配置：制造数量失败！');
 			return false;
 		}
 		
@@ -264,7 +282,28 @@ var thisobj = {
 			});
 		}
 		
-		Async.series([stage1, stage2, stage3, stage4, healObject.inputcb], cb);
+		var stage5 = (cb2)=>{
+			
+			var sayString = '【制造插件】请选择制造几件: 1~99999';
+			cga.sayLongWords(sayString, 0, 3, 1);
+			cga.waitForChatInput((msg, val)=>{
+				if(val !== null && val >= 1 && val <= 99999){
+					configTable.craftCount = val;
+					thisobj.craftCount = val;
+					
+					var sayString2 = '当前已选择:'+craftCount+'件。';
+					cga.sayLongWords(sayString2, 0, 3, 1);
+					
+					cb2(null);
+					
+					return true;
+				}
+				
+				return false;
+			});
+		}
+		
+		Async.series([stage1, stage2, stage3, stage4, stage5, healObject.inputcb], cb);
 	},
 	execute : ()=>{
 		callSubPlugins('init');
