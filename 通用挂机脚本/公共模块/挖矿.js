@@ -34,9 +34,12 @@ var mineArray = [
 				});
 			});
 		}
-		cga.walkList([
-			[153, 241, '芙蕾雅'],
-		], retry);
+		cga.travel.falan.toStone('S', ()=>{
+			cga.walkList([
+				[41, 98, '法兰城'],
+				[153, 241, '芙蕾雅'],
+			], retry);
+		});
 	},
 },
 {
@@ -63,14 +66,13 @@ var mineArray = [
 				});
 			});
 		}
-		cga.walkList([
-			[153, 241, '芙蕾雅'],
-		], retry);
+		cga.travel.falan.toStone('S', ()=>{
+			cga.walkList([
+				[41, 98, '法兰城'],
+				[153, 241, '芙蕾雅'],
+			], retry);
+		});
 	},
-	prerequisite : ()=>{
-		return cga.getItemCount('矿山钥匙') > 0;
-	},
-	prerequisite_info : '需要矿山钥匙！'
 },
 {
 	level : 4,
@@ -95,38 +97,41 @@ var mineArray = [
 				});
 			});
 		}
-		cga.walkList([
-			[153, 241, '芙蕾雅'],
-		], retry);
+		cga.travel.falan.toStone('S', ()=>{
+			cga.walkList([
+				[41, 98, '法兰城'],
+				[153, 241, '芙蕾雅'],
+			], retry);
+		});
 	}
 },
 {
 	level : 5,
 	name : '金',
-	func : (cb)=>{
-		cga.travel.falan.toStone('S', (r)=>{
-			
-			var retry = ()=>{
-				cga.walkList([
-					[473, 316],
-				], (r)=>{
-					cga.TurnTo(471, 316);
-					cga.AsyncWaitNPCDialog(()=>{
-						cga.ClickNPCDialog(4, -1);
-						cga.AsyncWaitMovement({map:'维诺亚洞穴 地下1楼', delay:1000, timeout:5000}, (err)=>{
-							if(err){
-								retry();
-								return;
-							}
-							cga.walkList([
-							[52, 11],
-							], cb);	
-						});
+	func : (cb)=>{	
+		var retry = ()=>{
+			cga.walkList([
+				[473, 316],
+			], (r)=>{
+				cga.TurnTo(471, 316);
+				cga.AsyncWaitNPCDialog(()=>{
+					cga.ClickNPCDialog(4, -1);
+					cga.AsyncWaitMovement({map:'维诺亚洞穴 地下1楼', delay:1000, timeout:5000}, (err)=>{
+						if(err){
+							retry();
+							return;
+						}
+						cga.walkList([
+						[52, 11],
+						], cb);	
 					});
 				});
-			}
+			});
+		}
 			
+		cga.travel.falan.toStone('S', ()=>{
 			cga.walkList([
+				[41, 98, '法兰城'],
 				[153, 241, '芙蕾雅'],
 			], retry);
 		});
@@ -155,9 +160,12 @@ var mineArray = [
 				});
 			});
 		}
-		cga.walkList([
-			[153, 241, '芙蕾雅'],
-		], retry);
+		cga.travel.falan.toStone('S', ()=>{
+			cga.walkList([
+				[41, 98, '法兰城'],
+				[153, 241, '芙蕾雅'],
+			], retry);
+		});
 	}
 },
 {

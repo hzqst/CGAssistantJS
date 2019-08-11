@@ -5,7 +5,7 @@ var thisobj = {
 	func : (cb)=>{
 		var gogogo = ()=>{
 			cga.walkList([
-				[31, 77],
+				[30, 79],
 			], ()=>{
 				cga.TurnTo(30, 77);
 				cga.sellStone(()=>{

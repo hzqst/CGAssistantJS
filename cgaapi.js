@@ -925,6 +925,93 @@ module.exports = function(callback){
 		});
 	}
 	
+	//从法兰城到阿凯鲁法
+	cga.travel.falan.toGelaer = (cb)=>{
+		
+		if(cga.GetMapName() == '哥拉尔'){
+			cb(null);
+			return;
+		}
+		
+		var stage3 = ()=>{
+			cga.walkList([
+				[84, 55],
+			], (r)=>{
+				cga.TurnTo(84, 53);
+				cga.AsyncWaitNPCDialog(()=>{
+					cga.ClickNPCDialog(4, -1);
+					cga.AsyncWaitMovement({map:'哥拉尔镇 港湾管理处'}, ()=>{
+						cga.walkList([
+							[14, 15, '哥拉尔镇'],
+							[118, 214],
+						], cb);
+					});
+				});
+			});
+		}
+		
+		var retry2 = ()=>{
+			cga.TurnTo(71, 26);
+			cga.AsyncWaitNPCDialog((err, dlg)=>{
+				
+				if(dlg && dlg.message.indexOf('正停在哥拉尔港') >= 0 && dlg.options == 12){
+					cga.ClickNPCDialog(4, -1);
+					cga.AsyncWaitMovement({map:'往伊尔栈桥'}, ()=>{
+						stage3();
+					});
+					return;
+				}
+				
+				setTimeout(retry2, 5000);
+			});
+		}
+		
+		var retry = ()=>{
+			cga.TurnTo(53, 50);
+			cga.AsyncWaitNPCDialog((err, dlg)=>{
+				if(dlg && dlg.options == 12){
+					cga.ClickNPCDialog(4, -1);
+					cga.AsyncWaitMovement({map:'铁达尼号'}, retry2);
+					return;
+				}
+				
+				setTimeout(retry, 5000);
+			});
+		}
+		
+		cga.travel.falan.toTeleRoom('伊尔村', (r)=>{
+			cga.walkList([
+				[12, 17, '村长的家'],
+				[6, 13, '伊尔村'],
+				[58, 71],
+			], (r)=>{
+				cga.TurnTo(60, 71);
+				cga.AsyncWaitNPCDialog(()=>{
+					cga.ClickNPCDialog(4, -1);
+					cga.AsyncWaitMovement({map:'伊尔'}, ()=>{
+						cga.walkList([
+							[30, 21, '港湾管理处'],
+							[25, 25],
+						], ()=>{
+							cga.TurnTo(25, 23);
+							cga.AsyncWaitNPCDialog(()=>{
+								cga.ClickNPCDialog(32, -1);
+								cga.AsyncWaitNPCDialog(()=>{
+									cga.ClickNPCDialog(4, -1);
+									cga.AsyncWaitMovement({map:'往哥拉尔栈桥'}, ()=>{
+										cga.walkList([
+											[51, 50],
+										], retry);
+									});
+								});
+							});
+						});
+					});
+				}, 1000);	
+			});
+		});
+	}
+	
 	cga.travel.AKLF = {};
 	
 	cga.travel.AKLF.isSettled = true;
@@ -1032,8 +1119,6 @@ module.exports = function(callback){
 				});
 			});
 		});
-		
-		
 	}
 		
 	cga.travel.falan.toTeleRoomTemplate = (villageName, npcPos, npcPos2, npcPos3, cb)=>{
@@ -1128,6 +1213,9 @@ module.exports = function(callback){
 				return;
 			case '阿凯鲁法':case '阿凯鲁法村':
 				cga.travel.falan.toAKLF(cb);
+				return;
+			case '哥拉尔':case '哥拉尔镇':
+				cga.travel.falan.toGelaer(cb);
 				return;
 		}
 		cb(new Error('未知的城市名'));
@@ -1297,10 +1385,10 @@ module.exports = function(callback){
 	//定居？
 	cga.travel.gelaer.isSettled = true;
 	
-	cga.travel.gelaer.xy2name = function(x, y){
-		if(x == 120 && y == 107)
+	cga.travel.gelaer.xy2name = function(x, y, mapname){
+		if(x == 120 && y == 107 && mapname == '哥拉尔镇')
 			return 'N';
-		if(x == 118 && y == 214)
+		if(x == 118 && y == 214 && mapname == '哥拉尔镇')
 			return 'S';
 		return null;
 	}
@@ -1364,7 +1452,6 @@ module.exports = function(callback){
 	}
 	
 	//参数1：传送石名称，有效参数：N S
-	//参数2：回调函数function(result), result 为true或false
 	cga.travel.gelaer.toStone = (stone, cb)=>{
 		if(!cga.travel.gelaer.isvalid(stone)){
 			cb(new Error('无效的目的地名称'));
@@ -1387,18 +1474,100 @@ module.exports = function(callback){
 		});
 	}
 
-	//按照数组中的坐标行走
-	//参数1：数组 ，例子: 
-	/*const list = [
-		[231, 78, null],
-		[225, 70, null],
-		[222, 69, null],
-		[208, 67, null],
-		[202, 66, null],
-		[194, 58, null],
-		[193, 52, null],
-		[195, 50, '职业介绍所']
-	];*/
+	cga.travel.gelaer.toFalan = (cb)=>{
+		if(cga.GetMapName() != '哥拉尔镇'){
+			cb(new Error('必须从哥拉尔镇启动'));
+			return;
+		}
+
+		var stage4 = ()=>{
+			cga.walkList([
+				[47, 83, '村长的家'],
+				[14, 17, '伊尔村的传送点'],
+				[20, 10],
+			], (r)=>{
+				cga.TurnTo(22, 10);
+				cga.AsyncWaitNPCDialog(()=>{
+					cga.ClickNPCDialog(4, -1);
+					cga.AsyncWaitMovement({map:'启程之间'}, ()=>{
+						cga.walkList([
+							[25, 24, '里谢里雅堡 1楼'],
+							[74, 40, '里谢里雅堡'],
+						], cb);
+					});
+				});
+			});
+		}
+		
+		var stage3 = ()=>{
+			cga.walkList([
+				[19, 55],
+			], (r)=>{
+				cga.TurnTo(19, 53);
+				cga.AsyncWaitNPCDialog(()=>{
+					cga.ClickNPCDialog(4, -1);
+					cga.AsyncWaitMovement({map:'港湾管理处'}, ()=>{
+						cga.walkList([
+							[9, 22, '伊尔'],
+							[24, 19],
+						], ()=>{
+							cga.TurnTo(24, 17);
+							cga.AsyncWaitNPCDialog(()=>{
+								cga.ClickNPCDialog(4, -1);
+								cga.AsyncWaitMovement({map:'伊尔村'}, stage4);
+							});
+						});
+					});
+				});
+			});
+		}
+		
+		var retry2 = ()=>{
+			cga.TurnTo(71, 26);
+			cga.AsyncWaitNPCDialog((err, dlg)=>{				
+				if(dlg && dlg.message.indexOf('现在正停靠在伊尔村') >= 0 && dlg.options == 12){
+					cga.ClickNPCDialog(4, -1);
+					cga.AsyncWaitMovement({map:'往哥拉尔栈桥'}, ()=>{
+						stage3();
+					});
+					return;
+				}
+				
+				setTimeout(retry2, 5000);
+			});
+		}
+
+		var retry = ()=>{
+			cga.TurnTo(53, 50);
+			cga.AsyncWaitNPCDialog((err, dlg)=>{
+				if(dlg && dlg.options == 12){
+					cga.ClickNPCDialog(4, -1);
+					cga.AsyncWaitMovement({map:'铁达尼号'}, retry2);
+					return;
+				}
+				
+				setTimeout(retry, 5000);
+			});
+		}
+		
+		cga.walkList([
+			[96, 211, '哥拉尔镇 港湾管理处'],
+			[8, 5],
+		], ()=>{
+			cga.TurnTo(8, 3);
+			cga.AsyncWaitNPCDialog(()=>{
+				cga.ClickNPCDialog(32, -1);
+				cga.AsyncWaitNPCDialog(()=>{
+					cga.ClickNPCDialog(4, -1);
+					cga.AsyncWaitMovement({map:'往伊尔栈桥'}, ()=>{
+						cga.walkList([
+						[51, 50],
+						], retry);
+					});
+				});
+			});
+		});
+	}
 
 	cga.calculatePath = (curX, curY, targetX, targetY, targetMap, dstX, dstY, newList)=>{
 		var walls = cga.buildMapCollisionMatrix();
@@ -1408,23 +1577,23 @@ module.exports = function(callback){
 			dontCrossCorners: true
 		});
 		
-		console.log('x_size ' + walls.x_size);
-		console.log('y_size ' + walls.y_size);
+		//console.log('x_size ' + walls.x_size);
+		//console.log('y_size ' + walls.y_size);
 		
-		console.log('xbot ' + walls.x_bottom);
-		console.log('ybot ' + walls.y_bottom);
+		//console.log('xbot ' + walls.x_bottom);
+		//console.log('ybot ' + walls.y_bottom);
 
 		var frompos = [curX - walls.x_bottom, curY - walls.y_bottom];
 		var topos = [targetX - walls.x_bottom, targetY - walls.y_bottom];
-		console.log('from '  + (frompos[0]) + ', '+ frompos[1]);
-		console.log('to '  + (topos[0]) +', '+(topos[1]));
+		console.log('寻路起始坐标 ('  + (frompos[0]) + ', '+ (frompos[1]) + ')');
+		console.log('寻路目的坐标 ('  + (topos[0]) +', '+(topos[1]) + ')');
 		
 		if(frompos[0] >= 0 && frompos[0] < walls.x_size && 
 		frompos[1] >= 0 && frompos[1] < walls.y_size &&
 			topos[0] >= 0 && topos[0] < walls.x_size && 
 			topos[1] >= 0 && topos[1] < walls.y_size){
 		
-			console.log('using AStar path finder...');
+			//console.log('using AStar path finder...');
 			
 			var path = finder.findPath(frompos[0], frompos[1], topos[0], topos[1], grid);
 			
@@ -1440,17 +1609,17 @@ module.exports = function(callback){
 				joint[i][5] = true;
 			}
 
-			console.log('result joints');
+			//console.log('result joints');
 				
-			console.log(joint);
+			//console.log(joint);
 
 			newList = joint.concat(newList);
 			
-			console.log('final list');
+			//console.log('final list');
 			
-			console.log(newList);
+			//console.log(newList);
 		} else {
-			console.log('failed to use AStar path finder...');
+			console.log('错误：寻路失败！');
 			newList.unshift([targetX, targetY, targetMap, null, null, true]);
 		}
 		
