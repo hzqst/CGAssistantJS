@@ -52,7 +52,7 @@ var loop = ()=>{
 			if(r && r.success){
 				thisobj.craftedCount ++;
 				console.log('已造' + thisobj.craftedCount + '件！');
-				if(thisobj.craftedCount >= thisobj.craftedCount){
+				if(thisobj.craftedCount >= thisobj.craftCount){
 					cga.SayWords('已达到设定的制造数量！', 0, 3, 1);
 					return;
 				}
