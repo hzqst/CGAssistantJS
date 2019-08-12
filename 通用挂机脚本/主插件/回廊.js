@@ -7,73 +7,121 @@ var cga = global.cga;
 var configTable = global.configTable;
 var sellStoreArray = ['不卖石', '卖石'];
 
-var battleWrapper = (checkTeam, isLeader)=>{
+var interrupt = require('./../公共模块/interrupt');
+
+var moveThinkInterrupt = new interrupt();
+var playerThinkInterrupt = new interrupt();
+var playerThinkRunning = false;
+
+var moveThink = (arg)=>{
+
+	if(moveThinkInterrupt.hasInterrupt())
+		return false;
+
+	if(arg == 'freqMoveMapChanged')
+	{
+		playerThinkInterrupt.requestInterrupt();
+		return false;
+	}
+
+	return true;
+}
+
+var playerThink = ()=>{
+
+	if(!cga.isInNormalState())
+		return true;
+	
 	var playerinfo = cga.GetPlayerInfo();
 	var ctx = {
 		playerinfo : playerinfo,
 		petinfo : cga.GetPetInfo(playerinfo.petid),
 		teamplayers : cga.getTeamPlayers(),
 		result : null,
+		dangerlevel : thisobj.getDangerLevel(),
 	}
 
-	if(checkTeam === true)
-		teamMode.battle(ctx);
+	teamMode.think(ctx);
 
-	global.callSubPlugins('battle', ctx);
+	global.callSubPlugins('think', ctx);
 
-	if(isLeader){
-		
-		if( ctx.result == 'supply' || ctx.result == 'logback' ){
-			
-			logbackEx.func(loop);
-			
+	if(cga.isTeamLeaderEx() && ctx.dangerlevel > 0)
+	{
+		if(ctx.result == null && playerThinkInterrupt.hasInterrupt())
+			ctx.result = 'supply';
+
+		if(ctx.result == 'supply' && supplyMode.isLogBack())
+			ctx.result = 'logback';
+
+		if( ctx.result == 'supply' || ctx.result == 'logback' )
+		{
+			moveThinkInterrupt.requestInterrupt(()=>{
+				if(cga.isInNormalState()){
+					logbackEx.func(loop);
+					return true;
+				}
+				return false;
+			});
 			return false;
 		}
 	}
+
 	return true;
 }
 
+var playerThinkTimer = ()=>{
+	if(playerThinkRunning){
+		if(!playerThink()){
+			console.log('playerThink off');
+			playerThinkRunning = false;
+		}
+	}
+	
+	setTimeout(playerThinkTimer, 1500);
+}
+
 var loop = ()=>{
+	
+	playerThinkRunning = true;
+	
 	var map = cga.GetMapName();
 	var mapindex = cga.GetMapIndex().index3;
 	
-	if(cga.isTeamLeader == true || !cga.getTeamPlayers().length){
-		if(map == '过去与现在的回廊'){
-			
-			if(!teamMode.is_enough_teammates()){
+	if(cga.isTeamLeaderEx())
+	{
+		if(map == '过去与现在的回廊')
+		{
+			if(!teamMode.is_enough_teammates())
+			{
+				//人没满
 				if(cga.isTeamLeader == true)
 				{
+					//队长等待队员
 					cga.WalkTo(11, 20);
+					teamMode.wait_for_teammates(loop);
+					return;
 				}
 				else
 				{
-					if(!battleWrapper(false, true))
-						return;
-					
+					//队员等待加队长
 					cga.WalkTo(10, 20);
+					teamMode.wait_for_teammates(loop);
+					return;
 				}
-				teamMode.wait_for_teammates(loop);
+			}
+			else
+			{
+				console.log('playerThink on');
+				playerThinkRunning = true;
+				//队长：人满了，开始遇敌
+				cga.freqMove(0);
 				return;
 			}
-			
-			cga.freqMove(0, ()=>{
-				
-				if(cga.isInNormalState()) {
-					if(!battleWrapper(true, true))
-						return false;
-				}
-				
-				return true;
-			});
-			return;
 		}
 	} else {
-		if(cga.isInNormalState()) {
-			if(!battleWrapper(true, false))
-				return;
-		}
-		
-		setTimeout(loop, 1500);
+		//进队了
+		console.log('playerThink on');
+		playerThinkRunning = true;
 		return;
 	}
 
@@ -176,6 +224,8 @@ var thisobj = {
 		}], cb);
 	},
 	execute : ()=>{
+		playerThinkTimer();
+		cga.registerMoveThink(moveThink);
 		callSubPlugins('init');
 		logbackEx.init();
 		loop();

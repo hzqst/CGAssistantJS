@@ -1,6 +1,7 @@
 var cga = require('bindings')('node_cga');	
 var moment = require('moment');
 var PF = require('pathfinding');
+var Async = require('async');
 
 global.is_array_contain = function(arr, val)
 {
@@ -88,6 +89,27 @@ module.exports = function(callback){
 		});
 		fn.apply(null, args);
 	});
+	
+	cga.moveThinkFnArray = [];
+	
+	cga.moveThink = (arg)=>{
+		for(var i = 0; i < cga.moveThinkFnArray.length; ++i){
+			if(cga.moveThinkFnArray[i](arg) == false){
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	cga.isMoveThinking = false;
+	
+	cga.registerMoveThink = (fn)=>{
+		cga.moveThinkFnArray.push(fn);
+	}
+	
+	cga.isTeamLeaderEx = ()=>{
+		return (cga.isTeamLeader == true || !cga.getTeamPlayers().length);
+	}
 	
 	cga.getMapInfo = () => {
 		const info = cga.GetMapXY();
@@ -1635,13 +1657,22 @@ module.exports = function(callback){
 		
 		//console.log('初始化寻路列表');
 		//console.log(list);
-				
+
+		cga.isMoveThinking = true;
+
+		if(!cga.moveThink('walkList')){
+			console.log('walkList被中断');
+			cga.isMoveThinking = false;
+			return;
+		}
+
 		var walkedList = [];
 		var newList = list.slice(0);
 		
 		var walkCb = ()=>{
 
 			if(newList.length == 0){
+				cga.isMoveThinking = false;
 				cb(null);
 				return;
 			}
@@ -1689,6 +1720,7 @@ module.exports = function(callback){
 						return;
 					}
 					
+					cga.isMoveThinking = false;
 					cb(null);
 					return;
 				}
@@ -1696,6 +1728,13 @@ module.exports = function(callback){
 			}
 			
 			var walker = (err, reason)=>{
+				
+				if(!cga.moveThink('walkList')){
+					console.log('walkList被中断');
+					cga.isMoveThinking = false;
+					return;
+				}
+
 				//console.log(result);
 				//console.log(reason);
 				if(err){
@@ -1785,6 +1824,8 @@ module.exports = function(callback){
 						console.log('当前寻路卡住，抛出错误！');
 
 					}
+					
+					cga.isMoveThinking = false;
 					cb(err, reason);
 					return;
 				}
@@ -2415,7 +2456,7 @@ module.exports = function(callback){
 	}
 	
 	
-	cga.freqMove = function(dir, cb){
+	cga.freqMove = function(dir){
 		var freqMoveDirTable = [ 4, 5, 6, 7, 0, 1, 2, 3 ];
 		var freqMoveDir = dir;
 		var pos = cga.GetMapXY();
@@ -2425,7 +2466,6 @@ module.exports = function(callback){
 			var result = true;
 			try
 			{
-				
 				var curindex3 = cga.GetMapIndex().index;
 				if(curindex3 == index3)
 				{
@@ -2480,22 +2520,29 @@ module.exports = function(callback){
 					}
 					
 					counter++;
-					if(counter % 4 == 0)
-						result = cb(true);
+					if(counter % 4 == 0){
+						if(!cga.moveThink('freqMove')){
+							cga.isMoveThinking = false;
+							return;
+						}
+					}
 				}
 				else
 				{
-					result = cb(false);
+					if(!cga.moveThink('freqMoveMapChanged')){
+						cga.isMoveThinking = false;
+						return;
+					}
 				}
 			}
 			catch(e){
 				console.log(e);
 			}
 			
-			if(result)
-				setTimeout(move, 50);
+			setTimeout(move, 50);
 		}
-		setTimeout(move, 50);
+		
+		move();
 	}
 	
 	cga.getTeamPlayers = ()=>{

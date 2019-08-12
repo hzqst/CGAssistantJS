@@ -2,42 +2,74 @@ var supplyModeArray = [
 {
 	name : '艾夏岛医院,资深护士回补',
 	func : (cb)=>{
-		cga.walkList([
-			[30, 193, '盖雷布伦森林'],
-			[199, 211, '艾夏岛'],
-			[112, 81, '医院'],
+		var path = [
 			[35, 43],
 			[35, 42],
 			[35, 43],
 			[35, 42],
 			[35, 43],
-		], ()=>{
+		];
+		if(map == '布拉基姆高地'){
+			path.unshift([112, 81, '医院']);
+			path.unshift([199, 211, '艾夏岛']);
+			path.unshift([30, 193, '盖雷布伦森林']);
+		}
+		else if(map == '盖雷布伦森林'){
+			path.unshift([112, 81, '医院']);
+			path.unshift([199, 211, '艾夏岛']);
+		}
+		else if(map == '艾夏岛'){
+			path.unshift([112, 81, '医院']);
+		}
+		cga.walkList(path, ()=>{
 			cga.TurnTo(37, 43);
 			setTimeout(cb, 5000);
 		});
 	},
-	isLogBack : false,
-	isInitialSupply : false,
+	isLogBack : ()=>{
+		var map = cga.GetMapName();
+		var mapindex = cga.GetMapIndex().index3;
+		return (map == '布拉基姆高地' || map == '盖雷布伦森林' || map == '艾夏岛' || mapindex == 59539) ? false : true;
+	},
+	isInitialSupply : ()=>{
+		return false;
+	},
 },
 {
 	name : '艾夏岛医院,普通护士回补',
 	func : (cb)=>{
-		cga.walkList([
-			[30, 193, '盖雷布伦森林'],
-			[199, 211, '艾夏岛'],
-			[112, 81, '医院'],
+		var path = [
 			[35, 46],
 			[35, 45],
 			[35, 46],
 			[35, 45],
 			[35, 46],
-		], ()=>{
-			cga.TurnTo(37, 46);
+		];
+		if(map == '布拉基姆高地'){
+			path.unshift([112, 81, '医院']);
+			path.unshift([199, 211, '艾夏岛']);
+			path.unshift([30, 193, '盖雷布伦森林']);
+		}
+		else if(map == '盖雷布伦森林'){
+			path.unshift([112, 81, '医院']);
+			path.unshift([199, 211, '艾夏岛']);
+		}
+		else if(map == '艾夏岛'){
+			path.unshift([112, 81, '医院']);
+		}
+		cga.walkList(path, ()=>{
+			cga.TurnTo(37, 43);
 			setTimeout(cb, 5000);
 		});
 	},
-	isLogBack : false,
-	isInitialSupply : false,
+	isLogBack : ()=>{
+		var map = cga.GetMapName();
+		var mapindex = cga.GetMapIndex().index3;
+		return (map == '布拉基姆高地' || map == '盖雷布伦森林' || map == '艾夏岛' || mapindex == 59539) ? false : true;
+	},
+	isInitialSupply : ()=>{
+		return false;
+	},
 },
 {
 	name : '登出飞碟回补',
@@ -46,8 +78,12 @@ var supplyModeArray = [
 			setTimeout(cb, 5000);
 		});
 	},
-	isLogBack : true,
-	isInitialSupply : true,
+	isLogBack : ()=>{
+		return true;
+	},
+	isInitialSupply : ()=>{
+		return true;
+	},
 },
 ]
 

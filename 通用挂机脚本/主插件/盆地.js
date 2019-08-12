@@ -3,68 +3,22 @@ var supplyMode = require('./../公共模块/盆地回补');
 var teamMode = require('./../公共模块/组队模式');
 var logbackEx = require('./../公共模块/登出防卡住');
 
-var battleAreaArray = [
-{
-	name : '门口',
-	pos : [155, 147],
-	dir : 0,
-},
-{
-	name : '赤熊 骷髅海盗',
-	pos : [182, 104],
-	dir : 0,
-},
-{
-	name : '红螳螂',
-	pos : [248, 134],
-	dir : 0,
-},
-]
-
 var cga = global.cga;
 var configTable = global.configTable;
 
-var battleWrapper = (isLeader)=>{
-	var playerinfo = cga.GetPlayerInfo();
-	var ctx = {
-		playerinfo : playerinfo,
-		petinfo : cga.GetPetInfo(playerinfo.petid),
-		teamplayers : cga.getTeamPlayers(),
-		result : null,
-	}
+var interrupt = require('./../公共模块/interrupt');
 
-	teamMode.battle(ctx);
+var moveThinkInterrupt = new interrupt();
+var playerThinkInterrupt = new interrupt();
+var playerThinkRunning = false;
 
-	global.callSubPlugins('battle', ctx);
-
-	//if(ctx.result == 'supply' && supplyMode.isLogBack())
-	//	ctx.result = 'logback';
-	if(isLeader){
-		if( ctx.result == 'supply' ){
-
-			supplyMode.func(loop);
-			
-			return false;
-		}
-		else if( ctx.result == 'logback' ){
-			
-			logbackEx.func(loop);
-			
-			return false;
-		}
-	}
-	return true;
-}
-
-var loop = ()=>{
-	var map = cga.GetMapName();
-	var mapindex = cga.GetMapIndex().index3;
-	
-	if(cga.isTeamLeader == true || !cga.getTeamPlayers().length){
-		if(map == '医院' && mapindex == 59539){
+var battleAreaArray = [
+{
+	name : '门口',
+	walkTo : (cb)=>{
+		cga.travel.newisland.toStone('S', ()=>{
 			cga.walkList([
 			[28, 52, '艾夏岛'],
-			[90, 63, '艾尔莎岛'],
 			[130, 50, '盖雷布伦森林'],
 			[216, 44],
 			], ()=>{
@@ -75,59 +29,188 @@ var loop = ()=>{
 						cga.ClickNPCDialog(32, 0);
 						cga.AsyncWaitNPCDialog(()=>{
 							cga.ClickNPCDialog(1, 0); 
-							cga.AsyncWaitMovement({map:'方堡盆地', delay:1000, timeout:5000}, loop);
-						});
-					});
-				});
-			});
-			return;
-		} 
-		if(map == '方堡盆地')
-		{
-			cga.freqMove(thisobj.battleArea.dir, ()=>{
-				
-				if(cga.isInNormalState()) {
-					if(!battleWrapper(true))
-						return false;
-				}
-				
-				return true;
-			});
-			return;
-		}
-		if(map == '艾尔莎岛' && teamMode.is_enough_teammates()){
-			cga.travel.newisland.toStone('S', ()=>{
-				cga.walkList([
-				[28, 52, '艾夏岛'],
-				[130, 50, '盖雷布伦森林'],
-				[216, 44],
-				], ()=>{
-					cga.TurnTo(216, 43)		
-					cga.AsyncWaitNPCDialog(()=>{
-						cga.ClickNPCDialog(8, 0);
-						cga.AsyncWaitNPCDialog(()=>{
-							cga.ClickNPCDialog(32, 0);
-							cga.AsyncWaitNPCDialog(()=>{
-								cga.ClickNPCDialog(1, 0); 
-								cga.AsyncWaitMovement({map:'方堡盆地', delay:1000, timeout:5000}, ()=>{
-									cga.walkList([
-									thisobj.battleArea.pos
-									], loop);
-								});
+							cga.AsyncWaitMovement({map:'方堡盆地', delay:1000, timeout:5000}, ()=>{
+								cga.walkList([
+								[155, 147],
+								], loop);
 							});
 						});
 					});
 				});
 			});
+		});
+	},
+	moveDir : 0,
+	isDesiredMap : (map)=>{
+		return (map == '方堡盆地');
+	}
+},
+{
+	name : '赤熊骷髅海盗',
+	walkTo : (cb)=>{
+		cga.travel.newisland.toStone('S', ()=>{
+			cga.walkList([
+			[28, 52, '艾夏岛'],
+			[130, 50, '盖雷布伦森林'],
+			[216, 44],
+			], ()=>{
+				cga.TurnTo(216, 43)		
+				cga.AsyncWaitNPCDialog(()=>{
+					cga.ClickNPCDialog(8, 0);
+					cga.AsyncWaitNPCDialog(()=>{
+						cga.ClickNPCDialog(32, 0);
+						cga.AsyncWaitNPCDialog(()=>{
+							cga.ClickNPCDialog(1, 0); 
+							cga.AsyncWaitMovement({map:'方堡盆地', delay:1000, timeout:5000}, ()=>{
+								cga.walkList([
+								[182, 104],
+								], loop);
+							});
+						});
+					});
+				});
+			});
+		});
+	},
+	moveDir : 0,
+	isDesiredMap : (map)=>{
+		return (map == '方堡盆地');
+	}
+},
+{
+	name : '红螳螂',
+	walkTo : (cb)=>{
+		cga.travel.newisland.toStone('S', ()=>{
+			cga.walkList([
+			[28, 52, '艾夏岛'],
+			[130, 50, '盖雷布伦森林'],
+			[216, 44],
+			], ()=>{
+				cga.TurnTo(216, 43)		
+				cga.AsyncWaitNPCDialog(()=>{
+					cga.ClickNPCDialog(8, 0);
+					cga.AsyncWaitNPCDialog(()=>{
+						cga.ClickNPCDialog(32, 0);
+						cga.AsyncWaitNPCDialog(()=>{
+							cga.ClickNPCDialog(1, 0); 
+							cga.AsyncWaitMovement({map:'方堡盆地', delay:1000, timeout:5000}, ()=>{
+								cga.walkList([
+								[248, 134],
+								], loop);
+							});
+						});
+					});
+				});
+			});
+		});
+	},
+	moveDir : 0,
+	isDesiredMap : (map)=>{
+		return (map == '方堡盆地');
+	}
+},
+]
+
+var moveThink = (arg)=>{
+
+	if(moveThinkInterrupt.hasInterrupt())
+		return false;
+
+	if(arg == 'freqMoveMapChanged')
+	{
+		playerThinkInterrupt.requestInterrupt();
+		return false;
+	}
+
+	return true;
+}
+
+var playerThink = ()=>{
+
+	if(!cga.isInNormalState())
+		return true;
+	
+	var playerinfo = cga.GetPlayerInfo();
+	var ctx = {
+		playerinfo : playerinfo,
+		petinfo : cga.GetPetInfo(playerinfo.petid),
+		teamplayers : cga.getTeamPlayers(),
+		result : null,
+		dangerlevel : thisobj.getDangerLevel(),
+	}
+
+	teamMode.think(ctx);
+
+	global.callSubPlugins('think', ctx);
+
+	if(cga.isTeamLeaderEx() && ctx.dangerlevel > 0)
+	{
+		if(ctx.result == null && playerThinkInterrupt.hasInterrupt())
+			ctx.result = 'supply';
+
+		if(ctx.result == 'supply' && supplyMode.isLogBack())
+			ctx.result = 'logback';
+		
+		if( ctx.result == 'supply' )
+		{
+			moveThinkInterrupt.requestInterrupt(()=>{
+				if(cga.isInNormalState()){
+					supplyMode.func(loop);
+					return true;
+				}
+				return false;
+			});
+			return false;
+		}
+		else if( ctx.result == 'logback' )
+		{
+			moveThinkInterrupt.requestInterrupt(()=>{
+				if(cga.isInNormalState()){
+					logbackEx.func(loop);
+					return true;
+				}
+				return false;
+			});
+			return false;
+		}
+	}
+
+	return true;
+}
+
+var playerThinkTimer = ()=>{
+	if(playerThinkRunning){
+		if(!playerThink()){
+			console.log('playerThink off');
+			playerThinkRunning = false;
+		}
+	}
+	
+	setTimeout(playerThinkTimer, 1500);
+}
+
+var loop = ()=>{
+
+	var map = cga.GetMapName();
+	var mapindex = cga.GetMapIndex().index3;
+	
+	if(cga.isTeamLeaderEx()){
+		if(thisobj.battleArea.isDesiredMap(map))
+		{
+			cga.freqMove(thisobj.battleArea.moveDir);
+			return;
+		}
+		else if(teamMode.is_enough_teammates())
+		{
+			console.log('playerThink on');
+			playerThinkRunning = true;
+
+			thisobj.battleArea.walkTo(loop);
 			return;
 		}
 	} else {
-		if(cga.isInNormalState()) {
-			if(!battleWrapper(false))
-				return;
-		}
-		
-		setTimeout(loop, 1500);
+		console.log('playerThink on');
+		playerThinkRunning = true;
 		return;
 	}
 
@@ -152,7 +235,10 @@ var thisobj = {
 	getDangerLevel : ()=>{
 		var map = cga.GetMapName();
 
-		if(map == '方堡盆地' )
+		if(map == '方堡盆地')
+			return 2;
+		
+		if(map == '盖雷布伦森林')
 			return 1;
 		
 		return 0;
@@ -225,6 +311,8 @@ var thisobj = {
 		}], cb);
 	},
 	execute : ()=>{
+		playerThinkTimer();
+		cga.registerMoveThink(moveThink);
 		callSubPlugins('init');
 		logbackEx.init();
 		loop();

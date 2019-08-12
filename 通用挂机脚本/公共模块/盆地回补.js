@@ -6,8 +6,12 @@ var supplyModeArray = [
 			setTimeout(cb, 5000);
 		});
 	},
-	isLogBack : true,
-	isInitialSupply : true,
+	isInitialSupply : ()=>{
+		return true;
+	},
+	isInitialSupply : ()=>{
+		return true;
+	},
 },
 ]
 
@@ -19,10 +23,10 @@ var thisobj = {
 		thisobj.object.func(cb);
 	},
 	isLogBack : ()=>{
-		return thisobj.object.isLogBack;
+		return thisobj.object.isLogBack();
 	},
 	isInitialSupply : ()=>{
-		return thisobj.object.isInitialSupply;
+		return thisobj.object.isInitialSupply();
 	},
 	translate : (pair)=>{
 		if(pair.field == 'supplyMode'){

@@ -3,106 +3,219 @@ var supplyMode = require('./../公共模块/高地回补');
 var teamMode = require('./../公共模块/组队模式');
 var logbackEx = require('./../公共模块/登出防卡住');
 
-var battleAreaArray = [
-{
-	name : '刀鸡',
-	pos : [34, 188],
-	dir : 0,
-},
-{
-	name : '黄金龙骨',
-	pos : [135, 175],
-	dir : 6,
-},
-{
-	name : '银狮',
-	pos : [147, 117],
-	dir : 2,
-},
-]
-
 var cga = global.cga;
 var configTable = global.configTable;
 
-var battleWrapper = (isLeader)=>{
+var interrupt = require('./../公共模块/interrupt');
+
+var moveThinkInterrupt = new interrupt();
+var playerThinkInterrupt = new interrupt();
+var playerThinkRunning = false;
+
+var battleAreaArray = [
+{
+	name : '刀鸡',
+	walkTo : (cb)=>{
+		if(map == '医院' && mapindex == 59539){
+			cga.walkList([
+				[28, 52, '艾夏岛'],
+				[190, 116, '盖雷布伦森林'],
+				[231, 222, '布拉基姆高地'],
+				[34, 188],
+			], cb);
+		} else {
+			cga.travel.newisland.toStone('D', ()=>{
+				cga.walkList([
+					[190, 116, '盖雷布伦森林'],
+					[231, 222, '布拉基姆高地'],
+					[34, 188],
+				], cb);
+			});
+		}
+	},
+	moveDir : 0,
+	isDesiredMap : (map)=>{
+		return (map == '布拉基姆高地');
+	}
+},
+{
+	name : '黄金龙骨',
+	walkTo : (cb)=>{
+		if(map == '医院' && mapindex == 59539){
+			cga.walkList([
+				[28, 52, '艾夏岛'],
+				[190, 116, '盖雷布伦森林'],
+				[231, 222, '布拉基姆高地'],
+				[135, 175],
+			], cb);
+		} else {
+			cga.travel.newisland.toStone('D', ()=>{
+				cga.walkList([
+					[190, 116, '盖雷布伦森林'],
+					[231, 222, '布拉基姆高地'],
+					[135, 175],
+				], cb);
+			});
+		}
+	},
+	moveDir : 6,
+	isDesiredMap : (map)=>{
+		return (map == '布拉基姆高地');
+	}
+},
+{
+	name : '银狮',
+	walkTo : (cb)=>{
+		if(map == '医院' && mapindex == 59539){
+			cga.walkList([
+				[28, 52, '艾夏岛'],
+				[190, 116, '盖雷布伦森林'],
+				[231, 222, '布拉基姆高地'],
+				[147, 117],
+			], cb);
+		} else {
+			cga.travel.newisland.toStone('D', ()=>{
+				cga.walkList([
+					[190, 116, '盖雷布伦森林'],
+					[231, 222, '布拉基姆高地'],
+					[147, 117],
+				], cb);
+			});
+		}
+	},
+	moveDir : 2,
+	isDesiredMap : (map)=>{
+		return (map == '布拉基姆高地');
+	}
+},
+{
+	name : '低地鸡',
+	walkTo : (cb)=>{
+		var path = ;
+		if(map == '医院' && mapindex == 59539){
+			cga.walkList([
+				[28, 52, '艾夏岛'],
+				[190, 116, '盖雷布伦森林'],
+				[210, 116],
+			], cb);
+		} else {
+			cga.travel.newisland.toStone('D', ()=>{
+				cga.walkList([
+					[190, 116, '盖雷布伦森林'],
+					[210, 116],
+				], cb);
+			});
+		}
+	},
+	moveDir : 0,
+	isDesiredMap : (map)=>{
+		return (map == '盖雷布伦森林');
+	}
+},
+]
+
+var moveThink = (arg)=>{
+
+	if(moveThinkInterrupt.hasInterrupt())
+		return false;
+
+	if(arg == 'freqMoveMapChanged')
+	{
+		playerThinkInterrupt.requestInterrupt();
+		return false;
+	}
+
+	return true;
+}
+
+var playerThink = ()=>{
+
+	if(!cga.isInNormalState())
+		return true;
+	
 	var playerinfo = cga.GetPlayerInfo();
 	var ctx = {
 		playerinfo : playerinfo,
 		petinfo : cga.GetPetInfo(playerinfo.petid),
 		teamplayers : cga.getTeamPlayers(),
 		result : null,
+		dangerlevel : thisobj.getDangerLevel(),
 	}
 
-	teamMode.battle(ctx);
+	teamMode.think(ctx);
 
-	global.callSubPlugins('battle', ctx);
+	global.callSubPlugins('think', ctx);
 
-	if(ctx.result == 'supply' && supplyMode.isLogBack())
-		ctx.result = 'logback';
-
-	if(isLeader)
+	if(cga.isTeamLeaderEx() && ctx.dangerlevel > 0)
 	{
-		if( ctx.result == 'supply' ){
+		if(ctx.result == null && playerThinkInterrupt.hasInterrupt())
+			ctx.result = 'supply';
 
-			supplyMode.func(loop);
-			
+		if(ctx.result == 'supply' && supplyMode.isLogBack())
+			ctx.result = 'logback';
+		
+		if( ctx.result == 'supply' )
+		{
+			moveThinkInterrupt.requestInterrupt(()=>{
+				if(cga.isInNormalState()){
+					supplyMode.func(loop);
+					return true;
+				}
+				return false;
+			});
 			return false;
 		}
-		else if( ctx.result == 'logback' ){
-			
-			logbackEx.func(loop);
-			
+		else if( ctx.result == 'logback' )
+		{
+			moveThinkInterrupt.requestInterrupt(()=>{
+				if(cga.isInNormalState()){
+					logbackEx.func(loop);
+					return true;
+				}
+				return false;
+			});
 			return false;
 		}
 	}
-	
+
 	return true;
 }
 
+var playerThinkTimer = ()=>{
+	if(playerThinkRunning){
+		if(!playerThink()){
+			console.log('playerThink off');
+			playerThinkRunning = false;
+		}
+	}
+	
+	setTimeout(playerThinkTimer, 1500);
+}
+
 var loop = ()=>{
+
 	var map = cga.GetMapName();
 	var mapindex = cga.GetMapIndex().index3;
 	
-	if(cga.isTeamLeader == true || !cga.getTeamPlayers().length){
-		if(map == '医院' && mapindex == 59539){
-			cga.walkList([
-			[28, 52, '艾夏岛'],
-			[190, 116, '盖雷布伦森林'],
-			[231, 222, '布拉基姆高地'],
-			thisobj.battleArea.pos,
-			], loop);
-			return;
-		} 
-		if(map == '布拉基姆高地')
+	if(cga.isTeamLeaderEx())
+	{
+		if(thisobj.battleArea.isDesiredMap(map))
 		{
-			cga.freqMove(thisobj.battleArea.dir, ()=>{
-				
-				if(cga.isInNormalState()) {
-					if(!battleWrapper(true))
-						return false;
-				}
-				
-				return true;
-			});
+			cga.freqMove(thisobj.battleArea.moveDir);
 			return;
 		}
-		if(map == '艾尔莎岛' && teamMode.is_enough_teammates()){
-			cga.travel.newisland.toStone('D', ()=>{
-				cga.walkList([
-					[190, 116, '盖雷布伦森林'],
-					[231, 222, '布拉基姆高地'],
-					thisobj.battleArea.pos,
-				], loop);
-			});
+		else if(teamMode.is_enough_teammates())
+		{
+			console.log('playerThink on');
+			playerThinkRunning = true;
+
+			thisobj.battleArea.walkTo(loop);
 			return;
 		}
 	} else {
-		if(cga.isInNormalState()) {
-			if(!battleWrapper(false))
-				return;
-		}
-		
-		setTimeout(loop, 1500);
+		console.log('playerThink on');
+		playerThinkRunning = true;
+
 		return;
 	}
 
@@ -203,6 +316,8 @@ var thisobj = {
 		}], cb);
 	},
 	execute : ()=>{
+		playerThinkTimer();
+		cga.registerMoveThink(moveThink);
 		callSubPlugins('init');
 		logbackEx.init();
 		loop();

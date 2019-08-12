@@ -6,9 +6,8 @@ var waitArray = [
 	mapname:'工房',
 	pos:[21, 23],
 	cb : ()=>{
-		if(cga.isTeamLeader == true || !cga.getTeamPlayers().length){
+		if(cga.isTeamLeaderEx())
 			return false;
-		}
 		
 		cga.TurnTo(21, 23);
 		cga.sellStone(function(){
@@ -22,9 +21,8 @@ var waitArray = [
 	mapname:'矮人城镇',
 	pos:[122, 110],
 	cb : ()=>{
-		if(cga.isTeamLeader == true || !cga.getTeamPlayers().length){
+		if(cga.isTeamLeaderEx())
 			return false;
-		}
 		
 		cga.TurnTo(122, 110);
 		cga.sellStone(function(){
@@ -38,9 +36,8 @@ var waitArray = [
 	mapname:'里谢里雅堡',
 	pos:[30, 77],
 	cb : ()=>{
-		if(cga.isTeamLeader == true || !cga.getTeamPlayers().length){
+		if(cga.isTeamLeaderEx())
 			return false;
-		}
 		
 		cga.TurnTo(30, 77);
 		cga.sellStone(function(){
@@ -55,9 +52,6 @@ var waitArray = [
 module.exports = {
 	init : ()=>{
 		cga.waitForMultipleLocation(waitArray);
-	},
-	battle : (ctx)=>{
-	
 	},
 	loadconfig : (obj, cb)=>{
 		return true;

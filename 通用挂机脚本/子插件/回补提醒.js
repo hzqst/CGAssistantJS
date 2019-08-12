@@ -1,6 +1,5 @@
-var muteUntil = 0;
-
 var thisobj = {
+	muteUntil : 0,
 	mute : 15,
 	translate : (pair)=>{
 		
@@ -20,35 +19,35 @@ var thisobj = {
 		
 		return false;
 	},
-	battle : (ctx)=>{
+	think : (ctx)=>{
 
 		var curTime = new Date().getTime();
-		if(ctx.playerinfo.hp < ctx.playerinfo.maxhp * thisobj.minHpPercent / 100 && curTime >= muteUntil){
+		if(ctx.playerinfo.hp < ctx.playerinfo.maxhp * thisobj.minHpPercent / 100 && curTime >= thisobj.muteUntil){
 			cga.SayWords('人物血量不够，需要回补!', 0, 3, 1);
-			muteUntil = curTime + 1000 * thisobj.mute;
+			thisobj.muteUntil = curTime + 1000 * thisobj.mute;
 			ctx.result = 'supply';
 			ctx.reason = '人物血量不够';
 			return;
 		}
-		if(ctx.playerinfo.mp < ctx.playerinfo.maxmp * thisobj.minMpPercent / 100 && curTime >= muteUntil){
+		if(ctx.playerinfo.mp < ctx.playerinfo.maxmp * thisobj.minMpPercent / 100 && curTime >= thisobj.muteUntil){
 			cga.SayWords('人物蓝量不够，需要回补!', 0, 3, 1);
-			muteUntil = curTime + 1000 * thisobj.mute;
+			thisobj.muteUntil = curTime + 1000 * thisobj.mute;
 			ctx.result = 'supply';
 			ctx.reason = '人物蓝量不够';
 			return true;
 		}
 
-		if(ctx.petinfo.hp < ctx.petinfo.maxhp * thisobj.minHpPercent / 100 && curTime >= muteUntil){
+		if(ctx.petinfo.hp < ctx.petinfo.maxhp * thisobj.minHpPercent / 100 && curTime >= thisobj.muteUntil){
 			cga.SayWords('宠物血量不够，需要回补!', 0, 3, 1);
-			muteUntil = curTime + 1000 * thisobj.mute;
+			thisobj.muteUntil = curTime + 1000 * thisobj.mute;
 			ctx.result = 'supply';
 			ctx.reason = '宠物血量不够';
 			return true;
 		}
 		
-		if(ctx.petinfo.mp < ctx.petinfo.maxmp * thisobj.minMpPercent / 100 && curTime >= muteUntil){
+		if(ctx.petinfo.mp < ctx.petinfo.maxmp * thisobj.minMpPercent / 100 && curTime >= thisobj.muteUntil){
 			cga.SayWords('宠物蓝量不够，需要回补!', 0, 3, 1);
-			muteUntil = curTime + 1000 * thisobj.mute;
+			thisobj.muteUntil = curTime + 1000 * thisobj.mute;
 			ctx.result = 'supply';
 			ctx.reason = '宠物蓝量不够';
 			return true;

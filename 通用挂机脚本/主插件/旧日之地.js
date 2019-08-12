@@ -9,6 +9,12 @@ var cga = global.cga;
 var configTable = global.configTable;
 var sellStoreArray = ['不卖石', '卖石'];
 
+var interrupt = require('./../公共模块/interrupt');
+
+var moveThinkInterrupt = new interrupt();
+var playerThinkInterrupt = new interrupt();
+var playerThinkRunning = false;
+
 var walkMazeForward = (cb)=>{
 	var map = cga.GetMapName();
 	if(map == '旧日迷宫第'+(thisobj.layerLevel)+'层'){
@@ -55,11 +61,79 @@ var walkMazeBack = (cb)=>{
 	});
 }
 
+var moveThink = (arg)=>{
+
+	if(moveThinkInterrupt.hasInterrupt())
+		return false;
+
+	if(arg == 'freqMoveMapChanged')
+	{
+		playerThinkInterrupt.requestInterrupt();
+		return false;
+	}
+
+	return true;
+}
+
+var playerThink = ()=>{
+
+	if(!cga.isInNormalState())
+		return true;
+	
+	var playerinfo = cga.GetPlayerInfo();
+	var ctx = {
+		playerinfo : playerinfo,
+		petinfo : cga.GetPetInfo(playerinfo.petid),
+		teamplayers : cga.getTeamPlayers(),
+		result : null,
+		dangerlevel : thisobj.getDangerLevel(),
+	}
+
+	teamMode.think(ctx);
+
+	global.callSubPlugins('think', ctx);
+
+	if(cga.isTeamLeaderEx() && ctx.dangerlevel > 0)
+	{
+		if(ctx.result == null && playerThinkInterrupt.hasInterrupt())
+			ctx.result = 'supply';
+
+		if(ctx.result == 'supply' && supplyMode.isLogBack())
+			ctx.result = 'logback';
+		
+		if( ctx.result == 'supply' || ctx.result == 'logback' )
+		{
+			moveThinkInterrupt.requestInterrupt(()=>{
+				if(cga.isInNormalState()){
+					logbackEx.func(loop);
+					return true;
+				}
+				return false;
+			});
+			return false;
+		}
+	}
+
+	return true;
+}
+
+var playerThinkTimer = ()=>{
+	if(playerThinkRunning){
+		if(!playerThink()){
+			console.log('playerThink off');
+			playerThinkRunning = false;
+		}
+	}
+	
+	setTimeout(playerThinkTimer, 1500);
+}
+
 var loop = ()=>{
+
 	var map = cga.GetMapName();
 	var mapindex = cga.GetMapIndex().index3;
 	
-	if(cga.isTeamLeader == true || !cga.getTeamPlayers().length){
+	if(cga.isTeamLeaderEx()){
 		if(map == '医院' && mapindex == 44692){
 			if(thisobj.sellStore == 1){
 				sellStore.func(loop);
@@ -82,6 +156,8 @@ var loop = ()=>{
 			return;
 		}
 		if(map == '迷宫入口' && teamMode.is_enough_teammates()){
+			console.log('playerThink on');
+			playerThinkRunning = true;
 			cga.walkList([
 				[9, 5, '旧日迷宫第1层'],
 			], loop);
@@ -90,84 +166,19 @@ var loop = ()=>{
 		if(map == '旧日迷宫第1层')
 		{
 			walkMazeForward((r)=>{
-				//意外传送回肯吉罗岛，迷宫刷新
 				if(r != true){
 					loop();
 					return;
 				}
 				var xy = cga.GetMapXY();
 				var dir = cga.getRandomSpaceDir(xy.x, xy.y);
-				cga.freqMove(dir, (r)=>{
-			
-					if(!cga.isInNormalState())
-						return true;
-					
-					var playerinfo = cga.GetPlayerInfo();
-					var ctx = {
-						playerinfo : playerinfo,
-						petinfo : cga.GetPetInfo(playerinfo.petid),
-						teamplayers : cga.getTeamPlayers(),
-						result : null,
-					}
-					
-					teamMode.battle(ctx);
-
-					global.callSubPlugins('battle', ctx);
-										
-					if(ctx.result == null && cga.GetMapName() == '迷宫入口')
-						ctx.result = 'supply';
-					
-					if(ctx.result == null && !r)
-						ctx.result = 'supply';
-					
-					//强制一切回补为登出回补，旧日只能登出
-					if(ctx.result == 'supply')
-						ctx.result = 'logback';
-					
-					if( ctx.result == 'supply' ){
-
-						walkMazeBack(loop);
-						
-						return false;
-					}
-					else if( ctx.result == 'logback' ){
-
-						logbackEx.func(loop);
-						
-						return false;
-					}
-
-					return true;
-				});
+				cga.freqMove(dir);
 			});
 			return;
 		}
 	} else {
-		if(!cga.isInBattle())
-		{
-			var playerinfo = cga.GetPlayerInfo();
-			var ctx = {
-				playerinfo : playerinfo,
-				petinfo : cga.GetPetInfo(playerinfo.petid),
-				teamplayers : cga.getTeamPlayers(),
-				result : null,
-			}
-			
-			teamMode.battle(ctx);
-			
-			global.callSubPlugins('battle', ctx);
-	
-			if(ctx.result == 'supply')
-				ctx.result = 'logback';
-			
-			if( ctx.result == 'supply' ){
-				//队员不会对回补有反应
-			}
-			else if( ctx.result == 'logback' ){
-				//队员不会对回补有反应
-			}
-		}
-		setTimeout(loop, 1500);
+		console.log('playerThink on');
+		playerThinkRunning = true;
 		return;
 	}
 	
@@ -182,7 +193,7 @@ var loop = ()=>{
 		supplyMode.func(loop);
 		return;
 	}
-	
+
 	callSubPluginsAsync('prepare', ()=>{
 		cga.travel.falan.toCamp(()=>{
 			
@@ -223,8 +234,7 @@ var loop = ()=>{
 									cga.isTeamLeader ? [6, 5] : [6, 6],
 									], ()=>{
 										teamMode.wait_for_teammates(loop);
-									});
-									
+									});									
 								});
 							});
 						});
@@ -242,7 +252,7 @@ var thisobj = {
 		
 		if(map == '肯吉罗岛' )
 			return 1;
-		
+
 		if(map.indexOf('旧日迷宫第') >= 0)
 			return 2;
 		
@@ -338,6 +348,8 @@ var thisobj = {
 		}], cb);
 	},
 	execute : ()=>{
+		playerThinkTimer();
+		cga.registerMoveThink(moveThink);
 		callSubPlugins('init');
 		logbackEx.init();
 		loop();

@@ -4,7 +4,7 @@ var configTable = global.configTable;
 const repairFilter = (eq) => {
 	if (eq.type >= 0 && eq.type <= 14 && eq.level <= 10) {
 		const durability = cga.getEquipEndurance(eq);
-		return durability &&
+		return durability && durability[0] < durability[1] &&
 			(
 				parseFloat(durability[0])/parseFloat(durability[1]) < 0.75 || durability[0] <= 30
 			)
@@ -16,7 +16,7 @@ const repairFilter = (eq) => {
 const repairFilterWeapon = (eq) => {
 	if (eq.type >= 0 && eq.type <= 6 && eq.level <= 10) {
 		const durability = cga.getEquipEndurance(eq);
-		return durability &&
+		return durability && durability[0] < durability[1] &&
 			(
 				parseFloat(durability[0])/parseFloat(durability[1]) < 0.75 || durability[0] <= 30
 			)
@@ -28,7 +28,7 @@ const repairFilterWeapon = (eq) => {
 const repairFilterArmor = (eq) => {
 	if (eq.type >= 7 && eq.type <= 14 && eq.level <= 10) {
 		const durability = cga.getEquipEndurance(eq);
-		return durability &&
+		return durability && durability[0] < durability[1] &&
 			(
 				parseFloat(durability[0])/parseFloat(durability[1]) < 0.75 || durability[0] <= 30
 			)

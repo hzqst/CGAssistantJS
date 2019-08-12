@@ -9,17 +9,101 @@ var cga = global.cga;
 var configTable = global.configTable;
 var sellStoreArray = ['不卖石', '卖石'];
 
+var interrupt = require('./../公共模块/interrupt');
+
+var moveThinkInterrupt = new interrupt();
+var playerThinkInterrupt = new interrupt();
+var playerThinkRunning = false;
+
+var moveThink = (arg)=>{
+
+	if(moveThinkInterrupt.hasInterrupt())
+		return false;
+
+	if(arg == 'freqMoveMapChanged')
+	{
+		playerThinkInterrupt.requestInterrupt();
+		return false;
+	}
+
+	return true;
+}
+
+var playerThink = ()=>{
+
+	if(!cga.isInNormalState())
+		return true;
+	
+	var playerinfo = cga.GetPlayerInfo();
+	var ctx = {
+		playerinfo : playerinfo,
+		petinfo : cga.GetPetInfo(playerinfo.petid),
+		teamplayers : cga.getTeamPlayers(),
+		result : null,
+		dangerlevel : thisobj.getDangerLevel(),
+	}
+
+	teamMode.think(ctx);
+
+	global.callSubPlugins('think', ctx);
+
+	if(cga.isTeamLeaderEx() && ctx.dangerlevel > 0)
+	{
+		if(ctx.result == null && playerThinkInterrupt.hasInterrupt())
+			ctx.result = 'supply';
+
+		if(ctx.result == 'supply' && supplyMode.isLogBack())
+			ctx.result = 'logback';
+		
+		if( ctx.result == 'supply' )
+		{
+			moveThinkInterrupt.requestInterrupt(()=>{
+				if(cga.isInNormalState()){
+					supplyMode.func(loop);
+					return true;
+				}
+				return false;
+			});
+			return false;
+		}
+		else if( ctx.result == 'logback' )
+		{
+			moveThinkInterrupt.requestInterrupt(()=>{
+				if(cga.isInNormalState()){
+					logbackEx.func(loop);
+					return true;
+				}
+				return false;
+			});
+			return false;
+		}
+	}
+
+	return true;
+}
+
+var playerThinkTimer = ()=>{
+	if(playerThinkRunning){
+		if(!playerThink()){
+			console.log('playerThink off');
+			playerThinkRunning = false;
+		}
+	}
+	
+	setTimeout(playerThinkTimer, 1500);
+}
+
 var loop = ()=>{
+
 	var map = cga.GetMapName();
 	var mapindex = cga.GetMapIndex().index3;
 	
-	if(cga.isTeamLeader == true || !cga.getTeamPlayers().length){
+	if(cga.isTeamLeaderEx()){
 		if(map == '医院' && mapindex == 44692){
 			if(thisobj.sellStore == 1){
 				sellStore.func(loop);
 			} else {
 				cga.walkList([
-					[9, 20],
 					[0, 20, '圣骑士营地'],
 				], loop);
 			}
@@ -32,44 +116,12 @@ var loop = ()=>{
 			return;
 		}
 		if(map == '肯吉罗岛'){
-			cga.freqMove(0, ()=>{
-				
-				if(cga.isInNormalState())
-				{
-					var playerinfo = cga.GetPlayerInfo();
-					var ctx = {
-						playerinfo : playerinfo,
-						petinfo : cga.GetPetInfo(playerinfo.petid),
-						teamplayers : cga.getTeamPlayers(),
-						result : null,
-					}
-					
-					teamMode.battle(ctx);
-					
-					global.callSubPlugins('battle', ctx);
-					
-					if(ctx.result == 'supply' && supplyMode.isLogBack())
-						ctx.result = 'logback';
-					
-					if( ctx.result == 'supply' ){
-						
-						supplyMode.func(loop);
-						
-						return false;
-					}
-					else if( ctx.result == 'logback' ){
-
-						logbackEx.func(loop);
-						
-						return false;
-					}
-				}
-				
-				return true;
-			});
+			cga.freqMove(0);
 			return;
 		}
 		if(map == '圣骑士营地' && teamMode.object.is_enough_teammates()){
+			console.log('playerThink on');
+			playerThinkRunning = true;
 			cga.walkList([
 				[36, 87, '肯吉罗岛'],
 				[467, 201],
@@ -77,31 +129,8 @@ var loop = ()=>{
 			return;
 		}
 	} else {
-		if(cga.isInNormalState())
-		{
-			var playerinfo = cga.GetPlayerInfo();
-			var ctx = {
-				playerinfo : playerinfo,
-				petinfo : cga.GetPetInfo(playerinfo.petid),
-				teamplayers : cga.getTeamPlayers(),
-				result : null,
-			}
-			
-			teamMode.battle(ctx);
-			
-			global.callSubPlugins('battle', ctx);
-			
-			if(ctx.result == 'supply' && supplyMode.isLogBack())
-				ctx.result = 'logback';
-			
-			if( ctx.result == 'supply' ){
-				//队员不会对回补有反应
-			}
-			else if( ctx.result == 'logback' ){
-				//队员不会对回补有反应
-			}
-		}
-		setTimeout(loop, 1500);
+		console.log('playerThink on');
+		playerThinkRunning = true;
 		return;
 	}
 
@@ -194,6 +223,8 @@ var thisobj = {
 		}], cb);
 	},
 	execute : ()=>{
+		playerThinkTimer();
+		cga.registerMoveThink(moveThink);
 		callSubPlugins('init');
 		logbackEx.init();
 		loop();

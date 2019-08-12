@@ -6,15 +6,14 @@ module.exports = {
 	init : ()=>{
 		cga.waitTeammateSay((player, msg)=>{
 
-			if(msg.indexOf('需要回补') >= 0 && global.getMainPlugin().getDangerLevel() >= 1){
-				
+			if(msg.indexOf('需要回补') >= 0 && global.getMainPlugin().getDangerLevel() > 0){
 				callsupply = true;
 			}
 			
 			return true;
 		});
 	},
-	battle : (ctx)=>{
+	think : (ctx)=>{
 		if(callsupply)
 		{
 			callsupply = false;

@@ -30,7 +30,7 @@ var teamModeArray = [
 		if(!cga.isTeamLeader){
 			
 			var waitAdd = ()=>{					
-				console.log('waitAdd...');
+				//console.log('waitAdd...');
 				cga.addTeammate(thisobj.teammates[0], (r)=>{
 					if(r){
 						cga.EnableFlags(cga.ENABLE_FLAG_JOINTEAM, false);
@@ -46,7 +46,7 @@ var teamModeArray = [
 		else 
 		{
 			var waitFor = ()=>{
-				console.log('waitFor...');
+				//console.log('waitFor...');
 				cga.waitTeammates(thisobj.teammates, (r)=>{
 					if(r){
 						cga.EnableFlags(cga.ENABLE_FLAG_JOINTEAM, false);
@@ -60,9 +60,13 @@ var teamModeArray = [
 			waitFor();
 		}
 	},
-	battle : (ctx)=>{
+	think : (ctx)=>{
 		//单练模式
 		if(thisobj.teammates.length == 0)
+			return;
+		
+		//非危险区域，不用管
+		if(ctx.dangerlevel == 0)
 			return;
 		
 		//队长：人数不足，登出
@@ -120,10 +124,14 @@ var teamModeArray = [
 		
 		wait();
 	},
-	battle : (ctx)=>{
+	think : (ctx)=>{
 		
 		//单练模式
 		if(thisobj.minTeamMemberCount <= 1)
+			return;
+		
+		//非危险区域，不用管
+		if(ctx.dangerlevel == 0)
 			return;
 		
 		//人数不足，回补
@@ -149,8 +157,8 @@ var thisobj = {
 	wait_for_teammates : (cb)=>{
 		thisobj.object.wait_for_teammates(cb);
 	},
-	battle : (ctx)=>{
-		thisobj.object.battle(ctx);
+	think : (ctx)=>{
+		thisobj.object.think(ctx);
 	},
 	translate : (pair)=>{
 		if(pair.field == 'teamMode'){

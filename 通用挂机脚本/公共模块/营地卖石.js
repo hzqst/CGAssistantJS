@@ -4,7 +4,6 @@ var configTable = global.configTable;
 var thisobj = {
 	func : (cb)=>{
 		cga.walkList([
-			[9, 20],
 			[0, 20, '圣骑士营地'],
 			[87, 72, '工房'],
 			[21, 22],

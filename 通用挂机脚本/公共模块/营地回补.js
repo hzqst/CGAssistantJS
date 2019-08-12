@@ -2,45 +2,71 @@ var supplyModeArray = [
 {
 	name : '圣骑士营地资深护士回补',
 	func : (cb)=>{
-		cga.walkList([
-			[551, 332, '圣骑士营地'],
-			[95, 72, '医院'],
+		var path = [
 			[9, 11],
 			[9, 12],
 			[9, 11],
 			[9, 12],
 			[9, 11],
-		], ()=>{
-			cga.TurnTo(11,11);
+		];
+		if(map == '肯吉罗岛'){
+			path.unshift([95, 72, '医院']);
+			path.unshift([551, 332, '圣骑士营地']);
+		}
+		else if(map == '圣骑士营地'){
+			path.unshift([95, 72, '医院']);
+		}
+		
+		cga.walkList(path, ()=>{
+			cga.TurnTo(11, 11);
 			setTimeout(cb, 5000);
 		});
 	},
-	isLogBack : false,
-	isInitialSupply : false,
+	isLogBack : ()=>{
+		var map = cga.GetMapName();
+		var mapindex = cga.GetMapIndex().index3;
+		return (map == '肯吉罗岛' || map == '圣骑士营地' || mapindex == 44692 || map.indexOf('黑龙沼泽') >= 0 || map.indexOf('蜥蜴洞穴') >= 0) ? false : true;
+	},
+	isInitialSupply : ()=>{
+		return false;
+	},
 },
 {
 	name : '圣骑士营地普通护士回补',
 	func : (cb)=>{
-		cga.walkList([
-			[551, 332, '圣骑士营地'],
-			[95, 72, '医院'],
+		var path = [
 			[18, 15],
 			[17, 15],
 			[18, 15],
 			[17, 15],
 			[18, 15],
-		], ()=>{
-			cga.TurnTo(18,13);
+		];
+		if(map == '肯吉罗岛'){
+			path.unshift([95, 72, '医院']);
+			path.unshift([551, 332, '圣骑士营地']);
+		}
+		else if(map == '圣骑士营地'){
+			path.unshift([95, 72, '医院']);
+		}
+		
+		cga.walkList(path, ()=>{
+			cga.TurnTo(11, 11);
 			setTimeout(cb, 5000);
 		});
 	},
-	isLogBack : false,
-	isInitialSupply : false,
+	isLogBack : ()=>{
+		var map = cga.GetMapName();
+		var mapindex = cga.GetMapIndex().index3;
+		return (map == '肯吉罗岛' || map == '圣骑士营地' || mapindex == 44692 || map.indexOf('黑龙沼泽') >= 0 || map.indexOf('蜥蜴洞穴') >= 0) ? false : true;
+	},
+	isInitialSupply : ()=>{
+		return false;
+	},
 },
 {
 	name : '登出飞碟回补',
 	func : (cb)=>{
-		if(cga.GetMapName() == '圣骑士营地'){
+		/*if(cga.GetMapName() == '圣骑士营地'){
 			cga.walkList([
 				[95, 72, '医院'],
 				[9, 11],
@@ -53,20 +79,24 @@ var supplyModeArray = [
 				setTimeout(cb, 5000);
 			});
 			return;
-		}
+		}*/
 		
 		cga.travel.falan.toCastleHospital(()=>{
 			setTimeout(cb, 5000);
 		});
 	},
-	isLogBack : true,
-	isInitialSupply : true,
+	isLogBack : ()=>{
+		return true;
+	},
+	isInitialSupply : ()=>{
+		return true;
+	},
 },
 {
-	name : '登出，到曙光营地医院回补',
+	name : '登出曙光营地医院回补',
 	func : (cb)=>{
 		
-		if(cga.GetMapName() == '圣骑士营地'){
+		/*if(cga.GetMapName() == '圣骑士营地'){
 			cga.walkList([
 				[95, 72, '医院'],
 				[9, 11],
@@ -79,7 +109,7 @@ var supplyModeArray = [
 				setTimeout(cb, 5000);
 			});
 			return;
-		}
+		}*/
 		
 		cga.travel.falan.toCamp(()=>{
 			cga.walkList([
@@ -97,8 +127,12 @@ var supplyModeArray = [
 			})
 		}, true);
 	},
-	isLogBack : true,
-	isInitialSupply : true,
+	isLogBack : ()=>{
+		return true;
+	},
+	isInitialSupply : ()=>{
+		return true;
+	},
 }
 ]
 
