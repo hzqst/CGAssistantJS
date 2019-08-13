@@ -22,7 +22,7 @@ require('../wrapper').then(cga => {
 		console.log('没有封印卡: ' + cardName);
 		return false;
 	}
-	const getBaby = (context) => context.enemies.find(e => e.name == babyName && e.maxhp >= babyMinHp && e.maxmp >= babyMinMp);
+	const getBaby = (context) => context.enemies.find(e => e.name == babyName && e.level == 1 && e.maxhp >= babyMinHp && e.maxmp >= babyMinMp);
 	cga.emogua.autoBattle([
 		{
 			user: 1,
