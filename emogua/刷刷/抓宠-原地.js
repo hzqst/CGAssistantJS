@@ -1,10 +1,12 @@
 /**
  * 一定要将界面的自动战斗关闭!
  */
-const petName = '哥布林';
+const babyName = '哥布林';
 const cardName = '封印卡（人形系）';
-const minHp = 50;
-const minMp = 50;
+const babyMinHp = 50;
+const babyMinMp = 50;
+const rechargeMinHp = 500; // 人宠吃血瓶
+const rechargeMinMp = 300; // 人宠吃料理
 
 
 const protect = { // 满足以下条件，停止遇敌
@@ -15,13 +17,27 @@ const protect = { // 满足以下条件，停止遇敌
 	maxPetNumber: 4
 };
 require('../wrapper').then(cga => {
-	console.log('抓宠-' + petName);
+	console.log('抓宠-' + babyName);
 	if (!cga.getInventoryItems().find(i => i.name == cardName)) {
 		console.log('没有封印卡: ' + cardName);
 		return false;
 	}
-	const getBaby = (context) => context.enemies.find(e => e.name == petName && e.maxhp >= minHp && e.maxmp >= minMp);
+	const getBaby = (context) => context.enemies.find(e => e.name == babyName && e.maxhp >= babyMinHp && e.maxmp >= babyMinMp);
 	cga.emogua.autoBattle([
+		{
+			user: 1,
+			check: context => (context.playerUnit.curhp <= rechargeMinHp || context.petUnit.curhp <= rechargeMinHp) && cga.getInventoryItems().findIndex(i => i.type == 43) >= 0,
+			type: '物品',
+			item: context => cga.getInventoryItems().find(i => i.type == 43).pos,
+			targets: context => [context.playerUnit, context.petUnit].sort((a,b) => a.curhp - b.curhp).map(u => u.pos)
+		},
+		{
+			user: 1,
+			check: context => (context.playerUnit.curmp <= rechargeMinMp || context.petUnit.curmp <= rechargeMinMp) && cga.getInventoryItems().findIndex(i => i.type == 23) >= 0,
+			type: '物品',
+			item: context => cga.getInventoryItems().find(i => i.type == 23).pos,
+			targets: context => [context.playerUnit, context.petUnit].sort((a,b) => a.curmp - b.curmp).map(u => u.pos)
+		},
 		{
 			user: 2,
 			check: context => {
