@@ -2178,28 +2178,9 @@ module.exports = function(callback){
 	}
 
 	cga.craft = {}
-	
-	cga.craft.buyFabricLv1 = (id, count, cb)=>{
-		cga.travel.falan.toFabricStore((r)=>{
-			cga.walkList([
-			[8, 7],
-			], ()=>{
-				cga.TurnTo(8, 6);
-				cga.AsyncWaitNPCDialog(()=>{
-					cga.ClickNPCDialog(0, 0);
-					cga.AsyncWaitNPCDialog(()=>{
-						cga.BuyNPCStore([{index:id, count:count}]);
-						cga.AsyncWaitNPCDialog(()=>{
-							cb(true);
-						});
-					});
-				});
-			});
-		});
-	}
-	
+		
 	cga.craft.buyFabricLv1Multi = (arr, cb)=>{
-		cga.travel.falan.toFabricStore((r)=>{
+		cga.travel.falan.toFabricStore(()=>{
 			cga.walkList([
 			[8, 7],
 			], ()=>{
@@ -2209,12 +2190,123 @@ module.exports = function(callback){
 					cga.AsyncWaitNPCDialog(()=>{
 						cga.BuyNPCStore(arr);
 						cga.AsyncWaitNPCDialog(()=>{
-							cb(true);
+							cb(null);
 						});
 					});
 				});
 			});
 		});
+	}
+	
+	cga.craft.buyFabricLv1 = (id, count, cb)=>{
+		cga.craft.buyFabricLv1Multi([{index:id, count:count}], cb);
+	}
+	
+	cga.craft.buyFabricLv2Multi = (arr, cb)=>{
+		cga.travel.falan.toTeleRoom('维诺亚村', ()=>{
+			cga.walkList([
+			[5, 1, '村长家的小房间'],
+			[0, 5, '村长的家'],
+			[9, 16, '维诺亚村'],
+			[56, 42, '装备品店'],
+			[13, 8],
+			], ()=>{
+				cga.TurnTo(13, 6);
+				cga.AsyncWaitNPCDialog(()=>{
+					cga.ClickNPCDialog(0, 0);
+					cga.AsyncWaitNPCDialog(()=>{
+						cga.BuyNPCStore(arr);
+						cga.AsyncWaitNPCDialog(()=>{
+							cb(null);
+						});
+					});
+				});
+			});
+		});
+	}
+	
+	cga.craft.buyFabricLv2 = (id, count, cb)=>{
+		cga.craft.buyFabricLv2Multi([{index:id, count:count}], cb);
+	}
+	
+	cga.craft.buyFabricLv3Multi = (arr, cb)=>{
+		cga.travel.falan.toTeleRoom('杰诺瓦镇', ()=>{
+			cga.walkList([
+			[14, 6, '村长的家'],
+			[1, 9, '杰诺瓦镇'],
+			[43, 23, '杂货店'],
+			[11, 12],
+			], ()=>{
+				cga.TurnTo(13, 12);
+				cga.AsyncWaitNPCDialog(()=>{
+					cga.ClickNPCDialog(0, 0);
+					cga.AsyncWaitNPCDialog(()=>{
+						cga.BuyNPCStore(arr);
+						cga.AsyncWaitNPCDialog(()=>{
+							cb(null);
+						});
+					});
+				});
+			});
+		});
+	}
+	
+	cga.craft.buyFabricLv3 = (id, count, cb)=>{
+		cga.craft.buyFabricLv3Multi([{index:id, count:count}], cb);
+	}
+	
+	cga.craft.buyFabricLv4Multi = (arr, cb)=>{
+		cga.travel.falan.toTeleRoom('阿巴尼斯村', ()=>{
+			cga.walkList([
+			[5, 4, 4313],
+			[6, 13, 4312],
+			[6, 13, '阿巴尼斯村'],
+			[37, 71, '莎莲娜'],
+			[118, 100, '魔法大学'],
+			[74, 93, '魔法大学内部'],
+			[29, 43, '更衣室'],
+			[11, 8],
+			], ()=>{
+				cga.TurnTo(11, 6);
+				cga.AsyncWaitNPCDialog(()=>{
+					cga.ClickNPCDialog(0, 0);
+					cga.AsyncWaitNPCDialog(()=>{
+						cga.BuyNPCStore(arr);
+						cga.AsyncWaitNPCDialog(()=>{
+							cb(null);
+						});
+					});
+				});
+			});
+		});
+	}
+	
+	cga.craft.buyFabricLv4 = (id, count, cb)=>{
+		cga.craft.buyFabricLv4Multi([{index:id, count:count}], cb);
+	}
+	
+	cga.craft.buyFabricLv5Multi = (arr, cb)=>{
+		cga.travel.falan.toTeleRoom('阿巴尼斯村', ()=>{
+			cga.walkList([
+			[5, 4, 4313],
+			[13, 5],
+			], ()=>{
+				cga.TurnTo(13, 3);
+				cga.AsyncWaitNPCDialog(()=>{
+					cga.ClickNPCDialog(0, 0);
+					cga.AsyncWaitNPCDialog(()=>{
+						cga.BuyNPCStore(arr);
+						cga.AsyncWaitNPCDialog(()=>{
+							cb(null);
+						});
+					});
+				});
+			});
+		});
+	}
+	
+	cga.craft.buyFabricLv5 = (id, count, cb)=>{
+		cga.craft.buyFabricLv5Multi([{index:id, count:count}], cb);
 	}
 	
 	//搜索第一个可鉴定的物品
