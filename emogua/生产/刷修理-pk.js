@@ -1,9 +1,9 @@
 /**
  * 注意需要在背包里至少留一个空格
  */
+const captain = ''; // 需要指定一个人名，以便两人站在对面
 require('../wrapper').then(cga => {
 	console.log('PK刷修理技能');
-	const captain = '紫西瓜';
 
 	const isCaptain = cga.GetPlayerInfo().name == captain;
 	cga.emogua.autoBattle([
