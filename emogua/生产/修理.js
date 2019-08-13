@@ -5,9 +5,7 @@ require('../wrapper').then(cga => {
 		cga.emogua.recursion(() => cga.emogua.prepare({
 			rechargeFlag: -1, repairFlag: -1
 		}).then(() =>
-			cga.emogua.falan.toStone('E1').then(
-				() => cga.emogua.turnOrientation(0, '市场三楼 - 修理专区')
-			).then(
+			cga.emogua.goto(n => n.falan.mbank).then(
 				() => cga.emogua.autoWalk([83, 8])
 			).then(
 				() => cga.emogua.turnOrientation(4)
@@ -26,14 +24,23 @@ require('../wrapper').then(cga => {
 						if (chat.msg && chat.msg.indexOf(skill.name) > 0) {
 							const tradeParty = cga.GetMapUnits().find(u => u.unit_id == chat.unitid);
 							if (tradeParty) {
-								return cga.emogua.trade(tradeParty.unit_name).then(result => {
+								const lastItems = cga.getInventoryItems();
+								const emptyPositions = Array(20).fill(8).map((v, i) => i + v).filter(p => lastItems.findIndex(i => i.pos == p) < 0);
+								return cga.emogua.trade(tradeParty.unit_name, {
+									partyStuffsChecker: partyInfo => {
+										return partyInfo.items.findIndex(i => !(i.type >= 0 && i.type <= 14)) < 0;
+									}
+								}).then(result => {
 									if (result.received && result.received.items.length > 0) {
+										const receivedPositions = emptyPositions.slice(0, result.received.items.length);
 										return cga.emogua.repairAll().then(
 											() => cga.emogua.recursion(
-												(timer) => cga.emogua.trade(tradeParty.unit_name, {
-													itemFilter: e => result.received.items.findIndex(r => e.itemid == r.itemid) >= 0
-												}).then(tr => tr.success === true || (Date.now() - timer) > 120000 ? Promise.reject() : cga.emogua.delay(3000))
-											)
+												timer => cga.emogua.trade(tradeParty.unit_name, {
+													itemFilter: e => receivedPositions.findIndex(p => e.pos == p) >= 0
+												}).then(tr => {
+													return tr.success === true || (Date.now() - timer) > 120000 ? Promise.reject() : cga.emogua.delay(3000);
+												})
+											).then(() => console.log('交易返还结束'))
 										);
 									}
 									return cga.emogua.delay(1000);
