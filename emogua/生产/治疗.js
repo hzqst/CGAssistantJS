@@ -3,7 +3,7 @@ require('../wrapper').then(cga => {
 	cga.emogua.recursion(() => {
 		if (cga.GetMapName() != '里谢里雅堡') {
 			return cga.emogua.logBack().then(
-				() => cga.emogua.falan.toStone('C')
+				() => cga.emogua.goto(n => n.castle.x)
 			);
 		}
 		if (cga.GetPlayerInfo().mp <= 100) {
