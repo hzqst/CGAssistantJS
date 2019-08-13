@@ -373,10 +373,10 @@ var thisobj = {
 					cga.sayLongWords(sayString2, 0, 3, 1);
 					
 					cb(null);				
-					return true;
+					return false;
 				}
 				
-				return false;
+				return true;
 			});
 		}
 		

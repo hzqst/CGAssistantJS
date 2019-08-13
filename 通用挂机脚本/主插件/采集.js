@@ -207,9 +207,8 @@ var thisobj = {
 			sayString += '('+ (parseInt(i)+1) + ')' + gatherArray[i].name;
 		}
 		cga.sayLongWords(sayString, 0, 3, 1);
-		cga.waitForChatInput((msg)=>{
-			var index = parseInt(msg);
-			if(index >= 1 && gatherArray[index - 1]){
+		cga.waitForChatInput((msg, index)=>{
+			if(index !== null && index >= 1 && gatherArray[index - 1]){
 				configTable.gatherObject = index - 1;
 				gatherObject = gatherArray[index - 1];
 				
@@ -220,10 +219,10 @@ var thisobj = {
 					mineObject = require(gatherObject.path);
 				
 				Async.series([mineObject.inputcb, doneObject.inputcb, healObject.inputcb], cb);
-				return true;
+				return false;
 			}
 			
-			return false;
+			return true;
 		});
 	},
 	execute : ()=>{

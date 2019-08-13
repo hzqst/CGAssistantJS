@@ -93,7 +93,7 @@ var playerThink = ()=>{
 
 	global.callSubPlugins('think', ctx);
 
-	if(cga.isTeamLeaderEx() && ctx.dangerlevel > 0)
+	if(cga.isTeamLeaderEx())
 	{
 		if(ctx.result == null && playerThinkInterrupt.hasInterrupt())
 			ctx.result = 'supply';
@@ -322,10 +322,10 @@ var thisobj = {
 					
 					cb2(null);
 					
-					return true;
+					return false;
 				}
 				
-				return false;
+				return true;
 			});
 		}, (cb2)=>{
 			var sayString = '【旧日插件】请选择旧日练级层数(1~100), 100代表顶层:';
@@ -340,10 +340,10 @@ var thisobj = {
 					
 					cb2(null);
 					
-					return true;
+					return false;
 				}
 				
-				return false;
+				return true;
 			});
 		}], cb);
 	},

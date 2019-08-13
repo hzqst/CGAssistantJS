@@ -92,7 +92,7 @@ var playerThink = ()=>{
 
 	global.callSubPlugins('think', ctx);
 
-	if(cga.isTeamLeaderEx() && ctx.dangerlevel > 0)
+	if(cga.isTeamLeaderEx())
 	{
 		if(ctx.result == null && playerThinkInterrupt.hasInterrupt())
 			ctx.result = 'supply';
@@ -113,7 +113,6 @@ var playerThink = ()=>{
 		}
 		else if( ctx.result == 'logback' )
 		{
-			console.log('logback');
 			moveThinkInterrupt.requestInterrupt(()=>{
 				if(cga.isInNormalState()){
 					logbackEx.func(loop);
@@ -293,10 +292,10 @@ var thisobj = {
 					
 					cb2(null);
 					
-					return true;
+					return false;
 				}
 				
-				return false;
+				return true;
 			});
 		}, (cb2)=>{
 			var sayString = '【黑龙插件】请选择黑龙练级层数(1~100), 100代表龙顶:';
@@ -311,10 +310,10 @@ var thisobj = {
 					
 					cb2(null);
 					
-					return true;
+					return false;
 				}
 				
-				return false;
+				return true;
 			});
 		}], cb);
 	},

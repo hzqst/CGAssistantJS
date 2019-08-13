@@ -16,6 +16,8 @@ var battleAreaArray = [
 {
 	name : '刀鸡',
 	walkTo : (cb)=>{
+		var map = cga.GetMapName();
+		var mapindex = cga.GetMapIndex().index3;
 		if(map == '医院' && mapindex == 59539){
 			cga.walkList([
 				[28, 52, '艾夏岛'],
@@ -41,6 +43,8 @@ var battleAreaArray = [
 {
 	name : '黄金龙骨',
 	walkTo : (cb)=>{
+		var map = cga.GetMapName();
+		var mapindex = cga.GetMapIndex().index3;
 		if(map == '医院' && mapindex == 59539){
 			cga.walkList([
 				[28, 52, '艾夏岛'],
@@ -66,6 +70,8 @@ var battleAreaArray = [
 {
 	name : '银狮',
 	walkTo : (cb)=>{
+		var map = cga.GetMapName();
+		var mapindex = cga.GetMapIndex().index3;
 		if(map == '医院' && mapindex == 59539){
 			cga.walkList([
 				[28, 52, '艾夏岛'],
@@ -91,7 +97,7 @@ var battleAreaArray = [
 {
 	name : '低地鸡',
 	walkTo : (cb)=>{
-		var path = ;
+		var map = cga.GetMapName();
 		if(map == '医院' && mapindex == 59539){
 			cga.walkList([
 				[28, 52, '艾夏岛'],
@@ -146,7 +152,7 @@ var playerThink = ()=>{
 
 	global.callSubPlugins('think', ctx);
 
-	if(cga.isTeamLeaderEx() && ctx.dangerlevel > 0)
+	if(cga.isTeamLeaderEx())
 	{
 		if(ctx.result == null && playerThinkInterrupt.hasInterrupt())
 			ctx.result = 'supply';
@@ -201,21 +207,23 @@ var loop = ()=>{
 	{
 		if(thisobj.battleArea.isDesiredMap(map))
 		{
+			console.log('playerThink on');
+			playerThinkRunning = true;
+			
 			cga.freqMove(thisobj.battleArea.moveDir);
 			return;
 		}
-		else if(teamMode.is_enough_teammates())
+		if(teamMode.is_enough_teammates())
 		{
 			console.log('playerThink on');
 			playerThinkRunning = true;
-
+			
 			thisobj.battleArea.walkTo(loop);
 			return;
 		}
 	} else {
 		console.log('playerThink on');
 		playerThinkRunning = true;
-
 		return;
 	}
 
@@ -225,6 +233,7 @@ var loop = ()=>{
 		return;
 	}
 	
+	console.log('prepare')
 	callSubPluginsAsync('prepare', ()=>{
 		cga.travel.newisland.toStone('X', ()=>{
 			cga.walkList([
@@ -308,10 +317,10 @@ var thisobj = {
 					
 					cb2(null);
 					
-					return true;
+					return false;
 				}
 				
-				return false;
+				return true;
 			});
 		}], cb);
 	},

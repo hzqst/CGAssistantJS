@@ -47,7 +47,7 @@ var playerThink = ()=>{
 
 	global.callSubPlugins('think', ctx);
 
-	if(cga.isTeamLeaderEx() && ctx.dangerlevel > 0)
+	if(cga.isTeamLeaderEx())
 	{
 		if(ctx.result == null && playerThinkInterrupt.hasInterrupt())
 			ctx.result = 'supply';
@@ -116,7 +116,7 @@ var loop = ()=>{
 			return;
 		}
 		if(map == '肯吉罗岛'){
-			cga.freqMove(0);
+			supplyMode.func(loop);
 			return;
 		}
 		if(map == '圣骑士营地' && teamMode.object.is_enough_teammates()){
@@ -125,7 +125,9 @@ var loop = ()=>{
 			cga.walkList([
 				[36, 87, '肯吉罗岛'],
 				[467, 201],
-			], loop);
+			], ()=>{
+				cga.freqMove(0);
+			});
 			return;
 		}
 	} else {
@@ -215,10 +217,10 @@ var thisobj = {
 					
 					cb2(null);
 					
-					return true;
+					return false;
 				}
 				
-				return false;
+				return true;
 			});
 		}], cb);
 	},

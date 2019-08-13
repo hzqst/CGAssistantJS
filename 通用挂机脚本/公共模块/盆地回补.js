@@ -6,7 +6,7 @@ var supplyModeArray = [
 			setTimeout(cb, 5000);
 		});
 	},
-	isInitialSupply : ()=>{
+	isLogBack : ()=>{
 		return true;
 	},
 	isInitialSupply : ()=>{
@@ -71,10 +71,10 @@ var thisobj = {
 				
 				cb(null);
 				
-				return true;
+				return false;
 			}
 			
-			return false;
+			return true;
 		});
 	}
 }

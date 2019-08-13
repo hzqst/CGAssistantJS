@@ -1250,7 +1250,7 @@ module.exports = function(callback){
 	cga.travel.newisland.xy2name = function(x, y, mapname){
 		if(x == 140 && y == 105 && mapname == '艾尔莎岛')
 			return 'X';
-		if(x == 158 && y == 94 && mapname == '艾夏岛')
+		if(x == 158 && y == 94 && mapname == '艾尔莎岛')
 			return 'A';
 		if(x == 84 && y == 112 && mapname == '艾夏岛')
 			return 'B';
@@ -1258,7 +1258,7 @@ module.exports = function(callback){
 			return 'C';
 		if(x == 151 && y == 97 && mapname == '艾夏岛')
 			return 'D';
-		return false;
+		return null;
 	}
 	
 	cga.travel.newisland.isvalid = function(stone){
@@ -1330,7 +1330,9 @@ module.exports = function(callback){
 					});
 					return;
 				}
-			} else if(curMap == '艾尔莎岛'){
+			}
+			
+			if(curMap == '艾尔莎岛'){
 				cga.walkList([
 				stone == 'X' ? [140, 105] : [158, 94],
 				], ()=>{
@@ -1657,6 +1659,10 @@ module.exports = function(callback){
 		
 		//console.log('初始化寻路列表');
 		//console.log(list);
+		
+		if(cga.isMoveThinking){
+			console.log('警告:已有walkList在运行中');
+		}
 
 		cga.isMoveThinking = true;
 
@@ -1705,7 +1711,13 @@ module.exports = function(callback){
 						setTimeout(waitBattle2, 1500);
 						return;
 					}
-										
+
+					if(!cga.moveThink('walkList')){
+						console.log('walkList被中断');
+						cga.isMoveThinking = false;
+						return;
+					}
+
 					var curpos = cga.GetMapXY();
 					if(typeof walkedList[walkedList.length-1][2] != 'string' &&
 					typeof walkedList[walkedList.length-1][2] != 'number' &&
@@ -2460,13 +2472,13 @@ module.exports = function(callback){
 		var freqMoveDirTable = [ 4, 5, 6, 7, 0, 1, 2, 3 ];
 		var freqMoveDir = dir;
 		var pos = cga.GetMapXY();
-		var index3 = cga.GetMapIndex().index;
+		var index3 = cga.GetMapIndex().index3;
 		var counter = 0;
 		var move = ()=>{
 			var result = true;
 			try
 			{
-				var curindex3 = cga.GetMapIndex().index;
+				var curindex3 = cga.GetMapIndex().index3;
 				if(curindex3 == index3)
 				{
 					var curpos = cga.GetMapXY();
@@ -2522,6 +2534,7 @@ module.exports = function(callback){
 					counter++;
 					if(counter % 4 == 0){
 						if(!cga.moveThink('freqMove')){
+							console.log('freqMove被中断');
 							cga.isMoveThinking = false;
 							return;
 						}
@@ -2530,9 +2543,11 @@ module.exports = function(callback){
 				else
 				{
 					if(!cga.moveThink('freqMoveMapChanged')){
+						console.log('freqMoveMapChanged被中断');
 						cga.isMoveThinking = false;
 						return;
 					}
+					console.log('地图不同，freqMove暂停运行');
 				}
 			}
 			catch(e){
@@ -2674,7 +2689,7 @@ module.exports = function(callback){
 		
 		cga.AsyncWaitChatMsg((err, r)=>{
 			
-			if(!r || !r.msg){
+			if(!r){
 				cga.waitTeammateSay(cb);
 				return;
 			}
@@ -2719,12 +2734,27 @@ module.exports = function(callback){
 			if(player.is_me == true){
 				var pattern_number=/^[1-9]\d*$|^0$/;
 				
-				if(cb(msg, pattern_number.test(msg) ? parseInt(msg) : null ))
+				if(cb(msg, pattern_number.test(msg) ? parseInt(msg) : null ) == false)
 					return false;
 			}
 
 			return true;
 		});
+	}
+	
+	cga.waitSysMsg = (cb)=>{
+		cga.AsyncWaitChatMsg((err, r)=>{
+
+			if(!r || r.unitid != -1){
+				cga.waitSysMsg(cb);
+				return;
+			}
+			
+			listen = cb(r.msg);	
+
+			if(listen == true)
+				cga.waitSysMsg(cb);
+		}, 1000);
 	}
 	
 	cga.sayLongWords = (words, color, range, size)=>{

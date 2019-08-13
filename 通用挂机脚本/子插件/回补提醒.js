@@ -86,10 +86,10 @@ var thisobj = {
 					
 					cb2(null);
 					
-					return true;
+					return false;
 				}
 				
-				return false;
+				return true;
 			});
 		}
 		

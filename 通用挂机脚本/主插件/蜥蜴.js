@@ -92,7 +92,7 @@ var playerThink = ()=>{
 
 	global.callSubPlugins('think', ctx);
 
-	if(cga.isTeamLeaderEx() && ctx.dangerlevel > 0)
+	if(cga.isTeamLeaderEx())
 	{
 		if(ctx.result == null && playerThinkInterrupt.hasInterrupt())
 			ctx.result = 'supply';
@@ -178,7 +178,9 @@ var loop = ()=>{
 				[36, 87, '肯吉罗岛'],
 				[384, 245, '蜥蜴洞穴'],
 				[17, 4, '蜥蜴洞穴上层第1层'],
-			], loop);
+			], ()=>{
+				
+			});
 			return;
 		}
 		if(map == '蜥蜴洞穴上层第1层')
@@ -302,10 +304,10 @@ var thisobj = {
 					
 					cb2(null);
 					
-					return true;
+					return false;
 				}
 				
-				return false;
+				return true;
 			});
 		}, (cb2)=>{
 			var sayString = '【蜥蜴插件】请选择蜥蜴练级层数(1~100):';
@@ -320,10 +322,10 @@ var thisobj = {
 					
 					cb2(null);
 					
-					return true;
+					return false;
 				}
 				
-				return false;
+				return true;
 			});
 		}], cb);
 	},

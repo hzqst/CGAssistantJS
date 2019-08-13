@@ -7,25 +7,38 @@ var thisobj = {
 	init : ()=>{
 		cga.waitForChatInput((msg)=>{
 			if(msg == '登出防卡住' && cga.isInNormalState() && thisobj.readyToLogBack == true){
-				cga.LogBack();
-				thisobj.callbackAfterLogBack();
+				console.log('登出防卡住');
 				thisobj.readyToLogBack = false;
+				cga.LogBack();
+				setTimeout(thisobj.callbackAfterLogBack, 1500);
+				thisobj.callbackAfterLogBack = null;
 			}
 			
-			return false;
+			return true;
 		});
+		
+		/*cga.waitSysMsg((msg)=>{
+			if(msg.indexOf('注销回到传送点。') >= 0 && thisobj.readyToLogBack == true){
+				console.log('注销回到传送点。');
+				thisobj.readyToLogBack = false;
+				setTimeout(thisobj.callbackAfterLogBack, 1500);
+				thisobj.callbackAfterLogBack = null;
+			}
+			
+			return true;
+		});*/
 	},
 	func : (cb)=>{
 		thisobj.readyToLogBack = true;
 		thisobj.callbackAfterLogBack = cb;
 
 		var retry = ()=>{
-			if(thisobj.readyToLogBack){
+			if(thisobj.readyToLogBack && thisobj.callbackAfterLogBack){
 				cga.SayWords('登出防卡住', 0, 3, 1);
 				setTimeout(retry, 1000);
 			}
 		}
-		
+
 		retry();
 	},
 	translate : (pair)=>{

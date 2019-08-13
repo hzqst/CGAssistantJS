@@ -2,6 +2,7 @@ var supplyModeArray = [
 {
 	name : '艾夏岛医院,资深护士回补',
 	func : (cb)=>{
+		var map = cga.GetMapName();
 		var path = [
 			[35, 43],
 			[35, 42],
@@ -38,6 +39,7 @@ var supplyModeArray = [
 {
 	name : '艾夏岛医院,普通护士回补',
 	func : (cb)=>{
+		var map = cga.GetMapName();
 		var path = [
 			[35, 46],
 			[35, 45],
@@ -95,10 +97,10 @@ var thisobj = {
 		thisobj.object.func(cb);
 	},
 	isLogBack : ()=>{
-		return thisobj.object.isLogBack;
+		return thisobj.object.isLogBack();
 	},
 	isInitialSupply : ()=>{
-		return thisobj.object.isInitialSupply;
+		return thisobj.object.isInitialSupply();
 	},
 	translate : (pair)=>{
 		if(pair.field == 'supplyMode'){
@@ -143,10 +145,10 @@ var thisobj = {
 				
 				cb(null);
 				
-				return true;
+				return false;
 			}
 			
-			return false;
+			return true;
 		});
 	}
 }

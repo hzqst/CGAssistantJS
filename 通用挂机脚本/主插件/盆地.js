@@ -15,96 +15,24 @@ var playerThinkRunning = false;
 var battleAreaArray = [
 {
 	name : '门口',
-	walkTo : (cb)=>{
-		cga.travel.newisland.toStone('S', ()=>{
-			cga.walkList([
-			[28, 52, '艾夏岛'],
-			[130, 50, '盖雷布伦森林'],
-			[216, 44],
-			], ()=>{
-				cga.TurnTo(216, 43)		
-				cga.AsyncWaitNPCDialog(()=>{
-					cga.ClickNPCDialog(8, 0);
-					cga.AsyncWaitNPCDialog(()=>{
-						cga.ClickNPCDialog(32, 0);
-						cga.AsyncWaitNPCDialog(()=>{
-							cga.ClickNPCDialog(1, 0); 
-							cga.AsyncWaitMovement({map:'方堡盆地', delay:1000, timeout:5000}, ()=>{
-								cga.walkList([
-								[155, 147],
-								], loop);
-							});
-						});
-					});
-				});
-			});
-		});
-	},
-	moveDir : 0,
+	pos : [155, 147],
+	dir : 0,
 	isDesiredMap : (map)=>{
 		return (map == '方堡盆地');
 	}
 },
 {
 	name : '赤熊骷髅海盗',
-	walkTo : (cb)=>{
-		cga.travel.newisland.toStone('S', ()=>{
-			cga.walkList([
-			[28, 52, '艾夏岛'],
-			[130, 50, '盖雷布伦森林'],
-			[216, 44],
-			], ()=>{
-				cga.TurnTo(216, 43)		
-				cga.AsyncWaitNPCDialog(()=>{
-					cga.ClickNPCDialog(8, 0);
-					cga.AsyncWaitNPCDialog(()=>{
-						cga.ClickNPCDialog(32, 0);
-						cga.AsyncWaitNPCDialog(()=>{
-							cga.ClickNPCDialog(1, 0); 
-							cga.AsyncWaitMovement({map:'方堡盆地', delay:1000, timeout:5000}, ()=>{
-								cga.walkList([
-								[182, 104],
-								], loop);
-							});
-						});
-					});
-				});
-			});
-		});
-	},
-	moveDir : 0,
+	pos : [182, 104],
+	dir : 0,
 	isDesiredMap : (map)=>{
 		return (map == '方堡盆地');
 	}
 },
 {
 	name : '红螳螂',
-	walkTo : (cb)=>{
-		cga.travel.newisland.toStone('S', ()=>{
-			cga.walkList([
-			[28, 52, '艾夏岛'],
-			[130, 50, '盖雷布伦森林'],
-			[216, 44],
-			], ()=>{
-				cga.TurnTo(216, 43)		
-				cga.AsyncWaitNPCDialog(()=>{
-					cga.ClickNPCDialog(8, 0);
-					cga.AsyncWaitNPCDialog(()=>{
-						cga.ClickNPCDialog(32, 0);
-						cga.AsyncWaitNPCDialog(()=>{
-							cga.ClickNPCDialog(1, 0); 
-							cga.AsyncWaitMovement({map:'方堡盆地', delay:1000, timeout:5000}, ()=>{
-								cga.walkList([
-								[248, 134],
-								], loop);
-							});
-						});
-					});
-				});
-			});
-		});
-	},
-	moveDir : 0,
+	pos : [248, 134],
+	dir : 0,
 	isDesiredMap : (map)=>{
 		return (map == '方堡盆地');
 	}
@@ -143,7 +71,7 @@ var playerThink = ()=>{
 
 	global.callSubPlugins('think', ctx);
 
-	if(cga.isTeamLeaderEx() && ctx.dangerlevel > 0)
+	if(cga.isTeamLeaderEx())
 	{
 		if(ctx.result == null && playerThinkInterrupt.hasInterrupt())
 			ctx.result = 'supply';
@@ -193,20 +121,40 @@ var loop = ()=>{
 
 	var map = cga.GetMapName();
 	var mapindex = cga.GetMapIndex().index3;
-	
+	var xy = cga.GetMapXY();
 	if(cga.isTeamLeaderEx()){
 		if(thisobj.battleArea.isDesiredMap(map))
 		{
-			cga.freqMove(thisobj.battleArea.moveDir);
-			return;
-		}
-		else if(teamMode.is_enough_teammates())
-		{
-			console.log('playerThink on');
-			playerThinkRunning = true;
-
-			thisobj.battleArea.walkTo(loop);
-			return;
+			if(!teamMode.is_enough_teammates())
+			{
+				//人没满
+				if(cga.isTeamLeader == true)
+				{
+					//队长等待队员
+					cga.WalkTo(156, 147);
+					teamMode.wait_for_teammates(loop);
+					return;
+				}
+				else
+				{
+					//队员等待加队长
+					cga.WalkTo(155, 147);
+					teamMode.wait_for_teammates(loop);
+					return;
+				}
+			}
+			else
+			{
+				//队长：人满了，开始遇敌
+				console.log('playerThink on');
+				playerThinkRunning = true;
+				cga.walkList([
+					thisobj.battleArea.pos
+				], ()=>{
+					cga.freqMove(thisobj.battleArea.dir);
+				});
+				return;
+			}
 		}
 	} else {
 		console.log('playerThink on');
@@ -223,9 +171,20 @@ var loop = ()=>{
 	callSubPluginsAsync('prepare', ()=>{
 		cga.travel.newisland.toStone('X', ()=>{
 			cga.walkList([
-			cga.isTeamLeader ? [144, 106] : [143, 106],
+			[130, 50, '盖雷布伦森林'],
+			[216, 44],
 			], ()=>{
-				teamMode.wait_for_teammates(loop);
+				cga.TurnTo(216, 43)		
+				cga.AsyncWaitNPCDialog(()=>{
+					cga.ClickNPCDialog(8, 0);
+					cga.AsyncWaitNPCDialog(()=>{
+						cga.ClickNPCDialog(32, 0);
+						cga.AsyncWaitNPCDialog(()=>{
+							cga.ClickNPCDialog(1, 0); 
+							cga.AsyncWaitMovement({map:'方堡盆地', delay:1000, timeout:5000}, loop);
+						});
+					});
+				});
 			});
 		});
 	});
@@ -303,10 +262,10 @@ var thisobj = {
 					
 					cb2(null);
 					
-					return true;
+					return false;
 				}
 				
-				return false;
+				return true;
 			});
 		}], cb);
 	},

@@ -2,6 +2,8 @@ var supplyModeArray = [
 {
 	name : '圣骑士营地资深护士回补',
 	func : (cb)=>{
+		var map = cga.GetMapName();
+		
 		var path = [
 			[9, 11],
 			[9, 12],
@@ -144,10 +146,10 @@ var thisobj = {
 		thisobj.object.func(cb);
 	},
 	isLogBack : ()=>{
-		return thisobj.object.isLogBack;
+		return thisobj.object.isLogBack();
 	},
 	isInitialSupply : ()=>{
-		return thisobj.object.isInitialSupply;
+		return thisobj.object.isInitialSupply();
 	},
 	translate : (pair)=>{
 		if(pair.field == 'supplyMode'){
@@ -192,10 +194,10 @@ var thisobj = {
 				
 				cb(null);
 				
-				return true;
+				return false;
 			}
 			
-			return false;
+			return true;
 		});
 	}
 }

@@ -66,8 +66,8 @@ var teamModeArray = [
 			return;
 		
 		//非危险区域，不用管
-		if(ctx.dangerlevel == 0)
-			return;
+		//if(ctx.dangerlevel == 0)
+		//	return;
 		
 		//队长：人数不足，登出
 		//队员：人都跑光了，登出
@@ -131,8 +131,8 @@ var teamModeArray = [
 			return;
 		
 		//非危险区域，不用管
-		if(ctx.dangerlevel == 0)
-			return;
+		//if(ctx.dangerlevel == 0)
+		//	return;
 		
 		//人数不足，回补
 		if(ctx.teamplayers.length < thisobj.minTeamMemberCount)
@@ -232,10 +232,10 @@ var thisobj = {
 					cga.sayLongWords(sayString2, 0, 3, 1);
 					
 					cb2(null);				
-					return true;
+					return false;
 				}
 				
-				return false;
+				return true;
 			});
 		}
 		
@@ -277,10 +277,10 @@ var thisobj = {
 					stage2(cb);
 				}
 				
-				return true;
+				return false;
 			}
 			
-			return false;
+			return true;
 		});
 	}	
 }

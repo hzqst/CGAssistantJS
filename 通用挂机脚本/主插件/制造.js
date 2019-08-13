@@ -184,10 +184,10 @@ var thisobj = {
 					cga.sayLongWords(sayString2, 0, 3, 1);
 					
 					cb2(null);
-					return true;
+					return false;
 				}
 				
-				return false;
+				return true;
 			});
 		}
 		var stage2 = (cb2)=>{
@@ -207,10 +207,10 @@ var thisobj = {
 					cga.sayLongWords(sayString2, 0, 3, 1);
 					
 					cb2(null);
-					return true;
+					return false;
 				}
 				
-				return false;
+				return true;
 			});
 		}
 		
@@ -254,10 +254,10 @@ var thisobj = {
 					cga.sayLongWords(sayString2, 0, 3, 1);
 					
 					cb2(null);
-					return true;
+					return false;
 				}
 				
-				return false;
+				return true;
 			});
 		}
 		
@@ -275,10 +275,10 @@ var thisobj = {
 					
 					cb2(null);
 					
-					return true;
+					return false;
 				}
 				
-				return false;
+				return true;
 			});
 		}
 		
@@ -296,10 +296,10 @@ var thisobj = {
 					
 					cb2(null);
 					
-					return true;
+					return false;
 				}
 				
-				return false;
+				return true;
 			});
 		}
 		

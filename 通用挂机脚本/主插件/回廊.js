@@ -45,13 +45,12 @@ var playerThink = ()=>{
 
 	global.callSubPlugins('think', ctx);
 
-	if(cga.isTeamLeaderEx() && ctx.dangerlevel > 0)
+	if(cga.isTeamLeaderEx())
 	{
+		console.log(ctx.result);
+		
 		if(ctx.result == null && playerThinkInterrupt.hasInterrupt())
 			ctx.result = 'supply';
-
-		if(ctx.result == 'supply' && supplyMode.isLogBack())
-			ctx.result = 'logback';
 
 		if( ctx.result == 'supply' || ctx.result == 'logback' )
 		{
@@ -81,9 +80,7 @@ var playerThinkTimer = ()=>{
 }
 
 var loop = ()=>{
-	
-	playerThinkRunning = true;
-	
+
 	var map = cga.GetMapName();
 	var mapindex = cga.GetMapIndex().index3;
 	
@@ -216,10 +213,10 @@ var thisobj = {
 					
 					cb2(null);
 					
-					return true;
+					return false;
 				}
 				
-				return false;
+				return true;
 			});
 		}], cb);
 	},
