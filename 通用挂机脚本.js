@@ -227,9 +227,9 @@ var cga = require('./cgaapi')(function(){
 			}
 			sayString += ']';
 			cga.sayLongWords(sayString, 0, 3, 1);
-			cga.waitForChatInput((msg)=>{
-				var index = parseInt(msg);
-				if(index >= 1 && pluginEnumList[index - 1]){
+			cga.waitForChatInput((msg, index)=>{
+
+				if(index !== null && index >= 1 && pluginEnumList[index - 1]){
 					configTable.mainPlugin = pluginEnumList[index - 1];
 					
 					var sayString2 = '当前已选择加载主插件:[' + configTable.mainPlugin + ']。';
@@ -237,10 +237,10 @@ var cga = require('./cgaapi')(function(){
 					
 					stage2();
 					
-					return true;
+					return false;
 				}
 				
-				return false;
+				return true;
 			});
 		}
 		
@@ -253,9 +253,8 @@ var cga = require('./cgaapi')(function(){
 			}
 			sayString += ']，选择完成请输入ok。';
 			cga.sayLongWords(sayString, 0, 3, 1);
-			cga.waitForChatInput((msg)=>{
-				var index = parseInt(msg);
-				if(index >= 1 && subPluginEnumList[index-1] ){
+			cga.waitForChatInput((msg, index)=>{
+				if(index !== null && index >= 1 && subPluginEnumList[index - 1] ){
 					var val = subPluginEnumList[index-1];
 					if(!is_array_contain(configTable.subPlugins, val))
 						configTable.subPlugins.push(subPluginEnumList[index - 1]);
@@ -268,20 +267,20 @@ var cga = require('./cgaapi')(function(){
 					cga.sayLongWords(sayString2, 0, 3, 1);
 					
 					stage2();
-					return true;
+					return false;
 				} else if(msg == 'ok'){
 					stage3();
-					return true;
+					return false;
 				}
 				
-				return false;
+				return true;
 			});
 		}
 		
 		var stage3 = ()=>{
 			
 			loadPlugin();
-			
+						
 			var inputcb = [];
 						
 			Async.series([
