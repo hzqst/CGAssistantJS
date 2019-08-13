@@ -324,7 +324,7 @@ const Reputations = [
 			max: null
 	}
 ];
-const CustomFunctionsFlag = 0;
+const CustomFunctionsFlag = 1;
 module.exports = new Promise(resolve => {
 	const cga = require('../cgaapi')(() => setTimeout(() => resolve(cga), 0));
 }).then(cga => {
@@ -2498,7 +2498,7 @@ module.exports = new Promise(resolve => {
 					sets.push({
 						user: 1,
 						check: context => {
-							const needHealUnits = context.teammates.filter(u => u.curhp > 0 && u.hpRatio <= 0.5);
+							const needHealUnits = context.teammates.filter(u => u.curhp > 0 && u.hpRatio <= 0.3);
 							return needHealUnits.length >= 2;
 						},
 						type: '技能',
@@ -2566,7 +2566,7 @@ module.exports = new Promise(resolve => {
 								return t.count > 1;
 							}
 							return false;
-						}, type: '技能', skillName: '强力补血魔法', skillLevel: 8,
+						}, type: '技能', skillName: '强力补血魔法', skillLevel: 6,
 						targets: context => {
 							const t = BattlePositionMatrix.getMaxTPosition(
 								context.teammates.filter(needHealChecker).map(u => u.pos)
@@ -2579,7 +2579,7 @@ module.exports = new Promise(resolve => {
 						check: function(context) {
 							const needHealUnits = context.teammates.filter(needHealChecker);
 							return needHealUnits.length >= 3;
-						}, type: '技能', skillName: '超强补血魔法', skillLevel: 8,
+						}, type: '技能', skillName: '超强补血魔法', skillLevel: 6,
 						targets: context => [context.player_pos]
 					});
 					sets.push({
@@ -2587,7 +2587,7 @@ module.exports = new Promise(resolve => {
 						check: function(context) {
 							const needHealUnits = context.teammates.filter(needHealChecker);
 							return needHealUnits.length > 0;
-						}, type: '技能', skillName: '补血魔法', skillLevel: 7,
+						}, type: '技能', skillName: '补血魔法', skillLevel: 6,
 						targets: context => context.teammates.sort((a, b) => a.hpRatio - b.hpRatio).map(t => t.pos)
 					});
 				}
@@ -2978,7 +2978,7 @@ module.exports = new Promise(resolve => {
 							delay += AutoBattleFirstRoundDelay;
 						}
 					} else if (context.skill_performed === 1) {
-						delay = 100;
+						delay = 0;
 					}
 					isFirstBattleAction = false;
 					setTimeout(() => {
@@ -2991,10 +2991,18 @@ module.exports = new Promise(resolve => {
 			waitBattleAction();
 		}, 120000);
 	};
-	if (CustomFunctionsFlag > 0) waitBattleAction();
+	let AutoBattleEnabled = false;
+	if (CustomFunctionsFlag > 0) {
+		AutoBattleEnabled = true;
+		waitBattleAction();
+	}
 	const BattleStrategyCache = [];
-	cga.emogua.autoBattle = (strategies, firstRoundDelay, roundDelay) => {
+	cga.emogua.autoBattle = (strategies, firstRoundDelay, roundDelay, force = false) => {
 		if (strategies && strategies.length > 0) {
+			if (force && !AutoBattleEnabled) {
+				AutoBattleEnabled = true;
+				waitBattleAction();
+			}
 			playerStrategies.splice(0, playerStrategies.length, ...strategies.filter(e => e.user & 1));
 			player2Strategies.splice(0, player2Strategies.length, ...strategies.filter(e => e.user & 4));
 			petStrategies.splice(0, petStrategies.length, ...strategies.filter(e => e.user & 2));
