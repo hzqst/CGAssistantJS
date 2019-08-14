@@ -84,14 +84,25 @@ var wait_stuffs = (name, materials, cb)=>{
 			var unit = cga.findPlayerUnit(find_player.cga_data.player_name);
 
 			if(unit == null || unit.xpos != 33 || unit.ypos != 88){
-				setTimeout(repeat, 1500);
+				setTimeout(repeat, 1000);
 				return;
 			}
 
 			setTimeout(()=>{
-				cga.positiveTrade(find_player.cga_data.player_name, {
-
-				}, null, (result)=>{
+				var stuffs = { gold:0 };
+				
+				if(find_player.cga_data.gather_name == '买布' && Object.keys(find_player.cga_data.count).length > 0){
+					for(var key in find_player.cga_data.count){
+						if(key == '麻布')
+							stuffs.gold += find_player.cga_data.count[key] * 20;
+						else if(key == '木棉布')
+							stuffs.gold += find_player.cga_data.count[key] * 25;
+						else if(key == '毛毡')
+							stuffs.gold += find_player.cga_data.count[key] * 29;
+					}
+				}
+					
+				cga.positiveTrade(find_player.cga_data.player_name, stuffs, null, (result)=>{
 					if (result.success == true){
 						cb(true);
 					} else {
@@ -104,7 +115,7 @@ var wait_stuffs = (name, materials, cb)=>{
 			return;
 		}
 		
-		setTimeout(repeat, 1500);
+		setTimeout(repeat, 1000);
 	}
 
 	cga.travel.falan.toStone('C', ()=>{
@@ -112,7 +123,7 @@ var wait_stuffs = (name, materials, cb)=>{
 		[34, 88]
 		], ()=>{
 			cga.TurnTo(32, 88);
-			setTimeout(repeat, 1000);
+			setTimeout(repeat, 500);
 		});
 	});
 }

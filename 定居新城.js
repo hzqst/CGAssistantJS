@@ -18,6 +18,11 @@ var cga = require('./cgaapi')(function(){
 			cga.travel.falan.toCity('艾尔莎岛', next);
 		});
 	}
+	else if(cga.GetMapName() == '哥拉尔镇'){
+		cga.travel.gelaer.toFalan(()=>{
+			cga.travel.falan.toCity('艾尔莎岛', next);
+		});
+	}
 	else
 	{
 		cga.travel.falan.toCity('艾尔莎岛', next);

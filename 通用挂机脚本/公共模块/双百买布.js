@@ -29,18 +29,20 @@ var thisobj = {
 				cb(true);
 				return
 			}
-			
+						
 			console.log('func');
-
+			
 			var buyArray = [];
-			if(thisobj.object.gatherCount['麻布'])
+			if(thisobj.object.gatherCount['麻布']){
 				buyArray.push({index:0, count: thisobj.object.gatherCount['麻布']});
-			if(thisobj.object.gatherCount['木棉布'])
+			}
+			if(thisobj.object.gatherCount['木棉布']){
 				buyArray.push({index:1, count: thisobj.object.gatherCount['木棉布']});
-			if(thisobj.object.gatherCount['毛毡'])
+			}
+			if(thisobj.object.gatherCount['毛毡']){
 				buyArray.push({index:2, count: thisobj.object.gatherCount['毛毡']});
-			console.log(thisobj.object.gatherCount);
-			console.log(buyArray);
+			}
+
 			cga.craft.buyFabricLv1Multi(buyArray, ()=>{
 				cb(true);
 			});
