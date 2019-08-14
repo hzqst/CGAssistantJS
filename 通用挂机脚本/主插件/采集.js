@@ -25,9 +25,19 @@ var gatherArray = [
 	path : './../公共模块/采花',
 },
 {
-	name : '刷双百鹿皮',
+	name : '双百新城鹿皮',
+	skill : '狩猎',
+	path : './../公共模块/双百新城鹿皮',
+},
+{
+	name : '双百伊尔鹿皮',
 	skill : '狩猎体验',
-	path : './../公共模块/刷双百鹿皮',
+	path : './../公共模块/双百伊尔鹿皮',
+},
+{
+	name : '双百买布',
+	skill : null,
+	path : './../公共模块/双百买布',
 },
 ]
 
@@ -37,12 +47,11 @@ var check_drop = ()=>{
 	cga.getInventoryItems().forEach((item)=>{
 		if(dropItemPos != -1)
 			return;
-		if(item.name == '魔石' || item.name == '卡片？' || pattern.exec(item.name) ){
+		if(item.name == '魔石' || item.name == '卡片？' || pattern.exec(item.name) ) {
 			dropItemPos = item.pos;
 			return;
 		}
-		if(mineObject.object &&	mineObject.object.extra_dropping && mineObject.object.extra_dropping(item))
-		{
+		if(mineObject.object &&	mineObject.object.extra_dropping && mineObject.object.extra_dropping(item)) {
 			dropItemPos = item.pos;
 			return;
 		}
@@ -53,19 +62,21 @@ var check_drop = ()=>{
 }
 
 var loop = ()=>{
-		
-	var skill = cga.findPlayerSkill(gatherObject.skill);
-	if(!skill){
-		errmsg = '你没有'+gatherObject.skill+'技能';
-		cga.SayWords(errmsg , 0, 3, 1);
-		//throw new Error(errmsg);
-		return;
-	}
-	if(mineObject.object && skill.lv < mineObject.object.level){
-		var errmsg = gatherObject.skill+'技能等级不够，挖'+mineObject.object.name+'需要'+mineObject.object.level+'级，而你只有'+skill.lv+'级';
-		cga.SayWords(errmsg , 0, 3, 1);
-		//throw new Error(errmsg);
-		return;
+	
+	var skill = null;
+	
+	if(gatherObject.skill !== null){
+		skill = cga.findPlayerSkill(gatherObject.skill);
+		if(!skill){
+			errmsg = '你没有'+gatherObject.skill+'技能';
+			cga.SayWords(errmsg , 0, 3, 1);
+			return;
+		}
+		if(mineObject.object && skill.lv < mineObject.object.level){
+			var errmsg = gatherObject.skill+'技能等级不够，挖'+mineObject.object.name+'需要'+mineObject.object.level+'级，而你只有'+skill.lv+'级';
+			cga.SayWords(errmsg , 0, 3, 1);
+			return;
+		}
 	}
 	
 	var playerInfo = cga.GetPlayerInfo();
@@ -105,8 +116,30 @@ var loop = ()=>{
 			
 			check_drop();
 			
+			cga.StartWork(skill.index, 0);
+			
 			waitwait(cb);
 		}, 10000);
+	}
+	
+	var waitwait2 = (cb)=>{
+		var playerInfo = cga.GetPlayerInfo();
+		if(playerInfo.mp == 0){
+			cb('restart');
+			return;
+		}
+		if(mineObject.check_done()){
+			cb('restart');
+			return;
+		}
+		if(playerInfo.health > 0){
+			cb('heal');
+			return;
+		}
+		
+		check_drop();
+		
+		setTimeout(waitwait2, 1500, cb);
 	}
 	
 	var workwork = ()=>{
@@ -117,19 +150,34 @@ var loop = ()=>{
 			return;
 		}
 		
-		cga.StartWork(skill.index, 0);		
-		waitwait((r)=>{
-			if(r == 'restart')
-			{
-				loop();
-				return;
-			}
-			if(r == 'heal')
-			{
-				healObject.func(workwork);
-				return;
-			}
-		});
+		if(skill != null){
+			cga.StartWork(skill.index, 0);
+			waitwait((r)=>{
+				if(r == 'restart')
+				{
+					loop();
+					return;
+				}
+				if(r == 'heal')
+				{
+					healObject.func(workwork);
+					return;
+				}
+			});
+		} else {
+			waitwait2((r)=>{
+				if(r == 'restart')
+				{
+					loop();
+					return;
+				}
+				if(r == 'heal')
+				{
+					healObject.func(workwork);
+					return;
+				}
+			});
+		}
 	}
 	
 	mineObject.func(workwork);
@@ -227,6 +275,7 @@ var thisobj = {
 	},
 	execute : ()=>{
 		callSubPlugins('init');
+		mineObject.init();
 		loop();
 	},
 };

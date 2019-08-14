@@ -324,7 +324,7 @@ module.exports = function(callback){
 				cga.travel.falan.toCastle(cb);
 				return;
 			}
-			
+
 			var curStone = cga.travel.falan.xy2name(curXY.x, curXY.y, curMap);
 			if(curStone) {
 				var turn = false;
@@ -443,7 +443,7 @@ module.exports = function(callback){
 			});
 			return;
 		}
-		if(curMap == '里谢里雅堡' && curXY.x >= 33 && curXY.x <= 35 && curXY.y >= 87 && curXY.y <= 90 ){
+		/*if(curMap == '里谢里雅堡' && curXY.x >= 33 && curXY.x <= 35 && curXY.y >= 87 && curXY.y <= 90 ){
 			cga.walkList([
 			[41, 91],
 			], (err, reason)=>{
@@ -455,7 +455,7 @@ module.exports = function(callback){
 			});
 			return;
 		}
-		if(curMap == '里谢里雅堡' && curXY.x == 27 && curXY.y == 82){
+		if(curMap == '里谢里雅堡'){
 			if(stone == 'C'){
 				cb(true);
 				return;
@@ -484,7 +484,7 @@ module.exports = function(callback){
 				cga.travel.falan.toStoneInternal(stone, cb);
 			});
 			return;
-		}
+		}*/
 		//重新回城
 		cga.LogBack();
 		cga.AsyncWaitMovement({map:desiredMap, delay:1000, timeout:5000}, (err, reason)=>{
@@ -561,11 +561,17 @@ module.exports = function(callback){
 			return;
 		}
 		
-		cga.travel.falan.toStone('S', (r)=>{
+		if(cga.GetMapName() == '法兰城'){
 			cga.walkList([
 			[154, 100, '里谢里雅堡']
 			], cb);
-		});
+		} else {
+			cga.travel.falan.toStone('S', (r)=>{
+				cga.walkList([
+				[154, 100, '里谢里雅堡']
+				], cb);
+			});
+		}
 	}
 	
 	cga.travel.falan.toCastleHospital = function(cb){
@@ -689,11 +695,20 @@ module.exports = function(callback){
 			return;
 		}
 		
-		cga.travel.falan.toStone('S1', function(r){
-			cga.walkList([
-				[117, 112, '流行商店'],
-			], cb);
-		});
+		if(cga.GetMapName() == '法兰城'){
+			cga.travel.falan.toStone('S1', ()=>{
+				cga.walkList([
+					[117, 112, '流行商店'],
+				], cb);
+			});
+		} else {
+			cga.travel.falan.toStone('C', ()=>{
+				cga.walkList([
+					[41, 98, '法兰城'],
+					[117, 112, '流行商店'],
+				], cb);
+			});
+		}
 	}
 	
 	cga.travel.falan.toKatieStore = cga.travel.falan.toAssessStore = (cb)=>{
@@ -702,119 +717,133 @@ module.exports = function(callback){
 			return;
 		}
 		
-		cga.travel.falan.toStone('E2', function(r){
-			cga.walkList([
-				[196, 78, '凯蒂夫人的店'],
-			], cb);
-		});
+		if(cga.GetMapName() == '法兰城'){
+			cga.travel.falan.toStone('E2', function(r){
+				cga.walkList([
+					[196, 78, '凯蒂夫人的店'],
+				], cb);
+			});
+		} else {
+			cga.travel.falan.toStone('C', ()=>{
+				cga.walkList([
+					[65, 53, '法兰城'],
+					[117, 112, '流行商店'],
+				], cb);
+			});
+		}
 	}
 	
 	cga.travel.falan.toMineStore = (mine, cb)=>{
 		var mineExchange = null;
 		if(mine == '铜'){
 			mineExchange = (cb2)=>{
-				cga.walkList([[26, 5]], function(r){
+				cga.walkList([[26, 5]], ()=>{
 					cga.TurnTo(26, 4);
-					cb2(true);
+					cb2(null);
 				});
 			}
 		}
 		if(mine == '铁'){
 			mineExchange = (cb2)=>{
-				cga.walkList([[28, 6]], function(r){
+				cga.walkList([[28, 6]], ()=>{
 					cga.TurnTo(28, 5);
-					cb2(true);
+					cb2(null);
 				});
 			}
 		}
 		if(mine == '银'){
 			mineExchange = (cb2)=>{
-				cga.walkList([[29, 6]], function(r){
+				cga.walkList([[29, 6]], ()=>{
 					cga.TurnTo(30, 5);
-					cb2(true);
+					cb2(null);
 				});
 			}
 		}
 		if(mine == '纯银'){
 			mineExchange = (cb2)=>{
-				cga.walkList([[27, 7]], function(r){
+				cga.walkList([[27, 7]], ()=>{
 					cga.TurnTo(27, 5);
-					cb2(true);
+					cb2(null);
 				});
 			}
 		}
 		if(mine == '金'){
 			mineExchange = (cb2)=>{
-				cga.walkList([[24, 6]], function(r){
+				cga.walkList([[24, 6]], ()=>{
 					cga.TurnTo(24, 5);
-					cb2(true);
+					cb2(null);
 				});
 			}
 		}
 		if(mine == '白金'){
 			mineExchange = (cb2)=>{
-				cga.walkList([[29, 6]], function(r){
+				cga.walkList([[29, 6]], ()=>{
 					cga.TurnTo(30, 7);
-					cb2(true);
+					cb2(null);
 				});
 			}
 		}
 		if(mine == '幻之钢'){
 			mineExchange = (cb2)=>{
-				cga.walkList([[26, 10]], function(r){
+				cga.walkList([[26, 10]], ()=>{
 					cga.TurnTo(28, 10);
-					cb2(true);
+					cb2(null);
 				});
 			}
 		}
 		if(mine == '幻之银'){
 			mineExchange = (cb2)=>{
-				cga.walkList([[27, 9]], function(r){
+				cga.walkList([[27, 9]], ()=>{
 					cga.TurnTo(28, 8);
-					cb2(true);
+					cb2(null);
 				});
 			}
 		}
 		if(mine == '勒格耐席鉧'){
 			mineExchange = (cb2)=>{
-				cga.walkList([[23, 7]], function(r){
+				cga.walkList([[23, 7]], ()=>{
 					cga.TurnTo(22, 6);
-					cb2(true);
+					cb2(null);
 				});
 			}
 		}
 		if(mine == '奥利哈钢'){
 			mineExchange = (cb2)=>{
-				cga.walkList([[26, 12]], function(r){
+				cga.walkList([[26, 12]], ()=>{
 					cga.TurnTo(27, 12);
-					cb2(true);
+					cb2(null);
 				});
 			}
 		}
 		if(cga.GetMapName()=='米克尔工房'){
 			if(mineExchange){
-				mineExchange(()=>{
-					cb(true);
-				});
+				mineExchange(cb);
 			}else{
-				cb(true);
+				cb(null);
 			}
 			return;
 		}
 		
-		cga.travel.falan.toStone('W1', function(r){
-			cga.walkList([
-				[100, 61, '米克尔工房'],
-			], function(r){
-				if(mineExchange){
-					mineExchange(()=>{
-						cb(true);
-					});
-				}else{
-					cb(true);
-				}
+		if(cga.GetMapName() == '法兰城'){
+			cga.travel.falan.toStone('W1', function(r){
+				cga.walkList([
+					[100, 61, '米克尔工房'],
+				], ()=>{
+					if(mineExchange){
+						mineExchange(cb);
+					}else{
+						cb(null);
+					}
+				});
 			});
-		});
+		} else {
+			cga.travel.falan.toStone('C', ()=>{
+				cga.walkList([
+					[17, 53, '法兰城'],
+					[100, 61, '米克尔工房'],
+				], cb);
+			});
+		}
 	}
 
 	//从法兰城到新城
@@ -3353,49 +3382,56 @@ module.exports = function(callback){
 	cga.tradeInternal = (stuff, checkParty, resolve, playerName) => {
 		
 		var savePartyName = null;
+		var tradeFinished = false;
+		var receivedStuffs = {};
+		
+		var waitTradeMsg = ()=>{
+			
+			cga.waitSysMsg((msg)=>{
+				
+				if(tradeFinished)
+					return false;
+				
+				if(msg.indexOf('交易完成') >= 0){
+					tradeFinished = true;
+					resolve({
+						success: true,
+						received: receivedStuffs
+					});
+					return false;
+				} else if(msg.indexOf('交易中止') >= 0){
+					tradeFinished = true;
+					resolve({
+						success: false,
+						received: receivedStuffs,
+						reason : 'refused'
+					});
+					return false;
+				} else if(msg.indexOf('没有可交易的对象') >= 0){
+					tradeFinished = true;
+					resolve({
+						success: false,
+						received: receivedStuffs,
+						reason : 'no target'
+					});
+					return false;
+				} else {
+					if(!tradeFinished)
+						return true
+				}
+				
+				return true;
+			});	
+		}
 		
 		var waitDialog = ()=>{
 			
+			if(tradeFinished)
+				return;
+			
 			var getInTradeStuffs = false;
 			var tradeStuffsChecked = false;
-			var receivedStuffs = {};
-			var tradeFinished = false;
-			
-			var waitTradeMsg = ()=>{
-				
-				cga.AsyncWaitChatMsg((err, r)=>{
-					console.log('AsyncWaitChatMsg');
-					console.log(r);
-
-					if(!r.msg){
 						
-						if(!tradeFinished)
-							waitTradeMsg();
-						
-						return;
-					}
-
-					if(r.unitid == -1 && r.msg.indexOf('交易完成') >= 0){
-						tradeFinished = true;
-						resolve({
-							success: true,
-							received: receivedStuffs
-						});
-					}
-					else if(r.unitid == -1 && r.msg.indexOf('交易中止') >= 0){
-						tradeFinished = true;
-						resolve({
-							success: false,
-							received: receivedStuffs,
-							reason : 'refused'
-						});
-					} else {
-						if(!tradeFinished)
-							waitTradeMsg();
-					}
-				}, 3000);		
-			}
-			
 			var waitTradeStuffs = ()=>{
 				
 				cga.AsyncWaitTradeStuffs((err, type, args) => {
@@ -3460,8 +3496,6 @@ module.exports = function(callback){
 			
 			waitTradeState();
 			
-			waitTradeMsg();
-			
 			const itemFilter = (stuff && typeof stuff.itemFilter == 'function') ? stuff.itemFilter : () => false;
 			const petFilter = (stuff && typeof stuff.petFilter == 'function') ? stuff.petFilter : () => false;
 			const tradeItems = cga.getInventoryItems().filter(itemFilter).map(e => {
@@ -3476,6 +3510,10 @@ module.exports = function(callback){
 		}
 		
 		cga.AsyncWaitTradeDialog((err, partyName, partyLevel) => {
+			
+			if(tradeFinished)
+				return;
+			
 			console.log('AsyncWaitTradeDialog');
 			console.log(partyName);
 			console.log(partyLevel);
@@ -3484,23 +3522,33 @@ module.exports = function(callback){
 			
 			if (!err && partyLevel > 0) {
 				waitDialog();
-			} else {					
+			} else {
 				cga.DoRequest(cga.REQUEST_TYPE_TRADE_REFUSE);
+				
+				tradeFinished = true;
 				resolve({success: false, reason : 'trade dialog timeout'});
 			}
 		}, 10000);
+		
+		waitTradeMsg();
 	};
 
 	cga.positiveTrade = (name, stuff, checkParty, resolve) => {
 		cga.AsyncWaitPlayerMenu(err, players => {
+			if(err){
+				console.log('player not found')
+				resolve({success: false, reason : 'player menu timeout'});
+				return;
+			}
+			
 			if (!(players instanceof Array)) players = [];
 			var player = players.find((e, index) => typeof name == 'number' ? index == name : e.name == name);
-			if (player) {
+			if (player !== undefined) {
 				cga.tradeInternal(stuff, checkParty, resolve, name);
 				cga.PlayerMenuSelect(player.index);
 			} else {
 				console.log('player not found')
-				resolve({success: false, reason : 'player menu timeout'});
+				resolve({success: false, reason : 'player not found'});
 			}
 		}, 3000);
 		
@@ -3516,7 +3564,7 @@ module.exports = function(callback){
 		
 		cga.EnableFlags(cga.ENABLE_FLAG_TRADE, true)
 		
-		cga.AsyncWaitPlayerMenu(err, players => {
+		cga.AsyncWaitPlayerMenu((err, players) => {
 			if (!(players instanceof Array)) players = [];
 			var player = players.find((e, index) => typeof name == 'number' ? index == name : e.name == name);
 			if (player) {

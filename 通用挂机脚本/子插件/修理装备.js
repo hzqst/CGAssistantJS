@@ -69,7 +69,7 @@ const putupEquipments = (equipped, cb)=>{
 	setTimeout(cb, 1000);
 }
 
-const repairLoop = (flags, cb)=>{
+const repairLoop = (flags, failure, cb)=>{
 	var words = '';
 	var item = cga.getInventoryItems().filter(flags == 0 ? repairFilter : ((flags & 1) ? repairFilterArmor : repairFilterWeapon) );
 	if (item.length) {
@@ -97,7 +97,10 @@ const repairLoop = (flags, cb)=>{
 		else
 		{
 			//重新请求修理
-			setTimeout(repairLoop, 1000, flags, cb);
+			if(failure + 1 >= 3)
+				setTimeout(cb, 1000);
+			else
+				setTimeout(repairLoop, 1000, flags, failure + 1, cb);
 			return;
 		}
 		
@@ -116,9 +119,9 @@ const repairLoop = (flags, cb)=>{
 						flags |= 2;
 					
 					if(flags == 3)
-					setTimeout(cb, 1000);
-				else
-					setTimeout(repairLoop, 1000, flags, cb);
+						setTimeout(cb, 1000);
+					else
+						setTimeout(repairLoop, 1000, flags, 0, cb);
 				}
 				else
 				{
@@ -153,7 +156,7 @@ module.exports = {
 					setTimeout(()=>{
 						var equipped = cga.getEquipItems();
 						putdownEquipments(()=>{
-							repairLoop(0, ()=>{
+							repairLoop(0, 0, ()=>{
 								putupEquipments(equipped, ()=>{
 									cga.EnableFlags(cga.ENABLE_FLAG_TRADE, false);
 									cga.EnableFlags(cga.ENABLE_FLAG_TEAMCHAT, true);

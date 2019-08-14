@@ -295,7 +295,10 @@ var thisobj = {
 			
 			return true;
 		});
-	}	
+	},
+	init : ()=>{
+		
+	}
 }
 
 module.exports = thisobj;
