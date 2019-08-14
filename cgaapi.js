@@ -2545,13 +2545,13 @@ module.exports = function(callback){
 	cga.saveToBankOnce = (itemname, maxcount, cb)=>{
 		var itempos = cga.findItem(itemname);
 		if(itempos == -1){
-			cb(false, new Error('包里没有该物品, 无法存放到银行'));
+			cb(new Error('包里没有该物品, 无法存放到银行'));
 			return;
 		}
 		
 		var emptyslot = cga.findBankEmptySlot(itemname, maxcount);
 		if(emptyslot == -1){
-			cb(false, new Error('银行没有空位, 无法存放到银行'));
+			cb(new Error('银行没有空位, 无法存放到银行'));
 			return;
 		}
 		
@@ -2560,10 +2560,11 @@ module.exports = function(callback){
 		var saveToBank = ()=>{
 			if(cga.GetItemInfo(emptyslot))
 			{
-				cb(true);
+				cb(null);
 			}
-			else{
-				cb(false);
+			else
+			{
+				cb(new Error('存银行失败，可能银行格子已满'));
 			}
 		}
 		
@@ -2572,13 +2573,13 @@ module.exports = function(callback){
 	
 	cga.saveToBankAll = (itemname, maxcount, cb)=>{
 		var repeat = ()=>{
-			cga.saveToBankOnce(itemname, maxcount, (r, err)=>{
-				if(!r){
-					cb(r, err);
+			cga.saveToBankOnce(itemname, maxcount, (err)=>{
+				if(err){
+					cb(err);
 					return;
 				}
 				if(cga.findItem(itemname) == -1){
-					cb(true);
+					cb(null);
 					return;
 				}				
 				repeat();
@@ -3534,7 +3535,7 @@ module.exports = function(callback){
 	};
 
 	cga.positiveTrade = (name, stuff, checkParty, resolve) => {
-		cga.AsyncWaitPlayerMenu(err, players => {
+		cga.AsyncWaitPlayerMenu((err, players) => {
 			if(err){
 				console.log('player not found')
 				resolve({success: false, reason : 'player menu timeout'});
@@ -3562,20 +3563,19 @@ module.exports = function(callback){
 	
 	cga.trade = (name, stuff, checkParty, resolve) => {
 		
-		cga.EnableFlags(cga.ENABLE_FLAG_TRADE, true)
+		cga.EnableFlags(cga.ENABLE_FLAG_TRADE, true);
 		
 		cga.AsyncWaitPlayerMenu((err, players) => {
 			if (!(players instanceof Array)) players = [];
 			var player = players.find((e, index) => typeof name == 'number' ? index == name : e.name == name);
 			if (player) {
+				cga.tradeInternal(stuff, checkParty, resolve, name);
 				cga.PlayerMenuSelect(player.index);
 			} else {
 				console.log('player not found, do nothing');
 			}
 		}, 3000);
-		
-		cga.tradeInternal(stuff, checkParty, resolve, name);
-		
+				
 		cga.DoRequest(cga.REQUEST_TYPE_TRADE);
 	}
 	

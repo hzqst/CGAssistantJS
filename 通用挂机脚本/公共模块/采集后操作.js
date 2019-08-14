@@ -10,12 +10,12 @@ var doneArray = [
 				cga.ClickNPCDialog(0, 0);
 				cga.AsyncWaitNPCDialog(()=>{
 					var exchangeCount = cga.getItemCount(mineObject.name) / 20;
-					var r = cga.BuyNPCStore([{index:0, count:exchangeCount}]);
+					cga.BuyNPCStore([{index:0, count:exchangeCount}]);
 					cga.AsyncWaitNPCDialog(()=>{
 						cga.travel.falan.toBank(()=>{
 							cga.AsyncWaitNPCDialog(()=>{
-								cga.saveToBankAll(mineObject.name+'条', 20, (r)=>{
-									cb(r);
+								cga.saveToBankAll(mineObject.name+'条', 20, (err)=>{
+									cb(null);
 								});
 							});
 						});
@@ -30,8 +30,8 @@ var doneArray = [
 	func: (cb, mineObject)=>{
 		cga.travel.falan.toBank(()=>{
 			cga.AsyncWaitNPCDialog(()=>{
-				cga.saveToBankAll(mineObject.name, 20, (r)=>{
-					cb(r);
+				cga.saveToBankAll(mineObject.name, 20, (err)=>{
+					cb(null);
 				});
 			});
 		});
