@@ -13,7 +13,7 @@ var thisobj = {
 		thisobj.object.doneManager(cb);
 	},
 	object : {
-		name :'鹿皮',
+		name :'铜条',
 		func : (cb) =>{
 			
 			if(thisobj.object.gatherCount === null){
@@ -26,41 +26,59 @@ var thisobj = {
 				return
 			}
 			
-			cga.travel.falan.toStone('E1', ()=>{
+			cga.travel.falan.toStone('W1', ()=>{
 				cga.walkList([
-				[281, 88, '芙蕾雅'],
-				[596, 247],
+				[22, 87, '芙蕾雅'],
+				[351, 145, '国营第24坑道 地下1楼'],
 				], cb);
 			});
 		},
 		gatherCount : null,
 		doneManager : (cb)=>{
-			thisobj.object.state = 'done';
 			
-			var repeat = ()=>{
-
-				switch(thisobj.object.state){
-					case 'done' : {
-						socket.emit('done', {
-							count : cga.getItemCount('鹿皮'),
+			var exchange = (cb2)=>{			
+				cga.travel.falan.toMineStore('铜', ()=>{
+					cga.AsyncWaitNPCDialog(()=>{
+						cga.ClickNPCDialog(0, 0);
+						cga.AsyncWaitNPCDialog(()=>{
+							var exchangeCount = cga.getItemCount('铜') / 20;
+							cga.BuyNPCStore([{index:0, count:exchangeCount}]);
+							cga.AsyncWaitNPCDialog(()=>{
+								cb2(null);
+							});
 						});
-						break;
-					}
-					case 'restart' : {
-						cb(true);
-						return;
-					}
-				}
-				
-				setTimeout(repeat, 1500);
+					});
+				});
 			}
 			
-			cga.travel.falan.toStone('C', ()=>{
-				cga.walkList([
-				[33, 88]
-				], ()=>{
-					cga.TurnTo(35, 88);
-					setTimeout(repeat, 1000);
+			exchange(()=>{
+				thisobj.object.state = 'done';
+			
+				var repeat = ()=>{
+
+					switch(thisobj.object.state){
+						case 'done' : {
+							socket.emit('done', {
+								count : cga.getItemCount('铜条'),
+							});
+							break;
+						}
+						case 'restart' : {
+							cb(true);
+							return;
+						}
+					}
+					
+					setTimeout(repeat, 1500);
+				}
+				
+				cga.travel.falan.toStone('C', ()=>{
+					cga.walkList([
+					[33, 88]
+					], ()=>{
+						cga.TurnTo(35, 88);
+						setTimeout(repeat, 1000);
+					});
 				});
 			});
 		},
@@ -69,11 +87,11 @@ var thisobj = {
 	check_done : ()=>{
 		if(thisobj.object.gatherCount === null)
 			return false;
-		
-		return cga.getItemCount('鹿皮') >= thisobj.object.gatherCount;
+
+		return (cga.getItemCount('铜') / 20) >= thisobj.object.gatherCount || ;
 	},
 	extra_dropping : (item)=>{
-		return (item.name == '传说中的鹿皮' && item.count >= 40);
+		return (item.name == '碎石头' && item.count >= 40);
 	},
 	translate : (pair)=>{
 		
@@ -133,7 +151,7 @@ var thisobj = {
 			thisobj.craft_player = data.craft_player;
 			thisobj.craft_materials = data.craft_materials;
 			data.craft_materials.forEach((m)=>{
-				if( m.name == '鹿皮' )
+				if( m.name == '铜条' )
 					thisobj.object.gatherCount = m.count * MATERIALS_MULTIPLE_TIMES;
 			});
 		});
@@ -151,7 +169,7 @@ var thisobj = {
 					if(count >= thisobj.object.gatherCount)
 						return false;
 					
-					if (item.name == '鹿皮' && item.count >= 20){
+					if (item.name == '铜条'){
 						count += item.count;
 						return true;
 					}

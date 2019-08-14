@@ -9,6 +9,9 @@ var thisobj = {
 	func : (cb) =>{
 		thisobj.object.func(cb);
 	},
+	doneManager : (cb)=>{
+		thisobj.object.doneManager(cb);
+	},
 	object : {
 		name :'鹿皮',
 		func : (cb) =>{
@@ -23,12 +26,6 @@ var thisobj = {
 				return
 			}
 			
-			/*cga.travel.falan.toStone('E1', ()=>{
-				cga.walkList([
-				[281, 88, '芙蕾雅'],
-				[596, 247],
-				], cb);
-			});*/
 			cga.travel.newisland.toStone('X', ()=>{
 				cga.walkList([
 				[130, 50, '盖雷布伦森林'],

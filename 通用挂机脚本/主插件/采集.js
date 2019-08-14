@@ -35,6 +35,11 @@ var gatherArray = [
 	path : './../公共模块/双百伊尔鹿皮',
 },
 {
+	name : '双百挖铜',
+	skill : '挖矿',
+	path : './../公共模块/双百挖铜',
+},
+{
 	name : '双百买布',
 	skill : null,
 	path : './../公共模块/双百买布',
@@ -93,7 +98,10 @@ var loop = ()=>{
 
 	if(mineObject.check_done())
 	{
-		doneObject.func(loop, mineObject.object);
+		if(mineObject.doneManager)
+			mineObject.doneManager(loop);
+		else if(doneObject.func)
+			doneObject.func(loop, mineObject.object);
 		return;
 	}
 	
@@ -239,8 +247,10 @@ var thisobj = {
 		if(!mineObject.loadconfig(obj))
 			return false;
 		
-		if(!doneObject.loadconfig(obj))
-			return false;
+		if(!mineObject.doneManager){
+			if(!doneObject.loadconfig(obj))
+				return false;
+		}
 		
 		if(!healObject.loadconfig(obj))
 			return false;
@@ -266,7 +276,11 @@ var thisobj = {
 				if(mineObject === null)
 					mineObject = require(gatherObject.path);
 				
-				Async.series([mineObject.inputcb, doneObject.inputcb, healObject.inputcb], cb);
+				if(!mineObject.doneManager){
+					Async.series([mineObject.inputcb, doneObject.inputcb, healObject.inputcb], cb);
+				} else {
+					Async.series([mineObject.inputcb, healObject.inputcb], cb);
+				}
 				return false;
 			}
 			

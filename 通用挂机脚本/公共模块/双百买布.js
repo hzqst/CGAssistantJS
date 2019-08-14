@@ -13,6 +13,9 @@ var thisobj = {
 	func : (cb) =>{
 		thisobj.object.func(cb);
 	},
+	doneManager : (cb)=>{
+		thisobj.object.doneManager(cb);
+	},
 	object : {
 		name :'买布',
 		func : (cb) =>{
