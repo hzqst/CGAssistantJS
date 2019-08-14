@@ -69,9 +69,9 @@ var thisobj = {
 		if(thisobj.object.gatherCount === null)
 			return false;
 		
-		if(result != undefined){
+		if(result !== undefined){
 			console.log(thisobj.object.gather_total_times);
-			if(thisobj.object.gather_total_times < 15){
+			if(thisobj.object.gather_total_times < 25){
 				thisobj.object.gather_total_times ++;
 			} else {
 				cga.LogOut();

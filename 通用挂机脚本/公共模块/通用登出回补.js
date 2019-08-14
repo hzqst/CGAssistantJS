@@ -3,7 +3,11 @@ var configTable = global.configTable;
 
 var thisobj = {
 	func : (cb)=>{
-		cga.LogBack();
+		console.log('zzz');
+		var mapname = cga.GetMapName();
+		if(mapname != '艾尔莎岛' && mapname != '法兰城' && mapname != '阿凯鲁法村')
+			cga.LogBack();
+		
 		setTimeout(()=>{
 			var mapname = cga.GetMapName();
 			switch(mapname)
@@ -14,6 +18,7 @@ var thisobj = {
 					});
 					break;
 				case '阿凯鲁法村':
+					cga.LogBack();
 					cga.walkList([
 					[121, 155, '夏姆吉诊所'],
 					[24, 17],

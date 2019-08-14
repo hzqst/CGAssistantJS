@@ -291,7 +291,7 @@ var thisobj = {
 					configTable.craftCount = val;
 					thisobj.craftCount = val;
 					
-					var sayString2 = '当前已选择:'+craftCount+'件。';
+					var sayString2 = '当前已选择:'+thisobj.craftCount+'件。';
 					cga.sayLongWords(sayString2, 0, 3, 1);
 					
 					cb2(null);

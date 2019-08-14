@@ -53,13 +53,13 @@ var cga = require('./cgaapi')(function(){
 	{
 		name : '阿巴尼斯制的线',
 		func : (count, cb)=>{
-			cga.craft.buyFabricLv4(0, count, cb);
+			cga.craft.buyFabricLv4(1, count, cb);
 		}
 	},
 	{
 		name : '阿巴尼斯制的布',
 		func : (count, cb)=>{
-			cga.craft.buyFabricLv4(0, count, cb);
+			cga.craft.buyFabricLv4(2, count, cb);
 		}
 	},
 	{

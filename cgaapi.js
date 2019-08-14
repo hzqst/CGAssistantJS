@@ -490,6 +490,7 @@ module.exports = function(callback){
 			return;
 		}*/
 		//重新回城
+		console.log('yyy')
 		cga.LogBack();
 		cga.AsyncWaitMovement({map:desiredMap, delay:1000, timeout:5000}, (err, reason)=>{
 			if(err){
