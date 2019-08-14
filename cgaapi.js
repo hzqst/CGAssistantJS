@@ -231,9 +231,23 @@ module.exports = function(callback){
 				itemArray[i] = -1;
 		}
 		
+		console.log(itemArray)
+				
+		cga.AsyncWaitWorkingResult((err, results)=>{
+			if(results)
+				return;
+			
+			if(err){
+				console.log(cga.GetCraftStatus());
+				if(cga.GetCraftStatus() != 1)
+					cga.craftNamedItem(craftItemName, extraItemName);				
+			}
+		}, 1000);
+		
 		cga.StartWork(info.skill.index, info.craft.index);
-		return cga.CraftItem(info.skill.index, info.craft.index, 0, itemArray);
+		cga.CraftItem(info.skill.index, info.craft.index, 0, itemArray);
 	}
+	
 
 	//获取物品栏里的物品，返回数组
 	cga.getInventoryItems = function(){
@@ -2409,43 +2423,59 @@ module.exports = function(callback){
 		return -1;
 	}
 	
-	cga.findItemArray = (itemname) =>{
+	cga.findItemArray = (filter) =>{
 		
-		var items = cga.getInventoryItems();
 		var arr = [];
-		if(typeof itemname =='string' && itemname.charAt(0) == '#'){
-			for(var i in items){
-				if(items[i].itemid == itemname.substring(1)){
+		var items = cga.getInventoryItems();
+		
+		if(typeof filter == 'function'){
+			items.forEach((item)=>{
+				if(filter(item)){
 					arr.push({
-					itempos : items[i].pos,
-					itemid : items[i].itemid,
-					count : (items[i].count < 1) ? 1 : items[i].count,
+					itempos : item.pos,
+					itemid : item.itemid,
+					count : (item.count < 1) ? 1 : item.count,
 					});
 				}
-			}			
-			return -1;
+			})
+			return arr;
 		}
-		for(var i in items){
-			if(itemname instanceof RegExp){
+		
+		
+		if(typeof filter =='string' && filter.charAt(0) == '#'){
+			items.forEach((item)=>{
+				if(item.itemid == filter.substring(1)){
+					arr.push({
+					itempos : item.pos,
+					itemid : item.itemid,
+					count : (item.count < 1) ? 1 : item.count,
+					});
+				}
+			})
+			return arr;
+		}
+		
+		items.forEach((item)=>{
+			if(filter instanceof RegExp){
 				//console.log(itemname.exec(items[i].name));
-				if(itemname.exec(items[i].name)){
+				if(filter.exec(item.name)){
 					arr.push({
-					itempos : items[i].pos,
-					itemid : items[i].itemid,
-					count : (items[i].count < 1) ? 1 : items[i].count,
+					itempos : item.pos,
+					itemid : item.itemid,
+					count : (item.count < 1) ? 1 : item.count,
 					});
 				}
 			}
-			else if(typeof itemname =='string'){
-				if(items[i].name == itemname){
+			else if(typeof filter =='string'){
+				if(item.name == filter){
 					arr.push({
-					itempos : items[i].pos,
-					itemid : items[i].itemid,
-					count : (items[i].count < 1) ? 1 : items[i].count,
+					itempos : item.pos,
+					itemid : item.itemid,
+					count : (item.count < 1) ? 1 : item.count,
 					});
 				}
 			}
-		}
+		});
 		return arr;
 	}
 		

@@ -88,16 +88,18 @@ var wait_stuffs = (name, materials, cb)=>{
 				return;
 			}
 
-			cga.positiveTrade(find_player.cga_data.player_name, {
+			setTimeout(()=>{
+				cga.positiveTrade(find_player.cga_data.player_name, {
 
-			}, null, (result)=>{
-				if (result.success == true){
-					cb(true);
-				} else {
-					find_player.emit('endtrade');
-					setTimeout(repeat, 1500);
-				}
-			});
+				}, null, (result)=>{
+					if (result.success == true){
+						cb(true);
+					} else {
+						find_player.emit('endtrade');
+						setTimeout(repeat, 1500);
+					}
+				});
+			}, 1500);
 
 			return;
 		}
@@ -207,7 +209,7 @@ var forgetAndLearn = (teacher, cb)=>{
 	});
 }
 
-var loop = (lastCraftTarget)=>{
+var loop = ()=>{
 
 	callSubPluginsAsync('prepare', ()=>{
 		
@@ -222,6 +224,7 @@ var loop = (lastCraftTarget)=>{
 				return t.skillname == thisobj.craftSkill.name;
 			})
 			if(teacher != undefined){
+				craft_count = 0;
 				forgetAndLearn(teacher, loop);
 				return;
 			}
@@ -247,9 +250,13 @@ var loop = (lastCraftTarget)=>{
 					[151, 122],
 				], ()=>{
 					cga.TurnTo(149, 122);
-					var sellarray = cga.findItemArray(craft_target.name);
-					if(lastCraftTarget != undefined && lastCraftTarget.name != craft_target.name)
-						sellarray = sellarray.concat(cga.findItemArray(craft_target.name));
+					var sellarray = cga.findItemArray((item)=>{
+						if ( thisobj.craftItemList.find((craftItem)=>{
+							return item.name == craftItem.name;
+						}) !== undefined){
+							return true;
+						}
+					});
 					cga.sellArray(sellarray, ()=>{
 						setTimeout(loop, 1000);
 					});
@@ -293,7 +300,7 @@ var loop = (lastCraftTarget)=>{
 			
 			//升级?
 			if(cga.findPlayerSkill(thisobj.craftSkill.name).lv != thisobj.craftSkill.lv){
-				loop(thisobj.craftSkill);
+				loop();
 				return;
 			}
 			
@@ -307,7 +314,7 @@ var loop = (lastCraftTarget)=>{
 					if(result && result.success){
 						craft_count ++;
 						console.log('已造' + craft_count + '次');
-						craft();
+						setTimeout(craft, 1000);
 					} else {
 						loop();
 					}
