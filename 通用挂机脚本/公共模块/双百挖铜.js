@@ -86,7 +86,7 @@ var thisobj = {
 		if(thisobj.object.gatherCount === null)
 			return false;
 
-		return (cga.getItemCount('铜') / 20) >= thisobj.object.gatherCount || ;
+		return (cga.getItemCount('铜') / 20) >= thisobj.object.gatherCount;
 	},
 	extra_dropping : (item)=>{
 		return (item.name == '碎石头' && item.count >= 40);

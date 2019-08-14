@@ -63,10 +63,21 @@ var thisobj = {
 			});
 		},
 		state : 'gathering',
+		gather_total_times : 0,
 	},
-	check_done : ()=>{
+	check_done : (result)=>{
 		if(thisobj.object.gatherCount === null)
 			return false;
+		
+		if(result != undefined){
+			console.log(thisobj.object.gather_total_times);
+			if(thisobj.object.gather_total_times < 15){
+				thisobj.object.gather_total_times ++;
+			} else {
+				cga.LogOut();
+				return false;
+			}
+		}
 		
 		return cga.getItemCount('鹿皮') >= thisobj.object.gatherCount;
 	},

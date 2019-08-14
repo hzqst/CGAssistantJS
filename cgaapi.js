@@ -71,6 +71,10 @@ module.exports = function(callback){
 	cga.FL_SKILL_ALL = 0x100;
 	cga.FL_SKILL_BOOM = 0x200;
 	cga.FL_SKILL_FRONT_ONLY = 0x400;
+	
+	cga.MOVE_GOLD_TOBANK = 1;
+	cga.MOVE_GOLD_FROMBANK =  2;
+	cga.MOVE_GOLD_DROP = 3;
 
 	//延迟x毫秒
 	cga.delay = (millis) => new Promise((resolve, reject) => {

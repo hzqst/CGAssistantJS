@@ -129,12 +129,15 @@ var getBestCraftableItem = ()=>{
 	thisobj.craftSkill = cga.findPlayerSkill(thisobj.craftSkill.name);
 	thisobj.craftItemList = cga.GetCraftsInfo(thisobj.craftSkill.index);
 	
+	var minGatherType = 999;
+	
 	var item = null;
 	for(var i = thisobj.craftItemList.length - 1; i >= 0; i--){
 		if(thisobj.craftItemList[i].level > thisobj.craftSkill.level)
 			continue;
 		
 		var allow = true;
+		var gather_type = 0;
 
 		thisobj.craftItemList[i].materials.forEach((mat)=>{
 
@@ -142,13 +145,18 @@ var getBestCraftableItem = ()=>{
 				allow = false;
 				return false;
 			}
+			
+			if(!isFabricName(mat.name))
+				gather_type ++;
 		})
-		
+				
 		if(allow == false)
 			continue;
 		
-		item = thisobj.craftItemList[i];
-		break;
+		if(gather_type < minGatherType){
+			minGatherType = gather_type;
+			item = thisobj.craftItemList[i];
+		}
 	}
 	
 	return item;

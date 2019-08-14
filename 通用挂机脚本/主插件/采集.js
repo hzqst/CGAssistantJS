@@ -111,13 +111,14 @@ var loop = ()=>{
 	}
 	
 	var waitwait = (cb)=>{
-		cga.AsyncWaitWorkingResult(()=>{
+		cga.AsyncWaitWorkingResult((err, result)=>{
 			var playerInfo = cga.GetPlayerInfo();
 			if(playerInfo.mp == 0){
 				cb('restart');
 				return;
 			}
-			if(mineObject.check_done())
+
+			if(mineObject.check_done(result))
 			{
 				cb('restart');
 				return;
