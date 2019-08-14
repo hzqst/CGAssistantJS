@@ -324,7 +324,7 @@ const Reputations = [
 			max: null
 	}
 ];
-const CustomFunctionsFlag = 1;
+const CustomFunctionsFlag = 0;
 module.exports = new Promise(resolve => {
 	const cga = require('../cgaapi')(() => setTimeout(() => resolve(cga), 0));
 }).then(cga => {
@@ -416,11 +416,8 @@ module.exports = new Promise(resolve => {
 	});
 	// range 0 最大 1 最小格
 	cga.emogua.sayWords = (words = '', color = 0, range = 1, size = 0) => {
-		if (cga.isInNormalState()) {
-			cga.SayWords(words, color, range, size);
-			return true;
-		}
-		return false;
+		cga.SayWords(words, color, range, size);
+		return Promise.resolve();
 	}
 	cga.emogua.recursion = (action, timer = Date.now()) => {
 		const result = action(timer);
@@ -483,13 +480,20 @@ module.exports = new Promise(resolve => {
 		if (matched) return [matched[2],matched[4]];
 		return [undefined, undefined];
 	};
-	cga.emogua.logBack = () => cga.emogua.delay(1000).then(() => cga.LogBack()).then(
-		() => cga.emogua.delay(3000)
-	).then(() => {
-		if (!cga.isInNormalState()) {
-			return cga.emogua.logBack();
-		}
-	});
+	cga.emogua.logBack = () => cga.emogua.sayWords('防卡住登出开始').then(
+		() => cga.emogua.waitMessage(chat => {
+			if (chat.msg) {
+				const [sayer,message] = cga.emogua.getNameFromMessage(chat.msg);
+				if (sayer == cga.GetPlayerInfo().name && message == '防卡住登出开始') {
+					cga.LogBack();
+					return cga.emogua.delay(500).then(() => cga.emogua.waitAfterBattle());
+				}
+			}
+			return cga.emogua.delay(2000).then(
+				() => cga.emogua.logBack()
+			);
+		}, 3000)
+	);
 	cga.emogua.forceMove = (orientation, times = 1) => {
 		if  (times > 0) {
 			cga.ForceMove(orientation, true);
@@ -517,7 +521,7 @@ module.exports = new Promise(resolve => {
 			cga.WalkTo(targetX, targetY);
 		}
 		return cga.emogua.recursion(
-			() => cga.emogua.delay(200).then(() => {
+			() => cga.emogua.delay(150).then(() => {
 				if (!cga.isInNormalState()) {
 					return cga.emogua.waitAfterBattle().then(battled => {
 						lastPointTimer = Date.now();
@@ -549,6 +553,8 @@ module.exports = new Promise(resolve => {
 						if (!destination || map.name == destination) {
 							return Promise.reject(0);
 						}
+					} else if (destination instanceof Array && map.x == destination[0] && map.y == destination[1]) {
+						return Promise.reject(0);
 					}
 				}
 				if (map.x != lastPoint.x || map.y != lastPoint.y) {

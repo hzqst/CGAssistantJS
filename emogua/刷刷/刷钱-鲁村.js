@@ -44,7 +44,7 @@ require('../wrapper').then(cga => {
 			if (info.name == '库鲁克斯岛' && (info.x >= 290 && info.x <= 320) && (info.y >= 870 && info.y <= 890)) {
 				return cga.emogua.autoWalk([322,883,'鲁米那斯']);
 			} else if (info.name == '艾尔莎岛') {
-				return cga.emogua.prepare({badge: true});
+				return cga.emogua.prepare({badge: false});
 			}
 		}).then(() => {
 			const playerInfo = cga.GetPlayerInfo();
