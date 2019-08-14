@@ -31,6 +31,10 @@ io.on('connection', (socket) => {
 		socket.cga_data.state = 'done'; 
 	});
 	
+	socket.on('gathering', () => {
+		socket.cga_data.state = 'gathering'; 
+	});
+	
 	socket.on('disconnect', (err) => {
 		if(socket.cga_data)
 			console.log('client '+ socket.cga_data.player_name +' is disconnected');
@@ -69,7 +73,7 @@ var wait_stuffs = (name, materials, cb)=>{
 				return;
 			}
 
-			cga.trade(find_player.cga_data.player_name, {
+			cga.positiveTrade(find_player.cga_data.player_name, {
 
 			}, null, (result)=>{
 				if (result.success == true){

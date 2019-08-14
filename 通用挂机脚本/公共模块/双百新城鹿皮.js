@@ -39,17 +39,15 @@ var thisobj = {
 			
 			var repeat = ()=>{
 
-				switch(thisobj.object.state){
-					case 'done' : {
-						socket.emit('done', {
-							count : cga.getItemCount('鹿皮'),
-						});
-						break;
-					}
-					case 'restart' : {
-						cb(true);
-						return;
-					}
+				if(!thisobj.check_done()){
+					thisobj.object.state = 'gathering';
+					socket.emit('gathering');
+					cb(true);
+					return;
+				}
+
+				if(thisobj.object.state == 'done'){
+					socket.emit('done', { count : cga.getItemCount('鹿皮') });
 				}
 				
 				setTimeout(repeat, 1500);
@@ -161,12 +159,10 @@ var thisobj = {
 			}
 
 			cga.waitTrade(stuffs, null, (result)=>{
-				if(result && result.success == true){
+				if(result && result.success == true)
 					cga.EnableFlags(cga.ENABLE_FLAG_TRADE, false);
-					thisobj.object.state = 'restart';
-				} else {
-					thisobj.object.state = 'done';
-				}
+				
+				thisobj.object.state = 'done';
 			});
 		})
 

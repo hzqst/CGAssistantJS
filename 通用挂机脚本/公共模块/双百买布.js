@@ -52,37 +52,35 @@ var thisobj = {
 				
 				console.log(thisobj.object.state);
 				
-				switch(thisobj.object.state){
-					case 'done' : {
-						var count = {};
-						var stuffs = 
-						{
-							itemFilter : (item)=>{
-								if(!isFabricName(item.name))
-									return false;
-								
-								if(typeof count[item.name] == 'undefined')
-									count[item.name] = 0;
-								
-								if(count[item.name] >= thisobj.object.gatherCount[item.name])
-									return false;
-								
-								count[item.name] += item.count;
-								return true;
-							}
+				if(!thisobj.check_done()){
+					thisobj.object.state = 'gathering';
+					socket.emit('gathering');
+					cb(true);
+					return;
+				}
+				
+				if(thisobj.object.state == 'done'){
+					var count = {};
+					var stuffs = 
+					{
+						itemFilter : (item)=>{
+							if(!isFabricName(item.name))
+								return false;
+							
+							if(typeof count[item.name] == 'undefined')
+								count[item.name] = 0;
+							
+							if(count[item.name] >= thisobj.object.gatherCount[item.name])
+								return false;
+							
+							count[item.name] += item.count;
+							return true;
 						}
-						
-						var filteredStuffs = cga.getInventoryItems().filter(stuffs.itemFilter);
-						
-						socket.emit('done', {
-							count : count,
-						});
-						break;
 					}
-					case 'restart' : {
-						cb(true);
-						return;
-					}
+					
+					var filteredStuffs = cga.getInventoryItems().filter(stuffs.itemFilter);
+					
+					socket.emit('done', { count : count });
 				}
 
 				setTimeout(repeat, 1500);
@@ -206,13 +204,10 @@ var thisobj = {
 			}
 
 			cga.waitTrade(stuffs, null, (result)=>{
-				if(result && result.success == true){
+				if(result && result.success == true)
 					cga.EnableFlags(cga.ENABLE_FLAG_TRADE, false);
-					thisobj.object.state = 'restart';
-				} else {
-					thisobj.object.state = 'done';
-					cga.EnableFlags(cga.ENABLE_FLAG_TRADE, false);
-				}
+				
+				thisobj.object.state = 'done';
 			});
 		});
 		
