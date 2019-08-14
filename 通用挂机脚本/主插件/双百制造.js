@@ -9,6 +9,21 @@ var isFabricName = (name)=>{
 	return name == '麻布' || name == '木棉布' || name == '毛毡';
 }
 
+const teachers = [
+{
+	skillname : '制鞋',
+	path : [
+		[7, 3, '村长的家'],
+		[2, 9, '圣拉鲁卡村'],
+		[32, 70, '装备品店'],
+		[14, 4, '1楼小房间'],
+		[9, 3, '地下工房'],
+		[22, 23],
+	],
+	pos : [23, 24],	
+},
+]
+
 const io = require('socket.io')();
 
 io.on('connection', (socket) => { 
@@ -109,6 +124,11 @@ var craftSkillList = cga.GetSkillsInfo().filter((sk)=>{
 var allowMats = ['麻布', '印度轻木', '铜条', '鹿皮', '毛毡', '木棉布'];
 
 var getBestCraftableItem = ()=>{
+	
+	//refresh
+	thisobj.craftSkill = cga.findPlayerSkill(thisobj.craftSkill.name);
+	thisobj.craftItemList = cga.GetCraftsInfo(thisobj.craftSkill.index);
+	
 	var item = null;
 	for(var i = thisobj.craftItemList.length - 1; i >= 0; i--){
 		if(thisobj.craftItemList[i].level > thisobj.craftSkill.level)
@@ -133,8 +153,53 @@ var getBestCraftableItem = ()=>{
 	
 	return item;
 }
+	
+var forgetAndLearn = (teacher, cb)=>{
+	cga.travel.falan.toTeleRoom('圣拉鲁卡村', ()=>{
+		cga.walkList(teacher.path, ()=>{
+			cga.TurnTo(teacher.pos[0], teacher.pos[1]);
+			
+			var dialogHandler = (err, dialog)=>{
+				if(dialog){
+					if (dialog.type == 16) {
+						cga.ClickNPCDialog(-1, 1);
+						cga.AsyncWaitNPCDialog(dialogHandler);
+						return;
+					}
+					if (dialog.type == 18) {
+						const skillIndex = cga.GetSkillsInfo().sort((a,b) => a.pos - b.pos).findIndex(s => s.name == teacher.skillname);
+						if (skillIndex > -1) {
+							cga.ClickNPCDialog(0, skillIndex);
+							cga.AsyncWaitNPCDialog(dialogHandler);
+							return;
+						}
+					}
+					if (dialog.options == 12) {
+						cga.ClickNPCDialog(4, -1);
+						cga.AsyncWaitNPCDialog(dialogHandler);
+						return;
+					}
+					if (dialog.message.indexOf('已经删除') >= 0) {
+						setTimeout(()=>{
+							cga.TurnTo(teacher.pos[0], teacher.pos[1]);
+							cga.AsyncWaitNPCDialog((dlg)=>{
+								cga.ClickNPCDialog(0, 0);
+								cga.AsyncWaitNPCDialog((dlg2)=>{
+									cga.ClickNPCDialog(0, 0);
+									setTimeout(cb, 1000);
+								});
+							});
+						}, 1000);
+						return;
+					}
+				}
+			}
+			cga.AsyncWaitNPCDialog(dialogHandler);
+		});
+	});
+}
 
-var loop = ()=>{
+var loop = (lastCraftTarget)=>{
 
 	callSubPluginsAsync('prepare', ()=>{
 		
@@ -142,6 +207,16 @@ var loop = ()=>{
 		if(!craft_target){
 			throw new Error('没有可制造的双百物品!');
 			return;
+		}
+		
+		if(thisobj.craftSkill.lv >= thisobj.forgetSkillAt){
+			var teacher = teachers.find((t)=>{
+				return t.skillname == thisobj.craftSkill.name;
+			})
+			if(teacher != undefined){
+				forgetAndLearn(teacher, loop);
+				return;
+			}
 		}
 
 		var playerInfo = cga.GetPlayerInfo();
@@ -165,6 +240,8 @@ var loop = ()=>{
 				], ()=>{
 					cga.TurnTo(149, 122);
 					var sellarray = cga.findItemArray(craft_target.name);
+					if(lastCraftTarget != undefined && lastCraftTarget.name != craft_target.name)
+						sellarray = sellarray.concat(cga.findItemArray(craft_target.name));
 					cga.sellArray(sellarray, ()=>{
 						setTimeout(loop, 1000);
 					});
@@ -193,14 +270,22 @@ var loop = ()=>{
 		
 		var craft = ()=>{
 
+			//没蓝
 			var playerInfo = cga.GetPlayerInfo();
 			if(playerInfo.mp < craft_target.cost){
 				loop();
 				return;
 			}
 			
+			//包满
 			if(cga.getInventoryItems().length >= 15){
 				loop();
+				return;
+			}
+			
+			//升级?
+			if(cga.findPlayerSkill(thisobj.craftSkill.name).lv != thisobj.craftSkill.lv){
+				loop(thisobj.craftSkill);
 				return;
 			}
 			
@@ -251,7 +336,14 @@ var thisobj = {
 			pair.translated = true;
 			return true;
 		}
-
+		
+		if(pair.field == 'forgetSkillAt'){
+			pair.field = '几级之后删除技能';
+			pair.value = pair.value;
+			pair.translated = true;
+			return true;
+		}
+		
 		if(healObject.translate(pair))
 			return true;
 		
@@ -273,14 +365,14 @@ var thisobj = {
 			return false;
 		}
 		
-		for(var i in thisobj.craftItemList){
-			if(thisobj.craftItemList[i].name == obj.craftItem){
-				configTable.craftItem = thisobj.craftItemList[i].name;
-				thisobj.craftItem = thisobj.craftItemList[i];
-				break;
-			}
+		configTable.forgetSkillAt = obj.forgetSkillAt;
+		thisobj.forgetSkillAt = obj.forgetSkillAt
+		
+		if(!thisobj.forgetSkillAt){
+			console.error('读取配置：几级之后删除技能失败！');
+			return false;
 		}
-			
+
 		configTable.listenPort = obj.listenPort;
 		thisobj.listenPort = obj.listenPort
 		
@@ -321,7 +413,28 @@ var thisobj = {
 			});
 		}
 		
-		var stage5 = (cb2)=>{
+		var stage2 = (cb2)=>{
+			
+			var sayString = '【双百插件】请选择几级之后删除技能: (2~11)';
+			cga.sayLongWords(sayString, 0, 3, 1);
+			cga.waitForChatInput((msg, val)=>{
+				if(val !== null && 2 >= 2 && 11 <= 11){
+					configTable.forgetSkillAt = val;
+					thisobj.forgetSkillAt = val;
+					
+					var sayString2 = '当前已选择:'+thisobj.forgetSkillAt+'级之后删除技。';
+					cga.sayLongWords(sayString2, 0, 3, 1);
+					
+					cb2(null);
+					
+					return false;
+				}
+				
+				return true;
+			});
+		}
+		
+		var stage3 = (cb2)=>{
 			
 			var sayString = '【双百插件】请选择服务监听端口: 1000~65535';
 			cga.sayLongWords(sayString, 0, 3, 1);
@@ -342,7 +455,7 @@ var thisobj = {
 			});
 		}
 		
-		Async.series([stage1, stage5, healObject.inputcb], cb);
+		Async.series([stage1, stage2, stage3, healObject.inputcb], cb);
 	},
 	execute : ()=>{
 		io.listen(thisobj.listenPort);
