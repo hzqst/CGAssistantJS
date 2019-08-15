@@ -101,7 +101,9 @@ var wait_stuffs = (name, materials, cb)=>{
 							stuffs.gold += find_player.cga_data.count[key] * 29;
 					}
 				}
-					
+				if(find_player.cga_data.gather_name == '鹿皮'){
+					stuffs.gold += find_player.cga_data.count * 1;
+				}
 				cga.positiveTrade(find_player.cga_data.player_name, stuffs, null, (result)=>{
 					if (result.success == true){
 						cb(true);
@@ -148,7 +150,8 @@ var getBestCraftableItem = ()=>{
 	for(var i = thisobj.craftItemList.length - 1; i >= 0; i--){
 		if(thisobj.craftItemList[i].level > thisobj.craftSkill.level)
 			continue;
-		
+		if(!thisobj.craftItemList[i].available)
+			continue;
 		var allow = true;
 		var gather_type = 0;
 
@@ -261,6 +264,7 @@ var loop = ()=>{
 					[151, 122],
 				], ()=>{
 					cga.TurnTo(149, 122);
+						console.log(thisobj.craftItemList);
 					var sellarray = cga.findItemArray((item)=>{
 						if ( thisobj.craftItemList.find((craftItem)=>{
 							return item.name == craftItem.name;
