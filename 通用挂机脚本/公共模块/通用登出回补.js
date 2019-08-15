@@ -34,7 +34,16 @@ var thisobj = {
 
 				case '法兰城':
 					cga.travel.falan.toWestHospital(()=>{
-						setTimeout(cb, 3000);
+						cga.walkList([
+						[9, 31],
+						], ()=>{
+							cga.TurnTo(9, 29);
+							setTimeout(()=>{
+								cga.walkList([
+								[12, 42, '法兰城']
+								], cb);
+							}, 3000);
+						});
 					});
 					break;
 				default: throw new Error('登出回到未知的定居地: '+mapname);

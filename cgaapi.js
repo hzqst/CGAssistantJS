@@ -614,7 +614,7 @@ module.exports = function(callback){
 	cga.travel.falan.toWestHospital = (cb)=>{
 		cga.travel.falan.toStone('W', (r)=>{
 			cga.walkList([
-			[82, 83, '医院']
+			[82, 83, '医院'],
 			], cb);
 		});
 	}
@@ -933,7 +933,13 @@ module.exports = function(callback){
 				cga.walkList([
 					[17, 53, '法兰城'],
 					[100, 61, '米克尔工房'],
-				], cb);
+				], ()=>{
+					if(mineExchange){
+						mineExchange(cb);
+					}else{
+						cb(null);
+					}
+				});
 			});
 		}
 	}
