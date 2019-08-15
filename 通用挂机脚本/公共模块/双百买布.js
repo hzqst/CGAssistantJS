@@ -44,6 +44,10 @@ var thisobj = {
 			}
 
 			cga.craft.buyFabricLv1Multi(buyArray, ()=>{
+				if(!thisobj.check_done()){
+					thisobj.object.func(cb);
+					return;
+				}
 				cb(true);
 			});
 		},
@@ -103,7 +107,7 @@ var thisobj = {
 	check_done : ()=>{
 		if(Object.keys(thisobj.object.gatherCount) == 0)
 			return false;
-
+		
 		for(var key in thisobj.object.gatherCount){
 			if(cga.getItemCount(key) < thisobj.object.gatherCount[key])
 				return false;
