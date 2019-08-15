@@ -26,27 +26,22 @@ var loop = ()=>{
 	}
 
 	var craft = ()=>{
-		cga.SetImmediateDoneWork((thisobj.craftedCount > 0) ? true : false);
+		cga.SetImmediateDoneWork();
 
-		try
-		{
-			if(thisobj.rebirth == 1){
-				if(cga.GetPlayerInfo().punchclock == 0){
-					throw new Error('卡时不足，无法精灵变身');
-				} else {
-					cga.DoRequest(cga.REQUEST_TYPE_REBIRTH_ON);
-				}
+		if(thisobj.rebirth == 1){
+			if(cga.GetPlayerInfo().punchclock == 0){
+				cga.SayWords('卡时不足，无法精灵变身', 0, 3, 1);
+				loop();
+			} else {
+				cga.DoRequest(cga.REQUEST_TYPE_REBIRTH_ON);
 			}
-
-			cga.craftNamedItem(thisobj.craftItem.name, thisobj.addExtraItem );
-		}catch(e){
-			cga.SayWords(e.message, 0, 3, 1);
-			console.log(e);
-			setTimeout(loop, 5000);
-			return;
 		}
 
-		cga.AsyncWaitWorkingResult((err, r)=>{
+		cga.craftItemEx({
+			craftitem : thisobj.craftItem.name,
+			extraitem : thisobj.addExtraItem,
+			immediate : (thisobj.craftedCount > 0) ? true : false,				
+		}, (err, r)=>{
 			//console.log(err);
 			//console.log(r);
 			if(r && r.success){
@@ -56,9 +51,11 @@ var loop = ()=>{
 					cga.SayWords('已达到设定的制造数量！', 0, 3, 1);
 					return;
 				}
+				craft();
+			} else {
+				loop();
 			}
-			craft();
-		}, 60000);
+		});
 	}
 	
 	craft();
