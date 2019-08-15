@@ -483,13 +483,10 @@ module.exports = new Promise(resolve => {
 	cga.emogua.logBack = () => cga.emogua.sayWords('防卡住登出开始').then(
 		() => cga.emogua.waitMessage(chat => {
 			if (chat.msg) {
-				const [sayer,message] = cga.emogua.getNameFromMessage(chat.msg);
-				if (sayer == cga.GetPlayerInfo().name && message == '防卡住登出开始') {
-					cga.LogBack();
-					return cga.emogua.delay(500).then(() => cga.emogua.waitAfterBattle());
-				}
+				cga.LogBack();
+				return cga.emogua.delay(2000).then(() => cga.emogua.waitAfterBattle());
 			}
-			return cga.emogua.delay(2000).then(
+			return cga.emogua.delay(3000).then(
 				() => cga.emogua.logBack()
 			);
 		}, 3000)
@@ -1830,7 +1827,7 @@ module.exports = new Promise(resolve => {
 					if (cga.isInNormalState()) {
 						cga.ForceMove(direction, false);
 					}
-					return cga.emogua.delay(300).then(() => {
+					return cga.emogua.delay(200).then(() => {
 						if (stopEncounter) return Promise.reject();
 						else if (!cga.isInNormalState()) {
 							return cga.emogua.waitAfterBattle().then(() => {
