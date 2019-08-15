@@ -3,7 +3,7 @@ var configTable = global.configTable;
 
 var socket = null;
 
-const MATERIALS_MULTIPLE_TIMES = 3;
+const MATERIALS_MULTIPLE_TIMES = 4;
 
 var thisobj = {
 	func : (cb) =>{

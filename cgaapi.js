@@ -230,8 +230,6 @@ module.exports = function(callback){
 			if(typeof itemArray[i] != 'number')
 				itemArray[i] = -1;
 		}
-		
-		console.log(itemArray)
 				
 		cga.AsyncWaitWorkingResult((err, results)=>{
 			if(results)
@@ -239,7 +237,7 @@ module.exports = function(callback){
 			
 			if(err){
 				console.log(cga.GetCraftStatus());
-				if(cga.GetCraftStatus() != 1)
+				if(cga.GetCraftStatus() == 0)
 					cga.craftNamedItem(craftItemName, extraItemName);				
 			}
 		}, 1000);
@@ -247,8 +245,83 @@ module.exports = function(callback){
 		cga.StartWork(info.skill.index, info.craft.index);
 		cga.CraftItem(info.skill.index, info.craft.index, 0, itemArray);
 	}
-	
 
+	cga.craftItemEx = function(options, cb){
+
+		var info = cga.getItemCraftInfo(options.craftitem);
+		if(info === null)
+			throw new Error('你没有制造 '+options.craftitem+' 的技能');
+
+		var inventory = cga.getInventoryItems();
+			var itemArray = [];
+	
+		var err = null;
+		
+		info.craft.materials.forEach((mat)=>{
+			var findRequired = inventory.find((inv)=>{
+				return (inv.itemid == mat.itemid && inv.count >= mat.count);
+			});
+			if(findRequired != undefined){
+				itemArray.push(findRequired.pos);
+			} else {
+				err = new Error('制造' +options.craftitem+'所需物品' +mat.name+'不足！');
+				return false;
+			}
+		});
+		
+		if(err){
+			cb(err);
+			return;
+		}
+
+		if(typeof options.extraItemName == 'string'){
+			var findRequired = inventory.find((inv)=>{
+				return (inv.name == options.extraitem);
+			});
+			if(findRequired != undefined){
+				itemArray[5] = findRequired.pos;
+			} else {
+				err = new Error('制造' +options.extraitem+'所需宝石' +options.extraitem+'不足！');
+			}
+		}
+		
+		if(err){
+			cb(err);
+			return;
+		}
+		
+		for(var i = 0; i < 6; ++i)
+		{
+			if(typeof itemArray[i] != 'number')
+				itemArray[i] = -1;
+		}
+		
+		cga.SetImmediateDoneWork(options.immediate ? true : false);
+		
+		cga.StartWork(info.skill.index, info.craft.index);
+		cga.CraftItem(info.skill.index, info.craft.index, 0, itemArray);
+		
+		var handler = (err, results)=>{
+			if(results){
+				cb(null, results);
+				return;
+			}
+			
+			var craftStatus = cga.GetCraftStatus();
+			
+			if(err){
+				if(craftStatus == 0){
+					cga.craftItemEx(options, cb);
+					return;
+				}
+				
+				cga.AsyncWaitWorkingResult(handler, 1000);
+			}
+		}
+		
+		cga.AsyncWaitWorkingResult(handler, 1000);
+	}
+	
 	//获取物品栏里的物品，返回数组
 	cga.getInventoryItems = function(){
 		return cga.GetItemsInfo().filter((item)=>{
@@ -582,12 +655,12 @@ module.exports = function(callback){
 		
 		if(cga.GetMapName() == '法兰城'){
 			cga.walkList([
-			[154, 100, '里谢里雅堡']
+			[153, 100, '里谢里雅堡']
 			], cb);
 		} else {
 			cga.travel.falan.toStone('S', (r)=>{
 				cga.walkList([
-				[154, 100, '里谢里雅堡']
+				[153, 100, '里谢里雅堡']
 				], cb);
 			});
 		}

@@ -264,7 +264,6 @@ var loop = ()=>{
 					[151, 122],
 				], ()=>{
 					cga.TurnTo(149, 122);
-						console.log(thisobj.craftItemList);
 					var sellarray = cga.findItemArray((item)=>{
 						if ( thisobj.craftItemList.find((craftItem)=>{
 							return item.name == craftItem.name;
@@ -319,27 +318,24 @@ var loop = ()=>{
 				return;
 			}
 			
-			cga.SetImmediateDoneWork((craft_count > 0) ? true : false);
+			console.log('craft');
 			
-			try
-			{
-				cga.craftNamedItem(craft_target.name);
+			cga.craftItemEx({
+				craftitem : craft_target.name,
+				immediate : (craft_count > 0) ? true : false
+			}, (err, results)=>{
+				//console.log(err);
+				//console.log(results);
 				
-				cga.AsyncWaitWorkingResult((err, result)=>{
-					if(result && result.success){
-						craft_count ++;
-						console.log('已造' + craft_count + '次');
-						setTimeout(craft, 1000);
-					} else {
-						loop();
-					}
-					
-				}, 60000);
-			
-			}catch(e){
-				console.log(e);
-				loop();
-			}
+				if(results && results.success){
+					craft_count ++;
+					console.log('已造' + craft_count + '次');
+					setTimeout(craft, 500);
+				} else {
+					setTimeout(loop, 500);
+				}
+				
+			});
 		}
 		
 		craft();		
