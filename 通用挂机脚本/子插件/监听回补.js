@@ -16,9 +16,17 @@ module.exports = {
 	think : (ctx)=>{
 		if(callsupply)
 		{
-			callsupply = false;
-			ctx.result = 'supply';
-			ctx.reason = '监听回补';
+			if(global.getMainPlugin().getDangerLevel() > 0)
+			{
+				callsupply = false;
+				ctx.result = 'supply';
+				ctx.reason = '监听回补';
+			}
+			else
+			{
+				console.log('不在危险区域，强制取消回补状态')
+				callsupply = false;
+			}
 		}
 	},
 	loadconfig : (obj, cb)=>{

@@ -48,6 +48,10 @@ var walkMazeBack = (cb)=>{
 		cb(true);
 		return;
 	}
+	if(map == '肯吉罗岛'){
+		cb(true);
+		return;
+	}
 	cga.walkRandomMaze(null, (err)=>{
 		walkMazeBack(cb);
 	}, {
@@ -94,6 +98,8 @@ var playerThink = ()=>{
 
 	if(cga.isTeamLeaderEx())
 	{
+		console.log(ctx.reason);
+		
 		if(ctx.result == null && playerThinkInterrupt.hasInterrupt())
 			ctx.result = 'supply';
 
