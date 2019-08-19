@@ -1,5 +1,73 @@
 var supplyModeArray = [
 {
+	name : '法兰西医资深护士回补',
+	func : (cb)=>{
+		var map = cga.GetMapName();
+		
+		var path = [
+			[8, 33],
+			[7, 33],
+			[8, 33],
+			[7, 33],
+			[8, 33],
+		];
+		if(map == '芙蕾雅'){
+			path.unshift([82, 83, '医院']);
+			path.unshift([378, 195, '法兰城']);
+		}
+		else if(map == '法兰城'){
+			path.unshift([82, 83, '医院']);
+		}
+		
+		cga.walkList(path, ()=>{
+			cga.TurnTo(6, 31);
+			setTimeout(cb, 5000);
+		});
+	},
+	isLogBack : ()=>{
+		var map = cga.GetMapName();
+		var mapindex = cga.GetMapIndex().index3;
+		return (map == '芙蕾雅' || map.indexOf('诅咒的迷宫') >= 0) ? false : true;
+	},
+	isInitialSupply : ()=>{
+		return false;
+	},
+},
+{
+	name : '法兰西医普通护士回补',
+	func : (cb)=>{
+		var map = cga.GetMapName();
+		
+		var path = [
+			[9, 31],
+			[8, 31],
+			[9, 31],
+			[8, 31],
+			[9, 31],
+		];
+		if(map == '芙蕾雅'){
+			path.unshift([82, 83, '医院']);
+			path.unshift([378, 195, '法兰城']);
+		}
+		else if(map == '法兰城'){
+			path.unshift([82, 83, '医院']);
+		}
+		
+		cga.walkList(path, ()=>{
+			cga.TurnTo(9, 29);
+			setTimeout(cb, 5000);
+		});
+	},
+	isLogBack : ()=>{
+		var map = cga.GetMapName();
+		var mapindex = cga.GetMapIndex().index3;
+		return (map == '芙蕾雅' || map.indexOf('诅咒的迷宫') >= 0) ? false : true;
+	},
+	isInitialSupply : ()=>{
+		return false;
+	},
+},
+{
 	name : '登出飞碟回补',
 	func : (cb)=>{
 		cga.travel.falan.toCastleHospital(()=>{
@@ -54,7 +122,7 @@ var thisobj = {
 		return true;
 	},
 	inputcb : (cb)=>{
-		var sayString = '【盆地插件】请选择回补方式:';
+		var sayString = '【诅咒插件】请选择回补方式:';
 		for(var i in supplyModeArray){
 			if(i != 0)
 				sayString += ', ';

@@ -293,7 +293,7 @@ var thisobj = {
 		configTable.sellStore = obj.sellStore;
 		thisobj.sellStore = obj.sellStore
 		
-		if(!thisobj.sellStore){
+		if(thisobj.sellStore == undefined){
 			console.error('读取配置：是否卖石失败！');
 			return false;
 		}

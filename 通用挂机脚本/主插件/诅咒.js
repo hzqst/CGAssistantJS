@@ -1,6 +1,5 @@
 var Async = require('async');
-var supplyMode = require('./../公共模块/营地回补');
-var sellStore = require('./../公共模块/营地卖石');
+var supplyMode = require('./../公共模块/诅咒回补');
 var sellStore2 = require('./../公共模块/里堡卖石');
 var teamMode = require('./../公共模块/组队模式');
 var logbackEx = require('./../公共模块/登出防卡住');
@@ -17,16 +16,16 @@ var playerThinkRunning = false;
 
 var walkMazeForward = (cb)=>{
 	var map = cga.GetMapName();
-	if(map == '黑龙沼泽'+(thisobj.layerLevel)+'区'){
+	if(map == '诅咒之迷宫地下'+(thisobj.layerLevel)+'楼'){
 		cb(true);
 		return;
 	}
-	if(map == '肯吉罗岛'){
+	if(map == '芙蕾雅'){
 		cb(false);
 		return;
 	}
 	cga.walkRandomMaze(null, (err)=>{
-		if(err && err.message == '无法找到迷宫的出口' && cga.GetMapName().indexOf('黑龙沼泽') >= 0)
+		if(err && err.message == '无法找到迷宫的出口' && cga.GetMapName().indexOf('诅咒之迷宫地下') >= 0)
 		{
 			cb(true);
 			return;
@@ -34,17 +33,17 @@ var walkMazeForward = (cb)=>{
 		walkMazeForward(cb);
 	}, {
 		layerNameFilter : (layerIndex)=>{
-			return '黑龙沼泽'+(layerIndex + 1)+'区';
+			return '诅咒之迷宫地下'+(layerIndex + 1)+'楼';
 		},
 		entryTileFilter : (e)=>{
-			return e.colraw == 0x2EE2;
+			return e.colraw == 0x36AD;
 		}
 	});
 }
 
 var walkMazeBack = (cb)=>{
 	var map = cga.GetMapName();
-	if(map == '肯吉罗岛'){
+	if(map == '芙蕾雅'){
 		cb(true);
 		return;
 	}
@@ -52,10 +51,10 @@ var walkMazeBack = (cb)=>{
 		walkMazeBack(cb);
 	}, {
 		layerNameFilter : (layerIndex)=>{
-			return layerIndex > 1 ? ('黑龙沼泽'+(layerIndex - 1)+'区') : '肯吉罗岛';
+			return layerIndex > 1 ? ('诅咒之迷宫地下'+(layerIndex - 1)+'楼') : '芙蕾雅';
 		},
 		entryTileFilter : (e)=>{
-			return (cga.GetMapName() == '黑龙沼泽1区') ? (e.colraw == 0) : (e.colraw == 0x2EE0);
+			return (cga.GetMapName() == '诅咒之迷宫地下') ? (e.colraw == 0) : (e.colraw == 0x36AC);
 		}
 	});
 }
@@ -138,43 +137,78 @@ var playerThinkTimer = ()=>{
 	setTimeout(playerThinkTimer, 1500);
 }
 
-var loop = ()=>{
+var getMazeEntrance = (cb)=>{
+	console.log('正在下载地图')
+	cga.downloadMapEx(260, 260+24, 133, 133+24*2, ()=>{
+		console.log('地图已下载完成')
 		
+		var objs = cga.getMapObjects();
+		var entrance = objs.find((obj)=>{
+			return (obj.cell == 3 && obj.mapx >= 260 && obj.mapx <= 273 && obj.mapy >= 133 && obj.mapy <= 164)
+		})
+		
+		if(entrance == undefined){
+			console.log('迷宫入口未找到,等待15秒后重试')
+			setTimeout(getMazeEntrance, 15000, cb);
+			return;
+		}
+		
+		cb(entrance);
+	});
+}
+
+var loop = ()=>{
+
 	var map = cga.GetMapName();
 	var mapindex = cga.GetMapIndex().index3;
-		
+	
 	if(cga.isTeamLeaderEx()){
-		if(map == '医院' && mapindex == 44692){
-			if(thisobj.sellStore == 1){
-				sellStore.func(loop);
-			} else {
+
+		if(map == '艾尔莎岛' && teamMode.is_enough_teammates())
+		{
+			console.log('playerThink on');
+			playerThinkRunning = true;
+			
+			cga.travel.falan.toStone('W', ()=>{
 				cga.walkList([
-					[0, 20, '圣骑士营地'],
-				], loop);
-			}
-			return;
-		} 
-		if(map == '工房'){
-			cga.walkList([
-			[30, 37, '圣骑士营地']
-			], loop);
-			return;
-		}
-		if(map == '肯吉罗岛'){
-			supplyMode.func(loop);
+				[22, 88, '芙蕾雅'],
+				], ()=>{
+					getMazeEntrance((obj)=>{
+						cga.walkList([
+							[obj.mapx, obj.mapy, '诅咒之迷宫地下1楼']
+						], loop);
+					})
+				});
+			})
 			return;
 		}
-		if(map == '圣骑士营地' && teamMode.is_enough_teammates()){
+		if(map == '法兰城' && teamMode.is_enough_teammates())
+		{
 			console.log('playerThink on');
 			playerThinkRunning = true;
 			
 			cga.walkList([
-				[36, 87, '肯吉罗岛'],
-				[424, 345, '黑龙沼泽1区'],
+				[22, 88, '芙蕾雅'],
+			], ()=>{
+				getMazeEntrance((obj)=>{
+					cga.walkList([
+						[obj.mapx, obj.mapy, '诅咒之迷宫地下1楼']
+					], loop);
+				})
+			});
+			return;
+		}
+		if(map == '医院' && mapindex == 1111){
+			cga.walkList([
+				[12, 42, '法兰城'],
 			], loop);
 			return;
 		}
-		if(map == '黑龙沼泽1区')
+		if(map == '芙蕾雅'){
+			supplyMode.func(loop);
+			return;
+		}
+		if(map == '诅咒之迷宫地下1楼')
 		{
 			walkMazeForward((r)=>{
 				if(r != true){
@@ -193,22 +227,22 @@ var loop = ()=>{
 		return;
 	}
 	
-	if(thisobj.sellStore == 1 && cga.getSellStoneItem().length > 0 && map != '圣骑士营地')
+	if(thisobj.sellStore == 1 && cga.getSellStoneItem().length > 0 && (map == '里谢里雅堡' || map == '艾尔莎岛'))
 	{
 		sellStore2.func(loop);
 		return;
 	}
 	
-	if(cga.needSupplyInitial() && supplyMode.isInitialSupply() && map != '圣骑士营地')
+	if(cga.needSupplyInitial() && supplyMode.isInitialSupply())
 	{
 		supplyMode.func(loop);
 		return;
 	}
-
+	
 	callSubPluginsAsync('prepare', ()=>{
-		cga.travel.falan.toCamp(()=>{
+		cga.travel.newisland.toStone('X', ()=>{
 			cga.walkList([
-			cga.isTeamLeader ? [96, 86] : [97, 86],
+			cga.isTeamLeader ? [144, 106] : [143, 106],
 			], ()=>{
 				teamMode.wait_for_teammates(loop);
 			});
@@ -220,10 +254,10 @@ var thisobj = {
 	getDangerLevel : ()=>{
 		var map = cga.GetMapName();
 		
-		if(map == '肯吉罗岛' )
+		if(map == '芙蕾雅')
 			return 1;
-		
-		if(map.indexOf('黑龙沼泽') >= 0)
+				
+		if(map.indexOf('诅咒之迷宫') >= 0)
 			return 2;
 		
 		return 0;
@@ -238,7 +272,7 @@ var thisobj = {
 		}
 		
 		if(pair.field == 'layerLevel'){
-			pair.field = '黑龙练级层数';
+			pair.field = '诅咒练级层数';
 			pair.value = pair.value + '层';
 			pair.translated = true;
 			return true;
@@ -272,7 +306,7 @@ var thisobj = {
 		thisobj.layerLevel = obj.layerLevel
 		
 		if(!thisobj.layerLevel){
-			console.error('读取配置：黑龙练级层数失败！');
+			console.error('读取配置：诅咒练级层数失败！');
 			return false;
 		}
 		
@@ -280,7 +314,7 @@ var thisobj = {
 	},
 	inputcb : (cb)=>{
 		Async.series([supplyMode.inputcb, teamMode.inputcb, (cb2)=>{
-			var sayString = '【黑龙插件】请选择是否卖石: 0不卖石 1卖石';
+			var sayString = '【诅咒插件】请选择是否卖石: 0不卖石 1卖石';
 			cga.sayLongWords(sayString, 0, 3, 1);
 			cga.waitForChatInput((msg, val)=>{
 				if(val !== null && val >= 0 && val <= 1){
@@ -298,14 +332,14 @@ var thisobj = {
 				return true;
 			});
 		}, (cb2)=>{
-			var sayString = '【黑龙插件】请选择黑龙练级层数(1~100), 100代表龙顶:';
+			var sayString = '【诅咒插件】请选择诅咒练级层数(1~100):';
 			cga.sayLongWords(sayString, 0, 3, 1);
 			cga.waitForChatInput((msg, val)=>{
 				if(val !== null && val >= 1 && val <= 100){
 					configTable.layerLevel = val;
 					thisobj.layerLevel = val;
 					
-					var sayString2 = '当前已选择:黑龙'+thisobj.layerLevel+'层练级。';
+					var sayString2 = '当前已选择:诅咒'+thisobj.layerLevel+'层练级。';
 					cga.sayLongWords(sayString2, 0, 3, 1);
 					
 					cb2(null);
