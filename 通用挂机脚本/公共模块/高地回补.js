@@ -60,7 +60,7 @@ var supplyModeArray = [
 			path.unshift([112, 81, '医院']);
 		}
 		cga.walkList(path, ()=>{
-			cga.TurnTo(37, 43);
+			cga.TurnTo(37, 46);
 			setTimeout(cb, 5000);
 		});
 	},

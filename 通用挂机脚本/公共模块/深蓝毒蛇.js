@@ -3,7 +3,7 @@ var configTable = global.configTable;
 
 var socket = null;
 
-const MATERIALS_MULTIPLE_TIMES = 4;
+const MATERIALS_MULTIPLE_TIMES = 3;
 
 var thisobj = {
 	func : (cb) =>{
@@ -13,7 +13,7 @@ var thisobj = {
 		thisobj.object.doneManager(cb);
 	},
 	object : {
-		name :'鹿皮',
+		name :'湿地毒蛇',
 		func : (cb) =>{
 			
 			if(thisobj.object.gatherCount === null){
@@ -26,11 +26,35 @@ var thisobj = {
 				return
 			}
 			
-			cga.travel.newisland.toStone('X', ()=>{
+			cga.travel.falan.toTeleRoom('魔法大学', ()=>{
 				cga.walkList([
-				[130, 50, '盖雷布伦森林'],
-				[175, 182],
-				], cb);
+				[36, 31],
+				], ()=>{
+					cga.TurnTo(36, 29);
+					cga.AsyncWaitNPCDialog(()=>{
+						cga.ClickNPCDialog(4, 0);
+						cga.AsyncWaitNPCDialog(()=>{
+							cga.ClickNPCDialog(4, 0);
+							cga.AsyncWaitMovement({map:'地底湖 地下1楼'}, ()=>{
+								cga.walkList([
+								[6, 23, '地底湖 地下2楼'],
+								[38, 54],
+								], ()=>{
+									cga.TurnTo(38, 52);
+									cga.AsyncWaitNPCDialog(()=>{
+										cga.ClickNPCDialog(4, 0);
+										cga.AsyncWaitMovement({x : 38, y : 52}, ()=>{
+											cga.walkList([
+											[38, 51, null, null, null, true],
+											[37, 49],
+											], cb);
+										});
+									});
+								});
+							});
+						});
+					})
+				});
 			});
 		},
 		gatherCount : null,
@@ -47,39 +71,44 @@ var thisobj = {
 				}
 
 				if(thisobj.object.state == 'done'){
-					socket.emit('done', { count : cga.getItemCount('鹿皮') });
+					socket.emit('done', { count : cga.getItemCount('湿地毒蛇') });
 				}
 				
 				setTimeout(repeat, 1500);
 			}
 			
-			cga.travel.falan.toStone('C', ()=>{
+			if(cga.GetMapName() == '魔法大学内部')
+			{
 				cga.walkList([
-				[33, 88]
+				[34, 45],
 				], ()=>{
-					cga.TurnTo(35, 88);
+					cga.TurnTo(36, 45);
 					setTimeout(repeat, 1000);
 				});
-			});
+			}
+			else
+			{
+				cga.travel.falan.toTeleRoom('魔法大学', ()=>{
+					cga.walkList([
+					[74, 93, '魔法大学内部'],
+					[34, 45],
+					], ()=>{
+						cga.TurnTo(36, 45);
+						setTimeout(repeat, 1000);
+					});
+				});
+			}
 		},
 		state : 'gathering',
-		gather_total_times : 0,
+		extra_dropping : (item)=>{
+			return (item.name == '腐烂的树枝');
+		},
 	},
-	check_done : (result)=>{
+	check_done : ()=>{
 		if(thisobj.object.gatherCount === null)
 			return false;
 		
-		if(result !== undefined){
-			console.log(thisobj.object.gather_total_times);
-			if(thisobj.object.gather_total_times < 25){
-				thisobj.object.gather_total_times ++;
-			} else {
-				cga.LogOut();
-				return false;
-			}
-		}
-		
-		return cga.getItemCount('鹿皮') >= thisobj.object.gatherCount;
+		return cga.getItemCount('湿地毒蛇') >= thisobj.object.gatherCount;
 	},
 	translate : (pair)=>{
 		
@@ -139,7 +168,7 @@ var thisobj = {
 			thisobj.craft_player = data.craft_player;
 			thisobj.craft_materials = data.craft_materials;
 			data.craft_materials.forEach((m)=>{
-				if( m.name == '鹿皮' )
+				if( m.name == '湿地毒蛇' )
 					thisobj.object.gatherCount = m.count * MATERIALS_MULTIPLE_TIMES;
 			});
 		});
@@ -155,7 +184,7 @@ var thisobj = {
 					if(count >= thisobj.object.gatherCount)
 						return false;
 					
-					if (item.name == '鹿皮' && item.count >= 20){
+					if (item.name == '湿地毒蛇' && item.count >= 20){
 						count += item.count;
 						return true;
 					}

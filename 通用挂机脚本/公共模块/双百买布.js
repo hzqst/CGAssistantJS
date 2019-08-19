@@ -165,7 +165,7 @@ var thisobj = {
 			socket.emit('register', {
 				state : thisobj.object.state,
 				player_name : cga.GetPlayerInfo().name,
-				gather_name : thisobj.object.name,
+				job_name : thisobj.object.name,
 			});
 		});
 		
@@ -188,8 +188,6 @@ var thisobj = {
 		socket.on('trade', (required_stuffs)=>{
 
 			thisobj.object.state = 'trading';
-			
-			cga.EnableFlags(cga.ENABLE_FLAG_TRADE, true);
 			
 			var count = {};
 			var stuffs = 

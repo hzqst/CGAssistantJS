@@ -70,9 +70,6 @@ var thisobj = {
 
 		return (cga.getItemCount('印度轻木') / 20) >= thisobj.object.gatherCount;
 	},
-	extra_dropping : (item)=>{
-		return (item.name == '碎石头' && item.count >= 40);
-	},
 	translate : (pair)=>{
 		
 		if(pair.field == 'serverPort'){
@@ -123,7 +120,7 @@ var thisobj = {
 			socket.emit('register', {
 				state : thisobj.object.state,
 				player_name : cga.GetPlayerInfo().name,
-				gather_name : thisobj.object.name,
+				job_name : thisobj.object.name,
 			});
 		});
 		
@@ -139,9 +136,7 @@ var thisobj = {
 		socket.on('trade', ()=>{
 
 			thisobj.object.state = 'trading';
-			
-			cga.EnableFlags(cga.ENABLE_FLAG_TRADE, true);
-			
+
 			var count = 0;
 			var stuffs = 
 			{

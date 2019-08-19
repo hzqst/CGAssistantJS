@@ -143,13 +143,30 @@ module.exports = function(callback){
 	}
 
 	//获取制造物品名为itemname的物品所需要的材料信息，返回材料信息object或null
-	cga.getItemCraftInfo = function(itemname){
+	cga.getItemCraftInfo = function(filter){
 		var result = null;
 		cga.GetSkillsInfo().forEach((sk)=>{
 			if(sk.type == 1)
 			{
 				var craftInfo = cga.GetCraftsInfo(sk.index).find((craft)=>{
-					return craft.name == itemname;
+
+					if(typeof filter == 'string')
+					{
+						if(filter.charAt(0) == '#')
+							return craft.itemid == parseInt(filter.substring(1));
+						else
+							return craft.name == filter;
+					}
+					else if(typeof filter == 'number')
+					{
+						return craft.itemid == filter;
+					}
+					else if(typeof filter == 'function')
+					{
+						return filter(craft);
+					}
+					
+					return false;
 				});
 				if(craftInfo != undefined){
 					result = {craft : craftInfo, skill : sk};
@@ -160,90 +177,48 @@ module.exports = function(callback){
 		return result;
 	}
 
-	//鉴定物品，参数：物品位置
-	//返回：true / false
-	cga.assessItem = function(itempos){
-		var skill = cga.findPlayerSkill('鉴定');
-		if(skill){
-			if(cga.StartWork(skill.index, 0))
-				return cga.AssessItem(skill.index, itempos);
+	cga.manipulateItemEx = function(options, cb){
+		var skill = cga.findPlayerSkill(options.skill);
+		if(!skill){
+			cb(new Error('你没有'+skillname+'的技能'));
+			return;
 		}
-		return false;
-	}
-	
-	//修理武器，参数：物品位置
-	//返回：true / false
-	cga.repairWeapon = function(itempos){
-		var skill = cga.findPlayerSkill('修理武器');
-		if(skill){
-			if(cga.StartWork(skill.index, 0))
-				return cga.AssessItem(skill.index, itempos);
+		
+		cga.SetImmediateDoneWork(options.immediate ? true : false);
+		
+		cga.StartWork(skill.index, 0);
+
+		if(!cga.AssessItem(skill.index, options.itempos)){
+			cb(new Error('无法操作该物品'));
+			return;
 		}
-		return false;
-	}
-	
-	//修理防具，参数：物品位置
-	//返回：true / false
-	cga.repairArmor = function(itempos){
-		var skill = cga.findPlayerSkill('修理防具');
-		if(skill){
-			if(cga.StartWork(skill.index, 0))
-				return cga.AssessItem(skill.index, itempos);
+		
+		var handler = (err, results)=>{
+			if(results){
+				cb(null, results);
+				return;
+			}
+			
+			var craftStatus = cga.GetCraftStatus();
+			
+			if(err){
+				if(craftStatus == 0 || craftStatus == 2){
+					cga.manipulateItemEx(options, cb);
+					return;
+				}
+				
+				cga.AsyncWaitWorkingResult(handler, 1000);
+			}
 		}
-		return false;
+		
+		cga.AsyncWaitWorkingResult(handler, 1000);
+		return;
 	}
 	
 	//制造物品，参数：物品名，添加的宝石的名字(或物品位置)
 	cga.craftNamedItem = function(craftItemName, extraItemName){
 
-		var info = cga.getItemCraftInfo(craftItemName);
-		if(info === null)
-			throw new Error('你没有制造 '+craftItemName+' 的技能');
-
-		var inventory = cga.getInventoryItems();
-		var itemArray = [];
-		
-		info.craft.materials.forEach((mat)=>{
-			var find_required = inventory.find((inv)=>{
-				return (inv.itemid == mat.itemid && inv.count >= mat.count);
-			});
-			if(find_required != undefined){
-				itemArray.push(find_required.pos);
-			} else {
-				throw new Error('制造' +craftItemName+'所需物品' +mat.name+'不足！');
-			}
-		});
-
-		if(typeof extraItemName == 'string'){
-			var find_required = inventory.find((inv)=>{
-				return (inv.name == extraItemName);
-			});
-			if(find_required != undefined){
-				itemArray[5] = find_required.pos;
-			} else {
-				throw new Error('制造' +extraItemName+'所需宝石' +extraItemName+'不足！');
-			}
-		}
-		
-		for(var i = 0; i < 6; ++i)
-		{
-			if(typeof itemArray[i] != 'number')
-				itemArray[i] = -1;
-		}
-				
-		cga.AsyncWaitWorkingResult((err, results)=>{
-			if(results)
-				return;
-			
-			if(err){
-				console.log(cga.GetCraftStatus());
-				if(cga.GetCraftStatus() == 0)
-					cga.craftNamedItem(craftItemName, extraItemName);				
-			}
-		}, 1000);
-		
-		cga.StartWork(info.skill.index, info.craft.index);
-		cga.CraftItem(info.skill.index, info.craft.index, 0, itemArray);
+		throw new Error('this api is deprecated.')
 	}
 
 	cga.craftItemEx = function(options, cb){
@@ -274,7 +249,7 @@ module.exports = function(callback){
 			return;
 		}
 
-		if(typeof options.extraItemName == 'string'){
+		if(typeof options.extraitem == 'string'){
 			var findRequired = inventory.find((inv)=>{
 				return (inv.name == options.extraitem);
 			});
@@ -310,7 +285,7 @@ module.exports = function(callback){
 			var craftStatus = cga.GetCraftStatus();
 			
 			if(err){
-				if(craftStatus == 0){
+				if(craftStatus == 0 || craftStatus == 2){
 					cga.craftItemEx(options, cb);
 					return;
 				}
@@ -646,7 +621,7 @@ module.exports = function(callback){
 	
 	//从法兰城到里谢里雅堡，启动地点：登出到法兰城即可
 	//参数1：回调函数function(result), result 为true或false
-	cga.travel.falan.toCastle = function(cb){
+	cga.travel.falan.toCastle = (cb)=>{
 		
 		if(cga.GetMapName() == '里谢里雅堡'){
 			cb(true);
@@ -654,14 +629,45 @@ module.exports = function(callback){
 		}
 		
 		if(cga.GetMapName() == '法兰城'){
-			cga.walkList([
-			[153, 100, '里谢里雅堡']
-			], cb);
+			var curXY = cga.GetMapXY();
+			
+			var westPath = cga.calculatePath(curXY.x, curXY.y, 141, 88, '里谢里雅堡', null, null, []);
+			westPath = PF.Util.expandPath(westPath);
+			
+			var southPath = cga.calculatePath(curXY.x, curXY.y, 153, 100, '里谢里雅堡', null, null, []);
+			southPath = PF.Util.expandPath(southPath);
+			
+			var eastPath = cga.calculatePath(curXY.x, curXY.y, 165, 88, '里谢里雅堡', null, null, []);
+			eastPath = PF.Util.expandPath(eastPath);
+
+			var northPath = cga.calculatePath(curXY.x, curXY.y, 153, 70, '里谢里雅堡', null, null, []);
+			northPath = PF.Util.expandPath(northPath);
+
+			var path = westPath;
+			var target = [141, 88, '里谢里雅堡'];
+			
+			if(path.length > southPath.length)
+			{
+				path = southPath;
+				target = [153, 100, '里谢里雅堡'];
+			}
+			
+			if(path.length > eastPath.length)
+			{
+				path = eastPath;
+				target = [165, 88, '里谢里雅堡'];
+			}
+			
+			if(path.length > northPath.length)
+			{
+				path = northPath;
+				target = [153, 70, '里谢里雅堡'];
+			}
+			
+			cga.walkList([target], cb);
 		} else {
-			cga.travel.falan.toStone('S', (r)=>{
-				cga.walkList([
-				[153, 100, '里谢里雅堡']
-				], cb);
+			cga.travel.falan.toStone('S', ()=>{
+				cga.travel.falan.toCastle(cb);
 			});
 		}
 	}
@@ -796,7 +802,7 @@ module.exports = function(callback){
 		} else {
 			cga.travel.falan.toStone('C', ()=>{
 				cga.walkList([
-					[41, 98, '法兰城'],
+					[17, 53, '法兰城'],
 					[117, 112, '流行商店'],
 				], cb);
 			});
@@ -1315,6 +1321,7 @@ module.exports = function(callback){
 	}
 	
 	cga.travel.falan.toTeleRoom = (villageName, cb)=>{
+		var mapname = cga.GetMapName();
 		switch(villageName){
 			case '亚留特村':
 				cga.travel.falan.toTeleRoomTemplate('亚留特村', [43, 23], [43, 22], [44, 22], cb);
@@ -1345,6 +1352,27 @@ module.exports = function(callback){
 				break;
 			case '蒂娜村':
 				cga.travel.falan.toTeleRoomTemplate('蒂娜村', [25, 4], [25, 5], [26, 4], cb);
+				break;
+			case '魔法大学':
+				if(mapname == '魔法大学'){
+					cb(null);
+					return;
+				}
+				else if(mapname == '魔法大学内部'){
+					cga.walkList([
+					[40, 59, '魔法大学'],
+					], cb);
+					return;
+				}
+				cga.travel.falan.toTeleRoom('阿巴尼斯村', ()=>{
+					cga.walkList([
+					[5, 4, 4313],
+					[6, 13, 4312],
+					[6, 13, '阿巴尼斯村'],
+					[37, 71, '莎莲娜'],
+					[118, 100, '魔法大学'],
+					], cb);
+				});
 				break;
 			default:
 				throw new Error('未知的村子名称');
@@ -1782,13 +1810,14 @@ module.exports = function(callback){
 		return {x: parseInt(f.x/64.0), y:parseInt(f.y/64.0)};
 	}
 	
-	cga.walkList = function(list, cb){
+	cga.walkList = (list, cb)=>{
 		
 		//console.log('初始化寻路列表');
 		//console.log(list);
 		
 		if(cga.isMoveThinking){
 			console.log('警告:已有walkList在运行中');
+			console.trace();
 		}
 
 		cga.isMoveThinking = true;
@@ -2383,13 +2412,8 @@ module.exports = function(callback){
 	}
 	
 	cga.craft.buyFabricLv4Multi = (arr, cb)=>{
-		cga.travel.falan.toTeleRoom('阿巴尼斯村', ()=>{
+		cga.travel.falan.toTeleRoom('魔法大学', ()=>{
 			cga.walkList([
-			[5, 4, 4313],
-			[6, 13, 4312],
-			[6, 13, '阿巴尼斯村'],
-			[37, 71, '莎莲娜'],
-			[118, 100, '魔法大学'],
 			[74, 93, '魔法大学内部'],
 			[29, 43, '更衣室'],
 			[11, 8],
@@ -2437,69 +2461,62 @@ module.exports = function(callback){
 	}
 	
 	//搜索第一个可鉴定的物品
-	cga.findAssessableItem = function(){
-		var frompos = arguments[0] ? arguments[0] : 8;
+	cga.findAssessableItem = ()=>{
 		var skill = cga.findPlayerSkill('鉴定');
 		var mp = cga.GetPlayerInfo().mp;
-		var items = cga.getInventoryItems();
-		for(var i in items){
-			if(items[i].pos >= frompos && 
-				false == items[i].assessed && 
-				skill.lv >= items[i].level &&
-				mp >= items[i].level * 10){
-					
-				return items[i];
-			}
-		}
-		return null;
+		var found = cga.getInventoryItems().find((item)=>{
+			return !item.assessed && skill.lv >= item.level && mp >= item.level * 10;
+		});
+		return found == undefined ? null : found;
 	}
 	
 	//鉴定背包中所有的物品
-	cga.assessAllItems = function(cb){
-		if(!cga.findPlayerSkill('鉴定')){
-			cb(false, '你没有鉴定技能');
-			return;
-		}
-		var frompos = arguments[1] ? arguments[1] : 8;
-		var item = cga.findAssessableItem(frompos);
+	
+	cga.isAssessedEver = false;
+	
+	cga.assessAllItems = (cb)=>{
+		var item = cga.findAssessableItem();
+		var times = 0;
 		if(item)
 		{
-			//console.log(item);
-			if(!cga.assessItem(item.pos)){
-				assessAllItems(cb, item.pos + 1);
-			}
-			else
-			{
-				cga.AsyncWaitWorkingResult((err, result)=>{
-					setTimeout(()=>{
-						cga.assessAllItems(cb);
-					}, 100);
-				}, 30000);
-			}
+			cga.manipulateItemEx({
+				skill : '鉴定',
+				itempos : item.pos,
+				immediate : cga.isAssessedEver ? true : false,
+			}, (err, results)=>{
+				if(results && results.success == true)
+					cga.isAssessedEver = true;
+				
+				setTimeout(cga.assessAllItems, 500, cb);
+			})
 		} else {
-			cb(true, '鉴定结束，所有物品都已鉴定完成或蓝量不足。');
+			cb(null);
 			return;
 		}
 	}
 	
-	cga.findItem = (itemname) =>{
+	cga.findItem = (filter) =>{
 		
 		var items = cga.getInventoryItems();
 		
-		if(itemname.charAt(0) == '#'){
-			for(var i in items){
-				if(items[i].itemid == itemname.substring(1)){
-					return items[i].pos;
-				}
-			}			
-			return -1;
+		if(typeof filter == 'string' && filter.charAt(0) == '#'){
+			var found = items.find((item)=>{
+				return item.itemid == parseInt(filter.substring(1));
+			})
+			
+			return found != undefined ? found.pos : -1;
 		}
-		for(var i in items){
-			if(items[i].name == itemname){
-				return items[i].pos;
-			}
-		}
-		return -1;
+		
+		var found = items.find((item)=>{
+			if(typeof filter == 'string')
+				return item.name == filter;
+			else if (typeof filter == 'number')
+				return item.itemid == filter;
+			else if (typeof filter == 'function')
+				return filter(item);
+		})
+			
+		return found != undefined ? found.pos : -1;
 	}
 	
 	cga.findItemArray = (filter) =>{
@@ -2608,7 +2625,7 @@ module.exports = function(callback){
 		return false;
 	}
 	
-	cga.findBankEmptySlot = (itemname, maxcount) =>{
+	cga.findBankEmptySlot = (filter, maxcount) =>{
 		
 		var banks = cga.GetBankItemsInfo();
 
@@ -2620,8 +2637,16 @@ module.exports = function(callback){
 		
 		for(var i = 0; i < 80; ++i){
 			if(typeof arr[i] != 'undefined'){
-				if(typeof itemname == 'string' && maxcount > 0){
-					if(arr[i].name == itemname && arr[i].count < maxcount)
+				if(typeof filter == 'string' && maxcount > 0){
+					if(arr[i].name == filter && arr[i].count < maxcount)
+						return 100+i;
+				}
+				else if(typeof filter == 'number' && maxcount > 0){
+					if(arr[i].itemid == filter && arr[i].count < maxcount)
+						return 100+i;
+				}
+				else if(typeof filter == 'function' && maxcount > 0){
+					if(filter(arr[i]) && arr[i].count < maxcount)
 						return 100+i;
 				}
 			} else {
@@ -2656,14 +2681,14 @@ module.exports = function(callback){
 		return -1;
 	}
 
-	cga.saveToBankOnce = (itemname, maxcount, cb)=>{
-		var itempos = cga.findItem(itemname);
+	cga.saveToBankOnce = (filter, maxcount, cb)=>{
+		var itempos = cga.findItem(filter);
 		if(itempos == -1){
 			cb(new Error('包里没有该物品, 无法存放到银行'));
 			return;
 		}
 		
-		var emptyslot = cga.findBankEmptySlot(itemname, maxcount);
+		var emptyslot = cga.findBankEmptySlot(filter, maxcount);
 		if(emptyslot == -1){
 			cb(new Error('银行没有空位, 无法存放到银行'));
 			return;
@@ -2682,21 +2707,22 @@ module.exports = function(callback){
 			}
 		}
 		
-		setTimeout(saveToBank, 500);
+		setTimeout(saveToBank, 800);
 	}
 	
-	cga.saveToBankAll = (itemname, maxcount, cb)=>{
+	cga.saveToBankAll = (filter, maxcount, cb)=>{
 		var repeat = ()=>{
-			cga.saveToBankOnce(itemname, maxcount, (err)=>{
+			cga.saveToBankOnce(filter, maxcount, (err)=>{
 				if(err){
+					console.log(err);
 					cb(err);
 					return;
 				}
-				if(cga.findItem(itemname) == -1){
+				if(cga.findItem(filter) == -1){
 					cb(null);
 					return;
 				}				
-				repeat();
+				setTimeout(repeat, 800);
 			});
 		}
 		
@@ -2980,7 +3006,6 @@ module.exports = function(callback){
 	
 	cga.waitSysMsg = (cb)=>{
 		cga.AsyncWaitChatMsg((err, r)=>{
-
 			if(!r || r.unitid != -1){
 				cga.waitSysMsg(cb);
 				return;
@@ -3493,20 +3518,30 @@ module.exports = function(callback){
 		
 		return null;
 	}
-		
-	cga.tradeInternal = (stuff, checkParty, resolve, playerName) => {
+	
+	cga.tradeInternal = (stuff, checkParty, resolve, playerName, timeout) => {
 		
 		var savePartyName = null;
 		var tradeFinished = false;
 		var receivedStuffs = {};
+		var beginTime = (new Date()).getTime();
 		
 		var waitTradeMsg = ()=>{
 			
 			cga.waitSysMsg((msg)=>{
-				
+								
 				if(tradeFinished)
 					return false;
 				
+				console.log('waitSysMsg='+msg);
+				
+				var timeout_trade = (typeof timeout == 'number') ? timeout : 30000;
+				if( (new Date()).getTime() > beginTime + timeout_trade){
+					tradeFinished = true;
+					cga.DoRequest(cga.REQUEST_TYPE_TRADE_REFUSE);
+					return false;
+				}
+								
 				if(msg.indexOf('交易完成') >= 0){
 					tradeFinished = true;
 					resolve({
@@ -3514,7 +3549,9 @@ module.exports = function(callback){
 						received: receivedStuffs
 					});
 					return false;
-				} else if(msg.indexOf('交易中止') >= 0){
+				} else if(msg.indexOf('交易中止') >= 0 || msg.indexOf('因物品栏已满所以无法交易') >= 0){
+
+					cga.DoRequest(cga.REQUEST_TYPE_TRADE_REFUSE);
 					tradeFinished = true;
 					resolve({
 						success: false,
@@ -3523,6 +3560,7 @@ module.exports = function(callback){
 					});
 					return false;
 				} else if(msg.indexOf('没有可交易的对象') >= 0){
+					cga.DoRequest(cga.REQUEST_TYPE_TRADE_REFUSE);
 					tradeFinished = true;
 					resolve({
 						success: false,
@@ -3530,9 +3568,6 @@ module.exports = function(callback){
 						reason : 'no target'
 					});
 					return false;
-				} else {
-					if(!tradeFinished)
-						return true
 				}
 				
 				return true;
@@ -3548,13 +3583,13 @@ module.exports = function(callback){
 			var tradeStuffsChecked = false;
 						
 			var waitTradeStuffs = ()=>{
-				
+
 				cga.AsyncWaitTradeStuffs((err, type, args) => {
 				
-					console.log('AsyncWaitTradeStuffs');
-					console.log(type);
-					console.log(args);	
-				
+					//console.log(err);
+					//console.log(type);
+					//console.log(args);
+
 					if(!args){
 
 						if(getInTradeStuffs == false && !tradeFinished)
@@ -3562,6 +3597,8 @@ module.exports = function(callback){
 						
 						return;
 					}
+					
+					console.log('AsyncWaitTradeStuffs='+type);
 															
 					getInTradeStuffs = true;
 						
@@ -3583,29 +3620,33 @@ module.exports = function(callback){
 			}
 			
 			var waitTradeState = () => {
-				cga.AsyncWaitTradeState((err, state) => {
-					console.log('AsyncWaitTradeState');
-					console.log(state);
 
-					if (state == cga.TRADE_STATE_READY || state == cga.TRADE_STATE_CONFIRM) {
-						getInTradeStuffs = true;
-						if (!checkParty || tradeStuffsChecked || checkParty(playerName ? playerName : savePartyName, receivedStuffs)) {
-							tradeStuffsChecked = true;
-							console.log('confirm');
-							cga.DoRequest(cga.REQUEST_TYPE_TRADE_CONFIRM);
-						} else {
-							console.log('refuse');
-							cga.DoRequest(cga.REQUEST_TYPE_TRADE_REFUSE);
-						}
-					} else if (state == cga.TRADE_STATE_SUCCEED || state == cga.TRADE_STATE_CANCEL) {
-						getInTradeStuffs = true;
-					}
+				cga.AsyncWaitTradeState((err, state) => {
 					
-					if(!tradeFinished){
-						waitTradeState();
+					if(tradeFinished)
+						return;
+					
+					console.log('AsyncWaitTradeState='+state);
+					
+					if(!err){
+						if (state == cga.TRADE_STATE_READY || state == cga.TRADE_STATE_CONFIRM) {
+							getInTradeStuffs = true;
+							if (!checkParty || tradeStuffsChecked || checkParty(playerName ? playerName : savePartyName, receivedStuffs)) {
+								tradeStuffsChecked = true;
+								console.log('confirm');
+								cga.DoRequest(cga.REQUEST_TYPE_TRADE_CONFIRM);
+							} else {
+								console.log('refuse');
+								cga.DoRequest(cga.REQUEST_TYPE_TRADE_REFUSE);
+							}
+						} else if (state == cga.TRADE_STATE_SUCCEED || state == cga.TRADE_STATE_CANCEL) {
+							getInTradeStuffs = true;
+						}
 					}
-				}, 10000);
-			};
+
+					waitTradeState();
+				}, 1000);
+			}
 
 			waitTradeStuffs();
 			
@@ -3629,9 +3670,9 @@ module.exports = function(callback){
 			if(tradeFinished)
 				return;
 			
-			console.log('AsyncWaitTradeDialog');
-			console.log(partyName);
-			console.log(partyLevel);
+			console.log('AsyncWaitTradeDialog='+partyLevel);
+			//console.log(partyName);
+			//console.log(partyLevel);
 			
 			savePartyName = partyName;
 			
@@ -3639,7 +3680,6 @@ module.exports = function(callback){
 				waitDialog();
 			} else {
 				cga.DoRequest(cga.REQUEST_TYPE_TRADE_REFUSE);
-				
 				tradeFinished = true;
 				resolve({success: false, reason : 'trade dialog timeout'});
 			}
@@ -3648,7 +3688,7 @@ module.exports = function(callback){
 		waitTradeMsg();
 	};
 
-	cga.positiveTrade = (name, stuff, checkParty, resolve) => {
+	cga.positiveTrade = (name, stuff, checkParty, resolve, timeout) => {
 		cga.AsyncWaitPlayerMenu((err, players) => {
 			if(err){
 				console.log('player not found')
@@ -3659,7 +3699,7 @@ module.exports = function(callback){
 			if (!(players instanceof Array)) players = [];
 			var player = players.find((e, index) => typeof name == 'number' ? index == name : e.name == name);
 			if (player !== undefined) {
-				cga.tradeInternal(stuff, checkParty, resolve, name);
+				cga.tradeInternal(stuff, checkParty, resolve, name, timeout);
 				cga.PlayerMenuSelect(player.index);
 			} else {
 				console.log('player not found')
@@ -3670,12 +3710,12 @@ module.exports = function(callback){
 		cga.DoRequest(cga.REQUEST_TYPE_TRADE);
 	}
 
-	cga.waitTrade = (stuff, checkParty, resolve) => {
+	cga.waitTrade = (stuff, checkParty, resolve, timeout) => {
 		cga.EnableFlags(cga.ENABLE_FLAG_TRADE, true)
-		cga.tradeInternal(stuff, checkParty, resolve);
+		cga.tradeInternal(stuff, checkParty, resolve, timeout);
 	}
 	
-	cga.trade = (name, stuff, checkParty, resolve) => {
+	cga.trade = (name, stuff, checkParty, resolve, timeout) => {
 		
 		cga.EnableFlags(cga.ENABLE_FLAG_TRADE, true);
 		
@@ -3683,7 +3723,7 @@ module.exports = function(callback){
 			if (!(players instanceof Array)) players = [];
 			var player = players.find((e, index) => typeof name == 'number' ? index == name : e.name == name);
 			if (player) {
-				cga.tradeInternal(stuff, checkParty, resolve, name);
+				cga.tradeInternal(stuff, checkParty, resolve, name, timeout);
 				cga.PlayerMenuSelect(player.index);
 			} else {
 				console.log('player not found, do nothing');

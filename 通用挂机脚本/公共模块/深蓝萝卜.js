@@ -3,7 +3,7 @@ var configTable = global.configTable;
 
 var socket = null;
 
-const MATERIALS_MULTIPLE_TIMES = 4;
+const MATERIALS_MULTIPLE_TIMES = 3;
 
 var thisobj = {
 	func : (cb) =>{
@@ -12,8 +12,11 @@ var thisobj = {
 	doneManager : (cb)=>{
 		thisobj.object.doneManager(cb);
 	},
+	supplyManager : (cb)=>{
+		thisobj.object.supplyManager(cb);
+	},
 	object : {
-		name :'鹿皮',
+		name :'魔法红萝卜',
 		func : (cb) =>{
 			
 			if(thisobj.object.gatherCount === null){
@@ -26,10 +29,31 @@ var thisobj = {
 				return
 			}
 			
-			cga.travel.newisland.toStone('X', ()=>{
+			if(cga.getItemCount('魔法手套') == 0){
+				cga.travel.falan.toTeleRoom('魔法大学', ()=>{
+					cga.walkList([
+					[117, 164, '仓库内部'],
+					[18, 10],
+					], ()=>{
+						cga.TurnTo(18, 8);
+						cga.AsyncWaitNPCDialog(()=>{
+							cga.ClickNPCDialog(4, 0);
+							cga.AsyncWaitNPCDialog(()=>{
+								cga.walkList([
+								[6, 14, '魔法大学'],
+								], ()=>{
+									thisobj.object.func(cb);
+								});
+							});
+						})
+					});
+				});
+				return;
+			}
+			
+			cga.travel.falan.toTeleRoom('魔法大学', ()=>{
 				cga.walkList([
-				[130, 50, '盖雷布伦森林'],
-				[175, 182],
+				[32, 167],
 				], cb);
 			});
 		},
@@ -47,39 +71,66 @@ var thisobj = {
 				}
 
 				if(thisobj.object.state == 'done'){
-					socket.emit('done', { count : cga.getItemCount('鹿皮') });
+					socket.emit('done', { count : cga.getItemCount('魔法红萝卜') });
 				}
 				
 				setTimeout(repeat, 1500);
 			}
 			
-			cga.travel.falan.toStone('C', ()=>{
+			if(cga.GetMapName() == '魔法大学内部')
+			{
 				cga.walkList([
-				[33, 88]
+				[34, 45],
 				], ()=>{
-					cga.TurnTo(35, 88);
+					cga.TurnTo(36, 45);
 					setTimeout(repeat, 1000);
 				});
-			});
+			}
+			else
+			{
+				cga.travel.falan.toTeleRoom('魔法大学', ()=>{
+					cga.walkList([
+					[74, 93, '魔法大学内部'],
+					[34, 45],
+					], ()=>{
+						cga.TurnTo(36, 45);
+						setTimeout(repeat, 1000);
+					});
+				});
+			}
+		},
+		supplyManager : (cb)=>{
+			var mapname = cga.GetMapName();
+			if(mapname == '魔法大学内部')
+			{
+				cga.walkList([
+				[34, 45],
+				], ()=>{
+					cga.TurnTo(35, 46);
+					setTimeout(cb, 3000);
+				});
+			}
+			else if(mapname == '魔法大学')
+			{
+				cga.walkList([
+				[74, 93, '魔法大学内部'],
+				[34, 45],
+				], ()=>{
+					cga.TurnTo(35, 46);
+					setTimeout(cb, 3000);
+				});
+			}
 		},
 		state : 'gathering',
-		gather_total_times : 0,
+		extra_dropping : (item)=>{
+			return (item.name == '苹果薄荷' && item.count >= 40);
+		},
 	},
-	check_done : (result)=>{
+	check_done : ()=>{
 		if(thisobj.object.gatherCount === null)
 			return false;
 		
-		if(result !== undefined){
-			console.log(thisobj.object.gather_total_times);
-			if(thisobj.object.gather_total_times < 25){
-				thisobj.object.gather_total_times ++;
-			} else {
-				cga.LogOut();
-				return false;
-			}
-		}
-		
-		return cga.getItemCount('鹿皮') >= thisobj.object.gatherCount;
+		return cga.getItemCount('魔法红萝卜') >= thisobj.object.gatherCount;
 	},
 	translate : (pair)=>{
 		
@@ -139,7 +190,7 @@ var thisobj = {
 			thisobj.craft_player = data.craft_player;
 			thisobj.craft_materials = data.craft_materials;
 			data.craft_materials.forEach((m)=>{
-				if( m.name == '鹿皮' )
+				if( m.name == '魔法红萝卜' )
 					thisobj.object.gatherCount = m.count * MATERIALS_MULTIPLE_TIMES;
 			});
 		});
@@ -155,7 +206,7 @@ var thisobj = {
 					if(count >= thisobj.object.gatherCount)
 						return false;
 					
-					if (item.name == '鹿皮' && item.count >= 20){
+					if (item.name == '魔法红萝卜' && item.count >= 20){
 						count += item.count;
 						return true;
 					}

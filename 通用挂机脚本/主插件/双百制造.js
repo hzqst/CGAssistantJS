@@ -5,7 +5,15 @@ var configTable = global.configTable;
 var craft_count = 0;
 var craft_target = null;
 
-var isFabricName = (name)=>{
+var healObject = require('./../公共模块/治疗自己');
+
+var craftSkillList = cga.GetSkillsInfo().filter((sk)=>{
+	return (sk.name.indexOf('制') == 0 || sk.name.indexOf('造') == 0 );
+});
+
+const allowMats = ['麻布', '印度轻木', '铜条', '鹿皮', '毛毡', '木棉布'];
+
+const isFabricName = (name)=>{
 	return name == '麻布' || name == '木棉布' || name == '毛毡';
 }
 
@@ -37,7 +45,7 @@ io.on('connection', (socket) => {
 	
 	socket.on('register', (data) => {
 		socket.cga_data = data;
-		socket.join('gather_'+data.gather_name);
+		socket.join('buddy_'+data.job_name);
 		console.log('client '+ socket.cga_data.player_name +' is registered');
 	});
 
@@ -56,16 +64,16 @@ io.on('connection', (socket) => {
 	})
 });
 
-var wait_stuffs = (name, materials, cb)=>{
+var waitStuffs = (name, materials, cb)=>{
 
-	console.log('wait_stuffs ' + name);
+	console.log('waitStuffs ' + name);
 
 	var repeat = ()=>{
-		var s = io.in('gather_'+name).sockets;
+		var s = io.in('buddy_'+name).sockets;
 		var find_player = null;
 		for(var key in s){
 			if(s[key].cga_data &&
-			((s[key].cga_data.gather_name == name) || (s[key].cga_data.gather_name == '买布' && isFabricName(name))) &&
+			((s[key].cga_data.job_name == name) || (s[key].cga_data.job_name == '买布' && isFabricName(name))) &&
 			s[key].cga_data.state == 'done' ){
 				find_player = s[key];
 				break;
@@ -79,6 +87,7 @@ var wait_stuffs = (name, materials, cb)=>{
 				craft_player : cga.GetPlayerInfo().name,
 				craft_materials : materials,
 			});
+			
 			find_player.emit('trade');
 
 			var unit = cga.findPlayerUnit(find_player.cga_data.player_name);
@@ -91,7 +100,7 @@ var wait_stuffs = (name, materials, cb)=>{
 			setTimeout(()=>{
 				var stuffs = { gold:0 };
 				
-				if(find_player.cga_data.gather_name == '买布' && Object.keys(find_player.cga_data.count).length > 0){
+				if(find_player.cga_data.job_name == '买布' && Object.keys(find_player.cga_data.count).length > 0){
 					for(var key in find_player.cga_data.count){
 						if(key == '麻布')
 							stuffs.gold += find_player.cga_data.count[key] * 20;
@@ -101,8 +110,14 @@ var wait_stuffs = (name, materials, cb)=>{
 							stuffs.gold += find_player.cga_data.count[key] * 29;
 					}
 				}
-				if(find_player.cga_data.gather_name == '鹿皮'){
+				if(find_player.cga_data.job_name == '鹿皮'){
 					stuffs.gold += find_player.cga_data.count * 1;
+				}
+				if(find_player.cga_data.job_name == '印度轻木'){
+					stuffs.gold += find_player.cga_data.count * 1;
+				}
+				if(find_player.cga_data.job_name == '铜条'){
+					stuffs.gold += find_player.cga_data.count * 20;
 				}
 				cga.positiveTrade(find_player.cga_data.player_name, stuffs, null, (result)=>{
 					if (result.success == true){
@@ -129,14 +144,6 @@ var wait_stuffs = (name, materials, cb)=>{
 		});
 	});
 }
-
-var healObject = require('./../公共模块/治疗自己');
-
-var craftSkillList = cga.GetSkillsInfo().filter((sk)=>{
-	return (sk.name.indexOf('制') == 0 || sk.name.indexOf('造') == 0 );
-});
-
-var allowMats = ['麻布', '印度轻木', '铜条', '鹿皮', '毛毡', '木棉布'];
 
 var getBestCraftableItem = ()=>{
 	
@@ -223,6 +230,53 @@ var forgetAndLearn = (teacher, cb)=>{
 	});
 }
 
+var cleanUseless = (inventory, cb)=>{
+	if(inventory.find((inv)=>{
+		return inv.name == '木棉布';
+	}) != undefined && craft_target.materials.find((mat)=>{
+		return mat.name == '木棉布';
+	}) == undefined){
+		var itempos = cga.findItem('木棉布');
+		if(itempos != -1){
+			cga.DropItem(itempos);
+			setTimeout(cleanUseless, 500, cga.getInventoryItems(), cb);
+			return;
+		}
+	}
+	
+	if(inventory.find((inv)=>{
+		return inv.name == '毛毡';
+	}) != undefined && craft_target.materials.find((mat)=>{
+		return mat.name == '毛毡';
+	}) == undefined){
+		var itempos = cga.findItem('毛毡');
+		if(itempos != -1){
+			cga.DropItem(itempos);
+			setTimeout(cleanUseless, 500, cga.getInventoryItems(), cb);
+			return;
+		}
+	}
+
+	cga.travel.falan.toStone('C', ()=>{
+		cga.walkList([
+			[41, 98, '法兰城'],
+			[151, 122],
+		], ()=>{
+			cga.TurnTo(149, 122);
+			var sellarray = cga.findItemArray((item)=>{
+				if ( thisobj.craftItemList.find((craftItem)=>{
+					return item.name == craftItem.name;
+				}) !== undefined){
+					return true;
+				}
+			});
+			cga.sellArray(sellarray, ()=>{
+				setTimeout(cb, 1000);
+			});
+		});
+	});
+}
+
 var loop = ()=>{
 
 	callSubPluginsAsync('prepare', ()=>{
@@ -257,25 +311,9 @@ var loop = ()=>{
 			return;
 		}
 		
-		if(cga.getInventoryItems().length >= 15){
-			cga.travel.falan.toStone('C', ()=>{
-				cga.walkList([
-					[41, 98, '法兰城'],
-					[151, 122],
-				], ()=>{
-					cga.TurnTo(149, 122);
-					var sellarray = cga.findItemArray((item)=>{
-						if ( thisobj.craftItemList.find((craftItem)=>{
-							return item.name == craftItem.name;
-						}) !== undefined){
-							return true;
-						}
-					});
-					cga.sellArray(sellarray, ()=>{
-						setTimeout(loop, 1000);
-					});
-				});
-			});
+		var inventory = cga.getInventoryItems();
+		if(inventory.length >= 15){
+			cleanUseless(inventory, loop);
 			return;
 		}
 				
@@ -293,7 +331,7 @@ var loop = ()=>{
 		})
 
 		if(lackStuffs !== null){
-			wait_stuffs(lackStuffs.name, craft_target.materials, loop);
+			waitStuffs(lackStuffs.name, craft_target.materials, loop);
 			return;
 		}
 		

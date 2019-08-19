@@ -26,7 +26,8 @@ var loop = ()=>{
 	}
 
 	var craft = ()=>{
-		cga.SetImmediateDoneWork();
+		
+		console.log('carft')
 
 		if(thisobj.rebirth == 1){
 			if(cga.GetPlayerInfo().punchclock == 0){
@@ -38,11 +39,11 @@ var loop = ()=>{
 		}
 
 		cga.craftItemEx({
-			craftitem : thisobj.craftItem.name,
+			craftitem : thisobj.craftItem.itemid,
 			extraitem : thisobj.addExtraItem,
 			immediate : (thisobj.craftedCount > 0) ? true : false,				
 		}, (err, r)=>{
-			//console.log(err);
+			console.log(err);
 			//console.log(r);
 			if(r && r.success){
 				thisobj.craftedCount ++;
@@ -124,8 +125,8 @@ var thisobj = {
 		}
 		
 		for(var i in thisobj.craftItemList){
-			if(thisobj.craftItemList[i].name == obj.craftItem){
-				configTable.craftItem = thisobj.craftItemList[i].name;
+			if(thisobj.craftItemList[i].itemid == obj.craftItem){
+				configTable.craftItem = thisobj.craftItemList[i].itemid;
 				thisobj.craftItem = thisobj.craftItemList[i];
 				break;
 			}
@@ -144,7 +145,7 @@ var thisobj = {
 		configTable.rebirth = obj.rebirth;
 		thisobj.rebirth = obj.rebirth
 		
-		if(!thisobj.rebirth){
+		if(thisobj.rebirth == undefined){
 			console.error('读取配置：是否变身失败！');
 			return false;
 		}
@@ -197,7 +198,7 @@ var thisobj = {
 			cga.sayLongWords(sayString, 0, 3, 1);
 			cga.waitForChatInput((msg, index)=>{
 				if(index !== null && index >= 1 && thisobj.craftItemList[index - 1]){
-					configTable.craftItem = thisobj.craftItemList[index - 1].name;
+					configTable.craftItem = thisobj.craftItemList[index - 1].itemid;
 					thisobj.craftItem = thisobj.craftItemList[index - 1];
 					
 					var sayString2 = '当前已选择:[' + thisobj.craftItem.name + ']。';

@@ -49,6 +49,26 @@ var gatherArray = [
 	skill : null,
 	path : './../公共模块/双百买布',
 },
+{
+	name : '深蓝毒蛇',
+	skill : '狩猎',
+	path : './../公共模块/深蓝毒蛇',
+},
+{
+	name : '深蓝萝卜',
+	skill : '伐木',
+	path : './../公共模块/深蓝萝卜',
+},
+{
+	name : '深蓝瞿麦',
+	skill : '伐木',
+	path : './../公共模块/深蓝瞿麦',
+},
+{
+	name : '深蓝百里香',
+	skill : '伐木',
+	path : './../公共模块/深蓝百里香',
+},
 ]
 
 var check_drop = ()=>{
@@ -92,7 +112,10 @@ var loop = ()=>{
 	var playerInfo = cga.GetPlayerInfo();
 	if(playerInfo.mp < playerInfo.maxmp)
 	{
-		supplyObject.func(loop);		
+		if(mineObject.supplyManager)
+			mineObject.supplyManager(loop);
+		else if(supplyObject.func)
+			supplyObject.func(loop);		
 		return;
 	}
 	

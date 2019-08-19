@@ -63,15 +63,15 @@ var thisobj = {
 			});
 		},
 		state : 'gathering',
+		extra_dropping : (item)=>{
+			return (item.name == '传说中的鹿皮' && item.count >= 40);
+		},
 	},
 	check_done : ()=>{
 		if(thisobj.object.gatherCount === null)
 			return false;
 		
 		return cga.getItemCount('鹿皮') >= thisobj.object.gatherCount;
-	},
-	extra_dropping : (item)=>{
-		return (item.name == '传说中的鹿皮' && item.count >= 40);
 	},
 	translate : (pair)=>{
 		
@@ -123,7 +123,7 @@ var thisobj = {
 			socket.emit('register', {
 				state : thisobj.object.state,
 				player_name : cga.GetPlayerInfo().name,
-				gather_name : thisobj.object.name,
+				job_name : thisobj.object.name,
 			});
 		});
 		
@@ -139,8 +139,6 @@ var thisobj = {
 		socket.on('trade', ()=>{
 
 			thisobj.object.state = 'trading';
-			
-			cga.EnableFlags(cga.ENABLE_FLAG_TRADE, true);
 			
 			var count = 0;
 			var stuffs = 
