@@ -32,8 +32,8 @@
  * 装备栏顺序
  *     0 头 1 衣服 2 左手 3 右手 4 鞋 5 左饰品 6 右饰品 7 水晶
  * 物品类型
- *     0-6 武器 0 剑 1 斧 2 枪 3 杖 4 弓 5 小刀 6 回力
- *     7-14 防具
+ *     0-6 武器 0剑 1斧 2枪 3杖 4弓 5小刀 6回力
+ *     7-14 防具 7盾 8盔 9帽 10铠 11衣 12袍 13靴 14鞋
  *     23 料理 29 矿条 30 木 38 宝石 43 血瓶 34 蔬菜 35 其它食材 32 肉 31 布 26 鹿皮
  * cga.SayWords('', 0, 0, 0)
  *     内容
@@ -328,56 +328,26 @@ const CustomFunctionsFlag = 0;
 module.exports = new Promise(resolve => {
 	const cga = require('../cgaapi')(() => setTimeout(() => resolve(cga), 0));
 }).then(cga => {
+	const multicast = () => {
+		const dgram = require('dgram');
+		const server = dgram.createSocket({type:'udp4',reuseAddr:true});
+		server.on('error', (err) => {
+			console.log(`服务器异常：\n${err.stack}`);
+			server.close();
+		});
+
+		server.on('message', (msg, rinfo) => {
+			console.log(`服务器收到消息：${msg} 来自 ${rinfo.address}:${rinfo.port}`);
+		});
+
+		server.on('listening', () => {
+			server.addMembership('239.255.255.255'); //加入组播组
+			server.setMulticastTTL(128);
+			console.log(`服务器监听 1`);
+		});
+		server.bind(41234);
+	};
 	cga.emogua = {};
-	// let isPersistenceDirty = false;
-	// const PersistenceHandler = {
-	// 	get: function(target, property, receiver) {
-	// 		if (property == 'alreadyProxed') {
-	// 			return true;
-	// 		}
-	// 		const value = target[property];
-	// 		if (typeof value == 'object' && !value.alreadyProxed) {
-	// 			target[property] = new Proxy(value, PersistenceHandler);
-	// 		}
-	// 		return target[property];
-	// 	},
-	// 	set: function(target, property, value, receiver) {
-	// 		isPersistenceDirty = true;
-	// 		target[property] = value;
-	// 		return true;
-	// 	}
-	// };
-	// const persistenceFileName = __dirname + "/persistence.global";
-	// const loadPersistenceSync = () => {
-	// 	try {
-	// 		const text = FS.readFileSync(persistenceFileName, 'utf8');
-	// 		return JSON.parse(text);
-	// 	} catch(e) {
-	// 		const defaultObj = {};
-	// 		FS.writeFile(persistenceFileName, JSON.stringify(defaultObj), e => {});
-	// 		return defaultObj;
-	// 	}
-	// };
-	// const savePersistence = () => {
-	// 	if (isPersistenceDirty) {
-	// 		isPersistenceDirty = false;
-	// 		FS.writeFile(persistenceFileName, JSON.stringify(cga.emogua.Persistence), e => {});
-	// 	}
-	// };
-	// cga.emogua.Persistence = new Proxy(loadPersistenceSync(), PersistenceHandler);
-	// let updatingPersistence = false;
-	// FS.watch(persistenceFileName, (eventType, filename) => {
-	// 	if (eventType == 'change' && !updatingPersistence) {
-	// 		updatingPersistence = true;
-	// 		FS.readFile(persistenceFileName, 'utf8', (e, text) => {
-	// 			if (!e && text) {
-	// 				const newObj = JSON.parse(text);
-	// 				cga.emogua.Persistence = new Proxy(Object.assign(newObj, cga.emogua.Persistence), PersistenceHandler);
-	// 			}
-	// 			updatingPersistence = false;
-	// 		});
-	// 	}
-	// });
 	cga.emogua.shuffle = (arr) => {
 		let i = arr.length;
 		while (i) {
@@ -439,30 +409,30 @@ module.exports = new Promise(resolve => {
 		}
 	};
 	// destination '艾尔莎岛' || 1111 || [147, 189]
-	cga.emogua.waitDestination = (destination, timeout = 3200, timer = Date.now()) => {
+	cga.emogua.arrived = (destination, mapInfo = cga.getMapInfo()) => {
+		if (typeof destination == 'string' && (destination == '*' || destination == mapInfo.name)) {
+			return true;
+		} else if (destination instanceof Array && mapInfo.x == destination[0] && mapInfo.y == destination[1]) {
+			return true;
+		} else if (typeof destination == 'number' && mapInfo.indexes.index3 == destination) {
+			return true;
+		}
+		return false;
+	}
+	cga.emogua.waitDestination = (destination, timeout = 3000, timer = Date.now()) => {
 		if ((Date.now() - timer) > timeout) {
 			console.log('不能抵达目的地->' + destination);
 			return Promise.reject();
 		}
 		if (destination) {
-			if (typeof destination == 'string' && destination == cga.GetMapName()) {
-				return cga.emogua.waitAfterBattle();
-			} else if (destination instanceof Array) {
-				const p = cga.GetMapXY();
-				if (p.x == destination[0] && p.y == destination[1]) {
-					return cga.emogua.waitAfterBattle();
-				}
-			} else if (typeof destination == 'number') {
-				return cga.GetMapIndex.index3 == destination;
-			}
-		} else {
-			return Promise.resolve();
+			if (cga.emogua.arrived(destination)) return cga.emogua.waitAfterBattle();
+			else return cga.emogua.delay(500).then(
+				() => cga.emogua.waitDestination(destination, timeout, timer)
+			);
 		}
-		return cga.emogua.delay(500).then(
-			() => cga.emogua.waitDestination(destination, timeout, timer)
-		);
+		return Promise.resolve();
 	};
-	cga.emogua.waitNPCDialog = (action, timeout = 2000) => new Promise(
+	cga.emogua.waitNPCDialog = (action, timeout = 5000) => new Promise(
 		resolve => cga.AsyncWaitNPCDialog((error, dialog) => setTimeout(() => resolve(action(dialog ? dialog : {})), 0), timeout)
 	);
 	cga.emogua.waitMessage = (check, timeout) => new Promise((resolve, reject) => {
@@ -480,17 +450,13 @@ module.exports = new Promise(resolve => {
 		if (matched) return [matched[2],matched[4]];
 		return [undefined, undefined];
 	};
-	cga.emogua.logBack = () => cga.emogua.sayWords('防卡住登出开始').then(
-		() => cga.emogua.waitMessage(chat => {
-			if (chat.msg) {
-				cga.LogBack();
-				return cga.emogua.delay(2000).then(() => cga.emogua.waitAfterBattle());
-			}
-			return cga.emogua.delay(3000).then(
-				() => cga.emogua.logBack()
-			);
-		}, 3000)
-	);
+	cga.emogua.logBack = () => cga.emogua.sayWords('防卡住登出').then(() => cga.emogua.waitMessage(chat => {
+		if (chat.msg) {
+			cga.LogBack();
+			return cga.emogua.delay(2000).then(() => cga.emogua.waitAfterBattle());
+		}
+		return cga.emogua.delay(5000).then(() => cga.emogua.logBack());
+	}), 5000);
 	cga.emogua.forceMove = (orientation, times = 1) => {
 		if  (times > 0) {
 			cga.ForceMove(orientation, true);
@@ -518,7 +484,7 @@ module.exports = new Promise(resolve => {
 			cga.WalkTo(targetX, targetY);
 		}
 		return cga.emogua.recursion(
-			() => cga.emogua.delay(150).then(() => {
+			() => cga.emogua.delay(120).then(() => {
 				if (!cga.isInNormalState()) {
 					return cga.emogua.waitAfterBattle().then(battled => {
 						lastPointTimer = Date.now();
@@ -901,7 +867,13 @@ module.exports = new Promise(resolve => {
 		} else if (dialog.options == 8) {
 			cga.ClickNPCDialog(8, -1);
 			return true;
+		} else if (dialog.options == 4) {
+			cga.ClickNPCDialog(4, -1);
+			return true;
+		} else if (dialog.options == 0) {
+			return true;
 		}
+		return false;
 	};
 	// 是否选否
 	cga.emogua.talkNpcSelectorNo = (dialog) => {
@@ -920,7 +892,13 @@ module.exports = new Promise(resolve => {
 		} else if (dialog.options == 8) {
 			cga.ClickNPCDialog(8, -1);
 			return true;
+		} else if (dialog.options == 4) {
+			cga.ClickNPCDialog(4, -1);
+			return true;
+		} else if (dialog.options == 0) {
+			return true;
 		}
+		return false;
 	};
 	cga.emogua.talkNpc = function(x, y, select, dest) {
 		let selector, orientation, targetx, targety, destination;
@@ -953,18 +931,20 @@ module.exports = new Promise(resolve => {
 				if (typeof orientation == 'number' && orientation > -1 && orientation < 8) {
 					cga.emogua.turnOrientation(orientation);
 				}
-			}).then(
-				() => cga.emogua.recursion(
+			}).then(() => {
+				let timeout = 6000;
+				return cga.emogua.recursion(
 					() => cga.emogua.waitNPCDialog(dialog => {
 						if (typeof dialog.type == 'number') {
+							timeout = 3000;
 							return selector(dialog);
 						}
 						return false;
-					}).then(r => r ? r : Promise.reject())
-				)
-			).then(() => {
-				if (destination) return cga.emogua.waitDestination(destination);
-			});
+					}, timeout).then(r => r ? r : Promise.reject())
+				);
+			}).then(
+				() => cga.emogua.waitDestination(destination)
+			);
 		}
 		return Promise.reject('Talk npc wrong arguments');
 	};
@@ -1058,7 +1038,8 @@ module.exports = new Promise(resolve => {
 			eout: new Station([475,196,'芙蕾雅']),
 			sout: new Station([424,259,'芙蕾雅']),
 			wout: new Station([374,195,'芙蕾雅']),
-			mbank: new Station([83, 12, '市场三楼 - 修理专区']),
+			mbank: new Station([83,12,'市场三楼 - 修理专区']),
+			mrepair: new Station([82,8,'市场三楼 - 修理专区']),
 			bank: new Station([11, 8, '银行']),
 			ehospital: new Station([12, 42, 1112]),
 			whospital: new Station([12, 42, 1111]),
@@ -1077,7 +1058,8 @@ module.exports = new Promise(resolve => {
 			aleut: new Station([56, 48, '亚留特村']),
 			kili: new Station([50, 63, '奇利村']),
 			jenova: new Station([58, 43, '杰诺瓦镇']),
-			vinoy: new Station([40,36, '维诺亚村'])
+			vinoy: new Station([40,36, '维诺亚村']),
+			ghana: new Station([36,40, '加纳村'])
 		}, aleut: {
 			eout: new Station([596,83,'芙蕾雅']),
 			nout: new Station([588,50,'芙蕾雅'])
@@ -1090,7 +1072,7 @@ module.exports = new Promise(resolve => {
 			hospital: new Station([4, 14, '医院']),
 			nurse: new Station([17, 16, '医院']),
 			hnurse: new Station([17, 5, '医院']),
-			door: new Station([321, 883, '鲁米那斯']) // 305,883
+			door: new Station([321, 883, '鲁米那斯'])
 		}, camp: {
 			x: new Station([90, 86, '圣骑士营地']),
 			sell: new Station([20, 23, '工房']),
@@ -1121,7 +1103,13 @@ module.exports = new Promise(resolve => {
 	};
 	Network.elsa.x.links = [
 		new Link(Network.elsa.a), new Link(Network.elsa.b),
-		new Link(Network.castle.x, () => cga.emogua.talkNpc(141,104,cga.emogua.talkNpcSelectorYes, '里谢里雅堡'))
+		new Link(Network.castle.x, () => cga.emogua.recursion(
+			() => cga.emogua.talkNpc(141,104,cga.emogua.talkNpcSelectorYes, '里谢里雅堡').catch(
+				() => cga.emogua.logBack()
+			).then(
+				() => Promise.reject()
+			)
+		))
 	];
 	Network.elsa.a.links = [
 		new Link(Network.asha.w, () => cga.emogua.turnOrientation(0))
@@ -1202,6 +1190,13 @@ module.exports = new Promise(resolve => {
 		).then(
 			() => cga.emogua.autoWalkList([
 				[5,1,'村长家的小房间'],[0,5,'村长的家'],[10,16,'维诺亚村']
+			])
+		)),
+		new Link(Network.teleport.ghana, () => cga.emogua.autoWalk([9, 43]).then(
+			() => cga.emogua.talkNpc(8,43,cga.emogua.talkNpcSelectorYes,'加纳村的传送点')
+		).then(
+			() => cga.emogua.autoWalkList([
+				[5,12,'村长的家'],[1,9,'加纳村']
 			])
 		))
 	];
@@ -1296,8 +1291,14 @@ module.exports = new Promise(resolve => {
 		))
 	];
 	Network.falan.m1.links = [
-		new Link(Network.falan.mbank),
+		new Link(Network.falan.mbank), new Link(Network.falan.mrepair),
 		new Link(Network.falan.s1, () => cga.emogua.turnOrientation(6))
+	];
+	Network.falan.mbank.links = [
+		new Link(Network.falan.m1), new Link(Network.falan.mrepair)
+	];
+	Network.falan.mrepair.links = [
+		new Link(Network.falan.m1), new Link(Network.falan.mbank)
 	];
 	Network.falan.m2.links = [
 		new Link(Network.falan.s2, () => cga.emogua.turnOrientation(6))
@@ -1470,6 +1471,9 @@ module.exports = new Promise(resolve => {
 		return Promise.reject();
 	};
 	cga.emogua.getDwarfBadge = () => {
+		if (cga.getInventoryItems().length == 20) {
+			return Promise.resolve();
+		}
 		return cga.emogua.autoBattle(cga.emogua.AutoBattlePreset.getEscapeSets()).then(() => {
 			const old = cga.GetItemsInfo().find(i => i.name == '矮人徽章');
 			if (old) {
@@ -1484,6 +1488,10 @@ module.exports = new Promise(resolve => {
 			if (fetch) {
 				return cga.emogua.goto(n => n.castle.nurse).then(
 					() => cga.emogua.recharge(0)
+				).then(
+					() => cga.emogua.goto(n => n.falan.sell)
+				).then(
+					() => cga.emogua.sell(6)
 				).then(
 					() => cga.emogua.goto(n => n.camp.x)
 				).then(
@@ -2196,6 +2204,35 @@ module.exports = new Promise(resolve => {
 		}
 		return false;
 	};
+	let equipmentMinDurability = 30;
+	cga.emogua.setEquipmentMinDurability = (durability) => {
+		if (typeof durability == 'number') {
+			equipmentMinDurability = durability;
+		}
+		return Promise.resolve();
+	};
+	cga.emogua.tidyupEquipments = () => Promise.resolve().then(() => {
+		const availableEquipments = cga.getInventoryItems().filter(
+			i => i.type >= 0 && i.type <= 14 && i.name != '狐皮披风' && cga.emogua.getDurability(i).current > equipmentMinDurability
+		);
+		if (availableEquipments.length > 0 && cga.isInNormalState()) {
+			availableEquipments.forEach(e => cga.emogua.useItem(e.pos));
+			return cga.emogua.delay(500);
+		}
+	}).then(() => {
+		let index = 0;
+		let emptyIndexes = cga.emogua.getEmptyBagIndexes();
+		if (emptyIndexes.length > 0 && cga.isInNormalState()) {
+			cga.GetItemsInfo().filter(
+				i => i.pos <= 4 && cga.emogua.getDurability(i).current <= equipmentMinDurability
+			).forEach(takeOff => {
+				if (emptyIndexes[index]) {
+					cga.MoveItem(takeOff.pos, emptyIndexes[index++], -1);
+				}
+			});
+			return cga.emogua.delay(500);
+		}
+	});
 	/**
 	 * options
 	 *     {
@@ -2210,6 +2247,24 @@ module.exports = new Promise(resolve => {
 		options = options ? options : {};
 		const validMaps = ['法兰城', '里谢里雅堡', '艾尔莎岛'];
 
+		const getBackSouls = () => {
+			const playerInfo = cga.GetPlayerInfo();
+			if (playerInfo.souls > 0) {
+				console.log('你丢掉了灵魂');
+				if (playerInfo.gold < 10000) {
+					console.log('可能没钱招魂!');
+					return Promise.reject();
+				}
+				return cga.emogua.goto(n => n.castle.x).then(
+					() => cga.emogua.autoWalkList([
+						[41,14,'法兰城'],[154,29,'大圣堂的入口'],[14,7,'礼拜堂'],[12,19]
+					])
+				).then(
+					() => cga.emogua.talkNpc(6,cga.emogua.talkNpcSelectorYes)
+				);
+			}
+			return Promise.resolve();
+		};
 		const crystal = () => {
 			if (options && options.crystalName) return cga.emogua.useCrystal(options.crystalName);
 			return Promise.resolve();
@@ -2219,7 +2274,7 @@ module.exports = new Promise(resolve => {
 				if (item.name == '魔石' || item.name.indexOf('卡片') >= 0 || item.name == '锥形水晶') return true;
 				else if (item.type >= 0 && item.type <= 14 && item.level <= 10) {
 					const durability = cga.emogua.getDurability(item);
-					return durability && durability.current == durability.max && durability.current <= 30;
+					return durability && durability.current == durability.max && durability.current <= equipmentMinDurability;
 				} else if (options && typeof options.sellFilter == 'function') {
 					return options.sellFilter(item);
 				}
@@ -2239,8 +2294,7 @@ module.exports = new Promise(resolve => {
 					return durability &&
 						(
 							durability.rate < 0.75 ||
-							(durability.current < durability.max && durability.current <= 30) ||
-							(repairFlag == 2 && durability.rate < 1)
+							(durability.current < durability.max && (repairFlag == 2 || durability.current <= equipmentMinDurability))
 						)
 					;
 				}
@@ -2248,7 +2302,7 @@ module.exports = new Promise(resolve => {
 			};
 			if (repairFlag > 0 && cga.GetItemsInfo().findIndex(needRepairChecker) >= 0 && cga.getInventoryItems().length < 20) {
 				return cga.emogua.goto(n => n.falan.mbank).then(
-					() => cga.emogua.autoWalk([82, 8])
+					() => cga.emogua.autoWalk([82,8])
 				).then(
 					() => cga.emogua.turnOrientation(2)
 				).then(() => cga.emogua.recursion(() => {
@@ -2283,19 +2337,7 @@ module.exports = new Promise(resolve => {
 							}
 						}
 					}
-				})).then(() => {
-					let result = Promise.resolve();
-					cga.getInventoryItems().filter(eq => {
-						if (eq.type >= 0 && eq.type <= 14 && eq.level <= 10 && eq.name != '狐皮披风') {
-							const durability = cga.emogua.getDurability(eq);
-							return durability && durability.current > 30;
-						}
-						return false;
-					}).forEach(item => {
-						result = result.then(() => cga.emogua.useItem(item.pos));
-					});
-					return result;
-				});
+				}));
 			} else return Promise.resolve();
 		};
 		const recharge = () => {
@@ -2327,9 +2369,9 @@ module.exports = new Promise(resolve => {
 						() => cga.emogua.recharge(0)
 					);
 				}).then(() => {
-					let currentInfo = cga.GetPlayerInfo();
-					if (currentInfo.hp < currentInfo.maxhp || currentInfo.mp < currentInfo.maxmp) {
-						console.log('没有补血，请检查设置或者是否没钱了');
+					const newInfo = cga.GetPlayerInfo();
+					if (newInfo.hp < newInfo.maxhp) {
+						console.log('无法补血魔！！！');
 						return Promise.reject();
 					}
 				});
@@ -2346,6 +2388,8 @@ module.exports = new Promise(resolve => {
 							() => cga.emogua.joinTeam(doctor.xpos, doctor.ypos, doctor.unit_name)
 						).then(
 							() => cga.emogua.delay(8000)
+						).catch(
+							() => false
 						).then(cga.emogua.leaveTeam);
 					}
 					return cga.emogua.delay(10000);
@@ -2358,7 +2402,7 @@ module.exports = new Promise(resolve => {
 				if (badge) {
 					return cga.emogua.getDwarfBadge().then(r => r ? cga.emogua.logBack() : Promise.resolve());
 				}
-			}).then(findDoctor).then(sell).then(recharge).then(crystal).then(repair);
+			}).then(findDoctor).then(recharge).then(getBackSouls).then(sell).then(repair).then(cga.emogua.tidyupEquipments).then(crystal);
 		} else {
 			return cga.emogua.overlap().then(cga.emogua.dropItems);
 		}
@@ -3069,40 +3113,6 @@ module.exports = new Promise(resolve => {
 	};
 
 	// 定时任务
-	let equipmentMinDurability = 30;
-	cga.emogua.setEquipmentMinDurability = (durability) => {
-		if (typeof durability == 'number') {
-			equipmentMinDurability = durability;
-		}
-		return Promise.resolve();
-	};
-	const protectEquipment = () => {
-		const allItems = cga.GetItemsInfo();
-		const equipments = allItems.filter(e => e.pos <= 4);
-		const items = allItems.filter(e => e.pos >= 8);
-		if (cga.isInNormalState()) {
-			let occupyCount = 0;
-			let emptyIndexes = cga.emogua.getEmptyBagIndexes(items);
-			equipments.filter(item => {
-				const durability = cga.emogua.getDurability(item);
-				return durability && durability.current <= equipmentMinDurability;
-			}).forEach(takeOff => {
-				const sameEquipment = items.find(i => {
-					if (i.type == takeOff.type) {
-						const durability = cga.emogua.getDurability(i);
-						return durability && durability.current > equipmentMinDurability;
-					}
-					return false;
-				});
-				if (sameEquipment) {
-					cga.MoveItem(takeOff.pos, sameEquipment.pos, -1);
-				} else if (emptyIndexes[occupyCount]) {
-					cga.MoveItem(takeOff.pos, emptyIndexes[occupyCount++], -1);
-				}
-			});
-		}
-		return cga.emogua.delay(500);
-	};
 	let lastPosition = cga.GetMapXY();
 	let lastPositionTimer = Date.now();
 	let lastNearPositionTimer = Date.now();
@@ -3133,7 +3143,12 @@ module.exports = new Promise(resolve => {
 			}
 
 			// 装备保护
-			protectEquipment();
+			if (
+				cga.GetItemsInfo().find(i => i.pos <= 4 && cga.emogua.getDurability(i).current <= equipmentMinDurability)
+			) {
+				cga.emogua.tidyupEquipments();
+			}
+
 
 			setTimeout(keepAlive, 10000);
 		}
