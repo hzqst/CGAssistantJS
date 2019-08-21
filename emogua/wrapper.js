@@ -1104,10 +1104,9 @@ module.exports = new Promise(resolve => {
 	Network.elsa.x.links = [
 		new Link(Network.elsa.a), new Link(Network.elsa.b),
 		new Link(Network.castle.x, () => cga.emogua.recursion(
-			() => cga.emogua.talkNpc(141,104,cga.emogua.talkNpcSelectorYes, '里谢里雅堡').catch(
+			() => cga.emogua.talkNpc(141,104,cga.emogua.talkNpcSelectorYes, '里谢里雅堡').then(
+				() => Promise.reject(),
 				() => cga.emogua.logBack()
-			).then(
-				() => Promise.reject()
 			)
 		))
 	];
@@ -2387,8 +2386,7 @@ module.exports = new Promise(resolve => {
 						return cga.emogua.walkTo([doctor.xpos - 1, doctor.ypos]).then(
 							() => cga.emogua.joinTeam(doctor.xpos, doctor.ypos, doctor.unit_name)
 						).then(
-							() => cga.emogua.delay(8000)
-						).catch(
+							() => cga.emogua.delay(8000),
 							() => false
 						).then(cga.emogua.leaveTeam);
 					}
