@@ -86,7 +86,7 @@ var thisobj = {
 		if(thisobj.object.gatherCount === null)
 			return false;
 
-		return (cga.getItemCount('铜') / 20) >= thisobj.object.gatherCount;
+		return (cga.getItemCount('铜') / 20 + cga.getItemCount('铜条')) >= thisobj.object.gatherCount;
 	},
 	translate : (pair)=>{
 		

@@ -36,7 +36,7 @@ var gatherArray = [
 },
 {
 	name : '双百挖铜(挖矿)',
-	skill : '挖矿',
+	skill : '挖掘',
 	path : './../公共模块/双百挖铜',
 },
 {

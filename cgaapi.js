@@ -714,10 +714,10 @@ module.exports = function(callback){
 					if(dlg.options == 12){
 						cga.ClickNPCDialog(4, -1);
 						cga.AsyncWaitNPCDialog(()=>{
-							cb(true);
+							cb(null);
 						});
 					} else {
-						cb(true);
+						cb(new Error('没有卡时，无法打卡'));
 					}
 				});
 			});

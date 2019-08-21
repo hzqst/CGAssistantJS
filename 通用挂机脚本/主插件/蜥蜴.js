@@ -98,8 +98,7 @@ var playerThink = ()=>{
 
 	if(cga.isTeamLeaderEx())
 	{
-		console.log(ctx.reason);
-		
+
 		if(ctx.result == null && playerThinkInterrupt.hasInterrupt())
 			ctx.result = 'supply';
 
@@ -148,8 +147,8 @@ var loop = ()=>{
 
 	var map = cga.GetMapName();
 	var mapindex = cga.GetMapIndex().index3;
-	
-	if(cga.isTeamLeaderEx()){
+	var isleader = cga.isTeamLeaderEx();
+	if(isleader && teamMode.is_enough_teammates()){
 		if(map == '医院' && mapindex == 44692){
 			if(thisobj.sellStore == 1){
 				sellStore.func(loop);
@@ -176,7 +175,7 @@ var loop = ()=>{
 			], loop);
 			return;
 		}
-		if(map == '圣骑士营地' && teamMode.is_enough_teammates()){
+		if(map == '圣骑士营地'){
 			console.log('playerThink on');
 			playerThinkRunning = true;
 			
@@ -189,6 +188,8 @@ var loop = ()=>{
 		}
 		if(map == '蜥蜴洞穴上层第1层')
 		{
+			console.log('playerThink on');
+			playerThinkRunning = true;
 			walkMazeForward((r)=>{
 				if(r != true){
 					loop();
@@ -200,7 +201,7 @@ var loop = ()=>{
 			});
 			return;
 		}
-	} else {
+	} else if(!isleader){
 		console.log('playerThink on');
 		playerThinkRunning = true;
 		return;

@@ -97,8 +97,9 @@ var loop = ()=>{
 
 	var map = cga.GetMapName();
 	var mapindex = cga.GetMapIndex().index3;
+	var isleader = cga.isTeamLeaderEx();
 	
-	if(cga.isTeamLeaderEx()){
+	if(isleader && teamMode.object.is_enough_teammates()){
 		if(map == '医院' && mapindex == 44692){
 			if(thisobj.sellStore == 1){
 				sellStore.func(loop);
@@ -119,7 +120,7 @@ var loop = ()=>{
 			supplyMode.func(loop);
 			return;
 		}
-		if(map == '圣骑士营地' && teamMode.object.is_enough_teammates()){
+		if(map == '圣骑士营地' ){
 			console.log('playerThink on');
 			playerThinkRunning = true;
 			cga.walkList([
@@ -130,7 +131,7 @@ var loop = ()=>{
 			});
 			return;
 		}
-	} else {
+	} else if(!isleader){
 		console.log('playerThink on');
 		playerThinkRunning = true;
 		return;

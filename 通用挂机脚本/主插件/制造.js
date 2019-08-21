@@ -6,7 +6,7 @@ var healObject = require('./../公共模块/治疗自己');
 var rebirthArray = ['不变身', '变身'];
 
 var craftSkillList = cga.GetSkillsInfo().filter((sk)=>{
-	return (sk.name.indexOf('制') == 0 || sk.name.indexOf('造') == 0 );
+	return (sk.name.indexOf('制') == 0 || sk.name.indexOf('造') == 0 || sk.name.indexOf('铸') == 0 );
 });
 
 var loop = ()=>{

@@ -132,8 +132,9 @@ var loop = ()=>{
 
 	var map = cga.GetMapName();
 	var mapindex = cga.GetMapIndex().index3;
+	var isleader = cga.isTeamLeaderEx();
 	
-	if(cga.isTeamLeaderEx()){
+	if(isleader && teamMode.is_enough_teammates()){
 		if(map == '医院' && mapindex == 44692){
 			if(thisobj.sellStore == 1){
 				sellStore.func(loop);
@@ -144,18 +145,14 @@ var loop = ()=>{
 				], loop);
 			}
 			return;
-		} 
+		}
 		if(map == '工房'){
 			cga.walkList([
 			[30, 37, '圣骑士营地']
 			], loop);
 			return;
 		}
-		if(map == '肯吉罗岛'){
-			supplyMode.func(loop);
-			return;
-		}
-		if(map == '迷宫入口' && teamMode.is_enough_teammates()){
+		if(map == '迷宫入口'){
 			console.log('playerThink on');
 			playerThinkRunning = true;
 			cga.walkList([
@@ -165,6 +162,8 @@ var loop = ()=>{
 		}
 		if(map == '旧日迷宫第1层')
 		{
+			console.log('playerThink on');
+			playerThinkRunning = true;
 			walkMazeForward((r)=>{
 				if(r != true){
 					loop();
@@ -176,7 +175,7 @@ var loop = ()=>{
 			});
 			return;
 		}
-	} else {
+	} else if(!isleader){
 		console.log('playerThink on');
 		playerThinkRunning = true;
 		return;

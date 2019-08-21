@@ -161,28 +161,11 @@ var loop = ()=>{
 
 	var map = cga.GetMapName();
 	var mapindex = cga.GetMapIndex().index3;
+	var isleader = cga.isTeamLeaderEx();
 	
-	if(cga.isTeamLeaderEx()){
+	if(isleader && teamMode.is_enough_teammates()){
 
-		if(map == '艾尔莎岛' && teamMode.is_enough_teammates())
-		{
-			console.log('playerThink on');
-			playerThinkRunning = true;
-			
-			cga.travel.falan.toStone('W', ()=>{
-				cga.walkList([
-				[22, 88, '芙蕾雅'],
-				], ()=>{
-					getMazeEntrance((obj)=>{
-						cga.walkList([
-							[obj.mapx, obj.mapy, '诅咒之迷宫地下1楼']
-						], loop);
-					})
-				});
-			})
-			return;
-		}
-		if(map == '法兰城' && teamMode.is_enough_teammates())
+		if(map == '法兰城')
 		{
 			console.log('playerThink on');
 			playerThinkRunning = true;
@@ -210,6 +193,9 @@ var loop = ()=>{
 		}
 		if(map == '诅咒之迷宫地下1楼')
 		{
+			console.log('playerThink on');
+			playerThinkRunning = true;
+			
 			walkMazeForward((r)=>{
 				if(r != true){
 					loop();
@@ -221,7 +207,7 @@ var loop = ()=>{
 			});
 			return;
 		}
-	} else {
+	} else if(!isleader){
 		console.log('playerThink on');
 		playerThinkRunning = true;
 		return;
@@ -233,16 +219,18 @@ var loop = ()=>{
 		return;
 	}
 	
-	if(cga.needSupplyInitial() && supplyMode.isInitialSupply())
+	if(cga.needSupplyInitial() && (map == '里谢里雅堡' || map == '艾尔莎岛'))
 	{
-		supplyMode.func(loop);
+		cga.travel.falan.toCastleHospital(()=>{
+			setTimeout(loop, 5000);
+		});
 		return;
 	}
 	
 	callSubPluginsAsync('prepare', ()=>{
-		cga.travel.newisland.toStone('X', ()=>{
+		cga.travel.falan.toStone('W1', ()=>{
 			cga.walkList([
-			cga.isTeamLeader ? [144, 106] : [143, 106],
+			cga.isTeamLeader ? [63, 80] : [63, 79],
 			], ()=>{
 				teamMode.wait_for_teammates(loop);
 			});

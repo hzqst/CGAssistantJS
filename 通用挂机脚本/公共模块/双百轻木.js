@@ -68,7 +68,7 @@ var thisobj = {
 		if(thisobj.object.gatherCount === null)
 			return false;
 
-		return (cga.getItemCount('印度轻木') / 20) >= thisobj.object.gatherCount;
+		return cga.getItemCount('印度轻木') >= thisobj.object.gatherCount;
 	},
 	translate : (pair)=>{
 		

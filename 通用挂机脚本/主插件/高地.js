@@ -202,18 +202,16 @@ var loop = ()=>{
 
 	var map = cga.GetMapName();
 	var mapindex = cga.GetMapIndex().index3;
+	var isleader = cga.isTeamLeaderEx();
 	
-	if(cga.isTeamLeaderEx())
+	if(isleader && teamMode.is_enough_teammates())
 	{
 		if(thisobj.battleArea.isDesiredMap(map))
 		{
-			console.log('playerThink on');
-			playerThinkRunning = true;
-			
 			cga.freqMove(thisobj.battleArea.moveDir);
 			return;
 		}
-		if(teamMode.is_enough_teammates())
+		else
 		{
 			console.log('playerThink on');
 			playerThinkRunning = true;
@@ -221,7 +219,7 @@ var loop = ()=>{
 			thisobj.battleArea.walkTo(loop);
 			return;
 		}
-	} else {
+	} else if(!isleader){
 		console.log('playerThink on');
 		playerThinkRunning = true;
 		return;
@@ -232,8 +230,7 @@ var loop = ()=>{
 		supplyMode.func(loop);
 		return;
 	}
-	
-	console.log('prepare')
+
 	callSubPluginsAsync('prepare', ()=>{
 		cga.travel.newisland.toStone('X', ()=>{
 			cga.walkList([
