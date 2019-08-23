@@ -2604,12 +2604,17 @@ module.exports = function(callback){
 	}
 	
 	cga.sellStone = (cb)=>{
-		cga.AsyncWaitNPCDialog((err, dlg)=>{	
+		cga.AsyncWaitNPCDialog((err, dlg)=>{
+			if(err){
+				cb(err);
+				return;
+			}
+			
 			var numOpt = dlg.message.charAt(dlg.message.length-1);
 			cga.ClickNPCDialog(0, numOpt == '3' ? 1 : 0);
 			cga.AsyncWaitNPCDialog(()=>{
 				cga.SellNPCStore(cga.getSellStoneItem());
-				setTimeout(cb, 1000, true);
+				setTimeout(cb, 1000, null);
 			});
 		});
 	}
