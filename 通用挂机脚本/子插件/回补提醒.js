@@ -31,7 +31,7 @@ var thisobj = {
 				ctx.reason = '人物血量不够';
 				return;
 			}
-			if(ctx.petinfo.hp < ctx.petinfo.maxhp * thisobj.minHpPercent / 100 && curTime >= thisobj.muteUntil){
+			if(ctx.petinfo != null && ctx.petinfo.hp < ctx.petinfo.maxhp * thisobj.minHpPercent / 100 && curTime >= thisobj.muteUntil){
 				cga.SayWords('宠物血量不够，需要回补!', 0, 3, 1);
 				thisobj.muteUntil = curTime + 1000 * thisobj.mute;
 				ctx.result = 'supply';
@@ -48,7 +48,7 @@ var thisobj = {
 				ctx.reason = '人物血量不够';
 				return;
 			}
-			if(ctx.petinfo.hp < thisobj.minHpValue / 100 && curTime >= thisobj.muteUntil){
+			if(ctx.petinfo != null && ctx.petinfo.hp < thisobj.minHpValue / 100 && curTime >= thisobj.muteUntil){
 				cga.SayWords('宠物血量不够，需要回补!', 0, 3, 1);
 				thisobj.muteUntil = curTime + 1000 * thisobj.mute;
 				ctx.result = 'supply';
@@ -65,7 +65,7 @@ var thisobj = {
 				ctx.reason = '人物蓝量不够';
 				return true;
 			}
-			if(ctx.petinfo.mp < ctx.petinfo.maxmp * thisobj.minMpPercent / 100 && curTime >= thisobj.muteUntil){
+			if(ctx.petinfo != null && ctx.petinfo.mp < ctx.petinfo.maxmp * thisobj.minMpPercent / 100 && curTime >= thisobj.muteUntil){
 				cga.SayWords('宠物蓝量不够，需要回补!', 0, 3, 1);
 				thisobj.muteUntil = curTime + 1000 * thisobj.mute;
 				ctx.result = 'supply';
@@ -82,7 +82,7 @@ var thisobj = {
 				ctx.reason = '人物蓝量不够';
 				return true;
 			}
-			if(ctx.petinfo.mp < thisobj.minMpValue && curTime >= thisobj.muteUntil){
+			if(ctx.petinfo != null && ctx.petinfo.mp < thisobj.minMpValue && curTime >= thisobj.muteUntil){
 				cga.SayWords('宠物蓝量不够，需要回补!', 0, 3, 1);
 				thisobj.muteUntil = curTime + 1000 * thisobj.mute;
 				ctx.result = 'supply';

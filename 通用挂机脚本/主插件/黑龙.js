@@ -82,7 +82,7 @@ var playerThink = ()=>{
 	var playerinfo = cga.GetPlayerInfo();
 	var ctx = {
 		playerinfo : playerinfo,
-		petinfo : cga.GetPetInfo(playerinfo.petid),
+		petinfo : playerinfo.petid >= 0 ? cga.GetPetInfo(playerinfo.petid) : null,
 		teamplayers : cga.getTeamPlayers(),
 		result : null,
 		dangerlevel : thisobj.getDangerLevel(),
