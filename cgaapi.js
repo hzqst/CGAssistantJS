@@ -552,7 +552,7 @@ module.exports = function(callback){
 			return;
 		}*/
 		//重新回城
-		console.log('yyy')
+		//console.log('yyy')
 		cga.LogBack();
 		cga.AsyncWaitMovement({map:desiredMap, delay:1000, timeout:5000}, (err, reason)=>{
 			if(err){
@@ -1794,9 +1794,9 @@ module.exports = function(callback){
 
 			newList = joint.concat(newList);
 			
-			//console.log('final list');
+			console.log('新寻路列表:');			
+			console.log(newList);
 			
-			//console.log(newList);
 		} else {
 			console.log('错误：寻路失败！');
 			newList.unshift([targetX, targetY, targetMap, null, null, true]);
@@ -1854,12 +1854,12 @@ module.exports = function(callback){
 			var curpos = cga.GetMapXY();
 			var curmapindex = cga.GetMapIndex().index3;
 
-			/*console.log('当前地图: ' + curmap);
+			console.log('当前地图: ' + curmap);
 			console.log('当前地图序号: ' + curmapindex);
 			console.log('当前坐标: (%d, %d)', curpos.x, curpos.y);
 			console.log('目标坐标: (%d, %d)', targetX, targetY);
 			console.log('目标地图');
-			console.log(targetMap);*/
+			console.log(targetMap);
 			
 			var end = ()=>{
 				var waitBattle2 = ()=>{
@@ -1882,8 +1882,9 @@ module.exports = function(callback){
 						){
 						console.log(curpos);
 						console.log(walkedList);
-						console.log('坐标错误，回滚到上一路径');
-						newList.unshift(walkedList.pop());
+						console.log('坐标错误，回滚到最后一个路径点');
+						var endpos = walkedList.pop();
+						newList = cga.calculatePath(curpos.x, curpos.y, endpos[0], endpos[1], endpos[2], null, null, newList);
 						walkCb();
 						return;
 					}
@@ -1937,6 +1938,7 @@ module.exports = function(callback){
 							if(typeof targetMap == 'string' && curmap == targetMap){
 								
 								if(newList.length == 0){
+									console.log('寻路结束1');
 									end();
 									return;
 								}
@@ -1944,9 +1946,10 @@ module.exports = function(callback){
 								walkCb();
 								return;
 							}
-							else if(curmapindex == targetMap){
+							else if(typeof targetMap == 'number' && curmapindex == targetMap){
 								
 								if(newList.length == 0){
+									console.log('寻路结束2');
 									end();
 									return;
 								}
@@ -1992,13 +1995,14 @@ module.exports = function(callback){
 						console.log('当前寻路卡住，抛出错误！');
 
 					}
-					
+
 					cga.isMoveThinking = false;
 					cb(err, reason);
 					return;
 				}
 								
 				if(newList.length == 0){
+					console.log('寻路结束3');
 					end();
 					return;
 				}
@@ -2152,14 +2156,14 @@ module.exports = function(callback){
 			console.log(this.stages[index].intro);
 			var objThis = this;
 			objThis.stages[index].workFunc(function(r){
-				if(!r){
+				if(r === false || r instanceof Error){
 					if(cb)
 						cb(r);
 					return;
 				}
-				console.trace()
+				//console.trace()
 				
-				if(r === true){
+				if(r === true || r === null){
 					console.log('第'+(index+1)+'阶段执行完成。');
 					objThis.doNext(index + 1, cb);
 				} else if( r == 'restart stage' ){
@@ -2603,6 +2607,21 @@ module.exports = function(callback){
 		return sellArray;
 	}
 	
+	cga.cleanInventory = (count, cb)=>{
+		if(cga.getInventoryItems().length >= 21 - count)
+		{
+			var items = cga.getSellStoneItem();
+			if(items.length > 0){
+				cga.DropItem(items[0].itempos);
+				setTimeout(cga.cleanInventory, 500, count, cb);
+			} else {
+				cb(new Error('没有可以扔的物品了'));
+			}
+		} else {
+			cb(null);
+		}
+	}
+	
 	cga.sellStone = (cb)=>{
 		cga.AsyncWaitNPCDialog((err, dlg)=>{
 			if(err){
@@ -2912,10 +2931,16 @@ module.exports = function(callback){
 	}
 	
 	cga.waitTeammates = (teammates, cb)=>{
+				
+		var teamplayers = cga.getTeamPlayers();
+		
+		if(teammates.length == 0 && teamplayers.length == 0)
+		{
+			setTimeout(cb, 2000, true);
+			return;
+		}
 		
 		cga.EnableFlags(cga.ENABLE_FLAG_JOINTEAM, true);
-		
-		var teamplayers = cga.getTeamPlayers();
 		
 		if(teamplayers.length == teammates.length){
 			for(var i = 0; i < teamplayers.length; ++i){
@@ -3084,7 +3109,7 @@ module.exports = function(callback){
 		}
 		
 		if(passCheck){
-			cb();
+			cb(null);
 			return;
 		}
 		
@@ -3142,7 +3167,7 @@ module.exports = function(callback){
 			}
 			
 			if(passCheck){
-				if(obj.cb() == true)
+				if(obj.cb(null) == true)
 					return;
 			}
 		}

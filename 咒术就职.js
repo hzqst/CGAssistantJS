@@ -12,8 +12,8 @@ var cga = require('./cgaapi')(function(){
 	for(var i in teamplayers)
 		teammates[i] = teamplayers[i].name;
 	
-	cga.isTeamLeader = (teammates[0] == playerinfo.name) ? true : false
-		
+	cga.isTeamLeader = (teammates[0] == playerinfo.name || teammates.length == 0) ? true : false
+
 	var waitStage = (cb2)=>{
 		var teammate_state = {};
 		var teammate_ready = 0;
@@ -26,8 +26,11 @@ var cga = require('./cgaapi')(function(){
 				teammate_ready ++;
 			}
 
-			if(teammate_ready >= teamplayers.length){
-				//all teammates are ready
+			if(teamplayers.length > 0 && teammate_ready >= teamplayers.length){
+				cb2(true);
+				return false;
+			}
+			if(teamplayers.length == 0 && teammate_ready > 0){
 				cb2(true);
 				return false;
 			}
@@ -64,15 +67,17 @@ var cga = require('./cgaapi')(function(){
 								[12, 8],
 								[12, 7],
 								], ()=>{
-									cga.TurnTo(14, 7);
-									cga.AsyncWaitNPCDialog(()=>{
-										cga.ClickNPCDialog(4, 0);
+									cga.cleanInventory(1, ()=>{
+										cga.TurnTo(14, 7);
 										cga.AsyncWaitNPCDialog(()=>{
-											cga.SayWords('拿咒器红念珠，完成请说“1”！', 0, 3, 1);
-											setTimeout(()=>{
-												cga.SayWords('1', 0, 3, 1);
-											}, 1000);
-										});										
+											cga.ClickNPCDialog(4, 0);
+											cga.AsyncWaitNPCDialog(()=>{
+												cga.SayWords('拿咒器红念珠，完成请说“1”！', 0, 3, 1);
+												setTimeout(()=>{
+													cga.SayWords('1', 0, 3, 1);
+												}, 1000);
+											});										
+										});
 									});
 								});
 							});
@@ -85,18 +90,20 @@ var cga = require('./cgaapi')(function(){
 			
 			var go2 = ()=>{
 				var retry = ()=>{
-					cga.TurnTo(14, 7);
-					cga.AsyncWaitNPCDialog((err)=>{
-						if(err){
-							retry();
-							return;
-						}
-						cga.ClickNPCDialog(4, 0);
-						cga.AsyncWaitNPCDialog(()=>{
-							cga.SayWords('1', 0, 3, 1);
-							setTimeout(()=>{								
-								cb2(true);
-							}, 5000);
+					cga.cleanInventory(1, ()=>{
+						cga.TurnTo(14, 7);
+						cga.AsyncWaitNPCDialog((err)=>{
+							if(err){
+								retry();
+								return;
+							}
+							cga.ClickNPCDialog(4, 0);
+							cga.AsyncWaitNPCDialog(()=>{
+								cga.SayWords('1', 0, 3, 1);
+								setTimeout(()=>{
+									cb2(true);
+								}, 1000);
+							});
 						});
 					});
 				}
@@ -161,84 +168,90 @@ var cga = require('./cgaapi')(function(){
 				[33, 10, '镜中的豪宅'],
 				[35, 2],
 				], ()=>{
-					cga.TurnTo(35, 1);
-					cga.AsyncWaitNPCDialog(()=>{
-						cga.ClickNPCDialog(4, 0);
-						setTimeout(()=>{
-							cga.walkList([
-							[36, 9],
-							], ()=>{
-								cga.TurnTo(36, 10);
-								cga.AsyncWaitNPCDialog(()=>{
-									cga.ClickNPCDialog(4, 0);
-									cga.AsyncWaitMovement({x:36, y:11, delay:1000, timeout:5000}, ()=>{
-										cga.walkList([
-										[27, 67, '豪宅'],
-										[58, 66, '豪宅  地下'],
-										[41, 23, '豪宅'],
-										[59, 6, '豪宅  2楼'],
-										[16, 9, '镜中的豪宅  2楼'],
-										[40, 10],
-										], ()=>{
-											cga.TurnTo(41, 10);
-											cga.AsyncWaitNPCDialog(()=>{
-												cga.ClickNPCDialog(4, 0);
-												setTimeout(()=>{
-													cga.walkList([
-													[40,16],
-													], ()=>{
-														cga.TurnTo(40, 17);
-														cga.AsyncWaitNPCDialog(()=>{
-															cga.ClickNPCDialog(4, 0);
-															cga.AsyncWaitMovement({x:40, y:18, delay:1000, timeout:5000}, ()=>{
-																cga.walkList([
-																[17, 61, '豪宅  2楼'],
-																[5, 23, '豪宅  阁楼'],
-																[14, 30, '镜中的豪宅  阁楼'],
-																[14, 36, '镜中的豪宅  2楼'],
-																[11, 35],
-																], ()=>{
-																	cga.TurnTo(12, 35);
-																	cga.AsyncWaitNPCDialog(()=>{
-																		cga.ClickNPCDialog(4, 0);
-																		setTimeout(()=>{
-																			cga.walkList([
-																			[16, 51, '镜中的豪宅  阁楼'],
-																			[23, 20],
-																			], ()=>{
-																				cga.TurnTo(23, 19);
-																				cga.AsyncWaitNPCDialog(()=>{
-																					cga.ClickNPCDialog(4, 0);
-																					cga.AsyncWaitMovement({x:23, y:18, delay:1000, timeout:5000}, ()=>{
-																						cga.walkList([
-																						[23, 11],
-																						[22, 11],
-																						[23, 11],
-																						[22, 11],
-																						[23, 11],
-																						], cb2);
+					cga.cleanInventory(1, ()=>{
+						cga.TurnTo(35, 1);
+						cga.AsyncWaitNPCDialog(()=>{
+							cga.ClickNPCDialog(4, 0);
+							setTimeout(()=>{
+								cga.walkList([
+								[36, 9],
+								], ()=>{
+									cga.TurnTo(36, 10);
+									cga.AsyncWaitNPCDialog(()=>{
+										cga.ClickNPCDialog(4, 0);
+										cga.AsyncWaitMovement({x:36, y:11, delay:1000, timeout:5000}, ()=>{
+											cga.walkList([
+											[27, 67, '豪宅'],
+											[58, 66, '豪宅  地下'],
+											[41, 23, '豪宅'],
+											[59, 6, '豪宅  2楼'],
+											[16, 9, '镜中的豪宅  2楼'],
+											[40, 10],
+											], ()=>{
+												cga.cleanInventoryOnceSync();
+												cga.TurnTo(41, 10);
+												cga.AsyncWaitNPCDialog(()=>{
+													cga.ClickNPCDialog(4, 0);
+													setTimeout(()=>{
+														cga.walkList([
+														[40,16],
+														], ()=>{
+															cga.TurnTo(40, 17);
+															cga.AsyncWaitNPCDialog(()=>{
+																cga.ClickNPCDialog(4, 0);
+																cga.AsyncWaitMovement({x:40, y:18, delay:1000, timeout:5000}, ()=>{
+																	cga.walkList([
+																	[17, 61, '豪宅  2楼'],
+																	[5, 23, '豪宅  阁楼'],
+																	[14, 30, '镜中的豪宅  阁楼'],
+																	[14, 36, '镜中的豪宅  2楼'],
+																	[11, 35],
+																	], ()=>{
+																		cga.cleanInventoryOnceSync();
+																		cga.TurnTo(12, 35);
+																		cga.AsyncWaitNPCDialog(()=>{
+																			cga.ClickNPCDialog(4, 0);
+																			setTimeout(()=>{
+																				cga.walkList([
+																				[16, 51, '镜中的豪宅  阁楼'],
+																				[23, 20],
+																				], ()=>{
+																					cga.TurnTo(23, 19);
+																					cga.AsyncWaitNPCDialog(()=>{
+																						cga.ClickNPCDialog(4, 0);
+																						cga.AsyncWaitMovement({x:23, y:18, delay:1000, timeout:5000}, ()=>{
+																							cga.walkList([
+																							[23, 11],
+																							[22, 11],
+																							[23, 11],
+																							[22, 11],
+																							[23, 11],
+																							], cb2);
+																						});
 																					});
 																				});
-																			});
-																		}, 1500);
+																			}, 1500);
+																		});
 																	});
 																});
 															});
 														});
-													});
-												}, 1500);
-											});											
+													}, 1500);
+												});											
+											});
 										});
 									});
 								});
-							});
-						}, 1500);
+							}, 1500);
+						});
 					});
 				})
 			}
 			
 			var go2 = ()=>{
-				cga.waitForLocation({mapname : '镜中的豪宅  阁楼', pos : [23, 1]}, cb2);
+				cga.waitForLocation({mapindex : '镜中的豪宅  阁楼', pos : [23, 1]}, ()=>{
+					cb2(true);
+				});
 			}
 
 			var wait = ()=>{
@@ -255,7 +268,7 @@ var cga = require('./cgaapi')(function(){
 			var wait2 = ()=>{
 				cga.addTeammate(teammates[0], (r)=>{
 					if(r){
-						cb2(true);
+						go2();
 						return;
 					}
 					setTimeout(wait2, 1000);
@@ -272,25 +285,27 @@ var cga = require('./cgaapi')(function(){
 	{//2
 		intro: '9.与罗蕾儿（23.10）对话，选“是”获得【神器·紫念珠】。再次与罗蕾儿对话传送回豪宅（32.45）处。',
 		workFunc: function(cb2){
-			cga.TurnTo(23, 10);
-			cga.AsyncWaitNPCDialog((err)=>{
-				
-				if(err){
-					cga.walkList([ [23, 11], [22, 11] ], ()=>{
-						cb2('restart stage');
-					});
-					return;
-				}
-				
-				cga.ClickNPCDialog(32, 0);
-				cga.AsyncWaitNPCDialog(()=>{
+			cga.cleanInventory(1, ()=>{
+				cga.TurnTo(23, 10);
+				cga.AsyncWaitNPCDialog((err)=>{					
+					if(err){
+						console.log(err);
+						cga.walkList([ [23, 11], [22, 11] ], ()=>{
+							cb2('restart stage');
+						});
+						return;
+					}
+					
 					cga.ClickNPCDialog(32, 0);
 					cga.AsyncWaitNPCDialog(()=>{
-						cga.ClickNPCDialog(4, 0);
-						setTimeout(cb2, 1000, true);
+						cga.ClickNPCDialog(32, 0);
+						cga.AsyncWaitNPCDialog(()=>{
+							cga.ClickNPCDialog(4, 0);
+							setTimeout(cb2, 1000, true);
+						});
 					});
-				});
-			});														
+				});	
+			});			
 		}
 	},
 	{//3

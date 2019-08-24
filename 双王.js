@@ -12,7 +12,7 @@ var cga = require('./cgaapi')(function(){
 	for(var i in teamplayers)
 		teammates[i] = teamplayers[i].name;
 	
-	cga.isTeamLeader = (teammates[0] == playerinfo.name) ? true : false
+	cga.isTeamLeader = (teammates[0] == playerinfo.name || teammates.length == 0) ? true : false
 	
 	var waitStage = (cb2)=>{
 		var teammate_state = {};
@@ -26,8 +26,11 @@ var cga = require('./cgaapi')(function(){
 				teammate_ready ++;
 			}
 
-			if(teammate_ready >= teamplayers.length){
-				//all teammates are ready
+			if(teamplayers.length > 0 && teammate_ready >= teamplayers.length){
+				cb2(true);
+				return false;
+			}
+			if(teamplayers.length == 0 && teammate_ready > 0){
 				cb2(true);
 				return false;
 			}
@@ -42,23 +45,25 @@ var cga = require('./cgaapi')(function(){
 		workFunc: function(cb2){
 			
 			var go_1 = ()=>{
-				cga.TurnTo(14, 10);
-				cga.AsyncWaitNPCDialog(()=>{
-					cga.ClickNPCDialog(32, 0);
+				cga.cleanInventory(1, ()=>{
+					cga.TurnTo(14, 10);
 					cga.AsyncWaitNPCDialog(()=>{
 						cga.ClickNPCDialog(32, 0);
 						cga.AsyncWaitNPCDialog(()=>{
 							cga.ClickNPCDialog(32, 0);
 							cga.AsyncWaitNPCDialog(()=>{
-								cga.ClickNPCDialog(4, 0);
+								cga.ClickNPCDialog(32, 0);
 								cga.AsyncWaitNPCDialog(()=>{
-									cga.ClickNPCDialog(32, 0);
+									cga.ClickNPCDialog(4, 0);
 									cga.AsyncWaitNPCDialog(()=>{
-										cga.ClickNPCDialog(1, 0);
-										setTimeout(()=>{ 
-											cga.SayWords('拿野草莓，然后传送至民家地下，与帕鲁凯斯对话获得“刀刃的碎片”。然后返回民家与队长重新组队！', 0, 3, 1);
-											setTimeout(cb2, 1500, true);
-										}, 1500);
+										cga.ClickNPCDialog(32, 0);
+										cga.AsyncWaitNPCDialog(()=>{
+											cga.ClickNPCDialog(1, 0);
+											setTimeout(()=>{ 
+												cga.SayWords('拿野草莓，然后传送至民家地下，与帕鲁凯斯对话获得“刀刃的碎片”。然后返回民家与队长重新组队！', 0, 3, 1);
+												setTimeout(cb2, 1500, true);
+											}, 1500);
+										});
 									});
 								});
 							});
@@ -88,24 +93,26 @@ var cga = require('./cgaapi')(function(){
 			
 			var go2 = ()=>{
 				var retry = ()=>{
-					cga.TurnTo(14, 10);
-					cga.AsyncWaitNPCDialog((err)=>{
-						if(err){
-							cga.walkList([ [13, 11], [13, 10] ], retry);
-							return;
-						}
-						cga.ClickNPCDialog(32, 0);
-						cga.AsyncWaitNPCDialog(()=>{
+					cga.cleanInventory(1, ()=>{
+						cga.TurnTo(14, 10);
+						cga.AsyncWaitNPCDialog((err)=>{
+							if(err){
+								cga.walkList([ [13, 11], [13, 10] ], retry);
+								return;
+							}
 							cga.ClickNPCDialog(32, 0);
 							cga.AsyncWaitNPCDialog(()=>{
 								cga.ClickNPCDialog(32, 0);
 								cga.AsyncWaitNPCDialog(()=>{
-									cga.ClickNPCDialog(4, 0);
+									cga.ClickNPCDialog(32, 0);
 									cga.AsyncWaitNPCDialog(()=>{
-										cga.ClickNPCDialog(32, 0);
+										cga.ClickNPCDialog(4, 0);
 										cga.AsyncWaitNPCDialog(()=>{
-											cga.ClickNPCDialog(1, 0);
-											setTimeout(cb2, 1500, true);
+											cga.ClickNPCDialog(32, 0);
+											cga.AsyncWaitNPCDialog(()=>{
+												cga.ClickNPCDialog(1, 0);
+												setTimeout(cb2, 1500, true);
+											});
 										});
 									});
 								});
@@ -141,7 +148,7 @@ var cga = require('./cgaapi')(function(){
 			var wait2 = ()=>{
 				var retry = ()=>{
 					cga.TurnTo(38, 4);
-					cga.AsyncWaitNPCDialog(function(err){
+					cga.AsyncWaitNPCDialog((err)=>{
 						if(err){
 							cga.walkList([ [37, 5], [37, 4] ], retry);
 							return;

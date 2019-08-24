@@ -10,7 +10,7 @@ var cga = require('./cgaapi')(function(){
 	for(var i in teamplayers)
 		teammates[i] = teamplayers[i].name;
 	
-	cga.isTeamLeader = (teammates[0] == playerinfo.name) ? true : false
+	cga.isTeamLeader = (teammates[0] == playerinfo.name || teammates.length == 0) ? true : false
 	
 	var callZLZZ = false;
 	var callWYW = false;
@@ -30,7 +30,6 @@ var cga = require('./cgaapi')(function(){
 	});
 	
 	var walkMazeForward = (cb)=>{
-		console.log('walkMazeForward')
 		cga.walkRandomMaze(null, (err)=>{
 			console.log(err);
 			cb(err === true ? true : false);
@@ -99,8 +98,8 @@ var cga = require('./cgaapi')(function(){
 			var blackList = [];
 			cga.searchMap((units) => {
 				return units.find(u => u.unit_name == '守墓员' && u.type == 1 && u.model_id != 0) || cga.GetMapName() == '？？？'
-			}, (result) => {
-				console.log(result);
+			}, (err, result) => {
+				
 				if(cga.GetMapName() == '？？？'){
 					goodToGoZLZZ(cb);
 					return;
@@ -304,7 +303,7 @@ var cga = require('./cgaapi')(function(){
 				[246, 76, '路路耶博士的家'],
 				], ()=>{
 					cga.WalkTo(3, 10);
-					cga.AsyncWaitMovement({map:['？？？'], delay:1000, timeout:10000}, (r)=>{
+					cga.AsyncWaitMovement({map:['？？？'], delay:1000, timeout:10000}, ()=>{
 						cga.walkList([
 						[131, 61],
 						], ()=>{
@@ -458,7 +457,7 @@ var cga = require('./cgaapi')(function(){
 						cga.ClickNPCDialog(32, -1);
 						cga.AsyncWaitNPCDialog(()=>{
 							cga.ClickNPCDialog(8, -1);
-							cga.AsyncWaitMovement({map:['梅布尔隘地'], delay:1000, timeout:10000}, function(r){
+							cga.AsyncWaitMovement({map:['梅布尔隘地'], delay:1000, timeout:10000}, ()=>{
 								cga.walkList([
 									[211, 117],
 								], (r)=>{
@@ -467,7 +466,7 @@ var cga = require('./cgaapi')(function(){
 										cga.ClickNPCDialog(32, -1);
 										cga.AsyncWaitNPCDialog(()=>{
 											cga.ClickNPCDialog(1, -1);
-											cga.AsyncWaitMovement({map:['？？？'], delay:1000, timeout:10000}, function(r){
+											cga.AsyncWaitMovement({map:['？？？'], delay:1000, timeout:10000}, ()=>{
 												cb2(r);
 											});
 										});
@@ -666,30 +665,33 @@ var cga = require('./cgaapi')(function(){
 	
 	task.anyStepDone = false;
 
-	cga.SayWords('欢迎使用琥珀之卵4（转职保证书）脚本，输入‘0’从头（朵拉）开始任务，输入‘1’从打长老证之前开始任务，输入‘2’从荷普特开始任务，输入‘3’从祭坛守卫开始任务，输入‘4’从打完BOSS换保证书开始任务（必须有文言抄本）。', 0, 3, 1);
+	cga.SayWords('欢迎使用琥珀之卵4（转职保证书）脚本，输入‘0’从头（朵拉）开始任务，输入‘1’从打长老证之前开始任务，输入‘3’从荷普特开始任务，输入‘4’从祭坛守卫开始任务，输入‘5’从打完BOSS换保证书开始任务（必须有文言抄本）。', 0, 3, 1);
 	
-	cga.waitForChatInput((msg)=>{
+	cga.waitForChatInput((msg, index)=>{
 
-		if(msg == '0')
-			task.jumpToStep = 0;
-		else if(msg == '1')
-			task.jumpToStep = 2;
-		else if(msg == '1.5')
-			task.jumpToStep = 3;
-		else if(msg == '2')
-			task.jumpToStep = 4;
-		else if(msg == '3')
-			task.jumpToStep = 6;
-		else if(msg == '4')
-			task.jumpToStep = 9;
-				
-		if(typeof task.jumpToStep != 'undefined'){
-			task.doTask(()=>{
-				console.log('ok');
-			});
-			return true;
+		if(index !== null)
+		{
+			console.log(index);
+			if(index == 0)
+				task.jumpToStep = 0;
+			else if(index == 1)
+				task.jumpToStep = 2;
+			//else if(index == 2)
+			//	task.jumpToStep = 3;
+			else if(index == 3)
+				task.jumpToStep = 4;
+			else if(index == 4)
+				task.jumpToStep = 6;
+			else if(index == 5)
+				task.jumpToStep = 9;
+					
+			if(typeof task.jumpToStep != 'undefined'){
+				task.doTask(()=>{
+					console.log('ok');
+				});
+				return false;
+			}
 		}
-		
-		return false;
+		return true;
 	});
 });
