@@ -41,7 +41,7 @@ var loop = ()=>{
 		cga.craftItemEx({
 			craftitem : thisobj.craftItem.itemid,
 			extraitem : thisobj.addExtraItem,
-			immediate : (thisobj.craftedCount > 0) ? true : false,				
+			immediate : true,
 		}, (err, r)=>{
 			console.log(err);
 			//console.log(r);

@@ -360,7 +360,7 @@ var loop = ()=>{
 			
 			cga.craftItemEx({
 				craftitem : craft_target.name,
-				immediate : (craft_count > 0) ? true : false
+				immediate : true
 			}, (err, results)=>{
 				//console.log(err);
 				//console.log(results);
