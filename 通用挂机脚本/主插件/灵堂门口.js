@@ -108,9 +108,6 @@ var loop = ()=>{
 		}
 		if(map == '艾尔莎岛')
 		{
-			console.log('playerThink on');
-			playerThinkRunning = true;
-			
 			cga.travel.falan.toStone('C', ()=>{
 				cga.walkList([
 					[47, 85, '召唤之间'],
@@ -118,6 +115,8 @@ var loop = ()=>{
 					[23, 19, '灵堂'],
 					[30, 49],
 				], ()=>{
+					console.log('playerThink on');
+					playerThinkRunning = true;
 					cga.freqMove(0);
 				});
 			});
@@ -125,13 +124,12 @@ var loop = ()=>{
 		}
 		if(map == '回廊')
 		{
-			console.log('playerThink on');
-			playerThinkRunning = true;
-			
 			cga.walkList([
 				[23, 19, '灵堂'],
 				[30, 49],
 			], ()=>{
+				console.log('playerThink on');
+				playerThinkRunning = true;
 				cga.freqMove(4);
 			});
 			return;

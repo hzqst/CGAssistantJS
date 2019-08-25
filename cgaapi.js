@@ -3338,7 +3338,7 @@ module.exports = function(callback){
 			}
 			else
 			{
-				newmap = regex[1] + (layerIndex + 1);
+				newmap = regex[1] + ((layerIndex >= 100) ? (layerIndex + 100) : (layerIndex + 1));
 				if(typeof regex[3] == 'string')
 					newmap += regex[3];
 			}
