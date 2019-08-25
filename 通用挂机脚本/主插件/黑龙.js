@@ -177,6 +177,8 @@ var loop = ()=>{
 		}
 		if(map == '黑龙沼泽1区')
 		{
+			console.log('playerThink on');
+			playerThinkRunning = true;
 			walkMazeForward((r)=>{
 				if(r != true){
 					loop();
@@ -202,8 +204,18 @@ var loop = ()=>{
 	
 	if(cga.needSupplyInitial() && supplyMode.isInitialSupply() && map != '圣骑士营地')
 	{
-		supplyMode.func(loop);
-		return;
+		if(supplyMode.isInitialSupply())
+		{
+			supplyMode.func(loop);
+			return;
+		}
+		else
+		{
+			cga.travel.falan.toCastleHospital(()=>{
+				setTimeout(loop, 3000);
+			});
+			return;
+		}
 	}
 
 	callSubPluginsAsync('prepare', ()=>{

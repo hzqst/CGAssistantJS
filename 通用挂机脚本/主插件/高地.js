@@ -225,10 +225,20 @@ var loop = ()=>{
 		return;
 	}
 
-	if(cga.needSupplyInitial() && supplyMode.isInitialSupply())
+	if(cga.needSupplyInitial())
 	{
-		supplyMode.func(loop);
-		return;
+		if(supplyMode.isInitialSupply())
+		{
+			supplyMode.func(loop);
+			return;
+		}
+		else
+		{
+			cga.travel.falan.toCastleHospital(()=>{
+				setTimeout(loop, 3000);
+			});
+			return;
+		}
 	}
 
 	callSubPluginsAsync('prepare', ()=>{

@@ -187,10 +187,20 @@ var loop = ()=>{
 		return;
 	}
 	
-	if(cga.needSupplyInitial() && supplyMode.isInitialSupply() && map != '圣骑士营地')
+	if(cga.needSupplyInitial() && map != '圣骑士营地')
 	{
-		supplyMode.func(loop);
-		return;
+		if(supplyMode.isInitialSupply())
+		{
+			supplyMode.func(loop);
+			return;
+		}
+		else
+		{
+			cga.travel.falan.toCastleHospital(()=>{
+				setTimeout(loop, 3000);
+			});
+			return;
+		}
 	}
 
 	callSubPluginsAsync('prepare', ()=>{

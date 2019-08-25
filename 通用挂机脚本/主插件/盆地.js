@@ -1,5 +1,5 @@
 var Async = require('async');
-var supplyMode = require('./../公共模块/盆地回补');
+var supplyMode = require('./../公共模块/里堡回补');
 var teamMode = require('./../公共模块/组队模式');
 var logbackEx = require('./../公共模块/登出防卡住');
 
@@ -162,10 +162,20 @@ var loop = ()=>{
 		return;
 	}
 
-	if(cga.needSupplyInitial() && supplyMode.isInitialSupply())
+	if(cga.needSupplyInitial())
 	{
-		supplyMode.func(loop);
-		return;
+		if(supplyMode.isInitialSupply())
+		{
+			supplyMode.func(loop);
+			return;
+		}
+		else
+		{
+			cga.travel.falan.toCastleHospital(()=>{
+				setTimeout(loop, 3000);
+			});
+			return;
+		}
 	}
 	
 	callSubPluginsAsync('prepare', ()=>{

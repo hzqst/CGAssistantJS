@@ -221,9 +221,18 @@ var loop = ()=>{
 	
 	if(cga.needSupplyInitial() && (map == '里谢里雅堡' || map == '艾尔莎岛'))
 	{
-		cga.travel.falan.toCastleHospital(()=>{
-			setTimeout(loop, 5000);
-		});
+		if(supplyMode.isInitialSupply())
+		{
+			supplyMode.func(loop);
+			return;
+		}
+		else
+		{
+			cga.travel.falan.toCastleHospital(()=>{
+				setTimeout(loop, 3000);
+			});
+			return;
+		}
 		return;
 	}
 	
