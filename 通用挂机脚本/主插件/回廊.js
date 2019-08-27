@@ -47,21 +47,35 @@ var playerThink = ()=>{
 
 	if(cga.isTeamLeaderEx())
 	{
-		console.log(ctx.result);
+		var interruptFromMoveThink = false;
 		
 		if(ctx.result == null && playerThinkInterrupt.hasInterrupt())
+		{
 			ctx.result = 'supply';
+			interruptFromMoveThink = true;
+		}
 
+		if(ctx.result == 'supply' && supplyMode.isLogBack())
+			ctx.result = 'logback';
+		
 		if( ctx.result == 'supply' || ctx.result == 'logback' )
 		{
-			moveThinkInterrupt.requestInterrupt(()=>{
-				if(cga.isInNormalState()){
-					logbackEx.func(loop);
-					return true;
-				}
+			if(interruptFromMoveThink)
+			{
+				logbackEx.func(loop);
 				return false;
-			});
-			return false;
+			}
+			else
+			{
+				moveThinkInterrupt.requestInterrupt(()=>{
+					if(cga.isInNormalState()){
+						logbackEx.func(loop);
+						return true;
+					}
+					return false;
+				});
+				return false;
+			}
 		}
 	}
 
