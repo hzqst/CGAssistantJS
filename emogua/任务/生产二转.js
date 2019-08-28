@@ -13,7 +13,7 @@ require('../wrapper').then(cga => {
 	});
 	let timer = Date.now();
 	cga.emogua.logBack().then(
-		() => cga.emogua.prepare({rechargeFlag: 2})
+		() => cga.emogua.prepare({repairFlag: -1})
 	).then(
 		() => cga.emogua.goto(n => n.teleport.ghana)
 	).then(
