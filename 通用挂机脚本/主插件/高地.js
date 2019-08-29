@@ -169,14 +169,14 @@ var playerThink = ()=>{
 		{
 			if(interruptFromMoveThink)
 			{
-				walkMazeBack(loop);
+				supplyMode.func(loop);
 				return false;
 			}
 			else
 			{
 				moveThinkInterrupt.requestInterrupt(()=>{
 					if(cga.isInNormalState()){
-						walkMazeBack(loop);
+						supplyMode.func(loop);
 						return true;
 					}
 					return false;

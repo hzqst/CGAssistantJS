@@ -82,26 +82,7 @@ var playerThink = ()=>{
 		if(ctx.result == 'supply' && supplyMode.isLogBack())
 			ctx.result = 'logback';
 		
-		if( ctx.result == 'supply' )
-		{
-			if(interruptFromMoveThink)
-			{
-				walkMazeBack(loop);
-				return false;
-			}
-			else
-			{
-				moveThinkInterrupt.requestInterrupt(()=>{
-					if(cga.isInNormalState()){
-						walkMazeBack(loop);
-						return true;
-					}
-					return false;
-				});
-				return false;
-			}
-		}
-		else if( ctx.result == 'logback' )
+		if( ctx.result == 'supply' || ctx.result == 'logback' )
 		{
 			if(interruptFromMoveThink)
 			{
