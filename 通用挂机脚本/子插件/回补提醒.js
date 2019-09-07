@@ -129,7 +129,7 @@ var thisobj = {
 			if(typeof obj.minMp == 'string' && obj.minMp.charAt(obj.minMp.length - 1) == '%')
 			{
 				configTable.minMp = obj.minMp;
-				thisobj.minMpPercent = parseInt(obj.minHp.substring(0, obj.minMp.length - 1));
+				thisobj.minMpPercent = parseInt(obj.minMp.substring(0, obj.minMp.length - 1));
 			}
 			else
 			{

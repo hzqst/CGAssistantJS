@@ -55,9 +55,6 @@ var playerThink = ()=>{
 			interruptFromMoveThink = true;
 		}
 
-		if(ctx.result == 'supply' && supplyMode.isLogBack())
-			ctx.result = 'logback';
-		
 		if( ctx.result == 'supply' || ctx.result == 'logback' )
 		{
 			if(interruptFromMoveThink)
