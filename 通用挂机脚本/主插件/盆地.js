@@ -265,7 +265,7 @@ var thisobj = {
 				break;
 			}
 		}
-		
+
 		if(!thisobj.battleArea){
 			console.error('读取配置：练级地点失败！');
 			return false;
