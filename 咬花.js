@@ -52,7 +52,10 @@ var cga = require('./cgaapi')(function(){
 				loop_count ++;
 				cga.SayWords('已刷' + loop_count + '遍！', 0, 3, 1);
 				
-				loop();
+				if(cga.GetMapIndex().index3 == 44641)
+					cb2(true);
+				else
+					loop();
 			};
 
 			cga.walkList([
@@ -63,7 +66,7 @@ var cga = require('./cgaapi')(function(){
 	],
 	[//任务阶段是否完成
 		function(){//证明信
-			return (cga.GetMapName() == '回忆之间') ? true : false;
+			return (cga.GetMapIndex().index3 == 44642) ? true : false;
 		},
 		function(){
 			return false;
@@ -71,5 +74,7 @@ var cga = require('./cgaapi')(function(){
 	]
 	);
 	
-	task.doTask();
+	task.doTask(()=>{
+		
+	});
 });

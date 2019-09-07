@@ -2080,12 +2080,20 @@ module.exports = function(callback){
 	//取背包中的物品数量
 	//参数1：物品名, 或#物品id
 	//参数2：是否包括装备栏
-	cga.getItemCount = function(name){
+	cga.getItemCount = function(filter){
 		var includeEquipment = arguments[1] === true ? true : false;
 		var items = cga.getInventoryItems();
 		var count = 0;
-		if(name.charAt(0) == '#'){
-			var itemid = parseInt(name.substring(1));
+		if(filter.charAt(0) == '#'){
+			var itemid = parseInt(filter.substring(1));
+			items.forEach((item)=>{
+				if(!includeEquipment && item.pos < 8)
+					return false;
+				if(item.itemid == itemid)
+					count += item.count > 0 ? item.count : 1;
+			});
+		} else if(typeof filter == 'number'){
+			var itemid = filter;
 			items.forEach((item)=>{
 				if(!includeEquipment && item.pos < 8)
 					return false;
@@ -2096,7 +2104,7 @@ module.exports = function(callback){
 			items.forEach((item)=>{
 				if(!includeEquipment && item.pos < 8)
 					return false;
-				if(item.name == name)
+				if(item.name == filter)
 					count += item.count > 0 ? item.count : 1;
 			});
 		}
@@ -2476,9 +2484,6 @@ module.exports = function(callback){
 	}
 	
 	//鉴定背包中所有的物品
-	
-	cga.isAssessedEver = false;
-	
 	cga.assessAllItems = (cb)=>{
 		var item = cga.findAssessableItem();
 		var times = 0;
@@ -2487,11 +2492,9 @@ module.exports = function(callback){
 			cga.manipulateItemEx({
 				skill : '鉴定',
 				itempos : item.pos,
-				immediate : cga.isAssessedEver ? true : false,
+				immediate : true,
 			}, (err, results)=>{
-				if(results && results.success == true)
-					cga.isAssessedEver = true;
-				
+
 				setTimeout(cga.assessAllItems, 500, cb);
 			})
 		} else {
@@ -3012,7 +3015,7 @@ module.exports = function(callback){
 				var msgheader = fromTeammate.name + ': ';
 				if(r.msg.indexOf(msgheader) >= 0){
 					var msg = r.msg.substr(r.msg.indexOf(msgheader) + msgheader.length);
-					listen = cb(fromTeammate, msg);						
+					listen = cb(fromTeammate, msg);
 				}
 			}
 
@@ -3731,6 +3734,28 @@ module.exports = function(callback){
 			var player = players.find((e, index) => typeof name == 'number' ? index == name : e.name == name);
 			if (player !== undefined) {
 				cga.tradeInternal(stuff, checkParty, resolve, name, timeout);
+				cga.PlayerMenuSelect(player.index);
+			} else {
+				console.log('player not found')
+				resolve({success: false, reason : 'player not found'});
+			}
+		}, 3000);
+		
+		cga.DoRequest(cga.REQUEST_TYPE_TRADE);
+	}
+	
+	cga.requestTrade = (name, resolve, timeout) => {
+		cga.AsyncWaitPlayerMenu((err, players) => {
+			if(err){
+				console.log('player not found')
+				resolve({success: false, reason : 'player menu timeout'});
+				return;
+			}
+			
+			if (!(players instanceof Array)) players = [];
+			var player = players.find((e, index) => typeof name == 'number' ? index == name : e.name == name);
+			if (player !== undefined) {
+				resolve({success: true});
 				cga.PlayerMenuSelect(player.index);
 			} else {
 				console.log('player not found')
