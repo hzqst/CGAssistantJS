@@ -27,7 +27,7 @@ var supplyModeArray = [
 	isLogBack : ()=>{
 		var map = cga.GetMapName();
 		var mapindex = cga.GetMapIndex().index3;
-		return (map == '肯吉罗岛' || map == '圣骑士营地' || mapindex == 44692 || map.indexOf('黑龙沼泽') >= 0 || map.indexOf('蜥蜴洞穴') >= 0) ? false : true;
+		return (map == '肯吉罗岛' || map == '圣骑士营地' || mapindex == 44692 || map.indexOf('黑龙沼泽') >= 0 || map.indexOf('蜥蜴洞穴') >= 0 || map.indexOf('隐秘之洞地下') >= 0) ? false : true;
 	},
 	isInitialSupply : ()=>{
 		return false;
@@ -59,7 +59,7 @@ var supplyModeArray = [
 	isLogBack : ()=>{
 		var map = cga.GetMapName();
 		var mapindex = cga.GetMapIndex().index3;
-		return (map == '肯吉罗岛' || map == '圣骑士营地' || mapindex == 44692 || map.indexOf('黑龙沼泽') >= 0 || map.indexOf('蜥蜴洞穴') >= 0) ? false : true;
+		return (map == '肯吉罗岛' || map == '圣骑士营地' || mapindex == 44692 || map.indexOf('黑龙沼泽') >= 0 || map.indexOf('蜥蜴洞穴') >= 0 || map.indexOf('隐秘之洞地下') >= 0) ? false : true;
 	},
 	isInitialSupply : ()=>{
 		return false;
