@@ -188,57 +188,58 @@ var cga = require('./cgaapi')(function(){
 											[16, 9, '镜中的豪宅  2楼'],
 											[40, 10],
 											], ()=>{
-												cga.cleanInventoryOnceSync();
-												cga.TurnTo(41, 10);
-												cga.AsyncWaitNPCDialog(()=>{
-													cga.ClickNPCDialog(4, 0);
-													setTimeout(()=>{
-														cga.walkList([
-														[40,16],
-														], ()=>{
-															cga.TurnTo(40, 17);
-															cga.AsyncWaitNPCDialog(()=>{
-																cga.ClickNPCDialog(4, 0);
-																cga.AsyncWaitMovement({x:40, y:18, delay:1000, timeout:5000}, ()=>{
-																	cga.walkList([
-																	[17, 61, '豪宅  2楼'],
-																	[5, 23, '豪宅  阁楼'],
-																	[14, 30, '镜中的豪宅  阁楼'],
-																	[14, 36, '镜中的豪宅  2楼'],
-																	[11, 35],
-																	], ()=>{
-																		cga.cleanInventory(1, ()=>{
-																			cga.TurnTo(12, 35);
-																			cga.AsyncWaitNPCDialog(()=>{
-																				cga.ClickNPCDialog(4, 0);
-																				setTimeout(()=>{
-																					cga.walkList([
-																					[16, 51, '镜中的豪宅  阁楼'],
-																					[23, 20],
-																					], ()=>{
-																						cga.TurnTo(23, 19);
-																						cga.AsyncWaitNPCDialog(()=>{
-																							cga.ClickNPCDialog(4, 0);
-																							cga.AsyncWaitMovement({x:23, y:18, delay:1000, timeout:5000}, ()=>{
-																								cga.walkList([
-																								[23, 11],
-																								[22, 11],
-																								[23, 11],
-																								[22, 11],
-																								[23, 11],
-																								], cb2);
+												cga.cleanInventory(1, ()=>{
+													cga.TurnTo(41, 10);
+													cga.AsyncWaitNPCDialog(()=>{
+														cga.ClickNPCDialog(4, 0);
+														setTimeout(()=>{
+															cga.walkList([
+															[40,16],
+															], ()=>{
+																cga.TurnTo(40, 17);
+																cga.AsyncWaitNPCDialog(()=>{
+																	cga.ClickNPCDialog(4, 0);
+																	cga.AsyncWaitMovement({x:40, y:18, delay:1000, timeout:5000}, ()=>{
+																		cga.walkList([
+																		[17, 61, '豪宅  2楼'],
+																		[5, 23, '豪宅  阁楼'],
+																		[14, 30, '镜中的豪宅  阁楼'],
+																		[14, 36, '镜中的豪宅  2楼'],
+																		[11, 35],
+																		], ()=>{
+																			cga.cleanInventory(1, ()=>{
+																				cga.TurnTo(12, 35);
+																				cga.AsyncWaitNPCDialog(()=>{
+																					cga.ClickNPCDialog(4, 0);
+																					setTimeout(()=>{
+																						cga.walkList([
+																						[16, 51, '镜中的豪宅  阁楼'],
+																						[23, 20],
+																						], ()=>{
+																							cga.TurnTo(23, 19);
+																							cga.AsyncWaitNPCDialog(()=>{
+																								cga.ClickNPCDialog(4, 0);
+																								cga.AsyncWaitMovement({x:23, y:18, delay:1000, timeout:5000}, ()=>{
+																									cga.walkList([
+																									[23, 11],
+																									[22, 11],
+																									[23, 11],
+																									[22, 11],
+																									[23, 11],
+																									], cb2);
+																								});
 																							});
 																						});
-																					});
-																				}, 1500);
+																					}, 1500);
+																				});
 																			});
 																		});
 																	});
 																});
 															});
-														});
-													}, 1500);
-												});											
+														}, 1500);
+													});	
+												});									
 											});
 										});
 									});
