@@ -111,7 +111,7 @@ var cga = require('./cgaapi')(function(){
 	{
 		type : 1,
 		name : '红组',
-		desired_flowers = [
+		desired_flowers : [
 		'黄花',
 		'绿花',
 		'蓝花',
@@ -210,7 +210,7 @@ var cga = require('./cgaapi')(function(){
 	{
 		type : 2,
 		name : '蓝组',
-		desired_flowers = [
+		desired_flowers : [
 		'绿花',
 		'黄花',
 		'红花',
@@ -309,7 +309,7 @@ var cga = require('./cgaapi')(function(){
 	{
 		type : 3,
 		name : '黄组',
-		desired_flowers = [
+		desired_flowers : [
 		'红花',
 		'蓝花',
 		'绿花',
@@ -411,7 +411,7 @@ var cga = require('./cgaapi')(function(){
 	{
 		type : 4,
 		name : '绿组',
-		desired_flowers = [
+		desired_flowers : [
 		'蓝花',
 		'红花',
 		'黄花',
