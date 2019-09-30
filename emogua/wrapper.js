@@ -93,7 +93,7 @@ const Professions = [
 		category: '魔法系'
 	}, {
 		name: '魔术师',
-		titles: ['见习魔术师', '魔术师', '王宫魔术师', '魔导士', '大魔术师', '狂魔导师'],
+		titles: ['见习魔术师', '魔术师', '王宫魔法师', '魔导士', '大魔术师', '狂魔导师'],
 		category: '魔法系'
 	}, {
 		name: '巫师',
@@ -367,7 +367,18 @@ module.exports = new Promise(resolve => {
 		return !(speed && speed.x === 0 && speed.y === 0);
 	};
 	cga.emogua.getPlayerProfession = () => ProfessionsMap[cga.GetPlayerInfo().job];
-	cga.emogua.getTeammates = () => cga.getTeamPlayers().filter(e => e.is_me !== true);
+	// 不可以在战斗中获取
+	let teammates = [];
+	cga.emogua.getTeammates = () => {
+		if (cga.isInNormalState()) {
+			try {
+				teammates = cga.getTeamPlayers().filter(e => e.is_me !== true);
+			} catch (e) {
+				console.log('获取teamplayers失败', e);
+			}
+		}
+		return teammates;
+	}
 	cga.emogua.getTeamNumber = () => cga.emogua.getTeammates().length + 1;
 	cga.emogua.getTeamLevel = () => {
 		let level = cga.GetPlayerInfo().level;
@@ -392,7 +403,16 @@ module.exports = new Promise(resolve => {
 	cga.emogua.recursion = (action, timer = Date.now()) => {
 		const result = action(timer);
 		if (result instanceof Promise) {
-			return result.then(() => cga.emogua.recursion(action, timer)).catch(e => e);
+			return result.then(
+				() => cga.emogua.recursion(action, timer),
+				e => {
+					if (e && typeof e != 'number') console.log(e);
+					if (e == 'RPC Invocation failed.') {
+						console.log('aha!');
+					}
+					return e;
+				}
+			);
 		}
 		if (result === true) {
 			return cga.emogua.recursion(action, timer);
@@ -450,13 +470,18 @@ module.exports = new Promise(resolve => {
 		if (matched) return [matched[2],matched[4]];
 		return [undefined, undefined];
 	};
-	cga.emogua.logBack = () => cga.emogua.sayWords('防卡住登出').then(() => cga.emogua.waitMessage(chat => {
-		if (chat.msg) {
-			cga.LogBack();
-			return cga.emogua.delay(2000).then(() => cga.emogua.waitAfterBattle());
+	cga.emogua.logBack = (times = 0) => Promise.resolve().then(() => {
+		if (times > 9) cga.LogOut();
+		else cga.LogBack();
+		return cga.emogua.delay(2000).then(() => cga.emogua.waitAfterBattle());
+	}).then(() => {
+		if (['法兰城','艾尔莎岛'].indexOf(cga.GetMapName()) < 0) {
+			return cga.emogua.logBack(times + 1);
 		}
-		return cga.emogua.delay(5000).then(() => cga.emogua.logBack());
-	}), 5000);
+	}).catch(e => {
+		console.log('登出失败', e);
+		return cga.emogua.logBack(times + 1);
+	});
 	cga.emogua.forceMove = (orientation, times = 1) => {
 		if  (times > 0) {
 			cga.ForceMove(orientation, true);
@@ -486,18 +511,9 @@ module.exports = new Promise(resolve => {
 		return cga.emogua.recursion(
 			() => cga.emogua.delay(120).then(() => {
 				if (!cga.isInNormalState()) {
-					return cga.emogua.waitAfterBattle().then(battled => {
-						lastPointTimer = Date.now();
-						if (battled) {
-							// console.log('send walk package ' + target);
-							cga.WalkTo(targetX, targetY);
-							return cga.emogua.delay(100);
-						}
-					}).then(() => {
-						tryCount = 1;
-					});
+					return cga.emogua.waitAfterBattle();
 				}
-			}).then(() => {
+			}).then(battled => {
 				const map = cga.emogua.getMapInfo();
 				if (startMapIndex != map.indexes.index3) {
 					if (destination instanceof Array && map.x == destination[0] && map.y == destination[1]) {
@@ -520,19 +536,25 @@ module.exports = new Promise(resolve => {
 						return Promise.reject(0);
 					}
 				}
-				if (map.x != lastPoint.x || map.y != lastPoint.y) {
+				if (battled || map.x != lastPoint.x || map.y != lastPoint.y) {
 					lastPoint = map;
 					lastPointTimer = Date.now();
 				}
 				const interval = Date.now() - lastPointTimer;
-				if (tryCount > 4) {
-					console.log('Can not arrive target=' + target);
-					return Promise.reject(1);
-				}
 				if (interval >= (500 * tryCount)) {
 					// console.log('send walk package ' + target);
-					cga.WalkTo(targetX, targetY);
-					tryCount++;
+					if (map.x != targetX || map.y != targetY) {
+						cga.WalkTo(targetX, targetY);
+					}
+					if (battled) tryCount = 1;
+					else tryCount++;
+				}
+				if (tryCount > 4) {
+					console.log('Can not arrive target=' + target);
+					if (map.x == targetX && map.y == targetY) {
+						return Promise.reject(-3);
+					}
+					return Promise.reject(1);
 				}
 			})
 		);
@@ -560,13 +582,14 @@ module.exports = new Promise(resolve => {
 						}
 					});
 				} else {
-					return cga.emogua.dropItems();
+					return cga.emogua.delay(1000).then(cga.emogua.waitAfterBattle).then(() => cga.emogua.dropItems());
 				}
 			}
 		});
 	};
+	const excludedMaps = [27001,61001,43600,43000,2400,11036,11037,15596,11032];
 	const isMapDownloaded = (walls, mapIndex = cga.GetMapIndex()) => {
-		if ([27001,61001,43600,43000,2400].indexOf(mapIndex.index3) > -1) return true;
+		if (excludedMaps.indexOf(mapIndex.index3) > -1) return true;
 		const downloadedFlag = mapIndex.index1 === 1 ? 0 : 1;
 		return walls.matrix[0][0] == downloadedFlag && walls.matrix[walls.y_size-1][0] == downloadedFlag && walls.matrix[walls.y_size-1][walls.x_size-1] == downloadedFlag && walls.matrix[0][walls.x_size-1] == downloadedFlag;
 	};
@@ -578,6 +601,7 @@ module.exports = new Promise(resolve => {
 				console.log('等待下载地图');
 				const ended = () => {
 					console.log('下载地图结束');
+					if (mapIndex.index1 === 0) excludedMaps.push(mapIndex.index3);
 					resolve(cga.buildMapCollisionMatrix());
 				};
 				const recursiveDownload = (xfrom, yfrom, xsize, ysize, times = 0) => {
@@ -619,6 +643,7 @@ module.exports = new Promise(resolve => {
 	cga.emogua.autoWalk = (target, walls, tryCount = 0, compress = true) => Promise.resolve().then(
 		() => walls ? walls : cga.emogua.downloadMap()
 	).then(walls => {
+		const mapInfo = cga.getMapInfo();
 		const matrix = walls.matrix;
 		cga.getMapObjects().filter(e => [3,10].indexOf(e.cell) >= 0).forEach(entry => {
 			if (entry.x != target[0] || entry.y != target[1]) {
@@ -630,8 +655,7 @@ module.exports = new Promise(resolve => {
 			allowDiagonal: true,
 			dontCrossCorners: true
 		});
-		const p = cga.GetMapXY();
-		let apath = finder.findPath(p.x, p.y, target[0], target[1], grid);
+		let apath = finder.findPath(mapInfo.x, mapInfo.y, target[0], target[1], grid);
 		// PF.Util.smoothenPath(grid, apath)
 		let path = compress ? PF.Util.compressPath(apath) : apath;
 		if (path.length > 0) {
@@ -665,10 +689,13 @@ module.exports = new Promise(resolve => {
 		}).shift();
 	};
 
-	cga.emogua.walkRandomMaze = () => cga.emogua.downloadMap().then(walls => {
+	cga.emogua.walkRandomMaze = (times = 0) => cga.emogua.downloadMap().then(walls => {
 		const target = cga.emogua.getFarthestEntry(cga.GetMapXY());
 		if (target) {
 			return cga.emogua.autoWalk([target.mapx, target.mapy, '*'], walls);
+		}
+		if (times < 3) {
+			return cga.emogua.walkRandomMaze(times + 1);
 		}
 		return Promise.reject('Fail to walk random maze');
 	});
@@ -861,6 +888,9 @@ module.exports = new Promise(resolve => {
 		} else if (dialog.options == 1) {
 			cga.ClickNPCDialog(1, -1);
 			return true;
+		} else if (dialog.options == 2) {
+			cga.ClickNPCDialog(2, -1);
+			return true;
 		} else if (dialog.options == 3) {
 			cga.ClickNPCDialog(1, -1);
 			return true;
@@ -885,6 +915,9 @@ module.exports = new Promise(resolve => {
 			return true;
 		} else if (dialog.options == 1) {
 			cga.ClickNPCDialog(1, -1);
+			return true;
+		} else if (dialog.options == 2) {
+			cga.ClickNPCDialog(2, -1);
 			return true;
 		} else if (dialog.options == 3) {
 			cga.ClickNPCDialog(1, -1);
@@ -935,6 +968,7 @@ module.exports = new Promise(resolve => {
 				let timeout = 6000;
 				return cga.emogua.recursion(
 					() => cga.emogua.waitNPCDialog(dialog => {
+						// console.log(dialog);
 						if (typeof dialog.type == 'number') {
 							timeout = 3000;
 							return selector(dialog);
@@ -1103,12 +1137,23 @@ module.exports = new Promise(resolve => {
 	};
 	Network.elsa.x.links = [
 		new Link(Network.elsa.a), new Link(Network.elsa.b),
-		new Link(Network.castle.x, () => cga.emogua.recursion(
-			() => cga.emogua.talkNpc(141,104,cga.emogua.talkNpcSelectorYes, '里谢里雅堡').then(
-				() => Promise.reject(),
-				() => cga.emogua.logBack()
-			)
-		))
+		new Link(Network.castle.x, () => {
+			let times = 0;
+			return cga.emogua.recursion(
+				() => cga.emogua.talkNpc(141,104,cga.emogua.talkNpcSelectorYes, '里谢里雅堡').then(
+					() => {
+						return Promise.reject();
+					},
+					() => {
+						if (times > 3) {
+							return cga.LogOut();
+						}
+						times++;
+						return cga.emogua.logBack();
+					}
+				)
+			);
+		})
 	];
 	Network.elsa.a.links = [
 		new Link(Network.asha.w, () => cga.emogua.turnOrientation(0))
@@ -1254,7 +1299,8 @@ module.exports = new Promise(resolve => {
 	];
 	Network.falan.sell.links = [
 		new Link(Network.falan.s2), new Link(Network.falan.s1),
-		new Link(Network.falan.fabric, () => cga.emogua.autoWalkList([[117,112,'流行商店'],Network.falan.fabric.id]))
+		new Link(Network.falan.fabric, () => cga.emogua.autoWalkList([[117,112,'流行商店'],Network.falan.fabric.id])),
+		new Link(Network.castle.s, () => cga.emogua.autoWalkList([[153,100,'里谢里雅堡']]))
 	];
 	Network.falan.w1.links = [
 		new Link(Network.falan.w2), new Link(Network.falan.wout,() => cga.emogua.autoWalk([22,88,'芙蕾雅'])),
@@ -1587,22 +1633,37 @@ module.exports = new Promise(resolve => {
 	};
 	/**
 	 * list
-	 *     [[name | matcher, groupCount]]
-	 *     可存到可叠加物品上，比如水晶碎片
+	 *     [[name | matcher, pileMax]]
+	 *     pileMax: 最大可叠加数
+	 *     空或者不传表示存全部
 	 * size
 	 *     银行大小  默认20
 	 * 返回
 	 *     true 银行已满
 	 */
-	cga.emogua.saveToBank = (list, size) => {
+	cga.emogua.saveToBank = (list, size = 20) => {
 		const bankList = cga.GetBankItemsInfo();
-		const bankMax = 99 + (size ? size : 20);
+		const bankMax = 99 + size;
 		const isSavable = (slot) => {
 			return list && list.findIndex(e => {
 				if (typeof e[0] == 'string') return e[0] == slot.name && slot.count > 0 && slot.count < e[1];
 				else if (typeof e[0] == 'function') return e[0](slot) && slot.count > 0 && slot.count < e[1];
 				else return false;
 			}) > -1;
+		};
+		let bankSlotIndex = 100;
+		const toSavableSlotIndex = (item) => {
+			while (bankSlotIndex <= bankMax) {
+				const slot = bankList.find(b => b.pos == bankSlotIndex);
+				if ((!slot || isSavable(slot))) {
+					cga.MoveItem(item.pos, bankSlotIndex, -1);
+					if (slot) slot.count = slot.count + item.count;
+					else bankList.push({pos: bankSlotIndex, count: item.count});
+					return true;
+				}
+				bankSlotIndex++;
+			}
+			return false;
 		};
 
 		const items = cga.getInventoryItems().filter(item =>
@@ -1614,24 +1675,17 @@ module.exports = new Promise(resolve => {
 			}) > -1
 		);
 		let result = Promise.resolve();
-		let itemIndex = 0;
 		if (items.length > 0) {
-			for (let bankSlotIndex = 100; bankSlotIndex <= bankMax; bankSlotIndex++) {
-				const slot = bankList.find(e => e.pos == bankSlotIndex);
-				if ((!slot || isSavable(slot)) && itemIndex < items.length) {
-					const currentItemPos = items[itemIndex].pos;
-					result = result.then(
-						() => Promise.resolve(cga.MoveItem(currentItemPos, bankSlotIndex, -1))
-					).then(
-						() => cga.emogua.delay(300)
-					);
-					itemIndex ++;
-				} else if (itemIndex >= items.length) break;
+			for (let itemIndex = 0; itemIndex < items.length; itemIndex++) {
+				result = result.then(() => {
+					if (!toSavableSlotIndex(items[itemIndex])) {
+						return Promise.reject();
+					}
+				});
 			}
+			return result.then(() => false).catch(() => true);
 		}
-		return result.then(
-				() => cga.emogua.delay(1000)
-			).then(() => cga.GetBankItemsInfo().length >= (bankMax - 99));
+		return result.then(() => bankList.length >= size);
 	};
 	const getTradeItems = (filter = (c, previous) => false) => {
 		const tradeItems = [];
@@ -1834,7 +1888,7 @@ module.exports = new Promise(resolve => {
 					if (cga.isInNormalState()) {
 						cga.ForceMove(direction, false);
 					}
-					return cga.emogua.delay(200).then(() => {
+					return cga.emogua.delay(100).then(() => {
 						if (stopEncounter) return Promise.reject();
 						else if (!cga.isInNormalState()) {
 							return cga.emogua.waitAfterBattle().then(() => {
@@ -1963,7 +2017,7 @@ module.exports = new Promise(resolve => {
 			if (dialog.type == 28) {
 				cga.BuyNPCStore(list);
 			}
-		}).then(() => cga.emogua.overlap());
+		}).then(() => cga.emogua.pile());
 		else return Promise.resolve();
 	};
 	// list: [{index: 0, count: 20}]
@@ -1980,7 +2034,7 @@ module.exports = new Promise(resolve => {
 			if (dialog.type == 6) {
 				cga.BuyNPCStore(list);
 			}
-		}).then(() => cga.emogua.overlap());
+		}).then(() => cga.emogua.pile());
 		else return Promise.resolve();
 	};
 	cga.emogua.sell = function(x, y, filter) {
@@ -2014,10 +2068,19 @@ module.exports = new Promise(resolve => {
 		}
 		return Promise.resolve();
 	};
-	cga.emogua.waitWorkResult = (timeout = 45000) => new Promise((resolve, reject) => {
-		cga.AsyncWaitWorkingResult((error, r) => setTimeout(() => resolve(r ? r : {}), 0), timeout);
+	// cga.GetCraftStatus() 0 打开制造界面 1 制造中 2 制造完成 4 修理中 | 鉴定中
+	cga.emogua.waitWorkResult = (timeout = 50000) => new Promise((resolve, reject) => {
+		cga.AsyncWaitWorkingResult((error, r) => setTimeout(() => {
+			let result = r;
+			if (error) {
+				result = {
+					success: false,
+					error: true
+				};
+			}
+			resolve(result);
+		}, 0), timeout);
 	});
-	let craftOnce = false;
 	cga.emogua.craft = (name) => {
 		const requireInfo = cga.getItemCraftInfo(name);
 		if (requireInfo) {
@@ -2040,15 +2103,10 @@ module.exports = new Promise(resolve => {
 						positions[index] = m.position;
 					});
 					if (jewelPosition > 0) positions[5] = jewelPosition;
-					cga.SetImmediateDoneWork(craftOnce);
+					cga.SetImmediateDoneWork(true);
 					if (cga.StartWork(requireInfo.skill.index, requireInfo.craft.index)) {
 						cga.CraftItem(requireInfo.skill.index, requireInfo.craft.index, 0, positions);
-						return cga.emogua.waitWorkResult(craftOnce ? 2000 : 45000).then(r => {
-							if (r.success === true) {
-								craftOnce = true;
-							}
-							return cga.emogua.overlap();
-						});
+						return cga.emogua.waitWorkResult().then(r => cga.emogua.pile());
 					}
 					return Promise.resolve();
 				}
@@ -2079,22 +2137,19 @@ module.exports = new Promise(resolve => {
 			rate: 0
 		};
 	};
-	let assessOnce = false;
 	cga.emogua.assessAll = () => {
 		const skill = cga.GetSkillsInfo().find(e => e.name == '鉴定');
 		let result = Promise.resolve();
 		if (skill) {
 			cga.getInventoryItems().filter(i => !i.assessed && i.level <= skill.lv).forEach(item => {
 				result = result.then(() => cga.emogua.recursion(() => {
-					cga.SetImmediateDoneWork(assessOnce);
+					cga.SetImmediateDoneWork(true);
 					cga.StartWork(skill.index, 0);
 					if (cga.GetPlayerInfo().mp >= (item.level * 10) && cga.AssessItem(skill.index, item.pos)) {
-						return cga.emogua.waitWorkResult(assessOnce ? 3000 : 45000).then(r => {
-							if (r.success === true) {
-								assessOnce = true;
+						return cga.emogua.waitWorkResult().then(r => {
+							if (r.success) {
 								return Promise.reject();
 							}
-							return Promise.resolve();
 						});
 					}
 					return Promise.reject();
@@ -2103,7 +2158,6 @@ module.exports = new Promise(resolve => {
 		}
 		return result.then(() => cga.emogua.delay(500));
 	};
-	let repairOnce = false;
 	cga.emogua.repairAll = () => {
 		const skill = cga.GetSkillsInfo().filter(e => e.name.indexOf('修理') >= 0).sort((e1, e2) => e2.lv - e1.lv)[0];
 
@@ -2114,24 +2168,21 @@ module.exports = new Promise(resolve => {
 					(
 						(skill.name == '修理武器' && eq.type >= 0 && eq.type <= 6) ||
 						(skill.name == '修理防具' && eq.type >= 7 && eq.type <= 14)
-					) && eq.level <= skill.lv
+					) && (eq.level <= skill.lv || (eq.level <= 11 && skill.lv == 10))
 				) {
 					const durability = cga.emogua.getDurability(eq);
 					return durability && durability.current < durability.max;
 				}
 				return false;
-			}).forEach(item => result = result.then(() =>
-				cga.emogua.recursion(() => {
-					cga.SetImmediateDoneWork(repairOnce);
+			}).forEach(item => result = result.then(
+				() => cga.emogua.recursion(() => {
+					cga.SetImmediateDoneWork(true);
 					cga.StartWork(skill.index, 0);
-
 					if (cga.GetPlayerInfo().mp >= (item.level * 10) && cga.AssessItem(skill.index, item.pos)) {
-						return cga.emogua.waitWorkResult(repairOnce ? 3000 : 45000).then(r => {
-							if (r.success === true) {
-								repairOnce = true;
+						return cga.emogua.waitWorkResult().then(r => {
+							if (r.success) {
 								return Promise.reject();
 							}
-							return Promise.resolve();
 						});
 					}
 					return Promise.reject();
@@ -2167,6 +2218,34 @@ module.exports = new Promise(resolve => {
 			}, 0), 2000);
 		} else resolve();
 	});
+	cga.emogua.healSelf = (playerInfo = cga.GetPlayerInfo()) => {
+		const skill = cga.GetSkillsInfo().find(s => s.name == '治疗');
+		if (skill) {
+			const requireMp = 25 + skill.lv * 5;
+			if (playerInfo.health > 0 && playerInfo.mp >= requireMp) {
+				return new Promise((resolve, reject) => {
+					cga.StartWork(skill.index, skill.lv-1);
+					cga.AsyncWaitPlayerMenu((error, players) => setTimeout(() => {
+						if (players && players.length > 0) {
+							const index = players.findIndex(p => p.name == playerInfo.name);
+							if (typeof index == 'number') {
+								cga.PlayerMenuSelect(index);
+								cga.AsyncWaitUnitMenu((error, units) => setTimeout(() => {
+									if (error) {
+										resolve();
+									} else {
+										cga.UnitMenuSelect(0);
+										cga.AsyncWaitWorkingResult((error, result) => setTimeout(resolve, 0));
+									}
+								}, 0));
+							} else resolve();
+						} else resolve();
+					}, 0), 2000);
+				}).then(() => cga.emogua.healSelf());
+			}
+		}
+		return Promise.resolve();
+	};
 	cga.emogua.useCrystal = (name) => {
 		const found = cga.GetItemsInfo().find(e => {
 			return e.type == 22 && e.name == name && cga.emogua.getDurability(e).current > 1;
@@ -2395,14 +2474,14 @@ module.exports = new Promise(resolve => {
 			} else return false;
 		});
 		if (cga.emogua.getTeamNumber() == 1 && validMaps.includes(cga.GetMapName())) {
-			return cga.emogua.overlap().then(cga.emogua.dropItems).then(() => {
+			return cga.emogua.pile().then(cga.emogua.dropItems).then(() => {
 				const badge = typeof options.badge == 'boolean' ? options.badge : false;
 				if (badge) {
 					return cga.emogua.getDwarfBadge().then(r => r ? cga.emogua.logBack() : Promise.resolve());
 				}
 			}).then(findDoctor).then(recharge).then(getBackSouls).then(sell).then(repair).then(cga.emogua.tidyupEquipments).then(crystal);
 		} else {
-			return cga.emogua.overlap().then(cga.emogua.dropItems);
+			return cga.emogua.pile().then(cga.emogua.dropItems);
 		}
 	};
 
@@ -2434,7 +2513,8 @@ module.exports = new Promise(resolve => {
 		ISPLAYER: 1,
 		ISDOUBLE: 2,
 		ISSKILLPERFORMED: 4,
-		END: 8
+		END: 8,
+		BEGIN: 16
 	};
 	const BattlePositionMatrix = [
 		[4,2,0,1,3],
@@ -2481,6 +2561,8 @@ module.exports = new Promise(resolve => {
 		}
 		return result;
 	};
+	cga.emogua.DebuffFlags = DebuffFlags;
+	cga.emogua.BattlePositionMatrix = BattlePositionMatrix;
 	cga.emogua.AutoBattlePreset = {
 		/**
 		 * options {
@@ -2499,26 +2581,8 @@ module.exports = new Promise(resolve => {
 				if (profession.name == '弓箭手') {
 					sets.push({
 						user: 1,
-						check: context => context.enemies.length >= 8,
-						type: '技能',
-						skillName: '乱射',
-						skillLevel: 6,
-						targets: context => cga.emogua.AutoBattlePreset.getSortedEnemies(context)
-					});
-					sets.push({
-						user: 1,
-						check: context => context.enemies.length >= 5,
-						type: '技能',
-						skillName: '乱射',
-						skillLevel: 3,
-						targets: context => cga.emogua.AutoBattlePreset.getSortedEnemies(context)
-					});
-					sets.push({
-						user: 1,
 						check: context => context.enemies.length >= 3,
-						type: '技能',
-						skillName: '乱射',
-						skillLevel: 1,
+						type: '技能',skillName: '乱射',skillLevel: 3,
 						targets: context => cga.emogua.AutoBattlePreset.getSortedEnemies(context)
 					});
 				}
@@ -2563,9 +2627,9 @@ module.exports = new Promise(resolve => {
 					sets.push({
 						user: 1,
 						check: function(context) {
-							const needCleanPositions = context.teammates.filter(u => u.curhp > 0 && u.flags & DebuffFlags.ANY).map(u => u.pos);
+							const needCleanPositions = context.teammates.filter(u => u.curhp > 0 && u.flags & cga.emogua.DebuffFlags.ANY).map(u => u.pos);
 							if (needCleanPositions.length >= 2) {
-								const t = BattlePositionMatrix.getMaxTPosition(needCleanPositions);
+								const t = cga.emogua.BattlePositionMatrix.getMaxTPosition(needCleanPositions);
 								if (t.count >= 3) {
 									subSkillInfo = context.getAvaliableSubSkillInfo(this);
 									return subSkillInfo && subSkillInfo.level == 6;
@@ -2576,44 +2640,44 @@ module.exports = new Promise(resolve => {
 						type: '技能',
 						skillName: '洁净魔法', skillLevel: 6,
 						targets: context => {
-							const needCleanPositions = context.teammates.filter(u => u.flags & DebuffFlags.ANY).map(u => u.pos);
-							const t = BattlePositionMatrix.getMaxTPosition(needCleanPositions);
+							const needCleanPositions = context.teammates.filter(u => u.flags & cga.emogua.DebuffFlags.ANY).map(u => u.pos);
+							const t = cga.emogua.BattlePositionMatrix.getMaxTPosition(needCleanPositions);
 							return [t.position];
 						}
 					});
-					sets.push({
-						user: 1,
-						check: function(context) {
-							const needCleanPositions = context.teammates.filter(u => u.curhp > 0 && u.flags & DebuffFlags.ANY).map(u => u.pos);
-							if (needCleanPositions.length >= 3) {
-								subSkillInfo = context.getAvaliableSubSkillInfo(this);
-								return subSkillInfo && subSkillInfo.level == 8;
-							}
-							return false;
-						},
-						type: '技能',
-						skillName: '洁净魔法', skillLevel: 8,
-						targets: context => {
-							const needCleanPositions = context.teammates.filter(u => u.flags & DebuffFlags.ANY).map(u => u.pos);
-							const t = BattlePositionMatrix.getMaxTPosition(needCleanPositions);
-							return [t.position];
-						}
-					});
+					// sets.push({
+					// 	user: 1,
+					// 	check: function(context) {
+					// 		const needCleanPositions = context.teammates.filter(u => u.curhp > 0 && u.flags & cga.emogua.DebuffFlags.ANY).map(u => u.pos);
+					// 		if (needCleanPositions.length >= 3) {
+					// 			subSkillInfo = context.getAvaliableSubSkillInfo(this);
+					// 			return subSkillInfo && subSkillInfo.level == 8;
+					// 		}
+					// 		return false;
+					// 	},
+					// 	type: '技能',
+					// 	skillName: '洁净魔法', skillLevel: 8,
+					// 	targets: context => {
+					// 		const needCleanPositions = context.teammates.filter(u => u.flags & cga.emogua.DebuffFlags.ANY).map(u => u.pos);
+					// 		const t = cga.emogua.BattlePositionMatrix.getMaxTPosition(needCleanPositions);
+					// 		return [t.position];
+					// 	}
+					// });
 					const needHealChecker = (unit) => {
-						return unit.curhp > 0 && unit.hpRatio <= 0.75;
+						return unit.curhp > 0 && unit.hpRatio <= 0.7;
 					};
 					sets.push({
 						user: 1,
 						check: function(context) {
 							const needHealUnits = context.teammates.filter(needHealChecker);
 							if (needHealUnits.length >= 3) {
-								const t = BattlePositionMatrix.getMaxTPosition(needHealUnits.map(u => u.pos));
+								const t = cga.emogua.BattlePositionMatrix.getMaxTPosition(needHealUnits.map(u => u.pos));
 								return t.count > 1;
 							}
 							return false;
 						}, type: '技能', skillName: '强力补血魔法', skillLevel: 6,
 						targets: context => {
-							const t = BattlePositionMatrix.getMaxTPosition(
+							const t = cga.emogua.BattlePositionMatrix.getMaxTPosition(
 								context.teammates.filter(needHealChecker).map(u => u.pos)
 							);
 							return [t.position];
@@ -2636,12 +2700,32 @@ module.exports = new Promise(resolve => {
 						targets: context => context.teammates.sort((a, b) => a.hpRatio - b.hpRatio).map(t => t.pos)
 					});
 				}
+				if (profession.name == '魔术师') {
+					sets.push({
+						user: 1,
+						check: context => context.enemies.length >= 5,
+						type: '技能', skillName: '超强冰冻魔法', skillLevel: 6,
+						targets: context => cga.emogua.AutoBattlePreset.getSortedEnemies(context)
+					});
+					sets.push({
+						user: 1,
+						check: context => true,
+						type: '技能', skillName: '冰冻魔法', skillLevel: 6,
+						targets: context => cga.emogua.AutoBattlePreset.getSortedEnemies(context)
+					});
+				}
 			}
 			sets.push({
 				user: 1,
 				check: context => context.enemies.front.length >= 3 || context.enemies.back.length >= 3,
 				type: '技能', skillName: '因果报应', skillLevel: 3,
 				targets: context => cga.emogua.AutoBattlePreset.getMaxHorizontalTargets(context)
+			});
+			sets.push({
+				user: 1,
+				check: context => context.enemies.length >= 3,
+				type: '技能', skillName: '气功弹', skillLevel: 5,
+				targets: context => cga.emogua.AutoBattlePreset.getSortedEnemies(context)
 			});
 			sets.push({
 				user: 5,
@@ -2664,7 +2748,7 @@ module.exports = new Promise(resolve => {
 			// });
 			sets.push({
 				user: 2,
-				check: context => context.enemies.length >= 4,
+				check: context => context.enemies.length >= 3,
 				skillName: '气功弹',
 				targets: context => cga.emogua.AutoBattlePreset.getSortedEnemies(context)
 			});
@@ -2735,7 +2819,8 @@ module.exports = new Promise(resolve => {
 			if (cga.emogua.AutoBattlePreset.KillFirstName.findIndex(n => a.name == n) >= 0) return -1;
 			else if (cga.emogua.AutoBattlePreset.KillFirstName.findIndex(n => b.name == n) >= 0) return 1;
 			return b.maxhp - a.maxhp;
-		}).map(u => u.pos)
+		}).map(u => u.pos),
+		getSortedMinHpEnemies: (context) => context.enemies.sort((a, b) => a.curhp - b.curhp).map(u => u.pos)
 	};
 	/**
 	 * context: {
@@ -2861,7 +2946,7 @@ module.exports = new Promise(resolve => {
 			console.log(e);
 		}
 	};
-	const applyPetStrategy = (context, strategy) => {
+	const applyPetStrategy = (context, strategy, twice = true) => {
 		try {
 			if (strategy.type == '什么都不做') {
 				cga.BattlePetSkillAttack(-1, -1);
@@ -2879,12 +2964,17 @@ module.exports = new Promise(resolve => {
 						if (SkillFlags.BOOM & skillInfo.flags) {
 							target = 42;
 						}
-						cga.BattlePetSkillAttack(skillInfo.index, target);
+						if (twice) {
+							cga.BattlePetSkillAttack(skillInfo.index, target, true);
+							cga.BattlePetSkillAttack(skillInfo.index, target, true);
+						} else {
+							cga.BattlePetSkillAttack(skillInfo.index, target, false);
+						}
 					} else {
-						cga.BattlePetSkillAttack(-1, -1);
+						cga.BattlePetSkillAttack(-1, -1, false);
 					}
 				} else {
-					cga.BattlePetSkillAttack(-1, -1);
+					cga.BattlePetSkillAttack(-1, -1, false);
 					console.log('没有可用的宠物战斗策略，什么都不做');
 				}
 			}
@@ -2892,6 +2982,16 @@ module.exports = new Promise(resolve => {
 			console.log('宠物自动战斗错误: ');
 			console.log(strategy);
 			console.log(e);
+		}
+	};
+	const petAction = (context, twice = true) => {
+		const matchedStrategy = petStrategies.find(strategy =>
+			strategy.type == '什么都不做' || (strategy.check(context) && typeof context.getAvaliablePetSkillInfo(strategy) == 'object')
+		);
+		if (matchedStrategy) applyPetStrategy(context, matchedStrategy, twice);
+		else {
+			cga.BattlePetSkillAttack(-1, -1, false);
+			console.log('没有可用的宠物战斗策略，什么都不做');
 		}
 	};
 	const getSkillsInfoCache = () => cga.GetSkillsInfo().map(skillInfo => {
@@ -2964,6 +3064,9 @@ module.exports = new Promise(resolve => {
 		};
 
 		if (state & BattleActionFlags.ISPLAYER) {
+			// 宠物二动
+			if (context.petUnit) petAction(context);
+
 			const matchedStrategy = (state & BattleActionFlags.ISDOUBLE ? player2Strategies : playerStrategies).find(strategy => {
 				if (strategy.check(context)) {
 					if (strategy.type == '技能') {
@@ -2978,14 +3081,7 @@ module.exports = new Promise(resolve => {
 				console.log('人物没有可匹配的战斗策略->' + JSON.stringify(playerStrategies));
 			}
 		} else {
-			const matchedStrategy = petStrategies.find(strategy =>
-				strategy.type == '什么都不做' || (strategy.check(context) && typeof context.getAvaliablePetSkillInfo(strategy) == 'object')
-			);
-			if (matchedStrategy) applyPetStrategy(context, matchedStrategy);
-			else {
-				cga.BattlePetSkillAttack(-1, -1);
-				console.log('没有可用的宠物战斗策略，什么都不做');
-			}
+			petAction(context, false);
 		}
 	};
 	// 等待战斗或者切图
@@ -3004,13 +3100,14 @@ module.exports = new Promise(resolve => {
 	};
 	let AutoBattleFirstRoundDelay = 4000;
 	let AutoBattleRoundDelay = 4000;
-	let isFirstBattleAction = true;
+	let isFirstBattleAction = false;
 	const waitBattleAction = () => {
 		cga.AsyncWaitBattleAction((error, state) => {
 			if (typeof state == 'number') {
 				if (BattleActionFlags.END & state) {
+					setTimeout(cga.emogua.pile, 2500);
+				} else if (BattleActionFlags.BEGIN & state) {
 					isFirstBattleAction = true;
-					setTimeout(cga.emogua.overlap, 2500);
 				} else {
 					const context = cga.GetBattleContext();
 					let delay = AutoBattleRoundDelay;
@@ -3025,12 +3122,12 @@ module.exports = new Promise(resolve => {
 					} else if (context.skill_performed === 1) {
 						delay = 0;
 					}
-					isFirstBattleAction = false;
 					setTimeout(() => {
 						if (playerStrategies.length > 0) {
 							battle(state, context);
 						}
 					}, delay);
+					isFirstBattleAction = false;
 				}
 			}
 			waitBattleAction();
@@ -3064,9 +3161,10 @@ module.exports = new Promise(resolve => {
 		}
 		return Promise.resolve();
 	};
-	const getOverlapCount = (item) => {
+	const getPileMax = (item) => {
 		if (item.name.endsWith('的水晶碎片')) return 999;
-		if (item.name == '长老之证') return 3;
+		if (['长老之证'].indexOf(item.name) >= 0) return 3;
+		if (['黄蜂的蜜'].indexOf(item.name) >= 0) return 6;
 		if (['巨石','龙角','坚硬的鳞片','竹子','孟宗竹'].indexOf(item.name) >= 0) return 20;
 		if (item.type == 29) {// 矿
 			if (item.name.endsWith('条')) return 20;
@@ -3079,23 +3177,24 @@ module.exports = new Promise(resolve => {
 		}
 		if (item.type == 31) return 20; // 布
 		if ([26,32,34,35].indexOf(item.type) >= 0) { // 狩猎材料
+			if (item.name.endsWith('元素碎片')) return 4;
 			return 40;
 		}
 	};
-	cga.emogua.overlap = () => {
+	cga.emogua.pile = () => {
 		if (cga.isInNormalState()) {
 			const cache = {};
 			cga.getInventoryItems().forEach(item => {
-				const overlapCount = getOverlapCount(item);
-				if (overlapCount && item.count < overlapCount) {
+				const pileMax = getPileMax(item);
+				if (pileMax && item.count < pileMax) {
 					const target = cache[item.itemid];
 					if (target) {
 						cga.MoveItem(item.pos, target.pos, -1);
 						const sum = item.count + target.count;
-						if (sum >= overlapCount) {
+						if (sum >= pileMax) {
 							delete cache[item.itemid];
-							if (sum > overlapCount) {
-								item.count = sum - overlapCount;
+							if (sum > pileMax) {
+								item.count = sum - pileMax;
 								cache[item.itemid] = item;
 							}
 						} else {
