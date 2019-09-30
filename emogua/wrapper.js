@@ -1490,8 +1490,13 @@ module.exports = new Promise(resolve => {
 						return paths;
 					}).then(paths => {
 						if (!paths || paths.length == 0) {
-							console.log('No path to target=' + target.id);
-							return Promise.reject();
+							if (count > 3) {
+								console.log('No path to target=' + target.id);
+								return Promise.reject();
+							}
+							return cga.emogua.logBack().then(
+								() => cga.emogua.goto(targetFunction, count + 1)
+							);
 						}
 						let short;
 						for (let p of paths) {
