@@ -6,7 +6,7 @@ require('../wrapper').then(cga => {
 	cga.emogua.autoBattle(cga.emogua.AutoBattlePreset.getAttackSets());
 	cga.emogua.recursion(
 		() => cga.emogua.logBack().then(
-			() => cga.emogua.prepare()
+			() => cga.emogua.prepare({repairFlag: -1})
 		).then(
 			() => cga.emogua.goto(n => n.falan.s1)
 		).then(
@@ -44,7 +44,7 @@ require('../wrapper').then(cga => {
 		).then(() => cga.emogua.recursion(
 			() => cga.emogua.talkNpc(0,cga.emogua.talkNpcSelectorYes).then(cga.emogua.waitAfterBattle).then(() => {
 				const f = cga.getInventoryItems().find(i => i.info == '$4吉拉的斗士之证');
-				if (f && playerInfo.hp > 150) {
+				if (f && cga.GetPlayerInfo().hp > 150) {
 					return cga.emogua.dropItems([f.pos]);
 				}
 				return Promise.reject();
