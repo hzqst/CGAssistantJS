@@ -529,7 +529,9 @@ module.exports = new Promise(resolve => {
 					return Promise.reject(-1);
 				} else {
 					if (map.x == targetX && map.y == targetY) {
-						if (!destination || map.name == destination) {
+						if (!destination || (typeof destination == 'string' && (map.name == destination || destination == '*')) ||
+							(typeof destination == 'number' && map.indexes.index3 == destination)
+						) {
 							return Promise.reject(0);
 						}
 					} else if (destination instanceof Array && map.x == destination[0] && map.y == destination[1]) {
@@ -2323,7 +2325,8 @@ module.exports = new Promise(resolve => {
 	 *         rechargeFlag: -1 不补血魔
 	 *         repairFlag: 1 正常 2 全部 -1 not
 	 *         crystalName: '',
-	 *         badge: false | true
+	 *         badge: false | true,
+	 *         doctorName: ''
 	 *     }
 	 */
 	cga.emogua.prepare = (options) => {
@@ -2465,7 +2468,17 @@ module.exports = new Promise(resolve => {
 			if (cga.GetPlayerInfo().health > 0) {
 				return cga.emogua.goto(n => n.castle.x).then(() => {
 					const profession = Professions.find(p => p.name == '医生');
-					const doctor = cga.GetMapUnits().find(u => u.type == 8 && (profession.titles.indexOf(u.title_name) >= 0 || u.nick_name.indexOf('治疗') >= 0 || u.nick_name.indexOf('神医') >= 0 || u.nick_name.indexOf('医生') >= 0 || u.title_name.indexOf('医师') >= 0 || u.title_name.indexOf('医生') >= 0));
+					const units = cga.GetMapUnits();
+					let doctor;
+					if (options.doctorName) {
+						doctor = units.find(u => u.type == 8 && u.unit_name == options.doctorName);
+					} else {
+						doctor = units.find(
+							u => u.type == 8 && (
+								profession.titles.indexOf(u.title_name) >= 0 || u.nick_name.indexOf('治疗') >= 0 || u.nick_name.indexOf('神医') >= 0 || u.nick_name.indexOf('医生') >= 0 || u.title_name.indexOf('医师') >= 0 || u.title_name.indexOf('医生') >= 0
+							)
+						);
+					}
 					if (doctor) {
 						return cga.emogua.walkTo([doctor.xpos - 1, doctor.ypos]).then(
 							() => cga.emogua.joinTeam(doctor.xpos, doctor.ypos, doctor.unit_name)
@@ -3213,48 +3226,28 @@ module.exports = new Promise(resolve => {
 		}
 		return cga.emogua.delay(500);
 	};
+	cga.emogua.keepAlive = (say = false) => {
+		if (say && cga.isInNormalState()) {
+			cga.emogua.sayWords();
+		}
+		setTimeout(() => cga.emogua.keepAlive(true), 50000);
+	};
 
 	// 定时任务
-	let lastPosition = cga.GetMapXY();
-	let lastPositionTimer = Date.now();
-	let lastNearPositionTimer = Date.now();
-	const keepAlive = () => {
+	const schedule = () => {
 		if (cga.GetWorldStatus() == 11) {
 			console.log('已掉线,退出进程' + new Date());
 			process.exit();
 		} else {
-			// 防掉线
-			const xy = cga.GetMapXY();
-			const currentTime = Date.now();
-			const distance = Math.abs(lastPosition.x - xy.x) + Math.abs(lastPosition.y - xy.y);
-			if (distance <= 2) {
-				if ((currentTime - lastNearPositionTimer) >= 900000 && CustomFunctionsFlag > 0) {
-					cga.emogua.dropItems();
-				}
-			} else {
-				lastNearPositionTimer = Date.now();
-			}
-			if (distance == 0) {
-				if ((currentTime - lastPositionTimer) >= 30000 && cga.isInNormalState()) {
-					cga.emogua.sayWords();
-					lastPositionTimer = currentTime;
-				}
-			} else {
-				lastPosition = xy;
-				lastPositionTimer = Date.now();
-			}
-
 			// 装备保护
 			if (
-				cga.GetItemsInfo().find(i => i.pos <= 4 && cga.emogua.getDurability(i).current <= equipmentMinDurability)
+				cga.isInNormalState() && cga.GetItemsInfo().find(i => i.pos <= 4 && cga.emogua.getDurability(i).current <= equipmentMinDurability)
 			) {
 				cga.emogua.tidyupEquipments();
 			}
-
-
-			setTimeout(keepAlive, 10000);
+			setTimeout(schedule, 30000);
 		}
 	};
-	keepAlive();
+	schedule();
 	return cga;
 });

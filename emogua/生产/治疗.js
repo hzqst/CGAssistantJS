@@ -1,18 +1,24 @@
+let point = [27,83];  // 可自定义飞碟站的坐标
 require('../wrapper').then(cga => {
 	console.log('治疗摆摊');
+	cga.emogua.keepAlive();
+	if (cga.GetPlayerInfo().name == 'xxx1') {
+		point = [27,83];
+	} else if (cga.GetPlayerInfo().name == 'xxx2') {
+		point = [27,83];
+	}
 	cga.emogua.recursion(() => {
 		if (cga.GetMapName() != '里谢里雅堡') {
-			return cga.emogua.logBack().then(
-				() => cga.emogua.goto(n => n.castle.x)
-			);
+			return cga.emogua.goto(n => n.castle.x);
 		}
-		if (cga.GetPlayerInfo().mp <= 100) {
+		if (cga.GetPlayerInfo().mp <= 70) {
 			return cga.emogua.autoWalk([34,88]).then(
 				() => cga.emogua.recharge(0)
 			);
 		}
-		if (cga.GetMapXY().x != 27 || cga.GetMapXY().y != 83) {
-			return cga.emogua.autoWalk([27,83]);
+		const xy = cga.GetMapXY();
+		if (xy.x != point[0] || xy.y != point[1]) {
+			return cga.emogua.autoWalk(point);
 		}
 		return cga.emogua.healTeammate().then(
 			() => cga.emogua.delay(2000)

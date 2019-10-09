@@ -2,18 +2,18 @@ require('../wrapper').then(cga => {
 	const skill = cga.GetSkillsInfo().filter(e => e.name.indexOf('修理') >= 0).sort((e1, e2) => e2.lv - e1.lv)[0];
 	if (skill) {
 		console.log(skill.name);
-		cga.emogua.recursion(() => cga.emogua.prepare({
-			rechargeFlag: -1, repairFlag: -1
-		}).then(() =>
+		cga.emogua.keepAlive();
+		cga.emogua.recursion(() => Promise.resolve().then(() =>
 			cga.emogua.goto(n => n.falan.mbank).then(
 				() => cga.emogua.autoWalk([83, 8])
 			).then(
 				() => cga.emogua.turnOrientation(4)
 			).then(() => cga.emogua.recursion(() => {
 				const playerInfo = cga.GetPlayerInfo();
-				if (playerInfo.health > 0) {
-					return false;
-				} else if (playerInfo.mp < 200) {
+				// if (playerInfo.health > 0) {
+				// 	return false;
+				// }
+				if (playerInfo.mp < 200) {
 					return cga.emogua.turnOrientation(0).then(
 						() => cga.emogua.delay(5000)
 					).then(
