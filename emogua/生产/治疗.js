@@ -11,7 +11,7 @@ require('../wrapper').then(cga => {
 		if (cga.GetMapName() != '里谢里雅堡') {
 			return cga.emogua.goto(n => n.castle.x);
 		}
-		if (cga.GetPlayerInfo().mp <= 70) {
+		if (cga.GetPlayerInfo().mp <= 100) {
 			return cga.emogua.autoWalk([34,88]).then(
 				() => cga.emogua.recharge(0)
 			);
