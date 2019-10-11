@@ -1,7 +1,7 @@
 /**
  * 需要定居新城
  */
-const captain = '白西瓜';  // 队长名字
+const captain = 'xxx';  // 队长名字
 const teamNumber = 5;  // 队伍人数
 let protect = { // 遇敌保护条件
 	minHp: 200,
