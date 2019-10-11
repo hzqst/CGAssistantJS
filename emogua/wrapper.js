@@ -559,7 +559,12 @@ module.exports = new Promise(resolve => {
 					return Promise.reject(1);
 				}
 			})
-		);
+		).catch(e => {
+			if (!(e instanceof Error)) {
+				return Promise.reject();
+			}
+			console.log('walk to', e);
+		});
 	};
 	// [ [x, y, destination] ]
 	cga.emogua.walkList = (list) => {
@@ -1940,6 +1945,8 @@ module.exports = new Promise(resolve => {
 			} else {
 				return start();
 			}
+		}).catch(e => {
+			console.log('encounter', e);
 		});
 	};
 	cga.emogua.joinTeam = (x, y, name) => {
@@ -2429,8 +2436,9 @@ module.exports = new Promise(resolve => {
 		const recharge = () => {
 			const rechargeFlag = typeof options.rechargeFlag == 'number' ? options.rechargeFlag : 1;
 			const playerInfo = cga.GetPlayerInfo();
-			const petHurt = cga.GetPetsInfo().findIndex(e => e.health > 0) > -1;
-			if (rechargeFlag > 0 && (playerInfo.hp < playerInfo.maxhp || playerInfo.mp < playerInfo.maxmp)) {
+			const pets = cga.GetPetsInfo();
+			const petHurt = pets.findIndex(e => e.health > 0) > -1;
+			if (rechargeFlag > 0 && (playerInfo.hp < playerInfo.maxhp || playerInfo.mp < playerInfo.maxmp || pets.find(p => p.hp < p.maxhp || p.mp < p.maxmp))) {
 				return Promise.resolve().then(() => {
 					const needh = cga.emogua.needHnurse(playerInfo);
 					if (needh || petHurt) {
@@ -2489,7 +2497,8 @@ module.exports = new Promise(resolve => {
 					}
 					return cga.emogua.delay(10000);
 				});
-			} else return false;
+			}
+			return false;
 		});
 		if (cga.emogua.getTeamNumber() == 1 && validMaps.includes(cga.GetMapName())) {
 			return cga.emogua.pile().then(cga.emogua.dropItems).then(() => {
@@ -3012,15 +3021,27 @@ module.exports = new Promise(resolve => {
 			console.log('没有可用的宠物战斗策略，什么都不做');
 		}
 	};
-	const getSkillsInfoCache = () => cga.GetSkillsInfo().map(skillInfo => {
-		skillInfo.subSkillsInfo = cga.GetSubSkillsInfo(skillInfo.index).reverse();
-		return skillInfo;
-	});
-	const getPetsSkillsInfoCache = () => {
-		const result = {};
-		cga.GetPetsInfo().forEach(pet => result[pet.index] = cga.GetPetSkillsInfo(pet.index))
-		return result;
+	const getSkillsInfoCache = () => {
+		try {
+			return cga.GetSkillsInfo().map(skillInfo => {
+				skillInfo.subSkillsInfo = cga.GetSubSkillsInfo(skillInfo.index).reverse();
+				return skillInfo;
+			});
+		} catch (e) {
+			console.log('getSkillsInfoCache', e);
+			return getSkillsInfoCache();
+		}
 	}
+	const getPetsSkillsInfoCache = () => {
+		try {
+			const result = {};
+			cga.GetPetsInfo().forEach(pet => result[pet.index] = cga.GetPetSkillsInfo(pet.index))
+			return result;
+		} catch (e) {
+			console.log('getPetsSkillsInfoCache', e);
+			return getPetsSkillsInfoCache();
+		}
+	};
 	let SkillsInfoCache = getSkillsInfoCache();
 	let PetsSkillsInfoCache = getPetsSkillsInfoCache();
 	const battle = (state, context) => {

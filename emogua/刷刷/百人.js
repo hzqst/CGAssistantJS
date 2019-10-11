@@ -245,6 +245,59 @@ require('../wrapper').then(cga => {
 			}
 		});
 	};
+	const battle = (map = cga.GetMapName()) => {
+		if ((isCaptain && map.indexOf('一') > 0) || teamNumber == 1) {
+			return Promise.resolve().then(() => {
+				if (teamNumber > 1)
+					return cga.emogua.autoWalk([5,11]).then(
+						() => cga.emogua.waitTeamBlock(teamNumber)
+					);
+			}).then(() => cga.emogua.recursion(() => {
+				const oldMap = cga.GetMapName();
+				return cga.emogua.autoWalk([15,10]).then(() => {
+					if (cga.GetMapUnits().find(u => u.type == 1 && u.xpos == 16 && u.ypos == 10))
+						return cga.emogua.talkNpc(16,10,cga.emogua.talkNpcSelectorYes);
+					else
+						return cga.emogua.talkNpc(16,11,cga.emogua.talkNpcSelectorYes);
+				}).then(
+					() => cga.emogua.delay(3000)
+				).then(
+					() => cga.emogua.waitAfterBattle()
+				).then(() => {
+					const currentMap = cga.GetMapName();
+					if (oldMap == currentMap) {
+						console.log('没有打过boss,请检查配置!');
+						return Promise.reject(process.exit());
+					}
+					if (currentMap.indexOf('组通过') > 0) {
+						return cga.emogua.autoWalk([20,12]).then(
+							() => cga.emogua.talkNpc(21,12,cga.emogua.talkNpcSelectorYes)
+						).then(
+							() => Promise.reject()
+						);
+					}
+				});
+			}));
+		}
+		if (map.indexOf('一') > 0) return cga.emogua.joinTeamBlock(5,11,captain).then(() => cga.emogua.recursion(() => {
+			if (cga.isInNormalState()) {
+				const currentMap = cga.GetMapName();
+				if (currentMap.indexOf('组通过') > 0) {
+					return cga.emogua.waitUntil(() => cga.emogua.getTeamNumber() == 1).then(
+						() => cga.emogua.autoWalk([20,12])
+					).then(
+						() => cga.emogua.talkNpc(21,12,cga.emogua.talkNpcSelectorYes)
+					).then(
+						() => Promise.reject()
+					);
+				} else if (cga.emogua.getTeamNumber() == 1) {
+					return Promise.reject();
+				}
+			}
+			return cga.emogua.delay(3000);
+		}));
+		return cga.emogua.logBack();
+	};
 	cga.emogua.recursion(
 		() => cga.emogua.prepare().then(() => {
 			const ticket = cga.getInventoryItems().find(i => i.name == '道场记忆');
@@ -255,61 +308,13 @@ require('../wrapper').then(cga => {
 			}
 		}).then(() => {
 			const map = cga.GetMapName();
-			if (map.indexOf('道场') > 0 && getCurrentFloor(map) <= maxFloor) {
-				if ((isCaptain && map.indexOf('一') > 0) || teamNumber == 1) {
-					return Promise.resolve().then(() => {
-						if (teamNumber > 1)
-							return cga.emogua.autoWalk([5,11]).then(
-								() => cga.emogua.waitTeamBlock(teamNumber)
-							);
-					}).then(() => cga.emogua.recursion(() => {
-						const oldMap = cga.GetMapName();
-						return cga.emogua.autoWalk([15,10]).then(() => {
-							if (cga.GetMapUnits().find(u => u.type == 1 && u.xpos == 16 && u.ypos == 10))
-								return cga.emogua.talkNpc(16,10,cga.emogua.talkNpcSelectorYes);
-							else
-								return cga.emogua.talkNpc(16,11,cga.emogua.talkNpcSelectorYes);
-						}).then(
-							() => cga.emogua.delay(3000)
-						).then(
-							() => cga.emogua.waitAfterBattle()
-						).then(() => {
-							const currentMap = cga.GetMapName();
-							if (oldMap == currentMap) {
-								console.log('没有打过boss,请检查配置!');
-								return Promise.reject(process.exit());
-							}
-							if (currentMap.indexOf('组通过') > 0) {
-								return cga.emogua.autoWalk([20,12]).then(
-									() => cga.emogua.talkNpc(21,12,cga.emogua.talkNpcSelectorYes)
-								).then(
-									() => Promise.reject()
-								);
-							}
-						});
-					}));
+			if (map.indexOf('道场') > 0) {
+				if (getCurrentFloor(map) <= maxFloor) {
+					return battle(map);
 				}
-				if (map.indexOf('一') > 0) return cga.emogua.joinTeamBlock(5,11,captain).then(() => cga.emogua.recursion(() => {
-					if (cga.isInNormalState()) {
-						const currentMap = cga.GetMapName();
-						if (currentMap.indexOf('组通过') > 0) {
-							return cga.emogua.waitUntil(() => cga.emogua.getTeamNumber() == 1).then(
-								() => cga.emogua.autoWalk([20,12])
-							).then(
-								() => cga.emogua.talkNpc(21,12,cga.emogua.talkNpcSelectorYes)
-							).then(
-								() => Promise.reject()
-							);
-						} else if (cga.emogua.getTeamNumber() == 1) {
-							return Promise.reject();
-						}
-					}
-					return cga.emogua.delay(3000);
-				}));
+				return cga.emogua.logBack();
 			}
-			return cga.emogua.logBack().then(
-				() => cga.emogua.prepare()
-			).then(() => {
+			return Promise.resolve().then(() => {
 				if (cga.getInventoryItems().length > 19) {
 					console.log('背包满了');
 					process.exit();
@@ -333,6 +338,8 @@ require('../wrapper').then(cga => {
 				() => cga.emogua.autoWalk([15, 23])
 			).then(
 				() => cga.emogua.talkNpc(0,cga.emogua.talkNpcSelectorYes)
+			).then(
+				() => battle()
 			);
 		})
 	);
