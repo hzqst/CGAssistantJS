@@ -2,12 +2,14 @@
  * 百人，最高层数100，使用时一般设置maxFloor=10或者20，30等
  * teamNumber=1，为单刷模式，此时队长可以不用设置
  */
-const captain = 'xxx';  // 队长名字
-const teamNumber = 5;  // 队伍人数
-const maxFloor = 80;
+let captain = 'xxx';  // 队长名字
+let teamNumber = 5;  // 队伍人数
+let maxFloor = 80;
+let mode = 'H'; // 目前支持 'H' 'CH'
 require('../wrapper').then(cga => {
-	console.log('百人');
+	console.log('百人', '模式: ' + mode, '队伍人数: ' + teamNumber);
 
+	const player = cga.GetPlayerInfo();
 	const sets = [];
 	const profession = cga.emogua.getPlayerProfession();
 	console.log(profession);
@@ -146,7 +148,7 @@ require('../wrapper').then(cga => {
 		targets: context => cga.emogua.AutoBattlePreset.getSortedEnemies(context)
 	});
 	cga.emogua.autoBattle(sets, 4000, 4000, false);
-	const isCaptain = cga.GetPlayerInfo().name == captain;
+	const isCaptain = player.name == captain;
 	const getCurrentFloor = (map) => {
 		if (map.indexOf('道场') > 0) {
 			if (map.startsWith('第十')) return 20;
@@ -299,7 +301,7 @@ require('../wrapper').then(cga => {
 		return cga.emogua.logBack();
 	};
 	cga.emogua.recursion(
-		() => cga.emogua.prepare().then(() => {
+		() => cga.emogua.prepare({repairFlag: -1}).then(() => {
 			const ticket = cga.getInventoryItems().find(i => i.name == '道场记忆');
 			if (ticket) {
 				return cga.emogua.useItem(ticket.pos).then(
@@ -332,9 +334,21 @@ require('../wrapper').then(cga => {
 				])
 			).then(
 				() => cga.emogua.talkNpc(0,cga.emogua.talkNpcSelectorYes,'百人道场大厅')
-			).then(
-				() => exchangeCH()
-			).then(
+			).then(() => {
+				if (mode == 'CH') {
+					return exchangeCH();
+				}
+				const chipNumber = cga.getInventoryItems().reduce((c, i) => {
+					if (i.name.indexOf('元素碎片') > 0) {
+						return c + i.count;
+					}
+					return c;
+				}, 0);
+				console.log(chipNumber);
+				if (chipNumber > 0) {
+					return exchangeH(chipNumber);
+				}
+			}).then(
 				() => cga.emogua.autoWalk([15, 23])
 			).then(
 				() => cga.emogua.talkNpc(0,cga.emogua.talkNpcSelectorYes)
