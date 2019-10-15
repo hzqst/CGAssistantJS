@@ -349,7 +349,6 @@ require('../wrapper').then(cga => {
 					}
 					return c;
 				}, 0);
-				console.log(chipNumber);
 				if (chipNumber > 0) {
 					return exchangeH(chipNumber);
 				}
