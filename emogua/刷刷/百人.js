@@ -7,9 +7,14 @@ let teamNumber = 5;  // 队伍人数
 let maxFloor = 80;
 let mode = 'H'; // 目前支持 'H' 'CH'
 require('../wrapper').then(cga => {
-	console.log('百人', '模式: ' + mode, '队伍人数: ' + teamNumber);
-
 	const player = cga.GetPlayerInfo();
+	if (player.name == 'yyyyy') {
+		captain = 'xxx1';
+		teamNumber = 1;
+		maxFloor = 10;
+		mode = 'H';
+	}
+	console.log('百人', '模式: ' + mode, '队伍人数: ' + teamNumber);
 	const sets = [];
 	const profession = cga.emogua.getPlayerProfession();
 	console.log(profession);
