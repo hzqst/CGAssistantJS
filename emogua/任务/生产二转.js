@@ -6,6 +6,7 @@ require('../wrapper').then(cga => {
 	console.log('生产二转');
 	cga.emogua.autoBattle(cga.emogua.AutoBattlePreset.getEscapeSets());
 
+	cga.emogua.keepAlive();
 	cga.getInventoryItems().forEach(i => {
 		if (['好像很好喝的酒', '好像很好吃的起司'].indexOf(i.name) >= 0) {
 			cga.emogua.dropItems([i.pos]);
