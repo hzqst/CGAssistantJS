@@ -18,6 +18,6 @@ require('../wrapper').then(cga => {
 			() => cga.emogua.talkNpc(6, cga.emogua.talkNpcSelectorYes).then(
 				() => cga.emogua.delay(3000)
 			).then(cga.emogua.waitAfterBattle)
-		).then(cga.emogua.logBack);
+		).then(() => cga.emogua.logBack());
 	}));
 });

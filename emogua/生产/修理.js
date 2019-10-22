@@ -50,7 +50,7 @@ require('../wrapper').then(cga => {
 						return true;
 					});
 				}
-			})).then(cga.emogua.logBack)
+			})).then(() => cga.emogua.logBack())
 		));
 	}
 });

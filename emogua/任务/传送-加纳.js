@@ -130,7 +130,7 @@ require('../wrapper').then(cga => {
 						() => cga.emogua.sayWords('开传送')
 					).then(
 						() => cga.emogua.delay(15000)
-					).then(cga.emogua.logBack);
+					).then(() => cga.emogua.logBack());
 				}
 				return cga.emogua.logBack();
 			}

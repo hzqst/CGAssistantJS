@@ -44,7 +44,7 @@ require('../wrapper').then(cga => {
 					);
 				}
 				if (['法兰城','里谢里雅堡','艾尔莎岛'].indexOf(mapInfo.name) < 0) {
-					return cga.emogua.waitAfterBattle().then(cga.emogua.logBack);
+					return cga.emogua.waitAfterBattle().then(() => cga.emogua.logBack());
 				}
 				return cga.emogua.goto(n => n.falan.isle);
 			}
@@ -58,23 +58,23 @@ require('../wrapper').then(cga => {
 							return cga.emogua.walkList([[entry.mapx, entry.mapy, '通往山顶的路100M']]).then(
 								() => cga.emogua.walkRandomMazeUntil(() => cga.GetMapName() == '半山腰')
 							).catch(
-								() => cga.emogua.waitAfterBattle().then(cga.emogua.logBack)
+								() => cga.emogua.waitAfterBattle().then(() => cga.emogua.logBack())
 							);
 						} else {
-							return cga.emogua.waitAfterBattle().then(cga.emogua.logBack);
+							return cga.emogua.waitAfterBattle().then(() => cga.emogua.logBack());
 						}
 					});
 				} else if (mapInfo.name == '半山腰') {
 					return cga.emogua.autoWalk([64, 63]).then(
 						() => cga.emogua.encounter(protect)
 					).then(
-						() => cga.emogua.waitAfterBattle().then(cga.emogua.logBack)
+						() => cga.emogua.waitAfterBattle().then(() => cga.emogua.logBack())
 					);
 				}
 				return cga.emogua.logBack();
 			}
 			if (isCaptain) {
-				cga.emogua.waitAfterBattle().then(cga.emogua.logBack);
+				cga.emogua.waitAfterBattle().then(() => cga.emogua.logBack());
 			}
 			if (!isCaptain) {
 				cga.emogua.checkStopEncounter(protect, true);
