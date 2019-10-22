@@ -25,7 +25,7 @@ require('../wrapper').then(cga => {
 		() => cga.emogua.talkNpc(1, cga.emogua.talkNpcSelectorYes)
 	).then(
 		() => timer = Date.now()
-	).then(cga.emogua.logBack).then(
+	).then(() => cga.emogua.logBack()).then(
 		() => cga.emogua.goto(n => n.falan.eout)
 	).then(
 		() => cga.emogua.autoWalkList([
