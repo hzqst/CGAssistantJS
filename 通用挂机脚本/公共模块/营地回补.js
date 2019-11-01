@@ -36,6 +36,7 @@ var supplyModeArray = [
 {
 	name : '圣骑士营地普通护士回补',
 	func : (cb)=>{
+		var map = cga.GetMapName();
 		var path = [
 			[18, 15],
 			[17, 15],
