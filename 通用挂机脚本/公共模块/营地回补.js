@@ -53,7 +53,7 @@ var supplyModeArray = [
 		}
 		
 		cga.walkList(path, ()=>{
-			cga.TurnTo(11, 11);
+			cga.TurnTo(18, 14);
 			setTimeout(cb, 5000);
 		});
 	},
