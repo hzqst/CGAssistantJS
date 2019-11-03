@@ -2084,7 +2084,7 @@ module.exports = function(callback){
 		var includeEquipment = arguments[1] === true ? true : false;
 		var items = cga.getInventoryItems();
 		var count = 0;
-		if(filter.charAt(0) == '#'){
+		if(typeof filter == 'string' && filter.charAt(0) == '#'){
 			var itemid = parseInt(filter.substring(1));
 			items.forEach((item)=>{
 				if(!includeEquipment && item.pos < 8)
