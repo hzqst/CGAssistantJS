@@ -232,98 +232,6 @@ const ProfessionsMap = (() => {
 	}));
 	return obj;
 })();
-const Reputations = [
-	{
-			name: '恶人',
-			index: 0,
-			min: null,
-			max: -3000
-	},
-	{
-			name: '受忌讳的人',
-			index: 1,
-			min: -2999,
-			max: -2000
-	},
-	{
-			name: '受挫折的人',
-			index: 2,
-			min: -1999,
-			max: -1000
-	},
-	{
-			name: '无名的旅人',
-			index: 3,
-			min: -999,
-			max: 1999
-	},
-	{
-			name: '路旁的落叶',
-			index: 4,
-			min: 2000,
-			max: 4999
-	},
-	{
-			name: '水面上的小草',
-			index: 5,
-			min: 5000,
-			max: 9999
-	},
-	{
-			name: '呢喃的歌声',
-			index: 6,
-			min: 10000,
-			max: 19999
-	},
-	{
-			name: '地上的月影',
-			index: 7,
-			min: 20000,
-			max: 32999
-	},
-	{
-			name: '奔跑的春风',
-			index: 8,
-			min: 33000,
-			max: 49999
-	},
-	{
-			name: '苍之风云',
-			index: 9,
-			min: 50000,
-			max: 69999
-	},
-	{
-			name: '摇曳的金星',
-			index: 10,
-			min: 70000,
-			max: 99999
-	},
-	{
-			name: '欢喜的慈雨',
-			index: 11,
-			min: 100000,
-			max: 129999
-	},
-	{
-			name: '蕴含的太阳',
-			index: 12,
-			min: 130000,
-			max: 159999
-	},
-	{
-			name: '敬畏的寂静',
-			index: 13,
-			min: 160000,
-			max: 199999
-	},
-	{
-			name: '无尽星空',
-			index: 14,
-			min: 200000,
-			max: null
-	}
-];
 const CustomFunctionsFlag = 0;
 module.exports = new Promise(resolve => {
 	const cga = require('../cgaapi')(() => setTimeout(() => resolve(cga), 0));
@@ -594,7 +502,7 @@ module.exports = new Promise(resolve => {
 			}
 		});
 	};
-	const excludedMaps = [27001,61001,43600,43000,2400,11036,11037,15596,11032];
+	const excludedMaps = [27001,61001,43600,43000,2400,11036,11037,15596,11032,15001,15006,5008];
 	const isMapDownloaded = (walls, mapIndex = cga.GetMapIndex()) => {
 		if (excludedMaps.indexOf(mapIndex.index3) > -1) return true;
 		const downloadedFlag = mapIndex.index1 === 1 ? 0 : 1;
@@ -688,8 +596,8 @@ module.exports = new Promise(resolve => {
 	});
 	// [ [x, y, destination] ]
 	cga.emogua.autoWalkList = (list) => list.reduce((a, c) => a.then(() => cga.emogua.autoWalk(c)), Promise.resolve());
-	cga.emogua.getFarthestEntry = (current) => {
-		return cga.getMapObjects().filter(e => [3,10].indexOf(e.cell) >= 0 && (e.mapx != current.x || e.mapy != current.y)).sort((a, b) => {
+	cga.emogua.getFarthestEntry = (current, mapObjects = cga.getMapObjects()) => {
+		return mapObjects.filter(e => [3,10].indexOf(e.cell) >= 0 && (e.mapx != current.x || e.mapy != current.y)).sort((a, b) => {
 			const distanceA = Math.abs(a.mapx - current.x) + Math.abs(a.mapy - current.y);
 			const distanceB = Math.abs(b.mapx - current.x) + Math.abs(b.mapy - current.y);
 			return distanceB - distanceA;
@@ -780,15 +688,17 @@ module.exports = new Promise(resolve => {
 	};
 	// targetFinder 返回unit object 或者 true 都将停止搜索
 	cga.emogua.searchMap = (targetFinder, recursion = true) => {
+		const start = cga.GetMapXY();
 		const getTarget = () => {
 			const target = targetFinder(cga.GetMapUnits().filter(u => u.model_id > 0));
 			if (typeof target == 'object') {
+				target.start = start;
 				const walkTo = cga.emogua.getMovablePositionAround({x: target.xpos,y: target.ypos});
 				if (walkTo) {
 					return cga.emogua.autoWalk([walkTo.x,walkTo.y],undefined,0,false).then(() => Promise.reject(target));
 				}
 			}
-			if (target === true) return Promise.reject();
+			if (target === true) return Promise.reject(target);
 			return Promise.resolve();
 		};
 		const toNextPoint = (points, centre) => {
@@ -806,9 +716,10 @@ module.exports = new Promise(resolve => {
 			}
 			return Promise.resolve();
 		};
-		const start = cga.GetMapXY();
 		let entry;
-		return getTarget().then(cga.emogua.downloadMap).then(w => {
+		return getTarget().then(
+			() => cga.emogua.downloadMap()
+		).then(w => {
 			const current = cga.GetMapXY();
 			if (!entry && recursion) entry = cga.emogua.getFarthestEntry(start);
 			return toNextPoint(Object.values(getMovablePoints(w, current)), current).then(() => {
@@ -816,11 +727,11 @@ module.exports = new Promise(resolve => {
 					return cga.emogua.autoWalk([entry.x,entry.y,'*'],undefined,0,false).then(() => cga.emogua.searchMap(targetFinder, recursion));
 				}
 			});
-		}).catch(r => r);
+		}).catch(t => t);
 	};
 	cga.emogua.battleZLZZ = (x, y, turned = false) => {
 		if(cga.isInBattle()) return cga.emogua.waitAfterBattle().then(() => cga.emogua.battleZLZZ(x,y,true));
-		if (cga.callZLZZ || cga.getItemCount('长老之证') >= 7) return Promise.resolve();
+		if (cga.getItemCount('长老之证') >= 7) return Promise.resolve();
 		return Promise.resolve().then(() => {
 			if (!turned) return cga.emogua.turnTo(x,y);
 		}).then(
@@ -975,7 +886,6 @@ module.exports = new Promise(resolve => {
 				let timeout = 6000;
 				return cga.emogua.recursion(
 					() => cga.emogua.waitNPCDialog(dialog => {
-						// console.log(dialog);
 						if (typeof dialog.type == 'number') {
 							timeout = 3000;
 							return selector(dialog);
@@ -1689,15 +1599,10 @@ module.exports = new Promise(resolve => {
 		let result = Promise.resolve();
 		if (items.length > 0) {
 			for (let itemIndex = 0; itemIndex < items.length; itemIndex++) {
-				result = result.then(() => {
-					if (!toSavableSlotIndex(items[itemIndex])) {
-						return Promise.reject();
-					}
-				});
+				result = result.then(() => toSavableSlotIndex(items[itemIndex]));
 			}
-			return result.then(() => false).catch(() => true);
 		}
-		return result.then(() => bankList.length >= size);
+		return result.then(() => cga.emogua.delay(1000)).then(() => bankList.length >= size);
 	};
 	const getTradeItems = (filter = (c, previous) => false) => {
 		const tradeItems = [];
@@ -1900,7 +1805,7 @@ module.exports = new Promise(resolve => {
 					if (cga.isInNormalState()) {
 						cga.ForceMove(direction, false);
 					}
-					return cga.emogua.delay(100).then(() => {
+					return cga.emogua.delay(80).then(() => {
 						if (stopEncounter) return Promise.reject();
 						else if (!cga.isInNormalState()) {
 							return cga.emogua.waitAfterBattle().then(() => {
@@ -2031,7 +1936,7 @@ module.exports = new Promise(resolve => {
 			if (dialog.type == 28) {
 				cga.BuyNPCStore(list);
 			}
-		}).then(() => cga.emogua.pile());
+		}).then(() => cga.emogua.pile(true));
 		else return Promise.resolve();
 	};
 	// list: [{index: 0, count: 20}]
@@ -2048,7 +1953,7 @@ module.exports = new Promise(resolve => {
 			if (dialog.type == 6) {
 				cga.BuyNPCStore(list);
 			}
-		}).then(() => cga.emogua.pile());
+		}).then(() => cga.emogua.pile(true));
 		else return Promise.resolve();
 	};
 	cga.emogua.sell = function(x, y, filter) {
@@ -2120,7 +2025,7 @@ module.exports = new Promise(resolve => {
 					cga.SetImmediateDoneWork(true);
 					if (cga.StartWork(requireInfo.skill.index, requireInfo.craft.index)) {
 						cga.CraftItem(requireInfo.skill.index, requireInfo.craft.index, 0, positions);
-						return cga.emogua.waitWorkResult().then(r => cga.emogua.pile());
+						return cga.emogua.waitWorkResult().then(r => cga.emogua.pile(true));
 					}
 					return Promise.resolve();
 				}
@@ -2501,14 +2406,14 @@ module.exports = new Promise(resolve => {
 			return false;
 		});
 		if (cga.emogua.getTeamNumber() == 1 && validMaps.includes(cga.GetMapName())) {
-			return cga.emogua.pile().then(cga.emogua.dropItems).then(() => {
+			return cga.emogua.pile(true).then(cga.emogua.dropItems).then(() => {
 				const badge = typeof options.badge == 'boolean' ? options.badge : false;
 				if (badge) {
 					return cga.emogua.getDwarfBadge().then(r => r ? cga.emogua.logBack() : Promise.resolve());
 				}
 			}).then(findDoctor).then(recharge).then(getBackSouls).then(sell).then(repair).then(cga.emogua.tidyupEquipments).then(crystal);
 		} else {
-			return cga.emogua.pile().then(cga.emogua.dropItems);
+			return cga.emogua.pile(true).then(cga.emogua.dropItems);
 		}
 	};
 
@@ -2667,6 +2572,7 @@ module.exports = new Promise(resolve => {
 						type: '技能',
 						skillName: '洁净魔法', skillLevel: 6,
 						targets: context => {
+							console.log('释放洁净魔法');
 							const needCleanPositions = context.teammates.filter(u => u.flags & cga.emogua.DebuffFlags.ANY).map(u => u.pos);
 							const t = cga.emogua.BattlePositionMatrix.getMaxTPosition(needCleanPositions);
 							return [t.position];
@@ -3204,6 +3110,7 @@ module.exports = new Promise(resolve => {
 		if (item.name.endsWith('的水晶碎片')) return 999;
 		if (['长老之证'].indexOf(item.name) >= 0) return 3;
 		if (['黄蜂的蜜'].indexOf(item.name) >= 0) return 6;
+		if (['魔族的水晶'].indexOf(item.name) >= 0) return 5;
 		if (['巨石','龙角','坚硬的鳞片','竹子','孟宗竹'].indexOf(item.name) >= 0) return 20;
 		if (item.type == 29) {// 矿
 			if (item.name.endsWith('条')) return 20;
@@ -3220,8 +3127,8 @@ module.exports = new Promise(resolve => {
 			return 40;
 		}
 	};
-	cga.emogua.pile = () => {
-		if (cga.isInNormalState()) {
+	cga.emogua.pile = (force = false) => {
+		if (force || cga.isInNormalState()) {
 			const cache = {};
 			cga.getInventoryItems().forEach(item => {
 				const pileMax = getPileMax(item);
@@ -3249,6 +3156,7 @@ module.exports = new Promise(resolve => {
 	};
 	cga.emogua.keepAlive = (say = false) => {
 		if (say && cga.isInNormalState()) {
+			cga.emogua.pile(true);
 			cga.emogua.sayWords();
 		}
 		setTimeout(() => cga.emogua.keepAlive(true), 50000);
