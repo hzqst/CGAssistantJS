@@ -29,10 +29,10 @@ require('../wrapper').then(cga => {
 		() => cga.emogua.goto(n => n.falan.eout)
 	).then(
 		() => cga.emogua.autoWalkList([
-			[672,223,'哈巴鲁东边洞穴 地下1楼'],[41,8,'哈巴鲁东边洞穴 地下2楼'],[17,20]
+			[672,223,'哈巴鲁东边洞穴 地下1楼'],[41,8,'哈巴鲁东边洞穴 地下2楼'],[17,18]
 		])
 	).then(
-		() => cga.emogua.forceMove(6, 4)
+		() => cga.emogua.forceMoveTo([17,16])
 	).then(
 		() => cga.emogua.autoWalkList([
 			[16,11,'哈巴鲁东边洞穴 地下1楼'],
@@ -64,10 +64,10 @@ require('../wrapper').then(cga => {
 			[67,64,'芙蕾雅'],
 			[691,188,'哈巴鲁东边洞穴 地下1楼'],
 			[21,39,'哈巴鲁东边洞穴 地下2楼'],
-			[17,15]
+			[17,16]
 		])
 	).then(
-		() => cga.emogua.forceMove(2, 4)
+		() => cga.emogua.forceMoveTo([17,18])
 	).then(
 		() => cga.emogua.autoWalkList([
 			[62,65,'哈巴鲁东边洞穴 地下1楼'],

@@ -397,6 +397,23 @@ module.exports = new Promise(resolve => {
 		}
 		return Promise.resolve();
 	};
+	// 遇敌重试，但一次在x或y上可同时最多移动5格,2格内不会触发npc战斗，超过会触发（比如熊男）
+	cga.emogua.forceMoveTo = (target, xy = cga.GetMapXY()) => {
+		if (Math.abs(xy.x - target[0]) > 5 || Math.abs(xy.y - target[1]) > 5) {
+			console.log('forceMoveTo的x或者y可同时最多移动5格');
+			return Promise.reject();
+		}
+		cga.ForceMoveTo(target[0], target[1], true);
+		return cga.emogua.delay(2000).then(
+			() => cga.emogua.waitAfterBattle()
+		).then(() => {
+			const current = cga.GetMapXY();
+			if (current.x != target[0] || current.y != target[1]) {
+				console.log('重试forceMoveTo', target);
+				return cga.emogua.forceMoveTo(target, current);
+			}
+		});
+	};
 	/**
 	 * target: [x, y, destination]
 	 *     destination: 'map name' | '*' | [x, y] 切同图
