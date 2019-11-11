@@ -29,7 +29,7 @@ var mineArray = [
 						}
 						cga.walkList([
 						[20, 14],
-						], cb);	
+						], cb);
 					});
 				});
 			});
@@ -61,7 +61,7 @@ var mineArray = [
 						cga.walkList([
 						[20, 59, '维诺亚洞穴 地下2楼'],
 						[37, 32],
-						], cb);	
+						], cb);
 					});
 				});
 			});
@@ -92,7 +92,7 @@ var mineArray = [
 						}
 						cga.walkList([
 						[49, 66],
-						], cb);	
+						], cb);
 					});
 				});
 			});
@@ -108,7 +108,7 @@ var mineArray = [
 {
 	level : 5,
 	name : '金',
-	func : (cb)=>{	
+	func : (cb)=>{
 		var retry = ()=>{
 			cga.walkList([
 				[473, 316],
@@ -123,12 +123,12 @@ var mineArray = [
 						}
 						cga.walkList([
 						[52, 11],
-						], cb);	
+						], cb);
 					});
 				});
 			});
 		}
-			
+
 		cga.travel.falan.toStone('S', ()=>{
 			cga.walkList([
 				[41, 98, '法兰城'],
@@ -155,7 +155,7 @@ var mineArray = [
 						}
 						cga.walkList([
 						[8, 69],
-						], cb);	
+						], cb);
 					});
 				});
 			});
@@ -234,6 +234,33 @@ var mineArray = [
 		});
 	}
 },
+{
+	level : 3,
+	name : '铝',
+	func : (cb)=>{
+		cga.travel.newisland.toStone('D', ()=>{
+			cga.walkList([
+				[190, 116, '盖雷布伦森林'],
+				[231, 222, '布拉基姆高地'],
+				[144, 126],
+				], (r)=>{
+				cga.TurnTo(145, 126);
+				cga.AsyncWaitNPCDialog(()=>{
+					cga.ClickNPCDialog(4, -1);
+					cga.AsyncWaitMovement({map:'布拉基姆高地', delay:1000, timeout:5000}, (err)=>{
+						if(err){
+							retry();
+							return;
+						}
+						cga.walkList([
+						[267, 267, '黑历史之石洞 第1层'],
+						], cb);
+					});
+				});
+			});
+		})
+	}
+},
 ];
 
 var cga = global.cga;
@@ -264,12 +291,12 @@ var thisobj = {
 				break;
 			}
 		}
-		
+
 		if(!thisobj.object){
 			console.error('读取配置：要挖的矿失败！');
 			return false;
 		}
-				
+
 		return true;
 	},
 	inputcb : (cb)=>{
@@ -284,20 +311,20 @@ var thisobj = {
 			if(index !== null && index >= 1 && mineArray[index - 1]){
 				configTable.mineObject = index - 1;
 				thisobj.object = mineArray[index - 1];
-				
+
 				var sayString2 = '当前已选择:[' + (typeof thisobj.object.display_name == 'string' ? thisobj.object.display_name : thisobj.object.name) + ']。';
 				cga.sayLongWords(sayString2, 0, 3, 1);
-				
+
 				cb(null);
-				
+
 				return false;
 			}
-			
+
 			return true;
 		});
 	},
 	init : ()=>{
-		
+
 	}
 }
 

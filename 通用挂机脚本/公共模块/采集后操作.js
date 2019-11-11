@@ -5,7 +5,7 @@ var doneArray = [
 {
 	name: '换条存银行',
 	func: (cb, mineObject)=>{
-		cga.travel.falan.toMineStore(mineObject.name, ()=>{
+		const exchange = () => {
 			cga.AsyncWaitNPCDialog(()=>{
 				cga.ClickNPCDialog(0, 0);
 				cga.AsyncWaitNPCDialog(()=>{
@@ -22,7 +22,12 @@ var doneArray = [
 					});
 				});
 			});
-		});
+		};
+		if (mineObject.name == '铝') {
+			cga.travel.falan.toNewMineStore(mineObject.name, exchange);
+		} else {
+			cga.travel.falan.toMineStore(mineObject.name, exchange);
+		}
 	}
 },
 {
@@ -45,7 +50,7 @@ var doneArray = [
 			[30, 79],
 			], ()=>{
 				cga.TurnTo(30, 77);
-				cga.AsyncWaitNPCDialog(()=>{	
+				cga.AsyncWaitNPCDialog(()=>{
 					cga.ClickNPCDialog(0, 0);
 					cga.AsyncWaitNPCDialog(()=>{
 
@@ -99,7 +104,7 @@ var doneArray = [
 			[12, 11],
 		], ()=>{
 			cga.TurnTo(12, 9);
-			cga.AsyncWaitNPCDialog(()=>{	
+			cga.AsyncWaitNPCDialog(()=>{
 				cga.ClickNPCDialog(0, 0);
 				cga.AsyncWaitNPCDialog(()=>{
 
@@ -147,7 +152,7 @@ var thisobj = {
 			mineObject.doneManager(cb);
 			return;
 		}
-		
+
 		thisobj.object.func(cb, mineObject);
 	},
 	translate : (pair)=>{
@@ -168,16 +173,16 @@ var thisobj = {
 				break;
 			}
 		}
-		
+
 		if(!thisobj.object){
 			console.error('读取配置：采集完成后操作失败！');
 			return false;
 		}
-		
+
 		return true;
 	},
 	inputcb : (cb)=>{
-		
+
 		var stage1 = (cb2)=>{
 			var sayString = '【采集插件】请选择采集完成后操作:';
 			for(var i in doneArray){
@@ -190,18 +195,18 @@ var thisobj = {
 				if(index !== null && index >= 1 && doneArray[index - 1]){
 					configTable.doneObject = index - 1;
 					thisobj.object = doneArray[index - 1];
-					
+
 					var sayString2 = '当前已选择:[' + thisobj.object.name + ']。';
 					cga.sayLongWords(sayString2, 0, 3, 1);
-					
-					cb(null);				
+
+					cb(null);
 					return false;
 				}
-				
+
 				return true;
 			});
 		}
-		
+
 		stage1();
 	}
 }
