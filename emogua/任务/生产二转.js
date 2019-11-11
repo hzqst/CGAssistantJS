@@ -57,33 +57,38 @@ require('../wrapper').then(cga => {
 		() => cga.emogua.talkNpc(6, cga.emogua.talkNpcSelectorYes)
 	).then(
 		() => timer = Date.now()
-	).then(
-		() => cga.emogua.autoWalkList([
-			[6,13,'亚留特村'],
-			[51,65],
-			[67,64,'芙蕾雅'],
-			[691,188,'哈巴鲁东边洞穴 地下1楼'],
-			[21,39,'哈巴鲁东边洞穴 地下2楼'],
-			[17,16]
-		])
-	).then(
-		() => cga.emogua.forceMoveTo([17,18])
-	).then(
-		() => cga.emogua.autoWalkList([
-			[62,65,'哈巴鲁东边洞穴 地下1楼'],
-			[9,37,'芙蕾雅'],
-			[470,196,'法兰城'],
-			[221,83,'医院'],
-			[8,31]
-		])
-	).then(
-		() => cga.emogua.recharge(6)
-	).then(
-		() => cga.emogua.autoWalkList([
-			[12,42,'法兰城'],
-			[233,78]
-		])
-	).then(
+	).then(() => {
+		// Promise.resolve().then(
+		// 	() => cga.emogua.autoWalkList([
+		// 		[6,13,'亚留特村'],
+		// 		[51,65],
+		// 		[67,64,'芙蕾雅'],
+		// 		[691,188,'哈巴鲁东边洞穴 地下1楼'],
+		// 		[21,39,'哈巴鲁东边洞穴 地下2楼'],
+		// 		[17,16]
+		// 	])
+		// ).then(
+		// 	() => cga.emogua.forceMoveTo([17,18])
+		// ).then(
+		// 	() => cga.emogua.autoWalkList([
+		// 		[62,65,'哈巴鲁东边洞穴 地下1楼'],
+		// 		[9,37,'芙蕾雅'],
+		// 		[470,196,'法兰城'],
+		// 		[221,83,'医院'],
+		// 		[8,31]
+		// 	])
+		// ).then(
+		// 	() => cga.emogua.recharge(6)
+		// ).then(
+		// 	() => cga.emogua.autoWalkList([
+		// 		[12,42,'法兰城'],
+		// 		[233,78]
+		// 	])
+		// );
+		return cga.emogua.logBack().then(
+			() => cga.emogua.prepare({repairFlag: -1})
+		);
+	}).then(
 		() => cga.emogua.goto(n => n.falan.wout)
 	).then(
 		() => cga.emogua.autoWalkList([
