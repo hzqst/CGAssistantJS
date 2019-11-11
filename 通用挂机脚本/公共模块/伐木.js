@@ -9,7 +9,7 @@ var mineArray = [
 					[361, 184],
 				], cb);
 			});
-		}		
+		}
 	},
 	{
 		level : 2,
@@ -27,15 +27,14 @@ var mineArray = [
 		level : 3,
 		name : '黄月木',
 		func : (cb)=>{
-			cga.travel.falan.toStone('W1', (r)=>{
+			cga.travel.falan.toTeleRoom('亚留特村', (r)=>{
 				cga.walkList([
-					[22, 87, '芙蕾雅'],
-					[361, 182],
+					[8, 3, '村长的家'],
+					[6, 13, '亚留特村'],
+					[59, 31, '芙蕾雅'],
+					[638, 141],
 				], cb);
 			});
-		},
-		extra_selling : (item)=>{
-			return item.name == '印度轻木';
 		}
 	},
 	{
@@ -164,7 +163,7 @@ var mineArray = [
 		func : (cb)=>{
 			if(cga.GetMapName() != '阿凯鲁法村')
 				throw new Error('必须从阿凯鲁法村启动');
-			
+
 			cga.walkList([
 				[178, 227, '米内葛尔岛'],
 				[206, 347],
@@ -179,7 +178,7 @@ var mineArray = [
 		func : (cb)=>{
 			if(cga.GetMapName() != '阿凯鲁法村')
 				throw new Error('必须从阿凯鲁法村启动');
-			
+
 			cga.walkList([
 				[178, 227, '米内葛尔岛'],
 				[154, 395],
@@ -193,11 +192,23 @@ var mineArray = [
 		func : (cb)=>{
 			if(cga.GetMapName() != '阿凯鲁法村')
 				throw new Error('必须从阿凯鲁法村启动');
-			
+
 			cga.walkList([
 				[178, 227, '米内葛尔岛'],
 				[250, 402],
 			], cb);
+		}
+	},
+	{
+		level : 3,
+		name : '茱萸木',
+		func : (cb)=>{
+			cga.travel.newisland.toStone('X', ()=>{
+				cga.walkList([
+				[130, 50, '盖雷布伦森林'],
+				[187, 43],
+				], cb);
+			});
 		}
 	},
 ];
@@ -229,12 +240,12 @@ var thisobj = {
 				break;
 			}
 		}
-		
+
 		if(!thisobj.object){
 			console.error('读取配置：要伐的木失败！');
 			return false;
 		}
-				
+
 		return true;
 	},
 	inputcb : (cb)=>{
@@ -249,20 +260,20 @@ var thisobj = {
 			if(index !== null && index >= 1 && mineArray[index - 1]){
 				configTable.mineObject = index - 1;
 				thisobj.object = mineArray[index - 1];
-				
+
 				var sayString2 = '当前已选择:[' + (typeof thisobj.object.display_name == 'string' ? thisobj.object.display_name : thisobj.object.name) + ']。';
 				cga.sayLongWords(sayString2, 0, 3, 1);
 
 				cb(null);
-				
+
 				return false;
 			}
-			
+
 			return true;
 		});
 	},
 	init : ()=>{
-		
+
 	}
 }
 
