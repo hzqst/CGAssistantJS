@@ -75,7 +75,12 @@ module.exports = function(callback){
 	
 	cga.MOVE_GOLD_TOBANK = 1;
 	cga.MOVE_GOLD_FROMBANK =  2;
-	cga.MOVE_GOLD_DROP = 3;
+	cga.MOVE_GOLD_DROP = 3
+	
+	cga.PET_STATE_READY = 1;
+	cga.PET_STATE_BATTLE = 2;
+	cga.PET_STATE_REST = 3;
+	cga.PET_STATE_WALK = 16;
 
 	//延迟x毫秒
 	cga.delay = (millis) => new Promise((resolve, reject) => {
