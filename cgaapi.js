@@ -1,4 +1,4 @@
-var cga = require('bindings')('node_cga');
+var cga = require('bindings')('node_cga');	
 var moment = require('moment');
 var PF = require('pathfinding');
 var Async = require('async');
@@ -12,7 +12,7 @@ global.is_array_contain = function(arr, val)
 			return true;
 		}
     }
-
+	
 	return false;
 }
 
@@ -23,10 +23,10 @@ module.exports = function(callback){
 	cga.AsyncConnect(port, function(err){
 		if(err)
 			throw err;
-
+		
 		callback();
 	});
-
+	
 	cga.TRADE_STUFFS_ITEM = 1;
 	cga.TRADE_STUFFS_PET = 2;
 	cga.TRADE_STUFFS_PETSKILL = 3;
@@ -42,19 +42,19 @@ module.exports = function(callback){
 	cga.REQUEST_TYPE_TRADE_REFUSE = 14;
 	cga.REQUEST_TYPE_REBIRTH_ON = 16;
 	cga.REQUEST_TYPE_REBIRTH_OFF = 17;
-
+	
 	cga.ENABLE_FLAG_PK = 0;
 	cga.ENABLE_FLAG_TEAMCHAT = 1;
 	cga.ENABLE_FLAG_JOINTEAM = 2;
 	cga.ENABLE_FLAG_CARD = 3;
 	cga.ENABLE_FLAG_TRADE = 4;
 	cga.ENABLE_FLAG_FAMILY = 5;
-
+	
 	cga.TRADE_STATE_CANCEL = 0;
 	cga.TRADE_STATE_READY = 1;
 	cga.TRADE_STATE_CONFIRM = 2;
 	cga.TRADE_STATE_SUCCEED = 3;
-
+	
 	cga.FL_BATTLE_ACTION_ISPLAYER = 1;
 	cga.FL_BATTLE_ACTION_ISDOUBLE = 2;
 	cga.FL_BATTLE_ACTION_ISSKILLPERFORMED = 4;
@@ -72,7 +72,7 @@ module.exports = function(callback){
 	cga.FL_SKILL_ALL = 0x100;
 	cga.FL_SKILL_BOOM = 0x200;
 	cga.FL_SKILL_FRONT_ONLY = 0x400;
-
+	
 	cga.MOVE_GOLD_TOBANK = 1;
 	cga.MOVE_GOLD_FROMBANK =  2;
 	cga.MOVE_GOLD_DROP = 3;
@@ -83,7 +83,7 @@ module.exports = function(callback){
 			resolve();
 		}, millis);
 	});
-
+	
 	cga.promisify = (fn, args) => new Promise((resolve, reject) => {
 		args.push((err, reason) => {
 			console.log(err);
@@ -94,9 +94,9 @@ module.exports = function(callback){
 		});
 		fn.apply(null, args);
 	});
-
+	
 	cga.moveThinkFnArray = [];
-
+	
 	cga.moveThink = (arg)=>{
 		for(var i = 0; i < cga.moveThinkFnArray.length; ++i){
 			if(cga.moveThinkFnArray[i](arg) == false){
@@ -105,34 +105,34 @@ module.exports = function(callback){
 		}
 		return true;
 	}
-
+	
 	cga.isMoveThinking = false;
-
+	
 	cga.registerMoveThink = (fn)=>{
 		cga.moveThinkFnArray.push(fn);
 	}
-
+	
 	cga.isTeamLeaderEx = ()=>{
 		return (cga.isTeamLeader == true || !cga.getTeamPlayers().length);
 	}
-
+	
 	cga.getMapInfo = () => {
 		const info = cga.GetMapXY();
 		info.indexes = cga.GetMapIndex();
 		info.name = cga.GetMapName();
 		return info;
 	};
-
+		
 	//判断是否在战斗状态
 	cga.isInBattle = function(){
 		return (cga.GetWorldStatus() == 10) ? true : false;
 	}
-
+	
 	//判断是否在正常状态（非切图非战斗状态）
 	cga.isInNormalState = function(){
 		return (cga.GetWorldStatus() == 9 && cga.GetGameStatus() == 3) ? true : false;
 	}
-
+	
 	//将字符串转义为windows下合法的文件名
 	cga.FileNameEscape = (str)=>{
 		return str.replace(/[\\/:\*\?"<>|]/g, (c)=>{return {'\\':'%5C','/':'%2F',':':'%3A','*':'%2A','?':'%3F','"':'%22','<':'%3C','>':'%3E','|':'%7C'}[c];});
@@ -166,7 +166,7 @@ module.exports = function(callback){
 					{
 						return filter(craft);
 					}
-
+					
 					return false;
 				});
 				if(craftInfo != undefined){
@@ -174,7 +174,7 @@ module.exports = function(callback){
 					return false;
 				}
 			}
-		});
+		});		
 		return result;
 	}
 
@@ -184,38 +184,38 @@ module.exports = function(callback){
 			cb(new Error('你没有'+skillname+'的技能'));
 			return;
 		}
-
+		
 		cga.SetImmediateDoneWork(options.immediate ? true : false);
-
+		
 		cga.StartWork(skill.index, 0);
 
 		if(!cga.AssessItem(skill.index, options.itempos)){
 			cb(new Error('无法操作该物品'));
 			return;
 		}
-
+		
 		var handler = (err, results)=>{
 			if(results){
 				cb(null, results);
 				return;
 			}
-
+			
 			var craftStatus = cga.GetCraftStatus();
-
+			
 			if(err){
 				if(craftStatus == 0 || craftStatus == 2){
 					cga.manipulateItemEx(options, cb);
 					return;
 				}
-
+				
 				cga.AsyncWaitWorkingResult(handler, 1000);
 			}
 		}
-
+		
 		cga.AsyncWaitWorkingResult(handler, 1000);
 		return;
 	}
-
+	
 	//制造物品，参数：物品名，添加的宝石的名字(或物品位置)
 	cga.craftNamedItem = function(craftItemName, extraItemName){
 
@@ -230,9 +230,9 @@ module.exports = function(callback){
 
 		var inventory = cga.getInventoryItems();
 			var itemArray = [];
-
+	
 		var err = null;
-
+		
 		info.craft.materials.forEach((mat)=>{
 			var findRequired = inventory.find((inv)=>{
 				return (inv.itemid == mat.itemid && inv.count >= mat.count);
@@ -244,7 +244,7 @@ module.exports = function(callback){
 				return false;
 			}
 		});
-
+		
 		if(err){
 			cb(err);
 			return;
@@ -260,58 +260,58 @@ module.exports = function(callback){
 				err = new Error('制造' +options.extraitem+'所需宝石' +options.extraitem+'不足！');
 			}
 		}
-
+		
 		if(err){
 			cb(err);
 			return;
 		}
-
+		
 		for(var i = 0; i < 6; ++i)
 		{
 			if(typeof itemArray[i] != 'number')
 				itemArray[i] = -1;
 		}
-
+		
 		cga.SetImmediateDoneWork(options.immediate ? true : false);
-
+		
 		cga.StartWork(info.skill.index, info.craft.index);
 		cga.CraftItem(info.skill.index, info.craft.index, 0, itemArray);
-
+		
 		var handler = (err, results)=>{
 			if(results){
 				cb(null, results);
 				return;
 			}
-
+			
 			var craftStatus = cga.GetCraftStatus();
-
+			
 			if(err){
 				if(craftStatus == 0 || craftStatus == 2){
 					cga.craftItemEx(options, cb);
 					return;
 				}
-
+				
 				cga.AsyncWaitWorkingResult(handler, 1000);
 			}
 		}
-
+		
 		cga.AsyncWaitWorkingResult(handler, 1000);
 	}
-
+	
 	//获取物品栏里的物品，返回数组
 	cga.getInventoryItems = function(){
 		return cga.GetItemsInfo().filter((item)=>{
 			return item.pos >= 8 && item.pos < 100;
 		});
 	}
-
+	
 	//获取装备栏里的物品，返回数组
 	cga.getEquipItems = function(){
 		return cga.GetItemsInfo().filter((item)=>{
 			return item.pos >= 0 && item.pos < 8;
 		});
 	}
-
+	
 	//获取装备耐久，返回数组[当前耐久,最大耐久]
 	cga.getEquipEndurance = (item)=>{
 		var regex = item.attr.match(/\$4耐久 (\d+)\/(\d+)/);
@@ -339,11 +339,11 @@ module.exports = function(callback){
 			default: throw new Error('Invalid direction');
 		}
 	}
-
+	
 	cga.travel = {};
-
+	
 	cga.travel.falan = {};
-
+	
 	cga.travel.falan.xy2name = (x, y, mapname)=>{
 		if(x == 242 && y == 100 && mapname == '法兰城')
 			return 'E1';
@@ -363,7 +363,7 @@ module.exports = function(callback){
 			return 'M1';
 		return null;
 	}
-
+	
 	cga.travel.falan.isvalid = function(stone){
 		switch(stone.toUpperCase()){
 			case 'E': return true;
@@ -438,7 +438,7 @@ module.exports = function(callback){
 				}
 			}
 		}
-
+		
 		if(curMap.indexOf('市场') >= 0 && curXY.x == 46 && curXY.y == 16){
 			if(stone == 'M1' && curMap == '市场一楼 - 宠物交易区'){
 				cb(null);
@@ -497,7 +497,7 @@ module.exports = function(callback){
 			else if(stone.length == 1)
 				walks = walkOutOfCastle_2;
 			else if(stone.length >= 2 && stone.charAt(1) == '1')
-				walks = walkOutOfCastle_1;
+				walks = walkOutOfCastle_1; 
 			else
 				walks = walkOutOfCastle_2;
 
@@ -563,7 +563,7 @@ module.exports = function(callback){
 			cga.travel.falan.toStoneInternal(stone, cb);
 		});
 	}
-
+	
 	//参数1：传送石名称，有效参数：E1 S1 W1 E2 S2 W2 M1(道具-市场1楼) M3(道具-市场3楼)
 	//参数2：回调函数function(result), result 为true或false
 	cga.travel.falan.toStone = function(stone, cb){
@@ -571,10 +571,10 @@ module.exports = function(callback){
 			cb(new Error('无效的目的地名称'));
 			return;
 		}
-
+		
 		cga.travel.falan.toStoneInternal(stone, cb, true);
 	}
-
+	
 	//前往到法兰城东医院
 	//参数1：回调函数function(result), result 为true或false
 	cga.travel.falan.toEastHospital = (cb)=>{
@@ -584,7 +584,7 @@ module.exports = function(callback){
 			], cb);
 		});
 	}
-
+	
 	//前往到法兰城西医院
 	//参数1：回调函数function(result), result 为true或false
 	cga.travel.falan.toWestHospital = (cb)=>{
@@ -594,11 +594,11 @@ module.exports = function(callback){
 			], cb);
 		});
 	}
-
+	
 	//前往到法兰城银行
 	//参数1：回调函数function(result), result 为true或false
 	cga.travel.falan.toBank = function(cb){
-
+		
 		if(cga.GetMapName() == '银行'){
 			cga.walkList([
 				[11, 8],
@@ -608,7 +608,7 @@ module.exports = function(callback){
 			});
 			return;
 		}
-
+		
 		cga.travel.falan.toStone('E', (r)=>{
 			cga.walkList([
 			[238, 111, '银行'],
@@ -619,25 +619,25 @@ module.exports = function(callback){
 			});
 		});
 	}
-
+	
 	//从法兰城到里谢里雅堡，启动地点：登出到法兰城即可
 	//参数1：回调函数function(result), result 为true或false
 	cga.travel.falan.toCastle = (cb)=>{
-
+		
 		if(cga.GetMapName() == '里谢里雅堡'){
 			cb(true);
 			return;
 		}
-
+		
 		if(cga.GetMapName() == '法兰城'){
 			var curXY = cga.GetMapXY();
-
+			
 			var westPath = cga.calculatePath(curXY.x, curXY.y, 141, 88, '里谢里雅堡', null, null, []);
 			westPath = PF.Util.expandPath(westPath);
-
+			
 			var southPath = cga.calculatePath(curXY.x, curXY.y, 153, 100, '里谢里雅堡', null, null, []);
 			southPath = PF.Util.expandPath(southPath);
-
+			
 			var eastPath = cga.calculatePath(curXY.x, curXY.y, 165, 88, '里谢里雅堡', null, null, []);
 			eastPath = PF.Util.expandPath(eastPath);
 
@@ -646,25 +646,25 @@ module.exports = function(callback){
 
 			var path = westPath;
 			var target = [141, 88, '里谢里雅堡'];
-
+			
 			if(path.length > southPath.length)
 			{
 				path = southPath;
 				target = [153, 100, '里谢里雅堡'];
 			}
-
+			
 			if(path.length > eastPath.length)
 			{
 				path = eastPath;
 				target = [165, 88, '里谢里雅堡'];
 			}
-
+			
 			if(path.length > northPath.length)
 			{
 				path = northPath;
 				target = [153, 70, '里谢里雅堡'];
 			}
-
+			
 			cga.walkList([target], cb);
 		} else {
 			cga.travel.falan.toStone('S', ()=>{
@@ -672,9 +672,9 @@ module.exports = function(callback){
 			});
 		}
 	}
-
+	
 	cga.travel.falan.toCastleHospital = function(cb){
-
+		
 		if(cga.GetMapName() == '里谢里雅堡'){
 			var pos = cga.GetMapXY();
 			if(pos.x == 34 && pos.y == 89)
@@ -694,7 +694,7 @@ module.exports = function(callback){
 			}
 			return;
 		}
-
+		
 		cga.travel.falan.toStone('C', (r)=>{
 			cga.walkList([
 			[34, 89]
@@ -702,9 +702,9 @@ module.exports = function(callback){
 				cga.TurnTo(36, 87);
 				cb(true);
 			});
-		});
+		});	
 	}
-
+	
 	cga.travel.falan.toCastleClock = (cb)=>{
 		cga.travel.falan.toStone('C', (r)=>{
 			cga.walkList([
@@ -722,15 +722,15 @@ module.exports = function(callback){
 					}
 				});
 			});
-		});
+		});	
 	}
 
 	cga.travel.falan.toCamp = (cb, noWarp)=>{
 		var warp = ()=>{
-
+			
 			var teamplayers = cga.getTeamPlayers();
 			var isTeamLeader = (teamplayers.length > 0 && teamplayers[0].is_me) == true ? true : false;
-
+			
 			if(isTeamLeader){
 				setTimeout(()=>{
 					cga.DoRequest(cga.REQUEST_TYPE_LEAVETEAM);
@@ -738,22 +738,22 @@ module.exports = function(callback){
 				}, 1500);
 				return;
 			}
-
+			
 			cga.TurnTo(7, 21);
 			cga.AsyncWaitMovement({map:'圣骑士营地', delay:1000, timeout:5000}, cb);
 		}
 
 		var castle_2_camp = ()=>{
-
+			
 			var shouldWarp = (cga.getItemCount('承认之戒') > 0 && noWarp !== true) ? true : false;
-
+			
 			var list = shouldWarp ? [
 			[55,47, '辛希亚探索指挥部'],
 			[7,4, '辛希亚探索指挥部', 91, 6],
 			[95, 9, 27101],
 			[8, 21],
 			] : [
-
+			
 			];
 
 			if(cga.GetMapName() == '里谢里雅堡'){
@@ -766,10 +766,10 @@ module.exports = function(callback){
 			} else if(cga.GetMapName() == '芙蕾雅'){
 				list.unshift([513, 282, '曙光骑士团营地']);
 			}
-
+			
 			cga.walkList(list, (shouldWarp) ? warp : cb);
 		}
-
+		
 		var mapname = cga.GetMapName();
 		if(mapname == '圣骑士营地'){
 			cb(null);
@@ -780,7 +780,7 @@ module.exports = function(callback){
 			cga.walkList([[8, 21]], warp);
 			return;
 		}
-
+		
 		if(mapname == '法兰城' || mapname == '里谢里雅堡' || mapname == '芙蕾雅' || mapname == '曙光骑士团营地'){
 			castle_2_camp(null);
 		}else{
@@ -793,7 +793,7 @@ module.exports = function(callback){
 			cb(true);
 			return;
 		}
-
+		
 		if(cga.GetMapName() == '法兰城'){
 			cga.travel.falan.toStone('S1', ()=>{
 				cga.walkList([
@@ -809,13 +809,13 @@ module.exports = function(callback){
 			});
 		}
 	}
-
+	
 	cga.travel.falan.toKatieStore = cga.travel.falan.toAssessStore = (cb)=>{
 		if(cga.GetMapName()=='凯蒂夫人的店'){
 			cb(true);
 			return;
 		}
-
+		
 		if(cga.GetMapName() == '法兰城'){
 			cga.travel.falan.toStone('E2', function(r){
 				cga.walkList([
@@ -831,7 +831,7 @@ module.exports = function(callback){
 			});
 		}
 	}
-
+	
 	cga.travel.falan.toMineStore = (mine, cb)=>{
 		var mineExchange = null;
 		if(mine == '铜'){
@@ -922,7 +922,7 @@ module.exports = function(callback){
 			}
 			return;
 		}
-
+		
 		if(cga.GetMapName() == '法兰城'){
 			cga.travel.falan.toStone('W1', function(r){
 				cga.walkList([
@@ -949,28 +949,6 @@ module.exports = function(callback){
 				});
 			});
 		}
-	}
-	cga.travel.falan.toNewMineStore = (mine, cb) => {
-		let mineExchange;
-		if (mine == '铝') {
-			mineExchange = (cb2) => {
-				cga.walkList([[38, 54]], () => {
-					cga.TurnTo(38, 53);
-					cb2(true);
-				});
-			};
-		}
-		cga.travel.newisland.toStone('C', () => {
-			cga.walkList([
-				[144,120,'武器工房'],[28,21,'画廊']
-			], () => {
-				if (mineExchange) {
-					mineExchange(cb);
-				} else {
-					cb(false);
-				}
-			});
-		});
 	}
 
 	//从法兰城到新城
@@ -1005,19 +983,19 @@ module.exports = function(callback){
 							});
 						});
 					});
-				}, 1000);
+				}, 1000);	
 			});
-		});
+		});	
 	}
-
+	
 	//从法兰城到阿凯鲁法
 	cga.travel.falan.toAKLF = (cb)=>{
-
+		
 		if(cga.GetMapName() == '阿凯鲁法村'){
 			cb(null);
 			return;
 		}
-
+		
 		var stage3 = ()=>{
 			cga.walkList([
 				[20, 53],
@@ -1040,11 +1018,11 @@ module.exports = function(callback){
 				});
 			});
 		}
-
+		
 		var retry2 = ()=>{
 			cga.TurnTo(71, 26);
 			cga.AsyncWaitNPCDialog((err, dlg)=>{
-
+				
 				if(dlg && dlg.message.indexOf('现在正停靠在阿凯鲁法港') >= 0 && dlg.options == 12){
 					cga.ClickNPCDialog(4, -1);
 					cga.AsyncWaitMovement({map:'往伊尔栈桥'}, ()=>{
@@ -1052,11 +1030,11 @@ module.exports = function(callback){
 					});
 					return;
 				}
-
+				
 				setTimeout(retry2, 5000);
 			});
 		}
-
+		
 		var retry = ()=>{
 			cga.TurnTo(53, 50);
 			cga.AsyncWaitNPCDialog((err, dlg)=>{
@@ -1065,11 +1043,11 @@ module.exports = function(callback){
 					cga.AsyncWaitMovement({map:'艾欧奇亚号'}, retry2);
 					return;
 				}
-
+				
 				setTimeout(retry, 5000);
 			});
 		}
-
+		
 		cga.travel.falan.toTeleRoom('伊尔村', (r)=>{
 			cga.walkList([
 				[12, 17, '村长的家'],
@@ -1098,19 +1076,19 @@ module.exports = function(callback){
 							});
 						});
 					});
-				}, 1000);
+				}, 1000);	
 			});
 		});
 	}
-
+	
 	//从法兰城到阿凯鲁法
 	cga.travel.falan.toGelaer = (cb)=>{
-
+		
 		if(cga.GetMapName() == '哥拉尔'){
 			cb(null);
 			return;
 		}
-
+		
 		var stage3 = ()=>{
 			cga.walkList([
 				[84, 55],
@@ -1127,11 +1105,11 @@ module.exports = function(callback){
 				});
 			});
 		}
-
+		
 		var retry2 = ()=>{
 			cga.TurnTo(71, 26);
 			cga.AsyncWaitNPCDialog((err, dlg)=>{
-
+				
 				if(dlg && dlg.message.indexOf('正停在哥拉尔港') >= 0 && dlg.options == 12){
 					cga.ClickNPCDialog(4, -1);
 					cga.AsyncWaitMovement({map:'往伊尔栈桥'}, ()=>{
@@ -1139,11 +1117,11 @@ module.exports = function(callback){
 					});
 					return;
 				}
-
+				
 				setTimeout(retry2, 5000);
 			});
 		}
-
+		
 		var retry = ()=>{
 			cga.TurnTo(53, 50);
 			cga.AsyncWaitNPCDialog((err, dlg)=>{
@@ -1152,11 +1130,11 @@ module.exports = function(callback){
 					cga.AsyncWaitMovement({map:'铁达尼号'}, retry2);
 					return;
 				}
-
+				
 				setTimeout(retry, 5000);
 			});
 		}
-
+		
 		cga.travel.falan.toTeleRoom('伊尔村', (r)=>{
 			cga.walkList([
 				[12, 17, '村长的家'],
@@ -1185,15 +1163,15 @@ module.exports = function(callback){
 							});
 						});
 					});
-				}, 1000);
+				}, 1000);	
 			});
 		});
 	}
-
+	
 	cga.travel.AKLF = {};
-
+	
 	cga.travel.AKLF.isSettled = true;
-
+	
 	cga.travel.AKLF.toFalan = (cb)=>{
 		if(cga.GetMapName() != '阿凯鲁法村'){
 			cb(new Error('必须从阿凯鲁法村启动'));
@@ -1218,7 +1196,7 @@ module.exports = function(callback){
 				});
 			});
 		}
-
+		
 		var stage3 = ()=>{
 			cga.walkList([
 				[19, 55],
@@ -1241,10 +1219,10 @@ module.exports = function(callback){
 				});
 			});
 		}
-
+		
 		var retry2 = ()=>{
 			cga.TurnTo(71, 26);
-			cga.AsyncWaitNPCDialog((err, dlg)=>{
+			cga.AsyncWaitNPCDialog((err, dlg)=>{				
 				if(dlg && dlg.message.indexOf('现在正停靠在伊尔村') >= 0 && dlg.options == 12){
 					cga.ClickNPCDialog(4, -1);
 					cga.AsyncWaitMovement({map:'往阿凯鲁法栈桥'}, ()=>{
@@ -1252,7 +1230,7 @@ module.exports = function(callback){
 					});
 					return;
 				}
-
+				
 				setTimeout(retry2, 5000);
 			});
 		}
@@ -1265,11 +1243,11 @@ module.exports = function(callback){
 					cga.AsyncWaitMovement({map:'艾欧奇亚号'}, retry2);
 					return;
 				}
-
+				
 				setTimeout(retry, 5000);
 			});
 		}
-
+		
 		cga.walkList([
 			[57, 176],
 		], ()=>{
@@ -1298,27 +1276,27 @@ module.exports = function(callback){
 			});
 		});
 	}
-
+		
 	cga.travel.falan.toTeleRoomTemplate = (villageName, npcPos, npcPos2, npcPos3, cb)=>{
 		cga.travel.falan.toStone('C', ()=>{
 			var teamplayers = cga.getTeamPlayers();
 			var isTeamLeader = teamplayers.length > 0 && teamplayers[0].is_me == true ? true : false;
-
+			
 			var list = [
 			[41, 50, '里谢里雅堡 1楼'],
 			[45, 20, '启程之间']
 			];
-
+			
 			if(isTeamLeader){
 				list.push(npcPos);
 				list.push(npcPos2);
 				list.push(npcPos);
-				list.push(npcPos2);
+				list.push(npcPos2);				
 				list.push(npcPos);
 			} else {
 				list.push(npcPos);
 			}
-
+			
 			cga.walkList(list, ()=>{
 				var go = ()=>{
 					cga.TurnTo(npcPos3[0], npcPos3[1]);
@@ -1342,7 +1320,7 @@ module.exports = function(callback){
 			});
 		});
 	}
-
+	
 	cga.travel.falan.toTeleRoom = (villageName, cb)=>{
 		var mapname = cga.GetMapName();
 		switch(villageName){
@@ -1401,11 +1379,11 @@ module.exports = function(callback){
 				throw new Error('未知的村子名称');
 		}
 	}
-
+	
 	cga.travel.falan.toTeleRoomPromisify = (city)=>{
 		return cga.promisify(cga.travel.falan.toTeleRoom, [city]);
 	}
-
+	
 	cga.travel.falan.toCity = function(city, cb){
 		switch(city){
 			case '新城':case '艾尔莎岛':
@@ -1420,11 +1398,11 @@ module.exports = function(callback){
 		}
 		cb(new Error('未知的城市名'));
 	}
-
+	
 	cga.travel.newisland = {};
-
+		
 	cga.travel.newisland.isSettled = true;
-
+	
 	cga.travel.newisland.xy2name = function(x, y, mapname){
 		if(x == 140 && y == 105 && mapname == '艾尔莎岛')
 			return 'X';
@@ -1438,7 +1416,7 @@ module.exports = function(callback){
 			return 'D';
 		return null;
 	}
-
+	
 	cga.travel.newisland.isvalid = function(stone){
 		switch(stone.toUpperCase()){
 			case 'A': return true;
@@ -1455,7 +1433,7 @@ module.exports = function(callback){
 		var curMap = cga.GetMapName();
 		const desiredMap = ['艾尔莎岛', '艾夏岛'];
 		if(curMap == '艾尔莎岛' || curMap == '艾夏岛'){
-
+			
 			var curStone = cga.travel.newisland.xy2name(curXY.x, curXY.y, curMap);
 			if(curStone !== null) {
 				var turn = false;
@@ -1491,7 +1469,7 @@ module.exports = function(callback){
 								});
 								return;
 							}
-
+							
 							cga.turnDir(6);
 							break;
 						}
@@ -1509,7 +1487,7 @@ module.exports = function(callback){
 					return;
 				}
 			}
-
+			
 			if(curMap == '艾尔莎岛'){
 				cga.walkList([
 				stone == 'X' ? [140, 105] : [158, 94],
@@ -1531,7 +1509,7 @@ module.exports = function(callback){
 			});
 		}
 	}
-
+	
 	//参数1：传送石名称，有效参数：A B C D
 	//参数2：回调函数function(result), result 为true或false
 	cga.travel.newisland.toStone = (stone, cb)=>{
@@ -1542,7 +1520,7 @@ module.exports = function(callback){
 
 		cga.travel.newisland.toStoneInternal(stone, cb);
 	}
-
+	
 	cga.travel.newisland.toPUB = (cb)=>{
 		cga.travel.newisland.toStone('B', (r)=>{
 			cga.walkList([
@@ -1552,11 +1530,11 @@ module.exports = function(callback){
 			});
 		});
 	}
-
+	
 	cga.travel.newisland.toLiXiaIsland = (cb)=>{
 		cga.travel.newisland.toStone('X', (r)=>{
 			var teamplayers = cga.getTeamPlayers();
-
+	
 			cga.walkList(
 			teamplayers.length > 1 ?
 			[
@@ -1581,12 +1559,12 @@ module.exports = function(callback){
 			});
 		});
 	}
-
+	
 	cga.travel.gelaer = {};
-
+	
 	//定居？
 	cga.travel.gelaer.isSettled = true;
-
+	
 	cga.travel.gelaer.xy2name = function(x, y, mapname){
 		if(x == 120 && y == 107 && mapname == '哥拉尔镇')
 			return 'N';
@@ -1594,7 +1572,7 @@ module.exports = function(callback){
 			return 'S';
 		return null;
 	}
-
+	
 	cga.travel.gelaer.isvalid = function(stone){
 		switch(stone.toUpperCase()){
 			case 'N': return true;
@@ -1607,7 +1585,7 @@ module.exports = function(callback){
 		var curXY = cga.GetMapXY();
 		var curMap = cga.GetMapName();
 		const desiredMap = ['哥拉尔镇'];
-		if(curMap == '哥拉尔镇'){
+		if(curMap == '哥拉尔镇'){			
 			var curStone = cga.travel.gelaer.xy2name(curXY.x, curXY.y);
 			if(curStone !== null) {
 				var turn = false;
@@ -1652,17 +1630,17 @@ module.exports = function(callback){
 			});
 		}
 	}
-
+	
 	//参数1：传送石名称，有效参数：N S
 	cga.travel.gelaer.toStone = (stone, cb)=>{
 		if(!cga.travel.gelaer.isvalid(stone)){
 			cb(new Error('无效的目的地名称'));
 			return;
 		}
-
+		
 		cga.travel.gelaer.toStoneInternal(stone, cb);
 	}
-
+	
 	//前往到哥拉尔医院
 	cga.travel.gelaer.toHospital = (cb)=>{
 		cga.travel.gelaer.toStone('N', ()=>{
@@ -1700,7 +1678,7 @@ module.exports = function(callback){
 				});
 			});
 		}
-
+		
 		var stage3 = ()=>{
 			cga.walkList([
 				[19, 55],
@@ -1723,10 +1701,10 @@ module.exports = function(callback){
 				});
 			});
 		}
-
+		
 		var retry2 = ()=>{
 			cga.TurnTo(71, 26);
-			cga.AsyncWaitNPCDialog((err, dlg)=>{
+			cga.AsyncWaitNPCDialog((err, dlg)=>{				
 				if(dlg && dlg.message.indexOf('现在正停靠在伊尔村') >= 0 && dlg.options == 12){
 					cga.ClickNPCDialog(4, -1);
 					cga.AsyncWaitMovement({map:'往哥拉尔栈桥'}, ()=>{
@@ -1734,7 +1712,7 @@ module.exports = function(callback){
 					});
 					return;
 				}
-
+				
 				setTimeout(retry2, 5000);
 			});
 		}
@@ -1747,11 +1725,11 @@ module.exports = function(callback){
 					cga.AsyncWaitMovement({map:'铁达尼号'}, retry2);
 					return;
 				}
-
+				
 				setTimeout(retry, 5000);
 			});
 		}
-
+		
 		cga.walkList([
 			[96, 211, '哥拉尔镇 港湾管理处'],
 			[8, 5],
@@ -1778,10 +1756,10 @@ module.exports = function(callback){
 			allowDiagonal: true,
 			dontCrossCorners: true
 		});
-
+		
 		//console.log('x_size ' + walls.x_size);
 		//console.log('y_size ' + walls.y_size);
-
+		
 		//console.log('xbot ' + walls.x_bottom);
 		//console.log('ybot ' + walls.y_bottom);
 
@@ -1789,16 +1767,16 @@ module.exports = function(callback){
 		var topos = [targetX - walls.x_bottom, targetY - walls.y_bottom];
 		console.log('寻路起始坐标 ('  + (frompos[0]) + ', '+ (frompos[1]) + ')');
 		console.log('寻路目的坐标 ('  + (topos[0]) +', '+(topos[1]) + ')');
-
-		if(frompos[0] >= 0 && frompos[0] < walls.x_size &&
+		
+		if(frompos[0] >= 0 && frompos[0] < walls.x_size && 
 		frompos[1] >= 0 && frompos[1] < walls.y_size &&
-			topos[0] >= 0 && topos[0] < walls.x_size &&
+			topos[0] >= 0 && topos[0] < walls.x_size && 
 			topos[1] >= 0 && topos[1] < walls.y_size){
-
+		
 			//console.log('using AStar path finder...');
-
+			
 			var path = finder.findPath(frompos[0], frompos[1], topos[0], topos[1], grid);
-
+			
 			var joint = PF.Util.compressPath(path);
 			for(var i in joint){
 				joint[i][0] += walls.x_bottom;
@@ -1812,32 +1790,32 @@ module.exports = function(callback){
 			}
 
 			//console.log('result joints');
-
+				
 			//console.log(joint);
 
 			newList = joint.concat(newList);
-
-			console.log('新寻路列表:');
+			
+			console.log('新寻路列表:');			
 			console.log(newList);
-
+			
 		} else {
 			console.log('错误：寻路失败！');
 			newList.unshift([targetX, targetY, targetMap, null, null, true]);
 		}
-
+		
 		return newList;
 	}
-
+	
 	cga.getMapXY = ()=>{
 		var f = cga.GetMapXYFloat();
 		return {x: parseInt(f.x/64.0), y:parseInt(f.y/64.0)};
 	}
-
+	
 	cga.walkList = (list, cb)=>{
-
+		
 		//console.log('初始化寻路列表');
 		//console.log(list);
-
+		
 		if(cga.isMoveThinking){
 			console.log('警告:已有walkList在运行中');
 			console.trace();
@@ -1853,7 +1831,7 @@ module.exports = function(callback){
 
 		var walkedList = [];
 		var newList = list.slice(0);
-
+		
 		var walkCb = ()=>{
 
 			if(newList.length == 0){
@@ -1868,11 +1846,11 @@ module.exports = function(callback){
 			var dstX = newList[0][3];
 			var dstY = newList[0][4];
 			var isAStarPath = newList[0][5];
-
+			
 			var walked = newList[0].slice(0);
 			walkedList.push(walked);
 			newList.shift();
-
+			
 			var curmap = cga.GetMapName();
 			var curpos = cga.GetMapXY();
 			var curmapindex = cga.GetMapIndex().index3;
@@ -1883,7 +1861,7 @@ module.exports = function(callback){
 			console.log('目标坐标: (%d, %d)', targetX, targetY);
 			console.log('目标地图');
 			console.log(targetMap);
-
+			
 			var end = ()=>{
 				var waitBattle2 = ()=>{
 					if(!cga.isInNormalState()){
@@ -1900,7 +1878,7 @@ module.exports = function(callback){
 					var curpos = cga.GetMapXY();
 					if(typeof walkedList[walkedList.length-1][2] != 'string' &&
 					typeof walkedList[walkedList.length-1][2] != 'number' &&
-						(curpos.x != walkedList[walkedList.length-1][0] ||
+						(curpos.x != walkedList[walkedList.length-1][0] || 
 						curpos.y != walkedList[walkedList.length-1][1])
 						){
 						console.log(curpos);
@@ -1911,16 +1889,16 @@ module.exports = function(callback){
 						walkCb();
 						return;
 					}
-
+					
 					cga.isMoveThinking = false;
 					cb(null);
 					return;
 				}
 				setTimeout(waitBattle2, 1500);
 			}
-
+			
 			var walker = (err, reason)=>{
-
+				
 				if(!cga.moveThink('walkList')){
 					console.log('walkList被中断');
 					cga.isMoveThinking = false;
@@ -1930,91 +1908,91 @@ module.exports = function(callback){
 				//console.log(result);
 				//console.log(reason);
 				if(err){
-
+					
 					if(reason == 4){
 						console.log('地图发生非预期的切换！');
 						var curmap = cga.GetMapName();
 						var curmapindex = cga.GetMapIndex().index3;
-
+						
 						console.log('当前地图: ' + curmap);
 						console.log('当前地图序号: ' + curmapindex);
 					}
 					//we are in battle status, wait a second then try again until battle is end
 					//or we are forcely moved back to an position by server
 					if(reason == 2 || reason == 5){
-
+						
 						var waitBattle = ()=>{
 							if(!cga.isInNormalState()){
 								setTimeout(waitBattle, 1000);
 								return;
 							}
-
+							
 							var curmap = cga.GetMapName();
 							var curmapindex = cga.GetMapIndex().index3;
 							var curpos = cga.GetMapXY();
-
+							
 							console.log('战斗回滚');
 							console.log('当前地图 ：' + curmap);
 							console.log('当前地图序号 ：' + curmapindex);
 							console.log('当前坐标：' + curpos.x + ', ' + curpos.y);
-
+							
 							if(typeof targetMap == 'string' && curmap == targetMap){
-
+								
 								if(newList.length == 0){
 									console.log('寻路结束1');
 									end();
 									return;
 								}
-
+								
 								walkCb();
 								return;
 							}
 							else if(typeof targetMap == 'number' && curmapindex == targetMap){
-
+								
 								if(newList.length == 0){
 									console.log('寻路结束2');
 									end();
 									return;
 								}
-
+								
 								walkCb();
 								return;
 							}
-							else if(typeof walkedList[walkedList.length-1] != 'undefined' &&
-								typeof walkedList[walkedList.length-1][2] == 'string' &&
+							else if(typeof walkedList[walkedList.length-1] != 'undefined' && 
+								typeof walkedList[walkedList.length-1][2] == 'string' && 
 								walkedList[walkedList.length-1][2] != '' &&
 								curmap != walkedList[walkedList.length-1][2])
 							{
 								console.log('目标地图错误，回滚到上一路径');
 								console.log('预期地图 ' + walkedList[walkedList.length-1][2] + ', 当前地图 ' + curmap);
-
+								
 								var temp = walkedList.pop();
 								newList = cga.calculatePath(curpos.x, curpos.y, temp[0], temp[1], temp[2], null, null, newList);
 							}
-							else if(typeof walkedList[walkedList.length-2] != 'undefined' &&
-								typeof walkedList[walkedList.length-2][2] == 'string' &&
-								walkedList[walkedList.length-2][2] != '' &&
+							else if(typeof walkedList[walkedList.length-2] != 'undefined' && 
+								typeof walkedList[walkedList.length-2][2] == 'string' && 
+								walkedList[walkedList.length-2][2] != '' && 
 								curmap != walkedList[walkedList.length-2][2])
 							{
 								console.log('目标地图错误，回滚到上上个路径');
 								console.log('预期地图 ' + walkedList[walkedList.length-2][2] + ', 当前地图 ' + curmap);
-
+								
 								walkedList.pop();
 								var temp = walkedList.pop();
-
+								
 								newList = cga.calculatePath(curpos.x, curpos.y, temp[0], temp[1], temp[2], null, null, newList);
 							} else {
-
+								
 								newList = cga.calculatePath(curpos.x, curpos.y, targetX, targetY, targetMap, dstX, dstY, newList);
 							}
 
 							walkCb();
 						}
-
+						
 						setTimeout(waitBattle, 1000);
 						return;
 					} else if(reason == 3){
-
+						
 						console.log('当前寻路卡住，抛出错误！');
 
 					}
@@ -2023,17 +2001,17 @@ module.exports = function(callback){
 					cb(err, reason);
 					return;
 				}
-
+								
 				if(newList.length == 0){
 					console.log('寻路结束3');
 					end();
 					return;
 				}
-
+				
 				walkCb();
 			}
-
-			if(targetX == curpos.x && targetY == curpos.y){
+				
+			if(targetX == curpos.x && targetY == curpos.y){		
 				var isEntrance = typeof targetMap == 'string' || typeof targetMap == 'number' || (targetMap instanceof Array) ? true : false;
 				if(isEntrance){
 					cga.FixMapWarpStuck(1);
@@ -2049,13 +2027,13 @@ module.exports = function(callback){
 				walkCb();
 				return;
 			}
-
+			
 			cga.AsyncWalkTo(targetX, targetY, targetMap, dstX, dstY, walker);
 		};
-
+		
 		walkCb();
 	}
-
+			
 	//查找玩家技能，返回技能index，找不到返回-1
 	//参数1：技能名
 	//参数2：完全匹配
@@ -2073,7 +2051,7 @@ module.exports = function(callback){
 
 		return skill != undefined ? skill : null;
 	}
-
+	
 	cga.findNPCEx = function(filter){
 		var unit = cga.GetMapUnits().find((u)=>{
 			if(u.valid == 0)
@@ -2082,17 +2060,17 @@ module.exports = function(callback){
 				return false;
 			return filter(u);
 		});
-
+		
 		return unit != undefined ? unit : null;
 	}
-
+	
 
 	cga.findNPC = function(name){
 		return cga.findNPCEx((u)=>{
 			return (u.unit_name == name);
 		});
 	}
-
+	
 	cga.findNPCByPosition = function(name, x, y){
 		return cga.findNPCEx((u)=>{
 			return (u.unit_name == name && x == u.xpos && y == u.ypos);
@@ -2132,19 +2110,19 @@ module.exports = function(callback){
 		}
 		return count;
 	}
-
+	
 	//任务
 	cga.task = {};
-
+	
 	//任务对象构造函数
 	cga.task.Task = function(name, stages, requirements){
-
+		
 		this.stages = stages;
 		this.name = name;
 		this.anyStepDone = true;
-
+		
 		this.requirements = requirements
-
+		
 		this.isDone = function(index){
 			for(var i = this.requirements.length - 1; i >= index; --i){
 				if(typeof this.requirements[i] == 'function' && this.requirements[i]())
@@ -2152,13 +2130,13 @@ module.exports = function(callback){
 			}
 			return false;
 		}
-
+		
 		this.isDoneSingleStep = function(index){
 			if(typeof this.requirements[index] == 'function' && this.requirements[index]())
 				return true;
 			return false;
 		}
-
+		
 		this.doNext = function(index, cb){
 			if(index >= this.stages.length){
 				console.log('任务：'+this.name+' 已完成！');
@@ -2168,7 +2146,7 @@ module.exports = function(callback){
 				this.doStage(index, cb);
 			}
 		}
-
+	
 		this.doStage = function(index, cb){
 			if(this.anyStepDone){
 				if(this.isDone(index)){
@@ -2193,7 +2171,7 @@ module.exports = function(callback){
 					return;
 				}
 				//console.trace()
-
+				
 				if(r === true || r === null){
 					console.log('第'+(index+1)+'阶段执行完成。');
 					objThis.doNext(index + 1, cb);
@@ -2213,10 +2191,10 @@ module.exports = function(callback){
 			console.log('任务：'+this.name+' 开始执行，共'+this.stages.length+'阶段。');
 			this.doStage( (typeof this.jumpToStep != 'undefined') ? this.jumpToStep : 0, cb);
 		}
-
+		
 		return this;
 	}
-
+	
 	//等待NPC出现
 	cga.task.waitForNPC = function(name, cb2){
 		var waitNpc = ()=>{
@@ -2225,12 +2203,12 @@ module.exports = function(callback){
 				cga.SayWords('', 0, 3, 1);
 				return;
 			}
-
+			
 			cb2(true);
 		}
 		waitNpc();
 	}
-
+	
 	cga.task.joinJobBattleCommon = function(jobname, cb) {
 		return cga.task.Task('就职' + jobname, [
 		{
@@ -2333,7 +2311,7 @@ module.exports = function(callback){
 						});
 					});
 				});
-			}
+			}	
 		}
 		],
 		[//任务阶段是否完成
@@ -2351,7 +2329,7 @@ module.exports = function(callback){
 	}
 
 	cga.gather = {};
-
+	
 	cga.gather.stats = function(itemname, itemgroupnum){
 		this.begintime = moment();
 		this.prevcount = cga.getItemCount(itemname);
@@ -2359,17 +2337,17 @@ module.exports = function(callback){
 		this.itemgroupnum = itemgroupnum;
 		this.printStats = function(){
 			var count = cga.getItemCount(this.itemname) - this.prevcount;
-
+			
 			console.log('一次采集完成，耗时' + moment.duration(moment() - this.begintime, 'ms').locale('zh-cn').humanize());
 			console.log('获得 '+ itemname +' x '+count+'，共 ' + parseInt(count / this.itemgroupnum) + ' 组。');
-
+			
 			this.begintime = moment();
 		}
 		return this;
 	}
 
 	cga.craft = {}
-
+		
 	cga.craft.buyFabricLv1Multi = (arr, cb)=>{
 		cga.travel.falan.toFabricStore(()=>{
 			cga.walkList([
@@ -2388,11 +2366,11 @@ module.exports = function(callback){
 			});
 		});
 	}
-
+	
 	cga.craft.buyFabricLv1 = (id, count, cb)=>{
 		cga.craft.buyFabricLv1Multi([{index:id, count:count}], cb);
 	}
-
+	
 	cga.craft.buyFabricLv2Multi = (arr, cb)=>{
 		cga.travel.falan.toTeleRoom('维诺亚村', ()=>{
 			cga.walkList([
@@ -2415,11 +2393,11 @@ module.exports = function(callback){
 			});
 		});
 	}
-
+	
 	cga.craft.buyFabricLv2 = (id, count, cb)=>{
 		cga.craft.buyFabricLv2Multi([{index:id, count:count}], cb);
 	}
-
+	
 	cga.craft.buyFabricLv3Multi = (arr, cb)=>{
 		cga.travel.falan.toTeleRoom('杰诺瓦镇', ()=>{
 			cga.walkList([
@@ -2441,11 +2419,11 @@ module.exports = function(callback){
 			});
 		});
 	}
-
+	
 	cga.craft.buyFabricLv3 = (id, count, cb)=>{
 		cga.craft.buyFabricLv3Multi([{index:id, count:count}], cb);
 	}
-
+	
 	cga.craft.buyFabricLv4Multi = (arr, cb)=>{
 		cga.travel.falan.toTeleRoom('魔法大学', ()=>{
 			cga.walkList([
@@ -2466,11 +2444,11 @@ module.exports = function(callback){
 			});
 		});
 	}
-
+	
 	cga.craft.buyFabricLv4 = (id, count, cb)=>{
 		cga.craft.buyFabricLv4Multi([{index:id, count:count}], cb);
 	}
-
+	
 	cga.craft.buyFabricLv5Multi = (arr, cb)=>{
 		cga.travel.falan.toTeleRoom('阿巴尼斯村', ()=>{
 			cga.walkList([
@@ -2490,11 +2468,11 @@ module.exports = function(callback){
 			});
 		});
 	}
-
+	
 	cga.craft.buyFabricLv5 = (id, count, cb)=>{
 		cga.craft.buyFabricLv5Multi([{index:id, count:count}], cb);
 	}
-
+	
 	//搜索第一个可鉴定的物品
 	cga.findAssessableItem = ()=>{
 		var skill = cga.findPlayerSkill('鉴定');
@@ -2504,7 +2482,7 @@ module.exports = function(callback){
 		});
 		return found == undefined ? null : found;
 	}
-
+	
 	//鉴定背包中所有的物品
 	cga.assessAllItems = (cb)=>{
 		var item = cga.findAssessableItem();
@@ -2524,19 +2502,19 @@ module.exports = function(callback){
 			return;
 		}
 	}
-
+	
 	cga.findItem = (filter) =>{
-
+		
 		var items = cga.getInventoryItems();
-
+		
 		if(typeof filter == 'string' && filter.charAt(0) == '#'){
 			var found = items.find((item)=>{
 				return item.itemid == parseInt(filter.substring(1));
 			})
-
+			
 			return found != undefined ? found.pos : -1;
 		}
-
+		
 		var found = items.find((item)=>{
 			if(typeof filter == 'string')
 				return item.name == filter;
@@ -2545,15 +2523,15 @@ module.exports = function(callback){
 			else if (typeof filter == 'function')
 				return filter(item);
 		})
-
+			
 		return found != undefined ? found.pos : -1;
 	}
-
+	
 	cga.findItemArray = (filter) =>{
-
+		
 		var arr = [];
 		var items = cga.getInventoryItems();
-
+		
 		if(typeof filter == 'function'){
 			items.forEach((item)=>{
 				if(filter(item)){
@@ -2566,8 +2544,8 @@ module.exports = function(callback){
 			})
 			return arr;
 		}
-
-
+		
+		
 		if(typeof filter =='string' && filter.charAt(0) == '#'){
 			items.forEach((item)=>{
 				if(item.itemid == filter.substring(1)){
@@ -2580,7 +2558,7 @@ module.exports = function(callback){
 			})
 			return arr;
 		}
-
+		
 		items.forEach((item)=>{
 			if(filter instanceof RegExp){
 				//console.log(itemname.exec(items[i].name));
@@ -2604,7 +2582,7 @@ module.exports = function(callback){
 		});
 		return arr;
 	}
-
+		
 	cga.sellArray = (sellarray, cb)=>{
 		cga.AsyncWaitNPCDialog((err, dlg)=>{
 			var numOpt = dlg.message.charAt(dlg.message.length-1);
@@ -2617,7 +2595,7 @@ module.exports = function(callback){
 			});
 		});
 	}
-
+	
 	cga.getSellStoneItem = ()=>{
 		var pattern = /(.+)的卡片/;
 		var sellArray = []
@@ -2628,11 +2606,11 @@ module.exports = function(callback){
 					itemid : item.itemid,
 					count : (item.count < 1) ? 1 : item.count,
 				});
-			}
-		})
+			}				
+		})		
 		return sellArray;
 	}
-
+	
 	cga.cleanInventory = (count, cb)=>{
 		if(cga.getInventoryItems().length >= 21 - count)
 		{
@@ -2647,14 +2625,14 @@ module.exports = function(callback){
 			cb(null);
 		}
 	}
-
+	
 	cga.sellStone = (cb)=>{
 		cga.AsyncWaitNPCDialog((err, dlg)=>{
 			if(err){
 				cb(err);
 				return;
 			}
-
+			
 			var numOpt = dlg.message.charAt(dlg.message.length-1);
 			cga.ClickNPCDialog(0, numOpt == '3' ? 1 : 0);
 			cga.AsyncWaitNPCDialog(()=>{
@@ -2663,20 +2641,20 @@ module.exports = function(callback){
 			});
 		});
 	}
-
+	
 	cga.getDistance = (x1, y1, x2, y2)=>{
-
+		
 		return Math.sqrt((x1-x2) * (x1-x2) + (y1-y2) * (y1-y2));
 	}
-
+	
 	cga.isDistanceClose = (x1, y1, x2, y2)=>{
 		if(x1 - x2 <= 1 && x1 - x2 >= -1 && y1 - y2 <= 1 && y1 - y2 >= -1)
 			return true;
 		return false;
 	}
-
+	
 	cga.findBankEmptySlot = (filter, maxcount) =>{
-
+		
 		var banks = cga.GetBankItemsInfo();
 
 		var arr = [];
@@ -2684,7 +2662,7 @@ module.exports = function(callback){
 		for(var i = 0; i < banks.length; ++i){
 			arr[banks[i].pos-100] = banks[i];
 		}
-
+		
 		for(var i = 0; i < 80; ++i){
 			if(typeof arr[i] != 'undefined'){
 				if(typeof filter == 'string' && maxcount > 0){
@@ -2703,12 +2681,12 @@ module.exports = function(callback){
 				return 100+i;
 			}
 		}
-
+		
 		return -1;
 	}
-
+	
 	cga.findInventoryEmptySlot = (itemname, maxcount) =>{
-
+		
 		var items = cga.GetItemsInfo();
 
 		var arr = [];
@@ -2716,7 +2694,7 @@ module.exports = function(callback){
 		for(var i = 0; i < items.length; ++i){
 			arr[items[i].pos-8] = items[i];
 		}
-
+		
 		for(var i = 0; i < 20; ++i){
 			if(typeof arr[i] != 'undefined'){
 				if(typeof itemname == 'string' && maxcount > 0){
@@ -2727,7 +2705,7 @@ module.exports = function(callback){
 				return 8+i;
 			}
 		}
-
+		
 		return -1;
 	}
 
@@ -2737,15 +2715,15 @@ module.exports = function(callback){
 			cb(new Error('包里没有该物品, 无法存放到银行'));
 			return;
 		}
-
+		
 		var emptyslot = cga.findBankEmptySlot(filter, maxcount);
 		if(emptyslot == -1){
 			cb(new Error('银行没有空位, 无法存放到银行'));
 			return;
 		}
-
+		
 		cga.MoveItem(itempos, emptyslot, -1);
-
+		
 		var saveToBank = ()=>{
 			if(cga.GetItemInfo(emptyslot))
 			{
@@ -2756,10 +2734,10 @@ module.exports = function(callback){
 				cb(new Error('存银行失败，可能银行格子已满'));
 			}
 		}
-
+		
 		setTimeout(saveToBank, 800);
 	}
-
+	
 	cga.saveToBankAll = (filter, maxcount, cb)=>{
 		var repeat = ()=>{
 			cga.saveToBankOnce(filter, maxcount, (err)=>{
@@ -2771,15 +2749,15 @@ module.exports = function(callback){
 				if(cga.findItem(filter) == -1){
 					cb(null);
 					return;
-				}
+				}				
 				setTimeout(repeat, 800);
 			});
 		}
-
-		repeat();
+		
+		repeat();		
 	}
-
-
+	
+	
 	cga.freqMove = function(dir){
 		var freqMoveDirTable = [ 4, 5, 6, 7, 0, 1, 2, 3 ];
 		var freqMoveDir = dir;
@@ -2842,7 +2820,7 @@ module.exports = function(callback){
 						else
 							cga.ForceMove(freqMoveDirTable[freqMoveDir], false);
 					}
-
+					
 					counter++;
 					if(counter % 4 == 0){
 						if(!cga.moveThink('freqMove')){
@@ -2865,19 +2843,19 @@ module.exports = function(callback){
 			catch(e){
 				console.log(e);
 			}
-
+			
 			setTimeout(move, 50);
 		}
-
+		
 		move();
 	}
-
+	
 	cga.getTeamPlayers = ()=>{
 		var teaminfo = cga.GetTeamPlayerInfo();
 		var units = cga.GetMapUnits();
 		var playerinfo = cga.GetPlayerInfo();
 		for(var i in teaminfo){
-
+		
 			for(var j in units){
 				if(units[j].type == 8 && units[j].unit_id == teaminfo[i].unit_id){
 					teaminfo[i].name = units[j].unit_name;
@@ -2898,26 +2876,26 @@ module.exports = function(callback){
 		}
 		return teaminfo;
 	}
-
+	
 	cga.addTeammate = (name, cb)=>{
 		var unit = cga.findPlayerUnit(name);
 		var mypos = cga.GetMapXY();
-		if(unit == null ||
-		!cga.isDistanceClose(unit.xpos, unit.ypos, mypos.x, mypos.y) ||
+		if(unit == null || 
+		!cga.isDistanceClose(unit.xpos, unit.ypos, mypos.x, mypos.y) || 
 		(unit.xpos == mypos.x && unit.ypos == mypos.y)){
-
+			
 			cb(false);
 			return;
 		}
 
 		setTimeout(()=>{
 			unit = cga.findPlayerUnit(name);
-
+			
 			if(unit == null){
 				cb(false);
 				return;
 			}
-
+			
 			cga.TurnTo(unit.xpos, unit.ypos);
 			setTimeout(()=>{
 				cga.DoRequest(cga.REQUEST_TYPE_JOINTEAM);
@@ -2947,7 +2925,7 @@ module.exports = function(callback){
 						} else if(teamPlayers.length && teamPlayers[0].name != name){
 							cga.DoRequest(cga.REQUEST_TYPE_LEAVETEAM);
 						}
-
+						
 						cb(false);
 						return;
 					}, 1500);
@@ -2955,19 +2933,19 @@ module.exports = function(callback){
 			}, 1500);
 		}, 1000);
 	}
-
+	
 	cga.waitTeammates = (teammates, cb)=>{
-
+				
 		var teamplayers = cga.getTeamPlayers();
-
+		
 		if(teammates.length == 0 && teamplayers.length == 0)
 		{
 			setTimeout(cb, 2000, true);
 			return;
 		}
-
+		
 		cga.EnableFlags(cga.ENABLE_FLAG_JOINTEAM, true);
-
+		
 		if(teamplayers.length == teammates.length){
 			for(var i = 0; i < teamplayers.length; ++i){
 				if(!is_array_contain(teammates, teamplayers[i].name)){
@@ -2995,23 +2973,23 @@ module.exports = function(callback){
 					return;
 				}
 			}
-
+			
 			setTimeout(cb, 2000, true);
 			return;
 		}
-
+		
 		cb(false);
 	}
-
+		
 	cga.waitTeammateSay = (cb)=>{
-
+		
 		cga.AsyncWaitChatMsg((err, r)=>{
-
+			
 			if(!r){
 				cga.waitTeammateSay(cb);
 				return;
 			}
-
+			
 			var listen = true;
 			var fromTeammate = null;
 			var teamplayers = cga.getTeamPlayers();
@@ -3032,7 +3010,7 @@ module.exports = function(callback){
 					break;
 				}
 			}
-
+			
 			if(fromTeammate){
 				var msgheader = fromTeammate.name + ': ';
 				if(r.msg.indexOf(msgheader) >= 0){
@@ -3045,13 +3023,13 @@ module.exports = function(callback){
 				cga.waitTeammateSay(cb);
 		}, 1000);
 	}
-
+	
 	cga.waitForChatInput = (cb)=>{
 		cga.waitTeammateSay((player, msg)=>{
 
 			if(player.is_me == true){
 				var pattern_number=/^[1-9]\d*$|^0$/;
-
+				
 				if(cb(msg, pattern_number.test(msg) ? parseInt(msg) : null ) == false)
 					return false;
 			}
@@ -3059,38 +3037,38 @@ module.exports = function(callback){
 			return true;
 		});
 	}
-
+	
 	cga.waitSysMsg = (cb)=>{
 		cga.AsyncWaitChatMsg((err, r)=>{
 			if(!r || r.unitid != -1){
 				cga.waitSysMsg(cb);
 				return;
 			}
-
-			listen = cb(r.msg);
+			
+			listen = cb(r.msg);	
 
 			if(listen == true)
 				cga.waitSysMsg(cb);
 		}, 1000);
 	}
-
+	
 	cga.sayLongWords = (words, color, range, size)=>{
 
 		var splitCount = words.length / 100;
 		if(splitCount == 0)
 			splitCount = 1;
-
+		
 		for(var i = 0;i < splitCount; ++i){
 			cga.SayWords(words.substring(i * 100, i * 100 + 100), color, range, size);
 		}
-
+		
 	}
-
+	
 	cga.waitForLocation = (obj, cb)=>{
 		var name = cga.GetMapName();
 		var fpos = cga.GetMapXYFloat();
 		var index = cga.GetMapIndex().index3;
-
+		
 		var passCheck = true;
 
 		if(typeof obj.mapname == 'string')
@@ -3107,12 +3085,12 @@ module.exports = function(callback){
 				passCheck = false;
 			}
 		}
-
+		
 		if(obj.moving !== true && !(parseInt(fpos.x) % 64 == 0 && parseInt(fpos.y) % 64 == 0))
 		{
 			passCheck = false;
 		}
-
+		
 		if(obj.pos instanceof Array)
 		{
 			if (!(Math.abs(fpos.x - obj.pos[0] * 64.0) < 1.001 * 64.0 && Math.abs(fpos.y - obj.pos[1] * 64.0) < 1.001 * 64.0))
@@ -3127,21 +3105,21 @@ module.exports = function(callback){
 
 			if(teamplayersnow.length)
 				passCheck = false;
-
+			
 			if(!passCheck && obj.walkto && !teamplayersnow.length && (index == obj.mapindex || name == obj.mapname))
 			{
 				cga.WalkTo(obj.walkto[0], obj.walkto[1]);
 			}
 		}
-
+		
 		if(passCheck){
 			cb(null);
 			return;
 		}
-
+		
 		setTimeout(cga.waitForLocation, 1000, obj, cb);
 	}
-
+	
 	cga.waitForMultipleLocation = (arr)=>{
 		var name = cga.GetMapName();
 		var fpos = cga.GetMapXYFloat();
@@ -3149,7 +3127,7 @@ module.exports = function(callback){
 
 		for(var i = 0; i < arr.length; ++i){
 			var obj = arr[i];
-
+		
 			var passCheck = true;
 
 			if(typeof obj.mapname == 'string')
@@ -3170,7 +3148,7 @@ module.exports = function(callback){
 			{
 				passCheck = false;
 			}
-
+			
 			if(obj.pos instanceof Array)
 			{
 				if (!(Math.abs(fpos.x - obj.pos[0] * 64.0) < 1.001 * 64.0 && Math.abs(fpos.y - obj.pos[1] * 64.0) < 1.001 * 64.0))
@@ -3185,22 +3163,22 @@ module.exports = function(callback){
 
 				if(teamplayersnow.length)
 					passCheck = false;
-
+				
 				if(!passCheck && obj.walkto && !teamplayersnow.length && (index == obj.mapindex || name == obj.mapname) )
 				{
 					cga.WalkTo(obj.walkto[0], obj.walkto[1]);
 				}
 			}
-
+			
 			if(passCheck){
 				if(obj.cb(null) == true)
 					return;
 			}
 		}
-
+		
 		setTimeout(cga.waitForMultipleLocation, 1000, arr);
 	}
-
+	
 	cga.buildMapTileMatrix = ()=>{
 		var wall = cga.GetMapTileTable(true);
 		var matrix = [];
@@ -3213,7 +3191,7 @@ module.exports = function(callback){
 		}
 		return {matrix : matrix, x_bottom : wall.x_bottom, y_bottom : wall.y_bottom, x_size : wall.x_size, y_size : wall.y_size};
 	}
-
+	
 	cga.buildMapCollisionRawMatrix = ()=>{
 		var wall = cga.GetMapCollisionTableRaw(true);
 		var matrix = [];
@@ -3226,7 +3204,7 @@ module.exports = function(callback){
 		}
 		return {matrix : matrix, x_bottom : wall.x_bottom, y_bottom : wall.y_bottom, x_size : wall.x_size, y_size : wall.y_size};
 	}
-
+	
 	cga.buildMapCollisionMatrix = (exitIsBlocked)=>{
 		var wall = cga.GetMapCollisionTable(true);
 		var objs = null;
@@ -3247,7 +3225,7 @@ module.exports = function(callback){
 		}
 		return {matrix : matrix, x_bottom : wall.x_bottom, y_bottom : wall.y_bottom, x_size : wall.x_size, y_size : wall.y_size};
 	}
-
+	
 	cga.buildMapObjectMatrix = ()=>{
 		var wall = cga.GetMapObjectTable(true);
 		var matrix = [];
@@ -3260,7 +3238,7 @@ module.exports = function(callback){
 		}
 		return {matrix : matrix, x_bottom : wall.x_bottom, y_bottom : wall.y_bottom, x_size : wall.x_size, y_size : wall.y_size};
 	}
-
+	
 	cga.getMapObjects = ()=>{
 		var wall = cga.GetMapObjectTable(true);
 		var objs = [];
@@ -3290,7 +3268,7 @@ module.exports = function(callback){
 		}
 		return null;
 	}
-
+		
 	cga.downloadMapEx = (xfrom, yfrom, xsize, ysize, cb)=>{
 		var last_index3 = cga.GetMapIndex().index3;
 		var x = xfrom, y = yfrom;
@@ -3302,18 +3280,18 @@ module.exports = function(callback){
 				x  = 0;
 			}
 			if(y > ysize){
-
+				
 				var waitDownloadEnd = (err, msg)=>{
 					if(err){
 						cb(err);
 						return;
 					}
-
+					
 					if(last_index3 != msg.index3){
 						cb(new Error('地图发生变化，下载失败'));
 						return
 					}
-
+					
 					if(msg.xtop >= xsize && msg.ytop >= ysize){
 						cb(null);
 						return
@@ -3321,7 +3299,7 @@ module.exports = function(callback){
 
 					cga.AsyncWaitDownloadMap(waitDownloadEnd, 5000);
 				}
-
+				
 				cga.AsyncWaitDownloadMap(waitDownloadEnd, 5000);
 				return;
 			}
@@ -3329,35 +3307,35 @@ module.exports = function(callback){
 		}
 		recursiveDownload();
 	}
-
+	
 	cga.downloadMap = (cb)=>{
 		var walls = cga.buildMapCollisionMatrix(true);
 		cga.downloadMapEx(0, 0, walls.x_size, walls.y_size, cb);
 	}
-
+	
 	cga.walkMaze = (target_map, cb, filter)=>{
 
 		var objs = cga.getMapObjects();
-
+		
 		var pos = cga.GetMapXY();
-
+		
 		var newmap = null;
 
 		if(typeof target_map != 'string'){
 			var mapname = cga.GetMapName();
-
+			
 			var regex = mapname.match(/([^\d]*)(\d+)([^\d]*)/);
 			var layerIndex = 0;
 
 			if(regex && regex.length >= 3){
 				layerIndex = parseInt(regex[2]);
 			}
-
+			
 			if(layerIndex == 0){
 				cb(new Error('无法从地图名中解析出楼层'));
 				return;
 			}
-
+			
 			if(filter && (typeof filter.layerNameFilter == 'function'))
 			{
 				newmap = filter.layerNameFilter(layerIndex, regex);
@@ -3373,7 +3351,7 @@ module.exports = function(callback){
 		}
 
 		var target = null;
-
+		
 		if(filter && (typeof filter.entryTileFilter == 'function'))
 		{
 			var tiles = cga.buildMapTileMatrix();
@@ -3400,7 +3378,7 @@ module.exports = function(callback){
 				}
 			});
 		}
-
+		
 		if(target == null){
 			cb(new Error('无法找到迷宫的出口'));
 			return;
@@ -3417,33 +3395,33 @@ module.exports = function(callback){
 			return;
 		});
 	}
-
+	
 	cga.isMapDownloaded = ()=>{
 		var tiles = cga.buildMapTileMatrix(true);
-
+		
 		for(var y = 0; y < tiles.y_size; ++y){
 			for(var x = 0; x < tiles.x_size; ++x){
 				if(tiles.matrix[y][x] == 0)
 					return false;
 			}
 		}
-
+		
 		return true;
 	}
-
+	
 	cga.walkRandomMaze = (target_map, cb, filter)=>{
 		if(!cga.isMapDownloaded())
 		{
 			cga.downloadMap(()=>{
 				cga.walkMaze(target_map, cb, filter);
 			});
-		}
+		} 
 		else
 		{
 			cga.walkMaze(target_map, cb, filter);
 		}
 	}
-
+	
 	/**
 	 * targetFinder返回unit object 或者 true都将停止搜索
 	 * cga.searchMap(units => units.find(u => u.unit_name == '守墓员' && u.type == 1) || cga.GetMapName() == '？？？', result => {
@@ -3530,7 +3508,7 @@ module.exports = function(callback){
 			} else findNext(walls);
 		});
 	}
-
+	
 	cga.getRandomSpace = (x, y)=>{
 		var walls = cga.buildMapCollisionMatrix(true);
 		if(walls.matrix[y][x-1] == 0)
@@ -3549,10 +3527,10 @@ module.exports = function(callback){
 			return [x+1,y-1];
 		if(walls.matrix[y-1][x-1] == 0)
 			return [x-1,y-1];
-
+		
 		return null;
 	}
-
+	
 	cga.getRandomSpaceDir = (x, y)=>{
 		var walls = cga.buildMapCollisionMatrix(true);
 		if(walls.matrix[y][x-1] == 0)
@@ -3571,33 +3549,33 @@ module.exports = function(callback){
 			return 7;
 		if(walls.matrix[y-1][x-1] == 0)
 			return 5;
-
+		
 		return null;
 	}
-
+	
 	cga.tradeInternal = (stuff, checkParty, resolve, playerName, timeout) => {
-
+		
 		var savePartyName = null;
 		var tradeFinished = false;
 		var receivedStuffs = {};
 		var beginTime = (new Date()).getTime();
-
+		
 		var waitTradeMsg = ()=>{
-
+			
 			cga.waitSysMsg((msg)=>{
-
+								
 				if(tradeFinished)
 					return false;
-
+				
 				console.log('waitSysMsg='+msg);
-
+				
 				var timeout_trade = (typeof timeout == 'number') ? timeout : 30000;
 				if( (new Date()).getTime() > beginTime + timeout_trade){
 					tradeFinished = true;
 					cga.DoRequest(cga.REQUEST_TYPE_TRADE_REFUSE);
 					return false;
 				}
-
+								
 				if(msg.indexOf('交易完成') >= 0){
 					tradeFinished = true;
 					resolve({
@@ -3625,23 +3603,23 @@ module.exports = function(callback){
 					});
 					return false;
 				}
-
+				
 				return true;
-			});
+			});	
 		}
-
+		
 		var waitDialog = ()=>{
-
+			
 			if(tradeFinished)
 				return;
-
+			
 			var getInTradeStuffs = false;
 			var tradeStuffsChecked = false;
-
+						
 			var waitTradeStuffs = ()=>{
 
 				cga.AsyncWaitTradeStuffs((err, type, args) => {
-
+				
 					//console.log(err);
 					//console.log(type);
 					//console.log(args);
@@ -3650,14 +3628,14 @@ module.exports = function(callback){
 
 						if(getInTradeStuffs == false && !tradeFinished)
 							waitTradeStuffs();
-
+						
 						return;
 					}
-
+					
 					console.log('AsyncWaitTradeStuffs='+type);
-
+															
 					getInTradeStuffs = true;
-
+						
 					if(type == cga.TRADE_STUFFS_ITEM){
 						receivedStuffs.items = args;
 					}else if(type == cga.TRADE_STUFFS_PET){
@@ -3671,19 +3649,19 @@ module.exports = function(callback){
 					}else if(type == cga.TRADE_STUFFS_GOLD){
 						receivedStuffs.gold = args;
 					}
-
+				
 				}, 1000);
 			}
-
+			
 			var waitTradeState = () => {
 
 				cga.AsyncWaitTradeState((err, state) => {
-
+					
 					if(tradeFinished)
 						return;
-
+					
 					console.log('AsyncWaitTradeState='+state);
-
+					
 					if(!err){
 						if (state == cga.TRADE_STATE_READY || state == cga.TRADE_STATE_CONFIRM) {
 							getInTradeStuffs = true;
@@ -3705,9 +3683,9 @@ module.exports = function(callback){
 			}
 
 			waitTradeStuffs();
-
+			
 			waitTradeState();
-
+			
 			const itemFilter = (stuff && typeof stuff.itemFilter == 'function') ? stuff.itemFilter : () => false;
 			const petFilter = (stuff && typeof stuff.petFilter == 'function') ? stuff.petFilter : () => false;
 			const tradeItems = cga.getInventoryItems().filter(itemFilter).map(e => {
@@ -3720,18 +3698,18 @@ module.exports = function(callback){
 				(stuff && stuff.gold) ? stuff.gold : 0
 			);
 		}
-
+		
 		cga.AsyncWaitTradeDialog((err, partyName, partyLevel) => {
-
+			
 			if(tradeFinished)
 				return;
-
+			
 			console.log('AsyncWaitTradeDialog='+partyLevel);
 			//console.log(partyName);
 			//console.log(partyLevel);
-
+			
 			savePartyName = partyName;
-
+			
 			if (!err && partyLevel > 0) {
 				waitDialog();
 			} else {
@@ -3740,7 +3718,7 @@ module.exports = function(callback){
 				resolve({success: false, reason : 'trade dialog timeout'});
 			}
 		}, 10000);
-
+		
 		waitTradeMsg();
 	};
 
@@ -3751,7 +3729,7 @@ module.exports = function(callback){
 				resolve({success: false, reason : 'player menu timeout'});
 				return;
 			}
-
+			
 			if (!(players instanceof Array)) players = [];
 			var player = players.find((e, index) => typeof name == 'number' ? index == name : e.name == name);
 			if (player !== undefined) {
@@ -3762,10 +3740,10 @@ module.exports = function(callback){
 				resolve({success: false, reason : 'player not found'});
 			}
 		}, 3000);
-
+		
 		cga.DoRequest(cga.REQUEST_TYPE_TRADE);
 	}
-
+	
 	cga.requestTrade = (name, resolve, timeout) => {
 		cga.AsyncWaitPlayerMenu((err, players) => {
 			if(err){
@@ -3773,7 +3751,7 @@ module.exports = function(callback){
 				resolve({success: false, reason : 'player menu timeout'});
 				return;
 			}
-
+			
 			if (!(players instanceof Array)) players = [];
 			var player = players.find((e, index) => typeof name == 'number' ? index == name : e.name == name);
 			if (player !== undefined) {
@@ -3784,7 +3762,7 @@ module.exports = function(callback){
 				resolve({success: false, reason : 'player not found'});
 			}
 		}, 3000);
-
+		
 		cga.DoRequest(cga.REQUEST_TYPE_TRADE);
 	}
 
@@ -3792,11 +3770,11 @@ module.exports = function(callback){
 		cga.EnableFlags(cga.ENABLE_FLAG_TRADE, true)
 		cga.tradeInternal(stuff, checkParty, resolve, timeout);
 	}
-
+	
 	cga.trade = (name, stuff, checkParty, resolve, timeout) => {
-
+		
 		cga.EnableFlags(cga.ENABLE_FLAG_TRADE, true);
-
+		
 		cga.AsyncWaitPlayerMenu((err, players) => {
 			if (!(players instanceof Array)) players = [];
 			var player = players.find((e, index) => typeof name == 'number' ? index == name : e.name == name);
@@ -3807,17 +3785,17 @@ module.exports = function(callback){
 				console.log('player not found, do nothing');
 			}
 		}, 3000);
-
+				
 		cga.DoRequest(cga.REQUEST_TYPE_TRADE);
 	}
-
+	
 	cga.needSupplyInitial = (obj)=>{
 		var playerinfo = cga.GetPlayerInfo();
 		var petinfo = cga.GetPetInfo(playerinfo.petid);
-
+		
 		if(!obj)
 			obj = {};
-
+		
 		if(!obj.playerhp)
 			obj.playerhp = 1.0;
 		if(!obj.playermp)
@@ -3826,13 +3804,13 @@ module.exports = function(callback){
 			obj.pethp = 1.0;
 		if(!obj.petmp)
 			obj.petmp = 1.0;
-
+		
 		if( playerinfo.hp < playerinfo.maxhp * obj.playerhp ||
-			playerinfo.mp < playerinfo.maxmp * obj.playermp ||
+			playerinfo.mp < playerinfo.maxmp * obj.playermp || 
 			petinfo.hp < petinfo.maxhp * obj.playerhp ||
 			petinfo.mp < petinfo.maxmp * obj.playermp)
 			return true;
-
+		
 		return false;
 	}
 
