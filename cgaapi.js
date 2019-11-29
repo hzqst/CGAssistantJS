@@ -3819,5 +3819,41 @@ module.exports = function(callback){
 		return false;
 	}
 
+	cga.needDoctor = (playeronly = false)=>{
+		var playerinfo = cga.GetPlayerInfo();
+		var pets = cga.GetPetsInfo();
+		
+		if( playerinfo.health > 0)
+			return true;
+
+		if(!playeronly)
+		{
+			for(var i = 0;i < pets.length; ++i){
+				if(pets[i].health > 0)
+					return true;
+			}
+		}
+		
+		return false;
+	}
+
+	cga.waitForBattleEnd = (cb, timeout = 30000)=>{
+		
+		cga.AsyncWaitBattleAction((err, result) => {
+			if(err){
+				cb(err);
+				return;
+			}
+			if(result == cga.FL_BATTLE_ACTION_END)
+			{
+				cb(null, true);
+			}
+			else
+			{
+				cga.waitBattleEnd(cb, timeout);
+			}
+		}, timeout);
+	}
+
 	return cga;
 }
