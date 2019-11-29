@@ -56,7 +56,7 @@ var cga = require('./cgaapi')(function(){
 					return;
 				
 				if(err || !r){
-					cga.SayWords('CGA四转脚本等待换花，['+myItem+']交换'+'['+waitForItem+']', 0, 3, 1);
+					cga.SayWords('CGA四转脚本等待换花，['+myItem+']交换'+'['+waitForItem+']。'+, 0, 3, 1);
 					waitChat();
 					return;
 				}
@@ -68,16 +68,18 @@ var cga = require('./cgaapi')(function(){
 					{
 						var playername = r.msg.substr(0, findpos);
 						
-						console.log(playername);
-						
 						if(myname != playername)
 						{
-							cga.requestTrade(playername, (result)=>{
-								if (result.success == true){
-									
-								}
-							});
-							return;
+							var playerunit = cga.findPlayerUnit(playername);
+							if(playerunit != null && playerunit.xpos == waitForPos[0] && playerunit.ypos ==waitForPos[1])
+							{
+								cga.requestTrade(playername, (result)=>{
+									if (result.success == true){
+										
+									}
+								});
+								return;
+							}
 						}
 					}
 				}
