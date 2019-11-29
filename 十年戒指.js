@@ -51,39 +51,7 @@ var cga = require('./cgaapi')(function(){
 		},
 	},
 	{//1
-		intro: '2.组队',
-		workFunc: function(cb2){
-			
-			var wait2 = ()=>{
-				cga.addTeammate(teammates[0], (r)=>{
-					if(r){
-						setTimeout(cb2, 1000, true);
-						return;
-					}
-					setTimeout(wait2, 1000);
-				});
-			}
-
-			var wait = ()=>{
-				cga.WalkTo(15, 125);
-				cga.waitTeammates(teammates, (r)=>{
-					if(r){
-						setTimeout(cb2, 1000, true);
-						return;
-					}
-					setTimeout(wait, 1000);
-				});
-			}
-						
-			if(cga.isTeamLeader){
-				wait();
-			} else {
-				wait2();
-			}
-		},
-	},
-	{//2
-		intro: '3.依次挑战追忆之路内的5位BOSS，分别是：露比、法尔肯、帕布提斯马&凯法、犹大、海贼头目、帕鲁凯斯的亡灵（第一形态）',
+		intro: '2.依次挑战追忆之路内的5位BOSS，分别是：露比、法尔肯、帕布提斯马&凯法、犹大、海贼头目、帕鲁凯斯的亡灵（第一形态）',
 		workFunc: function(cb2){
 			
 			var retry = ()=>{
@@ -141,7 +109,7 @@ var cga = require('./cgaapi')(function(){
 																cga.walkList([
 																[15, 67]
 																], ()=>{
-																	cga.TurnTo(15, 67);
+																	cga.TurnTo(15, 65);
 																	cga.AsyncWaitNPCDialog(()=>{
 																		cga.ClickNPCDialog(1, 0);
 																		cga.waitForBattleEnd(()=>{
@@ -188,9 +156,6 @@ var cga = require('./cgaapi')(function(){
 	},
 	],
 	[//任务阶段是否完成
-		function(){
-			return false;
-		},
 		function(){
 			return false;
 		},

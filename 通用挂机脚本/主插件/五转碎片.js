@@ -371,6 +371,13 @@ var thisobj = {
 			pair.translated = true;
 			return true;
 		}
+		
+		if(pair.field == 'battleArea'){
+			pair.field = '练级地点';
+			pair.value = battleAreaArray[pair.value];
+			pair.translated = true;
+			return true;
+		}
 
 		if(supplyMode.translate(pair))
 			return true;
