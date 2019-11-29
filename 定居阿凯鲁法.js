@@ -180,7 +180,7 @@ var cga = require('./cgaapi')(function(){
 		workFunc: function(cb2){
 			cga.walkList([
 			[183, 104, 33100],
-			[23, 11, 33101],
+			[25, 11, 33101],
 			[24, 6, '谒见之间'],
 			[24, 21],
 			], ()=>{
