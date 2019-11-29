@@ -1,15 +1,17 @@
 var cga = require('./cgaapi')(function(){
-	console.log('贝爷 起始地点：艾尔莎岛')
-	
-	var loop_count = 0;
-	
-	var teammates = [ 'hzqst', '你萌死了', '小苹花', '傲世蒼穹√' , '[NAI]地狱宠儿']//队长名字和队员名字
-	
+
 	var playerinfo = cga.GetPlayerInfo();
 	
-	cga.isTeamLeader = (teammates[0] == playerinfo.name) ? true : false
+	var teammates = [];
 	
-	var task = cga.task.Task('贝爷', [
+	var teamplayers = cga.getTeamPlayers();
+
+	for(var i in teamplayers)
+		teammates[i] = teamplayers[i].name;
+	
+	cga.isTeamLeader = (teammates[0] == playerinfo.name || teammates.length == 0) ? true : false
+	
+	var task = cga.task.Task('探险专家(贝爷)', [
 	{//0
 		intro: '1.前往法兰城里谢里雅堡与贝尔（53.22）对话，获得【证明信】。',
 		workFunc: function(cb2){
@@ -263,11 +265,5 @@ var cga = require('./cgaapi')(function(){
 	]
 	);
 	
-	var loop = ()=>{
-		loop_count ++;
-		cga.SayWords('已刷' + loop_count + '遍贝爷！', 0, 3, 1);
-		task.doTask(loop);
-	}
-
-	task.doTask(loop);
+	task.doTask();
 });

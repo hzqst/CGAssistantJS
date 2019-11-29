@@ -1,6 +1,5 @@
 var cga = require('./cgaapi')(function(){
-	console.log('琥珀之卵4 起始地点：艾尔莎岛')
-	
+
 	var playerinfo = cga.GetPlayerInfo();
 	
 	var teammates = [];
