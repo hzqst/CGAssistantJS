@@ -3850,7 +3850,7 @@ module.exports = function(callback){
 			}
 			else
 			{
-				cga.waitBattleEnd(cb, timeout);
+				cga.waitForBattleEnd(cb, timeout);
 			}
 		}, timeout);
 	}

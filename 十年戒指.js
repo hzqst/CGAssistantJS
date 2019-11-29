@@ -11,7 +11,7 @@ var cga = require('./cgaapi')(function(){
 	
 	cga.isTeamLeader = (teammates[0] == playerinfo.name || teammates.length == 0) ? true : false
 	
-	var task = cga.task.Task('诅咒的迷宫', [
+	var task = cga.task.Task('十周年戒指', [
 	{//0
 		intro: '1.前往法兰城里谢里雅堡与追忆之路管理员（30.80）对话，选“是”进入追忆之路。',
 		workFunc: function(cb2){
