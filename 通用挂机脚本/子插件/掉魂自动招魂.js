@@ -36,6 +36,13 @@ module.exports = {
 			});
 		});
 	},
+	think : (ctx)=>{
+		if(cga.GetPlayerInfo().souls != 0)
+		{
+			ctx.result = 'logout';
+			ctx.reason = '掉魂回补';
+		}
+	},
 	loadconfig : (obj, cb)=>{
 		return true;
 	},

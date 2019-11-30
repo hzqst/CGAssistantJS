@@ -27,6 +27,13 @@ module.exports = {
 			});
 		});
 	},
+	think : (ctx)=>{
+		if(cga.needDoctor())
+		{
+			ctx.result = 'logout';
+			ctx.reason = '受伤回补';
+		}
+	},
 	loadconfig : (obj, cb)=>{
 		return true;
 	},
