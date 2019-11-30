@@ -9,7 +9,7 @@ var cga = require('./cgaapi')(function(){
 	for(var i in teamplayers)
 		teammates[i] = teamplayers[i].name;
 	
-	cga.isTeamLeader = (teammates[0] == playerinfo.name || teammates.length == 0) ? true : false
+	cga.isTeamLeader = (teammates[0] == playerinfo.name || teammates.length == 0) ? true : false;
 	
 	var task = cga.task.Task('探险专家(贝爷)', [
 	{//0

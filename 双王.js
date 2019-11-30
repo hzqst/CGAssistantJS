@@ -1,7 +1,4 @@
 var cga = require('./cgaapi')(function(){
-	console.log('诅咒的迷宫 起始地点：艾尔莎岛')
-
-	//initialize teammates array
 
 	var playerinfo = cga.GetPlayerInfo();
 	
@@ -12,34 +9,9 @@ var cga = require('./cgaapi')(function(){
 	for(var i in teamplayers)
 		teammates[i] = teamplayers[i].name;
 	
-	cga.isTeamLeader = (teammates[0] == playerinfo.name || teammates.length == 0) ? true : false
-	
-	var waitStage = (cb2)=>{
-		var teammate_state = {};
-		var teammate_ready = 0;
-		//var teamplayers = cga.getTeamPlayers();
+	cga.isTeamLeader = (teammates[0] == playerinfo.name || teammates.length == 0) ? true : false;
 
-		cga.waitTeammateSay((player, msg)=>{
-
-			if(msg == '1' && teammate_state[player.name] !== true){
-				teammate_state[player.name] = true;
-				teammate_ready ++;
-			}
-
-			if(teamplayers.length > 0 && teammate_ready >= teamplayers.length){
-				cb2(true);
-				return false;
-			}
-			if(teamplayers.length == 0 && teammate_ready > 0){
-				cb2(true);
-				return false;
-			}
-			
-			return true;
-		});
-	}
-
-	var task = cga.task.Task('诅咒的迷宫', [
+	var task = cga.task.Task('诅咒的迷宫 (战斗系三转)', [
 	{//0
 		intro: '1.前往阿巴尼斯村民家（40.30）与历史学家雷伯尔森（14.10）对话，选“是”获得【野草莓】。',
 		workFunc: function(cb2){
@@ -1162,7 +1134,5 @@ var cga = require('./cgaapi')(function(){
 	]
 	);
 	
-	task.doTask(()=>{
-		console.log('ok');
-	});
+	task.doTask();
 });

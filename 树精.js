@@ -1,7 +1,4 @@
 var cga = require('./cgaapi')(function(){
-	console.log('树精长老的末日 起始地点：艾尔莎岛')
-
-	//initialize teammates array
 
 	var playerinfo = cga.GetPlayerInfo();
 	
@@ -12,29 +9,8 @@ var cga = require('./cgaapi')(function(){
 	for(var i in teamplayers)
 		teammates[i] = teamplayers[i].name;
 	
-	cga.isTeamLeader = (teammates[0] == playerinfo.name) ? true : false
+	cga.isTeamLeader = (teammates[0] == playerinfo.name || teammates.length == 0) ? true : false;
 	
-	var waitStage = (cb2)=>{
-		var teammate_state = {};
-		var teammate_ready = 0;
-
-		cga.waitTeammateSay((player, msg)=>{
-
-			if(msg == '1' && teammate_state[player.name] !== true){
-				teammate_state[player.name] = true;
-				teammate_ready ++;
-			}
-
-			if(teammate_ready >= teamplayers.length){
-				//all teammates are ready
-				cb2(true);
-				return false;
-			}
-			
-			return true;
-		});
-	}
-
 	var task = cga.task.Task('树精长老的末日', [
 	{//0
 		intro: '1.前往维诺亚村医院（61.53）与佣兵艾里克（7.5）对话，选“是”获得【火把】。',
@@ -72,7 +48,7 @@ var cga = require('./cgaapi')(function(){
 						setTimeout(go_1, 1500);
 					}, 1500);
 					
-					waitStage(cb2);
+					cga.waitTeammateSayNextStage(teammates, cb2);
 				});
 			}
 			
@@ -293,7 +269,7 @@ var cga = require('./cgaapi')(function(){
 	{//3
 		intro: '6.前往法兰城凯蒂夫人的店（196.78）与凯蒂夫人（15.12）对话，交出30G将【树苗？】鉴定为【生命之花】。',
 		workFunc: function(cb2){
-			cga.travel.falan.toAssessStore(()=>{
+			cga.travel.falan.toKatieStore(()=>{
 				cga.walkList([
 					[15, 12],
 				], ()=>{

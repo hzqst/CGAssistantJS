@@ -6,8 +6,12 @@ var cga = require('./cgaapi')(function(){
 	
 	var teamplayers = cga.getTeamPlayers();
 
-	for(var i in teamplayers)
-		teammates[i] = teamplayers[i].name;
+	if(!teamplayers.length){
+		teammates[0] = playerinfo.name;
+	} else {
+		for(var i in teamplayers)
+			teammates[i] = teamplayers[i].name;
+	}
 	
 	cga.isTeamLeader = (teammates[0] == playerinfo.name || teammates.length == 0) ? true : false
 	

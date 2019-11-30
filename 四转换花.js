@@ -1,5 +1,5 @@
 var cga = require('./cgaapi')(function(){
-	console.log('四转誓言之花脚本 起始地点：艾尔莎岛')
+
 	console.log('重要提示：每一层白色方舟地图档都要下载，否则自动寻路会失败！')
 
 	var myname = cga.GetPlayerInfo().name;

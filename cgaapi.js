@@ -341,7 +341,7 @@ module.exports = function(callback){
 			case 5: cga.TurnTo(x-2, y-2);break;
 			case 6: cga.TurnTo(x, y-2);break;
 			case 7: cga.TurnTo(x+2, y-2);break;
-			default: throw new Error('Invalid direction');
+			default: throw new Error('无效的方向');
 		}
 	}
 	
@@ -831,7 +831,7 @@ module.exports = function(callback){
 			cga.travel.falan.toStone('C', ()=>{
 				cga.walkList([
 					[65, 53, '法兰城'],
-					[117, 112, '流行商店'],
+					[196, 78, '凯蒂夫人的店'],
 				], cb);
 			});
 		}
@@ -2187,7 +2187,7 @@ module.exports = function(callback){
 					console.log('第'+(index+1)+'阶段请求重新执行。');
 					objThis.doNext(index, cb);
 				} else  {
-					throw new Error('invalid input');
+					throw new Error('无效参数');
 				}
 			});
 		}
@@ -2622,12 +2622,15 @@ module.exports = function(callback){
 			var items = cga.getSellStoneItem();
 			if(items.length > 0){
 				cga.DropItem(items[0].itempos);
-				setTimeout(cga.cleanInventory, 500, count, cb);
+				if(cb)
+					setTimeout(cga.cleanInventory, 500, count, cb);
 			} else {
-				cb(new Error('没有可以扔的物品了'));
+				if(cb)
+					cb(new Error('没有可以扔的物品了'));
 			}
 		} else {
-			cb(null);
+			if(cb)
+				cb(null);
 		}
 	}
 	
@@ -3027,6 +3030,61 @@ module.exports = function(callback){
 			if(listen == true)
 				cga.waitTeammateSay(cb);
 		}, 1000);
+	}
+	
+	cga.waitTeammateSayNextStage = (teammates, cb)=>{
+	
+		var teammate_state = {};
+		var teammate_ready = 0;
+
+		cga.waitTeammateSay((player, msg)=>{
+
+			if(msg == '1' && teammate_state[player.name] !== true){
+				teammate_state[player.name] = true;
+				teammate_ready ++;
+			}
+
+			if((teammates.length && teammate_ready >= teammates.length) || (!teammates.length && teammate_ready == 1)){
+				//all teammates are ready
+				cb(true);
+				return false;
+			}
+			
+			return true;
+		});
+	}
+	
+	cga.waitTeammateSayNextStage2 = (teammates, cb)=>{
+		var teammate_state = {};
+		var teammate_ready = 0;
+		var teammate_notready = 0;
+
+		cga.waitTeammateSay((player, msg)=>{
+
+			if(teammate_state[player.name] !== true && teammate_state[player.name] !== false){
+				if(msg == '1'){
+					teammate_state[player.name] = true;
+					teammate_ready ++;
+				} else if(msg == '2'){
+					teammate_state[player.name] = false;
+					teammate_notready ++;
+				}
+			}
+
+			if((teammates.length && teammate_ready >= teammates.length) || (!teammates.length && teammate_ready == 1)){
+				//all teammates are ready
+				cb(true);
+				return false;
+			}
+			
+			if((teammates.length && teammate_ready + teammate_notready >= teammates.length) || (!teammates.length && teammate_ready + teammate_notready == 1)){
+				//some teammates are not ready
+				cb(false);
+				return false;
+			}
+			
+			return true;
+		});
 	}
 	
 	cga.waitForChatInput = (cb)=>{

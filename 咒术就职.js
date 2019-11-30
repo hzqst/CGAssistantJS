@@ -1,8 +1,5 @@
 var cga = require('./cgaapi')(function(){
-	console.log('咒术就职 起始地点：艾尔莎岛')
-
-	//initialize teammates array
-
+	
 	var playerinfo = cga.GetPlayerInfo();
 	
 	var teammates = [];
@@ -12,32 +9,7 @@ var cga = require('./cgaapi')(function(){
 	for(var i in teamplayers)
 		teammates[i] = teamplayers[i].name;
 	
-	cga.isTeamLeader = (teammates[0] == playerinfo.name || teammates.length == 0) ? true : false
-
-	var waitStage = (cb2)=>{
-		var teammate_state = {};
-		var teammate_ready = 0;
-		//var teamplayers = cga.getTeamPlayers();
-
-		cga.waitTeammateSay((player, msg)=>{
-
-			if(msg == '1' && teammate_state[player.name] !== true){
-				teammate_state[player.name] = true;
-				teammate_ready ++;
-			}
-
-			if(teamplayers.length > 0 && teammate_ready >= teamplayers.length){
-				cb2(true);
-				return false;
-			}
-			if(teamplayers.length == 0 && teammate_ready > 0){
-				cb2(true);
-				return false;
-			}
-			
-			return true;
-		});
-	}
+	cga.isTeamLeader = (teammates[0] == playerinfo.name || teammates.length == 0) ? true : false;
 
 	var task = cga.task.Task('咒术就职', [
 	{//0
@@ -85,7 +57,7 @@ var cga = require('./cgaapi')(function(){
 					}, 1500);
 				});
 				
-				waitStage(cb2);
+				cga.waitTeammateSayNextStage(teammates, cb2);
 			}
 			
 			var go2 = ()=>{
@@ -431,7 +403,5 @@ var cga = require('./cgaapi')(function(){
 	]
 	);
 
-	task.doTask(()=>{
-		console.log('ok');
-	});
+	task.doTask();
 });

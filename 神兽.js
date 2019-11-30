@@ -1,7 +1,4 @@
 var cga = require('./cgaapi')(function(){
-	console.log('神兽 起始地点：艾尔莎岛')
-
-	//initialize teammates array
 
 	var playerinfo = cga.GetPlayerInfo();
 	
@@ -12,66 +9,97 @@ var cga = require('./cgaapi')(function(){
 	for(var i in teamplayers)
 		teammates[i] = teamplayers[i].name;
 	
-	cga.isTeamLeader = (teammates[0] == playerinfo.name) ? true : false
-	cga.callItemGot = false;
-	cga.AllItemGot = false;
-	cga.exitPos = null;
+	cga.isTeamLeader = (teammates[0] == playerinfo.name || teammates.length == 0) ? true : false;
+
+	exitPos = null;
+	itemGot = false;
+
+	var interrupt = require('./通用挂机脚本/公共模块/interrupt');
+
+	var moveThinkInterrupt = new interrupt();
+	var playerThinkInterrupt = new interrupt();
+	var playerThinkRunning = false;
+
+	var moveThink = (arg)=>{
+
+		if(moveThinkInterrupt.hasInterrupt())
+			return false;
+
+		if(arg == 'freqMoveMapChanged')
+		{
+			playerThinkInterrupt.requestInterrupt();
+			return false;
+		}
+
+		return true;
+	}
+
+	var playerThink = ()=>{
+
+		if(!cga.isInNormalState())
+			return true;
 		
-	var waitStage = (cb2)=>{
-		var teammate_state = [];
-		var teammate_ready = 0;
-
-		cga.waitTeammateSay((player, msg)=>{
-
-			if(msg == '1' && teammate_state[player.index] !== true){
-				teammate_state[player.index] = true;
-				teammate_ready ++;
-			}
-
-			if(teammate_ready >= teamplayers.length){
-				//all teammates are ready
-				cb2(true);
-				return false;
+		var result = null;
+		
+		cga.cleanInventory(1);
+		
+		if(cga.getItemCount('地龙的麟片') > 0) {
+			cga.SayWords('1', 0, 3, 1);
+		}
+		
+		if(itemGot)
+			result = 'supply';
+		
+		if(cga.isTeamLeaderEx())
+		{
+			var interruptFromMoveThink = false;
+			
+			if(result == null && playerThinkInterrupt.hasInterrupt())
+			{
+				result = 'supply';
+				interruptFromMoveThink = true;
 			}
 			
-			return true;
-		});
-	}
-	
-	var waitStageEx = (cb2)=>{
-		var teammate_state = [];
-		var teammate_ready = 0;
-		var teammate_notready = 0;
-
-		cga.waitTeammateSay((player, msg)=>{
-
-			if(teammate_state[player.index] !== true && teammate_state[player.index] !== false){
-				if(msg == '1'){
-					teammate_state[player.index] = true;
-					teammate_ready ++;
-				} else if(msg == '2'){
-					teammate_state[player.index] = false;
-					teammate_notready ++;
+			if( result == 'supply' )
+			{
+				if(interruptFromMoveThink)
+				{
+					if(!itemGot)
+						cga.SayWords('2', 0, 3, 1);
+					
+					return false;
+				}
+				else
+				{
+					moveThinkInterrupt.requestInterrupt(()=>{
+						if(cga.isInNormalState()){
+							if(!itemGot)
+								cga.SayWords('2', 0, 3, 1);
+							
+							return true;
+						}
+						return false;
+					});
+					return false;
 				}
 			}
+		}
 
-			if(teammate_ready >= teamplayers.length){
-				//all teammates are ready
-				cb2(true);
-				return false;
-			}
-			
-			if(teammate_ready + teammate_notready >= teamplayers.length){
-				//some teammates are not ready
-				cb2(false);
-				return false;
-			}
-			
-			return true;
-		});
+		return true;
 	}
 
-	var task = cga.task.Task('挑战神兽', [
+	var playerThinkTimer = ()=>{
+		if(playerThinkRunning){
+			if(!playerThink()){
+				console.log('playerThink off');
+				playerThinkRunning = false;
+			}
+		}
+		
+		setTimeout(playerThinkTimer, 1500);
+	}
+
+	var task = cga.task.Task('挑战神兽 (战斗系二转)', [
 	{//0
 		intro: '1.前往杰诺瓦镇医院（44.33）2楼与神官比尔班（11.4）对话，获得【贝兹雷姆之钥】。',
 		workFunc: function(cb2){
@@ -100,19 +128,19 @@ var cga = require('./cgaapi')(function(){
 					});
 				});
 				
-				waitStage(cb2);
+				cga.waitTeammateSayNextStage(teammates, cb2);
 			}
 			
 			var go2 = ()=>{
 				var retry = ()=>{
 					cga.TurnTo(11, 4);
-					cga.AsyncWaitNPCDialog((dlg)=>{
-						if(dlg instanceof TypeError){
+					cga.AsyncWaitNPCDialog((err)=>{
+						if(err){
 							retry();
 							return;
 						}
 						cga.ClickNPCDialog(1, 0);
-						cga.AsyncWaitNPCDialog((dlg)=>{
+						cga.AsyncWaitNPCDialog(()=>{
 							setTimeout(()=>{
 								cga.SayWords('1', 0, 3, 1);
 								cb2(true);
@@ -137,8 +165,8 @@ var cga = require('./cgaapi')(function(){
 			var wait2 = ()=>{
 				var retry = ()=>{
 					cga.TurnTo(16, 4);
-					cga.AsyncWaitNPCDialog(function(dlg){
-						if(dlg instanceof TypeError){
+					cga.AsyncWaitNPCDialog((err, dlg)=>{
+						if(err){
 							cga.walkList([ [16, 5], [15, 5] ], retry);
 							return;
 						}
@@ -213,7 +241,7 @@ var cga = require('./cgaapi')(function(){
 
 				cga.walkList(list, ()=>{
 					cga.TurnTo(135, 333);
-					cga.AsyncWaitNPCDialog((dlg)=>{
+					cga.AsyncWaitNPCDialog(()=>{
 						cga.ClickNPCDialog(1, 0);
 						setTimeout(wait, 1500);
 					});
@@ -223,8 +251,8 @@ var cga = require('./cgaapi')(function(){
 			var go2 = ()=>{
 				var retry = ()=>{
 					cga.TurnTo(135, 333);
-					cga.AsyncWaitNPCDialog((dlg)=>{
-						if(dlg instanceof TypeError){
+					cga.AsyncWaitNPCDialog((err)=>{
+						if(err){
 							cga.walkList([ [136, 334], [135, 334] ], retry);
 							return;
 						}
@@ -245,6 +273,7 @@ var cga = require('./cgaapi')(function(){
 	{//2
 		intro: '3.通过随机迷宫抵达静谧之间，持有【地龙的鳞片】与神官葛雷森（26.67）对话，选“是”交出【地龙的鳞片】并通过栅栏。',
 		workFunc: function(cb2){
+			//搜索迷宫入口
 			var findObj = (cb3)=>{
 				var objs = cga.getMapObjects();
 				var pos = cga.GetMapXY();
@@ -259,6 +288,7 @@ var cga = require('./cgaapi')(function(){
 				setTimeout(findObj, 1000, cb3);
 			}
 			
+			//走迷宫
 			var walkMaze = (cb3)=>{
 				var map = cga.GetMapName();
 				if(map == '静谧之间'){
@@ -274,6 +304,7 @@ var cga = require('./cgaapi')(function(){
 				});
 			}
 			
+			//重组队
 			var wait4 = ()=>{
 				cga.WalkTo(26, 64);
 				cga.waitTeammates(teammates, (r)=>{
@@ -295,83 +326,85 @@ var cga = require('./cgaapi')(function(){
 				});
 			}
 			
+			//通过神官
 			var goFuckBOSS = ()=>{
 				cga.walkList(
 				(cga.isTeamLeader) ?
 				[
 				[26, 68],
-				[27, 68],
+				[25, 68],
 				[26, 68],
-				[27, 68],
+				[25, 68],
 				[26, 68],
 				]
 				: 
 				[
 				[26, 68],
 				], ()=>{
-					cga.TurnTo(26, 67);
-					cga.AsyncWaitNPCDialog((dlg)=>{
-						cga.ClickNPCDialog(4, 0);
-						setTimeout((cga.isTeamLeader) ? wait4 : wait5, 1500);
+					cga.TurnTo(26, 66);
+					cga.AsyncWaitNPCDialog((err, dlg)=>{
+						if(err || !dlg.message){
+							cga.walkList([ [25, 68], [26, 68] ], retry);
+							return;
+						}
+						if(dlg.message.indexOf('看看你的强弱') >= 0)
+						{
+							cga.ClickNPCDialog(4, 0);
+							cga.AsyncWaitMovement({x:26, y:65, delay:1000, timeout:5000}, (cga.isTeamLeader) ? wait4 : wait5);
+						}
+						else
+						{
+							throw new Error('没有鳞片无法通过');
+						}
 					});
 				});
 			}
 			
-			var goFuckDragonBattle = ()=>{
-				
-				cga.SayWords('开始打鳞片，打到鳞片或者已有鳞片请说“1”！', 0, 3, 1);
-				
-				waitStage(()=>{
-					cga.allItemGot = true;
-					setTimeout(()=>{
-						cga.walkList([
-						[cga.exitPos.x, cga.exitPos.y, '静谧之间'],
-						], (err)=>{
-							if(err == 4){
-								cb2('restart stage');
-								return;
-							}
-							goFuckBOSS();
-						});
-					}, 5000);
-				});
-								
-				cga.freqMove(0, function(){
-					
-					if(cga.isInBattle())
-						return true;
-
-					if(cga.GetMapName() == '入口')
-					{
-						cb2('restart stage');
-						return;
-					}
-					
-					if( cga.getItemCount('地龙的麟片') > 0 && cga.callItemGot == false ){
-						cga.SayWords('1', 0, 3, 1);
-						cga.callItemGot = true;
-					}
-					
-					if(cga.allItemGot)
-						return true;
-					
-					return true;
-				});
-			}
-			
+			//刷鳞片
 			var goFuckDragon = ()=>{
 				cga.walkList([
 				[26, 72, ''],
 				], ()=>{
-					cga.exitPos = cga.GetMapXY();
-					var randomSpace = cga.getRandomSpace(cga.exitPos.x, cga.exitPos.y);
-					cga.WalkTo(randomSpace[0], randomSpace[1]);
-					setTimeout(goFuckDragonBattle, 1000, true);
+					exitPos = cga.GetMapXY();
+					var dir = cga.getRandomSpaceDir(exitPos.x, exitPos.y);
+					
+					setTimeout(()=>{
+						cga.SayWords('开始打鳞片，打到鳞片或者已有鳞片请说“1”！', 0, 3, 1);
+				
+						playerThinkRunning = true;
+						
+						cga.waitTeammateSayNextStage2(teammates, (r)=>{
+							if(r === true){
+								itemGot = true;
+								setTimeout(()=>{
+									cga.walkList([
+									[exitPos.x, exitPos.y, '静谧之间'],
+									], (err)=>{
+										if(err == 4){
+											cb2('restart stage');
+											return;
+										}
+										if(cga.GetMapName() != '静谧之间'){
+											cb2('restart stage');
+											return;
+										}
+										goFuckBOSS();
+									});
+								}, 3000);
+							} else {
+								cb2('restart stage');
+								return;
+							}
+						});
+						
+						cga.freqMove(dir);
+					}, 1000);
 				})
 			}
 	
-			var goJMZJ = ()=>{
-				waitStageEx((r)=>{
+			//检查全队鳞片数量
+			var CheckItemForJMZJ = ()=>{
+				cga.waitTeammateSayNextStage2(teammates, (r)=>{
 					if(r === true){
 						goFuckBOSS();
 						return;
@@ -386,11 +419,12 @@ var cga = require('./cgaapi')(function(){
 				}, 1500);
 			}
 	
-			var go = ()=>{
+			if(cga.isTeamLeader){
+				
 				var name = cga.GetMapName();
 				var pos = cga.GetMapXY();
 				if(name == '静谧之间'){
-					goJMZJ();
+					CheckItemForJMZJ();
 				}
 				else
 				{
@@ -399,83 +433,48 @@ var cga = require('./cgaapi')(function(){
 							[obj.mapx, obj.mapy, '贝兹雷姆的迷宫1楼']
 						], ()=>{
 							walkMaze(()=>{
-								goJMZJ();
+								CheckItemForJMZJ();
 							});
 						});
 					});
 				}
-			}
-			
-			var go2 = ()=>{
-				var name = cga.GetMapName();
-				var pos = cga.GetMapXY();
-				var teamplayersnow = cga.getTeamPlayers();
-								
-				if ( name == '静谧之间' && (pos.x >= 26 && pos.x <= 27) && (pos.y >= 68 && pos.y <= 68) && !teamplayersnow.length){
-					goFuckBOSS();
-					return;
-				}
 				
-				if( name != '静谧之间' && cga.getItemCount('地龙的麟片') > 0 && cga.callItemGot == false ){
-					cga.SayWords('1', 0, 3, 1);
-					cga.callItemGot = true;
-					return false;
-				}
-				
-				setTimeout(go2, 3000);
-			}
-			
-			if(cga.isTeamLeader){
-				go();
 			} else {
 				cga.waitTeammateSay((player, msg)=>{
-					if(player.index == 0 && msg.indexOf('已到达')  >= 0){
-						if(cga.getItemCount('地龙的麟片') >= 1){
+					if(player.index == 0 && msg.indexOf('鳞片请说')  >= 0){
+						if(cga.getItemCount('地龙的麟片') > 0){
 							cga.SayWords('1', 0, 3, 1);
 						} else {
 							cga.SayWords('2', 0, 3, 1);
+							playerThinkRunning = true;
 						}
 						
-						setTimeout(go2, 3000);
-						return false;
+						return true;
 					}
 					return true;
 				});
+				
+				cga.waitForLocation({mapname : '静谧之间', pos : [26, 67], leaveteam : true, walkto : [26, 68]}, goFuckBOSS);
 			}
 		}
 	},
 	{
 		intro: '4.与神兽史雷普尼尔（26.25）对话进入战斗。',
 		workFunc: function(cb2){
-			var waitBOSS = ()=>{
-				if(cga.isInBattle())
-				{
-					setTimeout(waitBOSS, 1000);
-					return;
-				}
-								
-				setTimeout(cb2, 1000, true);
+
+			//队长与神兽对话，触发战斗
+			if(cga.isTeamLeader){
+				cga.walkList([
+				[26, 26],
+				], ()=>{
+					cga.TurnTo(26, 24);
+				});
 			}
 			
-			var fuckBOSS = ()=>{
-				if(cga.isTeamLeader){
-					cga.walkList([
-					[26, 26],
-					], ()=>{
-						cga.TurnTo(26, 24);
-						setTimeout(waitBOSS, 1500);
-					});
-				} else {
-					if(cga.isInBattle())
-					{
-						setTimeout(waitBOSS, 1000);
-						return;
-					}
-					setTimeout(fuckBOSS, 1500);
-				}
-			}
-			
-			fuckBOSS();
+			//等待地图切换到打完神兽的场景
+			cga.waitForLocation({mapindex : 16512}, ()=>{
+				cb2(true);
+			});
 		}
 	},
 	{
@@ -492,9 +491,9 @@ var cga = require('./cgaapi')(function(){
 				[14, 15],
 				], ()=>{
 					cga.TurnTo(14, 14);		
-					cga.AsyncWaitNPCDialog((dlg)=>{
+					cga.AsyncWaitNPCDialog(()=>{
 						cga.ClickNPCDialog(32, 0);
-						cga.AsyncWaitNPCDialog((dlg)=>{
+						cga.AsyncWaitNPCDialog(()=>{
 							cga.ClickNPCDialog(1, 0);
 							setTimeout(cb2, 1500, true);
 						});
@@ -503,13 +502,13 @@ var cga = require('./cgaapi')(function(){
 			} else {
 				var retry = ()=>{
 					cga.TurnTo(14, 14);		
-					cga.AsyncWaitNPCDialog((dlg)=>{
-						if(dlg instanceof TypeError){
+					cga.AsyncWaitNPCDialog((err)=>{
+						if(err){
 							retry();
 							return;
 						}
 						cga.ClickNPCDialog(32, 0);
-						cga.AsyncWaitNPCDialog((dlg)=>{
+						cga.AsyncWaitNPCDialog(()=>{
 							cga.ClickNPCDialog(1, 0);
 							setTimeout(cb2, 1500, true);
 						});
@@ -541,7 +540,7 @@ var cga = require('./cgaapi')(function(){
 	]
 	);
 
-	task.doTask(()=>{
-		console.log('ok');
-	});
+	playerThinkTimer();
+	cga.registerMoveThink(moveThink);
+	task.doTask();
 });

@@ -1,43 +1,15 @@
 var cga = require('./cgaapi')(function(){
-	console.log('承认之戒 起始地点：艾尔莎岛')
-	console.log('暂不支持配合队员脚本联合执行，只能作为队长脚本使用')
-	//initialize teammates array
-
+	
 	var playerinfo = cga.GetPlayerInfo();
 	
 	var teammates = [];
 	
 	var teamplayers = cga.getTeamPlayers();
-	
+
 	for(var i in teamplayers)
-		teammates[i] = teamplayers.name;
-
-	var waitStage = (cb2)=>{
-		var teammate_state = [true];
-		var teammate_ready = 1;
-		var teamplayers = cga.getTeamPlayers();
-		
-		if(!teamplayers.length){
-			console.log('teammates are ready');
-			cb2(true);
-			return;
-		}
-		cga.waitTeammateSay((player, msg)=>{
-			
-			if(msg == '1' && teammate_state[player.index] !== true){
-				teammate_state[player.index] = true;
-				teammate_ready ++;
-			}
-
-			if(teammate_ready >= teamplayers.length){
-				//all teammates are ready
-				cb2(true);
-				return false;
-			}
-			
-			return true;
-		})
-	}
+		teammates[i] = teamplayers[i].name;
+	
+	cga.isTeamLeader = (teammates[0] == playerinfo.name || teammates.length == 0) ? true : false;
 
 	var task = cga.task.Task('曙光1/承认之戒', [
 	{//0
@@ -66,7 +38,7 @@ var cga = require('./cgaapi')(function(){
 						});
 					});
 					
-					waitStage(()=>{
+					cga.waitTeammateSayNextStage(teammates, ()=>{
 						cga.walkList([
 						[8, 19, '里谢里雅堡 2楼'],
 						[49, 80, '里谢里雅堡 1楼'],
