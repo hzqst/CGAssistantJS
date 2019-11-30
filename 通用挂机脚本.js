@@ -106,7 +106,7 @@ var cga = require('./cgaapi')(function(){
 		catch(e)
 		{
 			if(e.code != 'ENOENT'){
-				clearConfig();
+				//clearConfig();
 				console.log(e)
 			}
 		}
