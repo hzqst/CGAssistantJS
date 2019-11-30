@@ -56,7 +56,7 @@ var cga = require('./cgaapi')(function(){
 					return;
 				
 				if(err || !r){
-					cga.SayWords('CGA四转脚本等待换花，['+myItem+']交换'+'['+waitForItem+']。'+, 0, 3, 1);
+					cga.SayWords('CGA四转脚本等待换花，['+myItem+']交换'+'['+waitForItem+']。', 0, 3, 1);
 					waitChat();
 					return;
 				}
