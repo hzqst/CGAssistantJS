@@ -1,8 +1,5 @@
 var cga = require('./cgaapi')(function(){
-	console.log('学习因果报应 起始地点：艾尔莎岛')
-
-	//initialize teammates array
-
+	
 	var playerinfo = cga.GetPlayerInfo();
 	
 	var teammates = [];
@@ -12,30 +9,8 @@ var cga = require('./cgaapi')(function(){
 	for(var i in teamplayers)
 		teammates[i] = teamplayers[i].name;
 	
-	cga.isTeamLeader = (teammates[0] == playerinfo.name) ? true : false
+	cga.isTeamLeader = (teammates[0] == playerinfo.name || teammates.length == 0) ? true : false;
 	
-	var waitStage = (cb2)=>{
-		var teammate_state = [true];
-		var teammate_ready = 1;
-		var teamplayers = cga.getTeamPlayers();
-
-		cga.waitTeammateSay((player, msg)=>{
-
-			if(msg == '1' && teammate_state[player.index] !== true){
-				teammate_state[player.index] = true;
-				teammate_ready ++;
-			}
-
-			if(teammate_ready >= teamplayers.length){
-				//all teammates are ready
-				cb2(true);
-				return false;
-			}
-			
-			return true;
-		});
-	}
-
 	var task = cga.task.Task('大小宝箱', [
 	{//0
 		intro: '1.前往雪拉威森塔52层与纳利米（101.64）对话，选“是”获得【红色蜡烛】；选“否”获得【白色蜡烛】。',
@@ -73,7 +48,7 @@ var cga = require('./cgaapi')(function(){
 						});
 					});
 					
-					waitStage(cb2);
+					cga.waitTeammateSayNextStage(teammates, cb2);
 				});
 			}
 			
@@ -172,7 +147,7 @@ var cga = require('./cgaapi')(function(){
 						cga.SayWords('请拿取藏宝图，完成请说“1”！', 0, 3, 1);
 					});
 					
-					waitStage(cb2);
+					cga.waitTeammateSayNextStage(teammates, cb2);
 				});
 			}
 			
