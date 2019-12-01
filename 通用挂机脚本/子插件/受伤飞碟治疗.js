@@ -29,9 +29,6 @@ module.exports = {
 			});
 						
 			if(doctor && cga.getTeamPlayers().length == 0){
-				
-				console.log(doctor)
-				
 				var target = cga.getRandomSpace(doctor.xpos,doctor.ypos);
 				cga.walkList([
 				target
@@ -39,7 +36,7 @@ module.exports = {
 					cga.addTeammate(doctor.unit_name, (r)=>{
 						setTimeout(retry, 1500);
 					})
-				});					
+				});
 			} else {
 				setTimeout(retry, 1500);
 			}
