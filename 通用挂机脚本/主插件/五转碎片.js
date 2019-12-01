@@ -222,14 +222,16 @@ var getMazeEntrance = (cb)=>{
 			return o.cell == 3;
 		}))
 		var entrance = objs.find((obj)=>{
+
 			return (obj.cell == 3 && 
 			obj.mapx >= thisobj.battleArea.range[0] &&
 			obj.mapx <= thisobj.battleArea.range[1] && 
 			obj.mapy >= thisobj.battleArea.range[2] && 
 			obj.mapy <= thisobj.battleArea.range[3] && 
-			blacklistEntrance.find((b)=>{
+			( !blacklistEntrance.length || (blacklistEntrance.length && blacklistEntrance.find((b)=>{
 				return b.mapx == obj.mapx && b.mapy == obj.mapy;
-			}) == undefined)
+			}) == undefined) )
+			);
 		})
 		
 		if(entrance == undefined){
