@@ -17,15 +17,17 @@ var cga = require('./cgaapi')(function(){
 		workFunc: function(cb2){
 						
 			var go_1 = ()=>{
-				cga.TurnTo(7, 5);
-				cga.AsyncWaitNPCDialog(()=>{
-					cga.ClickNPCDialog(4, 0);
+				cga.cleanInventory(1, ()=>{
+					cga.TurnTo(7, 5);
 					cga.AsyncWaitNPCDialog(()=>{
-						cga.ClickNPCDialog(1, 0);
-						cga.SayWords('拿火把，完成请加队然后说“1”！', 0, 3, 1);
-						setTimeout(()=>{
-							cga.SayWords('1', 0, 3, 1);						
-						}, 1500);
+						cga.ClickNPCDialog(4, 0);
+						cga.AsyncWaitNPCDialog(()=>{
+							cga.ClickNPCDialog(1, 0);
+							cga.SayWords('拿火把，完成请加队然后说“1”！', 0, 3, 1);
+							setTimeout(()=>{
+								cga.SayWords('1', 0, 3, 1);						
+							}, 1500);
+						});
 					});
 				});
 			}
@@ -66,19 +68,21 @@ var cga = require('./cgaapi')(function(){
 			var go2 = ()=>{
 
 				var retry = ()=>{
-					cga.TurnTo(7, 5);
-					cga.AsyncWaitNPCDialog((err)=>{
-						if(err){
-							retry();
-							return;
-						}
-						cga.ClickNPCDialog(4, 0);
-						cga.AsyncWaitNPCDialog(()=>{
-							cga.ClickNPCDialog(1, 0);
-							setTimeout(()=>{
-								cga.WalkTo(5, 5);
-								setTimeout(wait4, 1000);
-							}, 1000);
+					cga.cleanInventory(1, ()=>{
+						cga.TurnTo(7, 5);
+						cga.AsyncWaitNPCDialog((err)=>{
+							if(err){
+								retry();
+								return;
+							}
+							cga.ClickNPCDialog(4, 0);
+							cga.AsyncWaitNPCDialog(()=>{
+								cga.ClickNPCDialog(1, 0);
+								setTimeout(()=>{
+									cga.WalkTo(5, 5);
+									setTimeout(wait4, 1000);
+								}, 1000);
+							});
 						});
 					});
 				}
@@ -130,32 +134,18 @@ var cga = require('./cgaapi')(function(){
 		intro: '2.出维诺亚村向北行走至芙蕾雅岛（380.353）处，进入布满青苔的洞窟。3.通过随机迷宫抵达叹息之森林，与树精长老（29.13）对话，交出【火把】进入战斗。',
 		workFunc: function(cb2){
 			
-			var waitBOSS = ()=>{
-				if(cga.isInBattle())
-				{
-					setTimeout(waitBOSS, 1000);
-					return;
-				}
-					
-				setTimeout(cb2, 1000, true);
-			}
-			
 			var fuckBOSS = ()=>{
 				if(cga.isTeamLeader){
 					cga.walkList([
 					[29, 14],
 					], ()=>{
-						cga.TurnTo(29, 13);
-						setTimeout(waitBOSS, 1500);
+						cga.turnTo(29, 13);
 					});
-				} else {
-					if(cga.isInBattle())
-					{
-						setTimeout(waitBOSS, 1000);
-						return;
-					}
-					setTimeout(fuckBOSS, 1500);
 				}
+				
+				cga.waitForLocation({mapname : '叹息森林'}, ()=>{
+					cb2(true);
+				});
 			}
 			
 			var walkMaze = (cb3)=>{
@@ -190,21 +180,10 @@ var cga = require('./cgaapi')(function(){
 				});
 			}
 			
-			var go2 = ()=>{
-				var name = cga.GetMapName();
-				var pos = cga.GetMapXY();
-				if(name == '叹息之森林' && (pos.x >= 25 && pos.x <= 29) && (pos.y >= 14 && pos.y <= 18)){
-					fuckBOSS();
-					return;
-				}
-				
-				setTimeout(go2, 1000);
-			}
-			
 			if(cga.isTeamLeader){
 				go();
 			} else {
-				go2();
+				cga.waitForLocation({mapname : '叹息之森林'}, fuckBOSS);
 			}
 		}
 	},
@@ -219,16 +198,19 @@ var cga = require('./cgaapi')(function(){
 				[26, 13],
 				[27, 13],
 				], ()=>{
-					var swordItem = cga.findItem('艾里克的大剑');
-					console.log('swordItem='+swordItem);
-					if(swordItem != -1){
-						cga.DropItem(swordItem);
+					var sword = cga.findItem('艾里克的大剑');
+
+					if(sword != -1){
+						cga.DropItem(sword);
 					}
+					
 					setTimeout(()=>{
-						cga.TurnTo(26, 12);
-						cga.AsyncWaitNPCDialog(()=>{
-							cga.SayWords('拿到树苗后请自行完成后续任务！前往法兰城凯蒂夫人的店，鉴定树苗并将其交给维诺亚村村长的家“村长卡丹”，即可完成任务！', 0, 3, 1);
-							setTimeout(cb2, 1000, true);
+						cga.cleanInventory(1, ()=>{
+							cga.turnTo(26, 12);
+							cga.AsyncWaitNPCDialog(()=>{
+								cga.SayWords('拿到树苗后前往法兰城凯蒂夫人的店，鉴定树苗并将其交给维诺亚村村长的家“村长卡丹”，即可完成任务！', 0, 3, 1);
+								setTimeout(cb2, 1000, true);
+							});
 						});
 					}, 1000);					
 				});
@@ -236,22 +218,25 @@ var cga = require('./cgaapi')(function(){
 			
 			var go2 = ()=>{
 				var retry = ()=>{
-					var swordItem = cga.findItem('艾里克的大剑');
-					console.log('swordItem='+swordItem);
-					if(swordItem != -1){
-						cga.DropItem(swordItem);
+					var sword = cga.findItem('艾里克的大剑');
+
+					if(sword != -1){
+						cga.DropItem(sword);
 					}
+					
 					setTimeout(()=>{
-						cga.TurnTo(26, 12);
-						cga.AsyncWaitNPCDialog((err)=>{
-							if(err){
-								cga.walkList([ [26, 13], [27, 13] ], retry);
-								return;
-							}
-							if(cga.findItem('树苗？') == -1){
-								setTimeout(retry, 1000);
-							}
-							setTimeout(cb2, 1000, true);
+						cga.cleanInventory(1, ()=>{
+							cga.turnTo(26, 12);
+							cga.AsyncWaitNPCDialog((err)=>{
+								if(err){
+									cga.walkList([ [26, 13], [27, 13] ], retry);
+									return;
+								}
+								if(cga.findItem('树苗？') == -1){
+									setTimeout(retry, 1000);
+								}
+								setTimeout(cb2, 1000, true);
+							});
 						});
 					}, 1000);
 				}
@@ -274,7 +259,7 @@ var cga = require('./cgaapi')(function(){
 					[15, 12],
 				], ()=>{
 						var itemArray = cga.findItemArray('树苗？');
-						cga.TurnTo(16, 12);
+						cga.turnTo(16, 12);
 						cga.AsyncWaitNPCDialog(()=>{
 							cga.SellNPCStore(itemArray);
 							cga.AsyncWaitNPCDialog(()=>{
@@ -294,7 +279,7 @@ var cga = require('./cgaapi')(function(){
 				[0, 5, '村长的家'],
 				[15, 8],
 				], ()=>{
-					cga.TurnTo(16, 7);
+					cga.turnTo(16, 7);
 					cga.AsyncWaitNPCDialog(()=>{
 						cga.ClickNPCDialog(4, 0);
 						cga.AsyncWaitNPCDialog(()=>{
@@ -318,6 +303,9 @@ var cga = require('./cgaapi')(function(){
 		},
 		function(){
 			return (cga.getItemCount('生命之花') >= 1) ? true : false;
+		},
+		function(){
+			return false;
 		},
 	]
 	);

@@ -18,7 +18,7 @@ var cga = require('./cgaapi')(function(){
 			
 			var go_1 = ()=>{
 				cga.cleanInventory(1, ()=>{
-					cga.TurnTo(14, 10);
+					cga.turnTo(14, 10);
 					cga.AsyncWaitNPCDialog(()=>{
 						cga.ClickNPCDialog(32, 0);
 						cga.AsyncWaitNPCDialog(()=>{
@@ -66,7 +66,7 @@ var cga = require('./cgaapi')(function(){
 			var go2 = ()=>{
 				var retry = ()=>{
 					cga.cleanInventory(1, ()=>{
-						cga.TurnTo(14, 10);
+						cga.turnTo(14, 10);
 						cga.AsyncWaitNPCDialog((err)=>{
 							if(err){
 								cga.walkList([ [13, 11], [13, 10] ], retry);
@@ -119,7 +119,7 @@ var cga = require('./cgaapi')(function(){
 			
 			var wait2 = ()=>{
 				var retry = ()=>{
-					cga.TurnTo(38, 4);
+					cga.turnTo(38, 4);
 					cga.AsyncWaitNPCDialog((err)=>{
 						if(err){
 							cga.walkList([ [37, 5], [37, 4] ], retry);
@@ -175,21 +175,21 @@ var cga = require('./cgaapi')(function(){
 				cga.walkList([
 				[9, 5],				
 				], ()=>{
-					cga.TurnTo(9, 4);
+					cga.turnTo(9, 4);
 					cga.AsyncWaitNPCDialog(()=>{
 						cga.ClickNPCDialog(1, 0);
 						cga.AsyncWaitMovement({map:4331, delay:1000, timeout:5000}, ()=>{
 							cga.walkList([
 							[14, 7],
 							], ()=>{
-								cga.TurnTo(15, 7);
+								cga.turnTo(15, 7);
 								cga.AsyncWaitNPCDialog(()=>{
 									cga.ClickNPCDialog(4, 0);
 									cga.AsyncWaitMovement({map:4332, delay:1000, timeout:5000}, ()=>{
 										cga.walkList([
 										[14, 7],
 										], ()=>{
-											cga.TurnTo(15, 7);
+											cga.turnTo(15, 7);
 											cga.AsyncWaitNPCDialog(()=>{
 												cga.ClickNPCDialog(1, 0);
 												setTimeout(()=>{
@@ -198,7 +198,7 @@ var cga = require('./cgaapi')(function(){
 													[9, 4, 4334],
 													[14, 10],
 													], ()=>{
-														cga.TurnTo(15, 10);
+														cga.turnTo(15, 10);
 														cga.AsyncWaitNPCDialog(()=>{
 															cga.ClickNPCDialog(4, 0);
 															cga.AsyncWaitMovement({map:4335, delay:1000, timeout:5000}, ()=>{
@@ -253,24 +253,25 @@ var cga = require('./cgaapi')(function(){
 				[12, 17, '阿巴尼斯村'],
 				[37, 71, '莎莲娜'],
 				[54, 162],
-				[55, 162, null, null, null, true],
-				[54, 162, null, null, null, true],
-				[55, 162, null, null, null, true],
-				[54, 162, null, null, null, true],
 				], ()=>{
-					cga.TurnTo(54, 161);
-					cga.AsyncWaitMovement({map:'诅咒的迷宫', delay:1000, timeout:5000}, ()=>{
-						setTimeout(wait, 1000);
+					cga.walkTeammateToPosition([
+					[54, 162],
+					[55, 162],
+					], ()=>{
+						cga.turnTo(54, 161);
+						cga.AsyncWaitMovement({map:'诅咒的迷宫', delay:1000, timeout:5000}, ()=>{
+							setTimeout(wait, 1000);
+						});
 					});
 				});
 			}
 			
 			var go2 = ()=>{
 				var retry = ()=>{
-					cga.TurnTo(54, 161);
+					cga.turnTo(54, 161);
 					cga.AsyncWaitMovement({map:'诅咒的迷宫', delay:1000, timeout:5000}, (err)=>{
 						if(err){
-							cga.walkList([ [54, 162], [55, 162], [54, 162], [55, 162] ], retry);
+							cga.walkList([ [54, 162], [55, 162] ], retry);
 							return;
 						}
 						
@@ -326,7 +327,7 @@ var cga = require('./cgaapi')(function(){
 			];
 			
 			var fuckBOSS = ()=>{
-				cga.TurnTo(22, 14);
+				cga.turnTo(22, 14);
 				cga.AsyncWaitNPCDialog((err)=>{
 					if(cga.isInBattle()){
 						return;
@@ -455,7 +456,7 @@ var cga = require('./cgaapi')(function(){
 			];
 			
 			var fuckBOSS = ()=>{
-				cga.TurnTo(26, 17);
+				cga.turnTo(26, 17);
 				cga.AsyncWaitNPCDialog((err)=>{
 					if(cga.isInBattle()){
 						return;
@@ -597,7 +598,7 @@ var cga = require('./cgaapi')(function(){
 			];
 			
 			var fuckBOSS = ()=>{
-				cga.TurnTo(20, 21);
+				cga.turnTo(20, 21);
 				cga.AsyncWaitNPCDialog((err)=>{
 					if(cga.isInBattle()){
 						return;
@@ -735,7 +736,7 @@ var cga = require('./cgaapi')(function(){
 			];
 			
 			var fuckBOSS = ()=>{
-				cga.TurnTo(15, 18);
+				cga.turnTo(15, 18);
 				cga.AsyncWaitNPCDialog((err)=>{
 					if(cga.isInBattle()){
 						return;
@@ -878,7 +879,7 @@ var cga = require('./cgaapi')(function(){
 			];
 			
 			var fuckBOSS = ()=>{
-				cga.TurnTo(22, 14);
+				cga.turnTo(22, 14);
 				cga.AsyncWaitNPCDialog((err)=>{
 					if(cga.isInBattle()){
 						return;
@@ -987,7 +988,7 @@ var cga = require('./cgaapi')(function(){
 			];
 			
 			var fuckBOSS = ()=>{
-				cga.TurnTo(24, 19);
+				cga.turnTo(24, 19);
 				cga.AsyncWaitNPCDialog((err)=>{
 					if(cga.isInBattle()){
 						return;
@@ -1050,7 +1051,7 @@ var cga = require('./cgaapi')(function(){
 		workFunc: function(cb2){
 
 			var fuckBOSS = ()=>{
-				cga.TurnTo(21, 12);
+				cga.turnTo(21, 12);
 				cga.AsyncWaitNPCDialog((err)=>{
 					if(err){
 						fuckBOSS();

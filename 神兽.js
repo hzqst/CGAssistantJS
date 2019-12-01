@@ -43,7 +43,9 @@ var cga = require('./cgaapi')(function(){
 		
 		cga.cleanInventory(1);
 		
-		if(cga.getItemCount('地龙的麟片') > 0) {
+		var hasItem = cga.getItemCount('地龙的麟片') > 0;
+		
+		if(hasItem) {
 			cga.SayWords('1', 0, 3, 1);
 		}
 		
@@ -64,7 +66,7 @@ var cga = require('./cgaapi')(function(){
 			{
 				if(interruptFromMoveThink)
 				{
-					if(!itemGot)
+					if(!itemGot && !hasItem)
 						cga.SayWords('2', 0, 3, 1);
 					
 					return false;
@@ -73,7 +75,7 @@ var cga = require('./cgaapi')(function(){
 				{
 					moveThinkInterrupt.requestInterrupt(()=>{
 						if(cga.isInNormalState()){
-							if(!itemGot)
+							if(!itemGot && !hasItem)
 								cga.SayWords('2', 0, 3, 1);
 							
 							return true;
@@ -144,7 +146,7 @@ var cga = require('./cgaapi')(function(){
 							setTimeout(()=>{
 								cga.SayWords('1', 0, 3, 1);
 								cb2(true);
-							}, 5000);
+							}, 3000);
 						});
 					});
 				}
@@ -226,38 +228,40 @@ var cga = require('./cgaapi')(function(){
 				
 				var list = [
 				[135, 334],
-				[136, 334, null, null, null, true],
-				[135, 334, null, null, null, true],
-				[136, 334, null, null, null, true],
-				[135, 334, null, null, null, true],
 				];
 
-				if(name == '医院2楼')
+				if(name == '医院2楼'){
 					list.unshift(
 					[15, 11, '医院'],
 					[1, 9, '杰诺瓦镇'],
 					[24, 40, '莎莲娜'],
 					);
-
+				}
+				
 				cga.walkList(list, ()=>{
-					cga.TurnTo(135, 333);
-					cga.AsyncWaitNPCDialog(()=>{
-						cga.ClickNPCDialog(1, 0);
-						setTimeout(wait, 1500);
+					cga.walkTeammateToPosition([
+					[135, 334],
+					[136, 334],					
+					], ()=>{
+						cga.turnTo(135, 333);
+						cga.AsyncWaitNPCDialog(()=>{
+							cga.ClickNPCDialog(1, 0);
+							cga.AsyncWaitMovement({map:'入口', delay:1000, timeout:5000}, wait);
+						});
 					});
 				});
 			}
 			
 			var go2 = ()=>{
 				var retry = ()=>{
-					cga.TurnTo(135, 333);
+					cga.turnTo(135, 333);
 					cga.AsyncWaitNPCDialog((err)=>{
 						if(err){
 							cga.walkList([ [136, 334], [135, 334] ], retry);
 							return;
 						}
 						cga.ClickNPCDialog(1, 0);
-						setTimeout(wait2, 1500);
+						cga.AsyncWaitMovement({map:'入口', delay:1000, timeout:5000}, wait2);
 					});
 				}
 				cga.waitForLocation({mapname : '莎莲娜', pos : [135, 333], walkto : [135, 334], leaveteam : true}, retry);
@@ -328,20 +332,21 @@ var cga = require('./cgaapi')(function(){
 			
 			//通过神官
 			var goFuckBOSS = ()=>{
+				playerThinkRunning = false;
 				cga.walkList(
-				(cga.isTeamLeader) ?
+				cga.isTeamLeader ? 
 				[
 				[26, 68],
 				[25, 68],
 				[26, 68],
 				[25, 68],
-				[26, 68],
+				[26, 68], 
 				]
-				: 
+				:
 				[
 				[26, 68],
 				], ()=>{
-					cga.TurnTo(26, 66);
+					cga.turnTo(26, 66);
 					cga.AsyncWaitNPCDialog((err, dlg)=>{
 						if(err || !dlg.message){
 							cga.walkList([ [25, 68], [26, 68] ], retry);
@@ -373,7 +378,7 @@ var cga = require('./cgaapi')(function(){
 				
 						playerThinkRunning = true;
 						
-						cga.waitTeammateSayNextStage2(teammates, (r)=>{
+						cga.waitTeammateSayNextStage(teammates, (r)=>{
 							if(r === true){
 								itemGot = true;
 								setTimeout(()=>{
@@ -444,7 +449,7 @@ var cga = require('./cgaapi')(function(){
 					if(player.index == 0 && msg.indexOf('鳞片请说')  >= 0){
 						if(cga.getItemCount('地龙的麟片') > 0){
 							cga.SayWords('1', 0, 3, 1);
-						} else {
+						} else if(msg.indexOf('静谧之间') >= 0){
 							cga.SayWords('2', 0, 3, 1);
 							playerThinkRunning = true;
 						}
@@ -467,7 +472,7 @@ var cga = require('./cgaapi')(function(){
 				cga.walkList([
 				[26, 26],
 				], ()=>{
-					cga.TurnTo(26, 24);
+					cga.turnTo(26, 24);
 				});
 			}
 			
@@ -490,7 +495,7 @@ var cga = require('./cgaapi')(function(){
 				[15, 15],
 				[14, 15],
 				], ()=>{
-					cga.TurnTo(14, 14);		
+					cga.turnTo(14, 14);		
 					cga.AsyncWaitNPCDialog(()=>{
 						cga.ClickNPCDialog(32, 0);
 						cga.AsyncWaitNPCDialog(()=>{
@@ -501,7 +506,7 @@ var cga = require('./cgaapi')(function(){
 				});
 			} else {
 				var retry = ()=>{
-					cga.TurnTo(14, 14);		
+					cga.turnTo(14, 14);		
 					cga.AsyncWaitNPCDialog((err)=>{
 						if(err){
 							retry();

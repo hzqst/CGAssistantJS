@@ -1,17 +1,10 @@
-var cga = require('./cgaapi')(function(){
+var Async = require('async');
+var teamMode = require('./../公共模块/组队模式');
 
-	var playerinfo = cga.GetPlayerInfo();
-	
-	var teammates = [];
-	
-	var teamplayers = cga.getTeamPlayers();
+var cga = global.cga;
+var configTable = global.configTable;
 
-	for(var i in teamplayers)
-		teammates[i] = teamplayers[i].name;
-	
-	cga.isTeamLeader = (teammates[0] == playerinfo.name || teammates.length == 0) ? true : false;
-	
-	var task = cga.task.Task('探险专家(贝爷)', [
+var task = cga.task.Task('探险专家(贝爷)', [
 	{//0
 		intro: '1.前往法兰城里谢里雅堡与贝尔（53.22）对话，获得【证明信】。',
 		workFunc: function(cb2){
@@ -205,25 +198,20 @@ var cga = require('./cgaapi')(function(){
 				});
 			}
 			
+			//重新组队
 			var wait = ()=>{
 
-				if(cga.isTeamLeader){
-					cga.WalkTo(23, 23);
-					cga.waitTeammates(teammates, (r)=>{
-						if(r){
-							fuckBeiYe();
-							return;
-						}
-						setTimeout(wait, 1000);
+				if(cga.isTeamLeader)
+				{
+					cga.walkList([
+					[23, 23]
+					], ()=>{
+						teamMode.wait_for_teammates(fuckBeiYe);
 					});
-				} else {
-					cga.addTeammate(teammates[0], (r)=>{
-						if(r){
-							fuckBeiYe();
-							return;
-						}
-						setTimeout(wait, 1000);
-					});
+				}
+				else
+				{
+					teamMode.wait_for_teammates(fuckBeiYe);
 				}
 			}
 			
@@ -267,7 +255,44 @@ var cga = require('./cgaapi')(function(){
 			return false;
 		},
 	]
-	);
+);
+
+var loop = ()=>{	
+	callSubPluginsAsync('prepare', ()=>{
+		task.doTask(loop);
+	});
+}
+
+var thisobj = {
+	getDangerLevel : ()=>{
+		var map = cga.GetMapName();
+
+		if(map.indexOf('隐秘山道') >= 0)
+			return 2;
+		
+		return 0;
+	},
+	translate : (pair)=>{
 	
-	task.doTask();
-});
+		if(teamMode.translate(pair))
+			return true;
+		
+		return false;
+	},
+	loadconfig : (obj)=>{
+
+		if(!teamMode.loadconfig(obj))
+			return false;
+
+		return true;
+	},
+	inputcb : (cb)=>{
+		Async.series([teamMode.inputcb], cb);
+	},
+	execute : ()=>{
+		callSubPlugins('init');
+		loop();
+	},
+}
+
+module.exports = thisobj;

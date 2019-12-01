@@ -1,117 +1,10 @@
 var Async = require('async');
-var supplyMode = require('./../公共模块/里堡回补');
 var teamMode = require('./../公共模块/组队模式');
-var logbackEx = require('./../公共模块/登出防卡住');
 
 var cga = global.cga;
 var configTable = global.configTable;
 
-var interrupt = require('./../公共模块/interrupt');
-
-var moveThinkInterrupt = new interrupt();
-var playerThinkInterrupt = new interrupt();
-var playerThinkRunning = false;
-
 var saveBankArray = ['不存银行', '存银行'];
-
-var moveThink = (arg)=>{
-
-	if(moveThinkInterrupt.hasInterrupt())
-		return false;
-
-	if(arg == 'freqMoveMapChanged')
-	{
-		playerThinkInterrupt.requestInterrupt();
-		return false;
-	}
-
-	return true;
-}
-
-var playerThink = ()=>{
-
-	if(!cga.isInNormalState())
-		return true;
-	
-	var playerinfo = cga.GetPlayerInfo();
-	var ctx = {
-		playerinfo : playerinfo,
-		petinfo : playerinfo.petid >= 0 ? cga.GetPetInfo(playerinfo.petid) : null,
-		teamplayers : cga.getTeamPlayers(),
-		result : null,
-		dangerlevel : thisobj.getDangerLevel(),
-	}
-
-	teamMode.think(ctx);
-
-	global.callSubPlugins('think', ctx);
-
-	if(cga.isTeamLeaderEx())
-	{
-		var interruptFromMoveThink = false;
-		
-		if(ctx.result == null && playerThinkInterrupt.hasInterrupt())
-		{
-			ctx.result = 'supply';
-			interruptFromMoveThink = true;
-		}
-
-		if(ctx.result == 'supply' && supplyMode.isLogBack())
-			ctx.result = 'logback';
-		
-		if( ctx.result == 'supply' )
-		{
-			if(interruptFromMoveThink)
-			{
-				supplyMode.func(loop);
-				return false;
-			}
-			else
-			{
-				moveThinkInterrupt.requestInterrupt(()=>{
-					if(cga.isInNormalState()){
-						supplyMode.func(loop);
-						return true;
-					}
-					return false;
-				});
-				return false;
-			}
-		}
-		else if( ctx.result == 'logback' )
-		{
-			if(interruptFromMoveThink)
-			{
-				logbackEx.func(loop);
-				return false;
-			}
-			else
-			{
-				moveThinkInterrupt.requestInterrupt(()=>{
-					if(cga.isInNormalState()){
-						logbackEx.func(loop);
-						return true;
-					}
-					return false;
-				});
-				return false;
-			}
-		}
-	}
-
-	return true;
-}
-
-var playerThinkTimer = ()=>{
-	if(playerThinkRunning){
-		if(!playerThink()){
-			console.log('playerThink off');
-			playerThinkRunning = false;
-		}
-	}
-	
-	setTimeout(playerThinkTimer, 1500);
-}
 
 var task = cga.task.Task('十周年戒指', [
 {//0
@@ -145,9 +38,9 @@ var task = cga.task.Task('十周年戒指', [
 		//进入追忆之路
 		cga.travel.falan.toStone('C', ()=>{
 			cga.walkList([
-			[30, 81, null]
+			[30, 81]
 			], ()=>{
-				cga.TurnTo(30, 79);
+				cga.turnTo(30, 80);
 				cga.AsyncWaitNPCDialog(()=>{
 					cga.ClickNPCDialog(32, 0);
 					cga.AsyncWaitNPCDialog(()=>{
@@ -155,7 +48,23 @@ var task = cga.task.Task('十周年戒指', [
 						cga.AsyncWaitNPCDialog(()=>{
 							cga.ClickNPCDialog(1, 0);
 							cga.AsyncWaitMovement({map:'追忆之路', delay:1000, timeout:5000}, ()=>{
-								cb2(true);
+								
+								if(cga.isTeamLeader)
+								{
+									cga.walkList([
+									[15, 125]
+									], ()=>{
+										teamMode.wait_for_teammates(()=>{
+											cb2(true);
+										});
+									});
+								}
+								else
+								{
+									teamMode.wait_for_teammates(()=>{
+										cb2(true);
+									});
+								}
 							});
 						});
 					});
@@ -261,7 +170,7 @@ var task = cga.task.Task('十周年戒指', [
 			});
 		}
 					
-		if(cga.isTeamLeaderEx()){
+		if(cga.isTeamLeader){
 			go();
 		} else {
 			wait();
@@ -280,71 +189,8 @@ var task = cga.task.Task('十周年戒指', [
 );
 
 var loop = ()=>{
-
-	var map = cga.GetMapName();
-	var mapindex = cga.GetMapIndex().index3;
-	var xy = cga.GetMapXY();
-	if(cga.isTeamLeaderEx()){
-		if(map == '里谢里雅堡')
-		{
-			if(!teamMode.is_enough_teammates())
-			{
-				//人没满
-				if(cga.isTeamLeader == true)
-				{
-					//队长等待队员
-					cga.walkList([
-					[30, 82]
-					], ()=>{
-						teamMode.wait_for_teammates(loop);
-					});
-					return;
-				}
-				else
-				{
-					//队员等待加队长
-					cga.walkList([
-					[30, 83]
-					], ()=>{
-						teamMode.wait_for_teammates(loop);
-					});
-					return;
-				}
-			}
-			else
-			{
-				//队长：人满了，开始遇敌
-				console.log('playerThink on');
-				playerThinkRunning = true;
-				task.doTask();
-				return;
-			}
-		}
-	} else {
-		console.log('playerThink on');
-		playerThinkRunning = true;
-		return;
-	}
-
-	if(cga.needSupplyInitial() && (map == '里谢里雅堡' || map == '艾尔莎岛'))
-	{
-		if(supplyMode.isInitialSupply())
-		{
-			supplyMode.func(loop);
-			return;
-		}
-		else
-		{
-			cga.travel.falan.toCastleHospital(()=>{
-				setTimeout(loop, 3000);
-			});
-			return;
-		}
-		return;
-	}
-	
 	callSubPluginsAsync('prepare', ()=>{
-		cga.travel.falan.toStone('C', loop);
+		task.doTask(loop);
 	});
 }
 
@@ -366,18 +212,12 @@ var thisobj = {
 			return true;
 		}
 		
-		if(supplyMode.translate(pair))
-			return true;
-		
 		if(teamMode.translate(pair))
 			return true;
 		
 		return false;
 	},
 	loadconfig : (obj)=>{
-
-		if(!supplyMode.loadconfig(obj))
-			return false;
 
 		if(!teamMode.loadconfig(obj))
 			return false;
@@ -398,7 +238,7 @@ var thisobj = {
 		return true;
 	},
 	inputcb : (cb)=>{
-		Async.series([supplyMode.inputcb, teamMode.inputcb, (cb2)=>{
+		Async.series([teamMode.inputcb, (cb2)=>{
 			
 			var sayString = '【十年戒指】请选择是否存银行 (0否，1是):';
 
@@ -421,10 +261,7 @@ var thisobj = {
 		}], cb);
 	},
 	execute : ()=>{
-		playerThinkTimer();
-		cga.registerMoveThink(moveThink);
 		callSubPlugins('init');
-		logbackEx.init();
 		loop();
 	},
 }

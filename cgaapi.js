@@ -127,7 +127,59 @@ module.exports = function(callback){
 		info.name = cga.GetMapName();
 		return info;
 	};
-		
+	
+	cga.getOrientation = (x, y) => {
+		const p = cga.GetMapXY();
+		const xy = Math.max(-1, Math.min(1, x - p.x)).toString() + Math.max(-1, Math.min(1, y - p.y)).toString();
+		switch (xy) {
+			case '10':
+				return 0;
+			case '11':
+				return 1;
+			case '01':
+				return 2;
+			case '-11':
+				return 3;
+			case '-10':
+				return 4;
+			case '-1-1':
+				return 5;
+			case '0-1':
+				return 6;
+			case '1-1':
+				return 7;
+			default:
+		}
+		return -1;
+	}
+	
+	cga.turnOrientation = (orientation) => {
+		const current = cga.GetMapXY();
+		switch (orientation) {
+			case 0:
+				cga.TurnTo(current.x + 2, current.y); break;
+			case 1:
+				cga.TurnTo(current.x + 2, current.y + 2); break;
+			case 2:
+				cga.TurnTo(current.x, current.y + 2); break;
+			case 3:
+				cga.TurnTo(current.x - 2, current.y + 2); break;
+			case 4:
+				cga.TurnTo(current.x - 2, current.y); break;
+			case 5:
+				cga.TurnTo(current.x - 2, current.y - 2); break;
+			case 6:
+				cga.TurnTo(current.x, current.y - 2); break;
+			case 7:
+				cga.TurnTo(current.x + 2, current.y - 2); break;
+			default:
+		}
+	}
+	
+	cga.turnTo = (x, y)=>{
+		cga.turnOrientation(cga.getOrientation(x, y));
+	}
+	
 	//判断是否在战斗状态
 	cga.isInBattle = function(){
 		return (cga.GetWorldStatus() == 10) ? true : false;
@@ -3085,6 +3137,72 @@ module.exports = function(callback){
 			
 			return true;
 		});
+	}
+	
+	cga.walkTeammateToPosition = (posArray, cb) =>{
+		
+		var index = 0;
+		
+		var walk = ()=>{
+			cga.AsyncWalkTo(posArray[index][0], posArray[index][1], null, null, null, checkTeammateAtPosition);
+		}
+		
+		var checkTeammateAtPosition = (err)=>{
+			
+			if(!cga.isInNormalState())
+			{
+				setTimeout(walk, 500);
+				return;
+			}
+			
+			var teamplayers = cga.getTeamPlayers();
+			var someoneNotInPosArray = false;
+			for(var i in teamplayers) {
+				var isInPosArray = false;
+				for(var j in posArray) {
+					if(teamplayers[i].xpos == posArray[j][0] && teamplayers[i].ypos == posArray[j][1]) {
+						isInPosArray = true;
+						break;
+					}
+				}
+				
+				if(!isInPosArray){
+					someoneNotInPosArray = true;
+					break;
+				}
+			}
+			
+			if(someoneNotInPosArray){
+				index ++;
+				if(index > posArray.length - 1)
+					index = 0;
+				walk();
+				return;
+			}
+			
+			cga.SayWords('防遇敌卡住', 0, 3, 1);
+			cga.waitForChatInput((msg, val)=>{
+				if(msg == '防遇敌卡住')
+				{
+					//restart the walk procedure
+					if(!cga.isInNormalState())
+					{
+						setTimeout(walk, 500);
+					}
+					else
+					{
+						//or we are at position
+						cb(null);
+					}
+					return false;
+				}
+				
+				return true;
+			});
+			
+		}
+		
+		walk();
 	}
 	
 	cga.waitForChatInput = (cb)=>{
