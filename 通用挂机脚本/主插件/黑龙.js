@@ -124,7 +124,7 @@ var playerThink = ()=>{
 				return false;
 			}
 		}
-		else if( ctx.result == 'logback' )
+		else if( ctx.result == 'logback' || ctx.result == 'logback_forced' )
 		{
 			if(interruptFromMoveThink)
 			{
@@ -142,6 +142,12 @@ var playerThink = ()=>{
 				});
 				return false;
 			}
+		}
+	} else {
+		if( ctx.result == 'logback_forced' )
+		{
+			logbackEx.func(loop);
+			return false;
 		}
 	}
 

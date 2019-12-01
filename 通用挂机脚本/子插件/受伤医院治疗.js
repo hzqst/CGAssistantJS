@@ -30,7 +30,7 @@ module.exports = {
 	think : (ctx)=>{
 		if(cga.needDoctor())
 		{
-			ctx.result = 'logout';
+			ctx.result = 'logout_forced';
 			ctx.reason = '受伤医院治疗';
 		}
 	},

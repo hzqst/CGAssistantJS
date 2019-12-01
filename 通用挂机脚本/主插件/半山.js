@@ -82,7 +82,7 @@ var playerThink = ()=>{
 		if(ctx.result == 'supply' && supplyMode.isLogBack())
 			ctx.result = 'logback';
 		
-		if( ctx.result == 'supply' || ctx.result == 'logback' )
+		if( ctx.result == 'supply' || ctx.result == 'logback' || ctx.result == 'logback_forced' )
 		{
 			if(interruptFromMoveThink)
 			{
@@ -100,6 +100,12 @@ var playerThink = ()=>{
 				});
 				return false;
 			}
+		}
+	} else {
+		if( ctx.result == 'logback_forced' )
+		{
+			logbackEx.func(loop);
+			return false;
 		}
 	}
 
