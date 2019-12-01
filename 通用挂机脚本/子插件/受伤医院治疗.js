@@ -31,7 +31,7 @@ module.exports = {
 		if(cga.needDoctor())
 		{
 			ctx.result = 'logout';
-			ctx.reason = '受伤回补';
+			ctx.reason = '受伤医院治疗';
 		}
 	},
 	loadconfig : (obj, cb)=>{

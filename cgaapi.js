@@ -2967,7 +2967,7 @@ module.exports = function(callback){
 						strip = strip.replace(/\\n/g,"|");
 						var reg = new RegExp(/([^|\n]+)/g)
 						var match = strip.match(reg);
-						console.log(match);
+						//console.log(match);
 						for(var j = 0; j < match.length; ++j){
 							if(match[j] == name){
 								console.log(j);
@@ -3020,7 +3020,7 @@ module.exports = function(callback){
 							console.log(strip);
 							var reg = new RegExp(/([^|\n]+)/g)
 							var match = strip.match(reg);
-							console.log(match);
+							//console.log(match);
 							for(var j = 0; j < match.length; ++j){
 								if(match[j] == teamplayers[i].name){
 									cga.ClickNPCDialog(0, j / 2);
@@ -3439,15 +3439,11 @@ module.exports = function(callback){
 		return objs;
 	}
 
-	cga.findPlayerUnit = (name)=>{
-		var units = cga.GetMapUnits();
-
-		for(var i = 0; i < units.length; ++i){
-			if(units[i].type == 8 && units[i].unit_name == name){
-				return units[i];
-			}
-		}
-		return null;
+	cga.findPlayerUnit = (filter)=>{
+		var found = cga.GetMapUnits().find((u)=>{
+			return u.type == 8 && ((typeof filter == 'function' && filter(u)) || (typeof filter == 'string' && filter == u.unit_name)) ;
+		});
+		return found != undefined ? found : null;
 	}
 		
 	cga.downloadMapEx = (xfrom, yfrom, xsize, ysize, cb)=>{
@@ -3995,19 +3991,16 @@ module.exports = function(callback){
 		return false;
 	}
 
-	cga.needDoctor = (playeronly = false)=>{
+	cga.needDoctor = ()=>{
 		var playerinfo = cga.GetPlayerInfo();
 		var pets = cga.GetPetsInfo();
 		
 		if( playerinfo.health > 0)
 			return true;
 
-		if(!playeronly)
-		{
-			for(var i = 0;i < pets.length; ++i){
-				if(pets[i].health > 0)
-					return true;
-			}
+		for(var i = 0;i < pets.length; ++i){
+			if(pets[i].health > 0)
+				return true;
 		}
 		
 		return false;

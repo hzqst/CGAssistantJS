@@ -40,7 +40,7 @@ module.exports = {
 		if(cga.GetPlayerInfo().souls != 0)
 		{
 			ctx.result = 'logout';
-			ctx.reason = '掉魂回补';
+			ctx.reason = '掉魂自动招魂';
 		}
 	},
 	loadconfig : (obj, cb)=>{

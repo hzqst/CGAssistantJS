@@ -48,7 +48,7 @@ var task = cga.task.Task('十周年戒指', [
 						cga.AsyncWaitNPCDialog(()=>{
 							cga.ClickNPCDialog(1, 0);
 							cga.AsyncWaitMovement({map:'追忆之路', delay:1000, timeout:5000}, ()=>{
-								
+
 								if(cga.isTeamLeader)
 								{
 									cga.walkList([

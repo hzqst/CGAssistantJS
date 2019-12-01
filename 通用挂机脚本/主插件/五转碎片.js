@@ -212,7 +212,9 @@ var getMazeEntrance = (cb)=>{
 		console.log('地图已下载完成')
 		
 		var objs = cga.getMapObjects();
-		console.log(objs)
+		console.log(objs.filter((o)=>{
+			return o.cell == 3;
+		}))
 		var entrance = objs.find((obj)=>{
 			return (obj.cell == 3 && 
 			obj.mapx >= thisobj.battleArea.range[0] &&
