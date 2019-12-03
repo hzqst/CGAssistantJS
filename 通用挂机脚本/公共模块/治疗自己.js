@@ -13,7 +13,9 @@ var thisobj = {
 		var playerinfo = cga.GetPlayerInfo();
 		
 		if (playerinfo.mp < requiremp){
-			cb(true);
+			cga.travel.falan.toCastleHospital(()=>{
+				setTimeout(thisobj.func, 3000, cb);
+			});
 			return;
 		}
 
