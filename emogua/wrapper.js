@@ -521,10 +521,11 @@ module.exports = new Promise(resolve => {
 	};
 	const excludedMaps = [27001,61001,43600,43000,2400,11036,11037,15596,11032,15001,15006,5008];
 	const isMapDownloaded = (walls, mapIndex = cga.GetMapIndex()) => {
-		if (excludedMaps.indexOf(mapIndex.index3) > -1) return true;
+		if (mapIndex.index1 === 0 && excludedMaps.indexOf(mapIndex.index3) > -1) return true;
 		const downloadedFlag = mapIndex.index1 === 1 ? 0 : 1;
 		return walls.matrix[0][0] == downloadedFlag && walls.matrix[walls.y_size-1][0] == downloadedFlag && walls.matrix[walls.y_size-1][walls.x_size-1] == downloadedFlag && walls.matrix[0][walls.x_size-1] == downloadedFlag;
 	};
+	cga.emogua.isMapDownloaded = (walls, mapIndex = cga.GetMapIndex()) => isMapDownloaded(walls, mapIndex);
 	cga.emogua.downloadMap = () => {
 		const walls = cga.buildMapCollisionMatrix();
 		const mapIndex = cga.GetMapIndex();

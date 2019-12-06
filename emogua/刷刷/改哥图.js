@@ -15,7 +15,6 @@ require('../wrapper').then(cga => {
 	const isCaptain = player.name == captain;
 
 	let npcPosition;
-	let firtIndex;
 	cga.emogua.autoBattle(cga.emogua.AutoBattlePreset.getEscapeSets());
 	cga.emogua.prepare().then(
 		() => cga.emogua.recursion(
@@ -47,25 +46,25 @@ require('../wrapper').then(cga => {
 						])
 					).then(
 						() => cga.emogua.recursion(() => {
-							const entry = cga.getMapObjects().find(m => m.cell == 3 && m.x > 529 && m.x < 549 && m.y > 26 && m.y < 48);
+							const entry = cga.getMapObjects().find(m => m.cell == 3 && m.x > 529 && m.x < 560 && m.y > 20 && m.y < 43);
 							if (entry) {
 								const around = cga.emogua.getMovablePositionAround(entry);
 								return cga.emogua.autoWalk([around.x, around.y], undefined, 0, false).then(
 									() => cga.emogua.delay(5000)
 								).then(
 									() => cga.emogua.autoWalk([entry.x, entry.y, '*'])
-								).then(() => {
-									const mapIndexes = cga.GetMapIndex();
-									if (firtIndex != mapIndexes.index3) {
-										npcPosition = undefined;
-										firtIndex = mapIndexes.index3;
-									}
-									return Promise.reject()
-								});
+								);
 							}
+							console.log('等待迷宫入口');
 							return cga.emogua.delay(10000);
 						})
 					).then(() => {
+						if (cga.GetMapName() == '芙蕾雅') {
+							return Promise.reject();
+						}
+						if (!cga.emogua.isMapDownloaded()) {
+							npcPosition = null;
+						}
 						if (npcPosition) {
 							return cga.emogua.walkRandomMazeUntil(() => cga.GetMapName() == npcPosition.mapName).then(() => {
 								const up = cga.emogua.getFarthestEntry(npcPosition.start);
