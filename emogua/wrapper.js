@@ -708,7 +708,7 @@ module.exports = new Promise(resolve => {
 	cga.emogua.searchMap = (targetFinder, recursion = true) => {
 		const start = cga.GetMapXY();
 		const getTarget = () => {
-			const target = targetFinder(cga.GetMapUnits().filter(u => u.model_id > 0));
+			const target = targetFinder(cga.GetMapUnits().filter(u => (u.flags & 4096) && u.model_id > 0));
 			if (typeof target == 'object') {
 				target.start = start;
 				const walkTo = cga.emogua.getMovablePositionAround({x: target.xpos,y: target.ypos});

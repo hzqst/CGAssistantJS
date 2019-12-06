@@ -47,13 +47,15 @@ require('../wrapper').then(cga => {
 					).then(() => {
 						const points = [[551,26],[538,34]];
 						return cga.emogua.recursion(() => {
-							const entry = cga.getMapObjects().find(m => m.cell == 3 && m.x > 529 && m.x < 560 && m.y > 20 && m.y < 43);
+							const entry = cga.GetMapUnits().find(u => (u.flags & 4096) && u.unit_name == ' ');
 							if (entry) {
-								const around = cga.emogua.getMovablePositionAround(entry);
+								const around = cga.emogua.getMovablePositionAround({x: entry.xpos, y: entry.ypos});
 								return cga.emogua.autoWalk([around.x, around.y], undefined, 0, false).then(
-									() => cga.emogua.delay(5000)
+									() => cga.emogua.delay(2000)
 								).then(
-									() => cga.emogua.autoWalk([entry.x, entry.y, '*'])
+									() => cga.emogua.autoWalk([entry.xpos, entry.ypos, '*'])
+								).then(
+									() => Promise.reject()
 								);
 							}
 							const current = cga.GetMapXY();
@@ -128,7 +130,7 @@ require('../wrapper').then(cga => {
 				);
 				return cga.emogua.delay(5000);
 			}).catch(r => {
-				console.log('随即迷宫可能刷新,回亚留特重新开始');
+				console.log('随即迷宫可能刷新,回亚留特重新开始', r);
 				if (cga.GetMapName() == '芙蕾雅') {
 					return cga.emogua.autoWalk([588,51,'*']);
 				}
