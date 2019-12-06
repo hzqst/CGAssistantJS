@@ -44,8 +44,9 @@ require('../wrapper').then(cga => {
 						() => cga.emogua.autoWalkList([
 							[2,9,'*'],[58,31,'*'],[551,26]
 						])
-					).then(
-						() => cga.emogua.recursion(() => {
+					).then(() => {
+						const points = [[551,26],[538,34]];
+						return cga.emogua.recursion(() => {
 							const entry = cga.getMapObjects().find(m => m.cell == 3 && m.x > 529 && m.x < 560 && m.y > 20 && m.y < 43);
 							if (entry) {
 								const around = cga.emogua.getMovablePositionAround(entry);
@@ -55,10 +56,15 @@ require('../wrapper').then(cga => {
 									() => cga.emogua.autoWalk([entry.x, entry.y, '*'])
 								);
 							}
-							console.log('等待迷宫入口');
-							return cga.emogua.delay(10000);
-						})
-					).then(() => {
+							const current = cga.GetMapXY();
+							let index = points.findIndex(p => current.x == p[0] && current.y == p[1]);
+							if (!index) index = 1;
+							else if (index >= points.length - 1) index = 0;
+							else index = index + 1;
+							console.log('尝试下一个地点找入口', points[index]);
+							return cga.emogua.autoWalk(points[index]);
+						});
+					}).then(() => {
 						if (cga.GetMapName() == '芙蕾雅') {
 							return Promise.reject();
 						}
