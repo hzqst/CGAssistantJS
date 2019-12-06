@@ -525,7 +525,7 @@ module.exports = new Promise(resolve => {
 		const downloadedFlag = mapIndex.index1 === 1 ? 0 : 1;
 		return walls.matrix[0][0] == downloadedFlag && walls.matrix[walls.y_size-1][0] == downloadedFlag && walls.matrix[walls.y_size-1][walls.x_size-1] == downloadedFlag && walls.matrix[0][walls.x_size-1] == downloadedFlag;
 	};
-	cga.emogua.isMapDownloaded = (walls, mapIndex = cga.GetMapIndex()) => isMapDownloaded(walls, mapIndex);
+	cga.emogua.isMapDownloaded = (walls = cga.buildMapCollisionMatrix(), mapIndex = cga.GetMapIndex()) => isMapDownloaded(walls, mapIndex);
 	cga.emogua.downloadMap = () => {
 		const walls = cga.buildMapCollisionMatrix();
 		const mapIndex = cga.GetMapIndex();
