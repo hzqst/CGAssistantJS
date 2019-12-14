@@ -23,7 +23,7 @@ module.exports = {
 			}
 			
 			var doctor = cga.findPlayerUnit((u)=>{
-				return ['见习医生','医生','资深医生','御医','超级医生','神医'].find((n)=>{
+				return ['实习医师','医师','资深医师','御医','超级医生','神医'].find((n)=>{
 					return n == u.title_name;
 				}) == undefined ? false : true;
 			});

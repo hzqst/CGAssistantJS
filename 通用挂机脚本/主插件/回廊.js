@@ -125,6 +125,7 @@ var loop = ()=>{
 			}
 			else
 			{
+				
 				console.log('playerThink on');
 				playerThinkRunning = true;
 				//队长：人满了，开始遇敌

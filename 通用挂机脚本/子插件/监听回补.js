@@ -3,6 +3,13 @@ var configTable = global.configTable;
 var callsupply = false;
 
 module.exports = {
+	prepare : (cb)=>{
+		if(callsupply){
+			console.log('已经回补，强制取消回补状态')
+			callsupply = false;
+		}
+		cb(null);
+	},
 	init : ()=>{
 		cga.waitTeammateSay((player, msg)=>{
 

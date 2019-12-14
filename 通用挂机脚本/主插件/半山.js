@@ -124,7 +124,7 @@ var playerThinkTimer = ()=>{
 }
 
 var loop = ()=>{
-		
+	
 	var map = cga.GetMapName();
 	var mapindex = cga.GetMapIndex().index3;
 	var isleader = cga.isTeamLeaderEx();

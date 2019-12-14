@@ -25,6 +25,11 @@ var gatherArray = [
 	path : './../公共模块/采花',
 },
 {
+	name : '狩猎',
+	skill : '狩猎',
+	path : './../公共模块/狩猎',
+},
+{
 	name : '双百新城鹿皮(狩猎)',
 	skill : '狩猎',
 	path : './../公共模块/双百新城鹿皮',
@@ -239,7 +244,7 @@ var thisobj = {
 		
 		if(pair.field == 'gatherObject'){
 			pair.field = '采集类型';
-			pair.value = gatherArray[pair.value].name;
+			pair.value = pair.value;
 			pair.translated = true;
 			return true;
 		}
@@ -258,8 +263,8 @@ var thisobj = {
 	loadconfig : (obj)=>{
 		
 		for(var i in gatherArray){
-			if(i == obj.gatherObject){
-				configTable.gatherObject = i;
+			if(gatherArray[i].name == obj.gatherObject){
+				configTable.gatherObject = gatherArray[i].name;
 				gatherObject = gatherArray[i];
 				break;
 			}
@@ -296,7 +301,7 @@ var thisobj = {
 		cga.sayLongWords(sayString, 0, 3, 1);
 		cga.waitForChatInput((msg, index)=>{
 			if(index !== null && index >= 1 && gatherArray[index - 1]){
-				configTable.gatherObject = index - 1;
+				configTable.gatherObject = gatherArray[index - 1].name;
 				gatherObject = gatherArray[index - 1];
 				
 				var sayString2 = '当前已选择:[' + gatherObject.name + ']。';
