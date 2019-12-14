@@ -98,7 +98,7 @@ var cga = require('./cgaapi')(function(){
 			
 			if(!loadConfigForPlugin(obj))
 			{
-				throw new Error('插件配置加载失败。可能由于插件配置的格式发生变化，请重新设置配置！');
+				throw new Error('插件配置加载失败。可能由于插件配置的格式发生变化，建议手动删除配置文件后重新设置配置！');
 			}
 			
 			return true;
