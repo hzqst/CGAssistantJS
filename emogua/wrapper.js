@@ -383,7 +383,7 @@ module.exports = new Promise(resolve => {
 		else cga.LogBack();
 		return cga.emogua.delay(2000).then(() => cga.emogua.waitAfterBattle());
 	}).then(() => {
-		if (['法兰城','艾尔莎岛'].indexOf(cga.GetMapName()) < 0) {
+		if (['法兰城','艾尔莎岛','哥拉尔镇'].indexOf(cga.GetMapName()) < 0) {
 			return cga.emogua.logBack(times + 1);
 		}
 	}).catch(e => {
@@ -521,10 +521,11 @@ module.exports = new Promise(resolve => {
 	};
 	const excludedMaps = [27001,61001,43600,43000,2400,11036,11037,15596,11032,15001,15006,5008];
 	const isMapDownloaded = (walls, mapIndex = cga.GetMapIndex()) => {
-		if (excludedMaps.indexOf(mapIndex.index3) > -1) return true;
+		if (mapIndex.index1 === 0 && excludedMaps.indexOf(mapIndex.index3) > -1) return true;
 		const downloadedFlag = mapIndex.index1 === 1 ? 0 : 1;
 		return walls.matrix[0][0] == downloadedFlag && walls.matrix[walls.y_size-1][0] == downloadedFlag && walls.matrix[walls.y_size-1][walls.x_size-1] == downloadedFlag && walls.matrix[0][walls.x_size-1] == downloadedFlag;
 	};
+	cga.emogua.isMapDownloaded = (walls = cga.buildMapCollisionMatrix(), mapIndex = cga.GetMapIndex()) => isMapDownloaded(walls, mapIndex);
 	cga.emogua.downloadMap = () => {
 		const walls = cga.buildMapCollisionMatrix();
 		const mapIndex = cga.GetMapIndex();
@@ -707,7 +708,7 @@ module.exports = new Promise(resolve => {
 	cga.emogua.searchMap = (targetFinder, recursion = true) => {
 		const start = cga.GetMapXY();
 		const getTarget = () => {
-			const target = targetFinder(cga.GetMapUnits().filter(u => u.model_id > 0));
+			const target = targetFinder(cga.GetMapUnits().filter(u => (u.flags & 4096) && u.model_id > 0));
 			if (typeof target == 'object') {
 				target.start = start;
 				const walkTo = cga.emogua.getMovablePositionAround({x: target.xpos,y: target.ypos});
@@ -2316,11 +2317,14 @@ module.exports = new Promise(resolve => {
 				return false;
 			};
 			if (repairFlag > 0 && cga.GetItemsInfo().findIndex(needRepairChecker) >= 0 && cga.getInventoryItems().length < 20) {
-				return cga.emogua.goto(n => n.falan.mbank).then(
-					() => cga.emogua.autoWalk([82,8])
-				).then(
-					() => cga.emogua.turnOrientation(2)
-				).then(() => cga.emogua.recursion(() => {
+				return Promise.resolve().then(() => {
+					// cga.emogua.goto(n => n.falan.mbank).then(
+					// 	() => cga.emogua.autoWalk([82,8])
+					// );
+					return cga.emogua.goto(n => n.elsa.x).then(
+						() => cga.emogua.autoWalk([143,110])
+					);
+				}).then(() => cga.emogua.recursion(() => {
 					let item = cga.getInventoryItems().find(needRepairChecker);
 					if (item) {
 						let words;

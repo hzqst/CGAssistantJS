@@ -15,7 +15,6 @@ require('../wrapper').then(cga => {
 	const isCaptain = player.name == captain;
 
 	let npcPosition;
-	let firtIndex;
 	cga.emogua.autoBattle(cga.emogua.AutoBattlePreset.getEscapeSets());
 	cga.emogua.prepare().then(
 		() => cga.emogua.recursion(
@@ -45,27 +44,35 @@ require('../wrapper').then(cga => {
 						() => cga.emogua.autoWalkList([
 							[2,9,'*'],[58,31,'*'],[551,26]
 						])
-					).then(
-						() => cga.emogua.recursion(() => {
-							const entry = cga.getMapObjects().find(m => m.cell == 3 && m.x > 529 && m.x < 549 && m.y > 26 && m.y < 48);
-							if (entry) {
-								const around = cga.emogua.getMovablePositionAround(entry);
-								return cga.emogua.autoWalk([around.x, around.y], undefined, 0, false).then(
-									() => cga.emogua.delay(5000)
-								).then(
-									() => cga.emogua.autoWalk([entry.x, entry.y, '*'])
-								).then(() => {
-									const mapIndexes = cga.GetMapIndex();
-									if (firtIndex != mapIndexes.index3) {
-										npcPosition = undefined;
-										firtIndex = mapIndexes.index3;
-									}
-									return Promise.reject()
-								});
-							}
-							return cga.emogua.delay(10000);
-						})
 					).then(() => {
+						const points = [[551,26],[538,34]];
+						return cga.emogua.recursion(() => {
+							const entry = cga.GetMapUnits().find(u => (u.flags & 4096) && u.unit_name == ' ');
+							if (entry) {
+								const around = cga.emogua.getMovablePositionAround({x: entry.xpos, y: entry.ypos});
+								return cga.emogua.autoWalk([around.x, around.y], undefined, 0, false).then(
+									() => cga.emogua.delay(2000)
+								).then(
+									() => cga.emogua.autoWalk([entry.xpos, entry.ypos, '*'])
+								).then(
+									() => Promise.reject()
+								);
+							}
+							const current = cga.GetMapXY();
+							let index = points.findIndex(p => current.x == p[0] && current.y == p[1]);
+							if (!index) index = 1;
+							else if (index >= points.length - 1) index = 0;
+							else index = index + 1;
+							console.log('尝试下一个地点找入口', points[index]);
+							return cga.emogua.autoWalk(points[index]);
+						});
+					}).then(() => {
+						if (cga.GetMapName() == '芙蕾雅') {
+							return Promise.reject();
+						}
+						if (!cga.emogua.isMapDownloaded()) {
+							npcPosition = null;
+						}
 						if (npcPosition) {
 							return cga.emogua.walkRandomMazeUntil(() => cga.GetMapName() == npcPosition.mapName).then(() => {
 								const up = cga.emogua.getFarthestEntry(npcPosition.start);
@@ -123,7 +130,7 @@ require('../wrapper').then(cga => {
 				);
 				return cga.emogua.delay(5000);
 			}).catch(r => {
-				console.log('随即迷宫可能刷新,回亚留特重新开始');
+				console.log('随即迷宫可能刷新,回亚留特重新开始', r);
 				if (cga.GetMapName() == '芙蕾雅') {
 					return cga.emogua.autoWalk([588,51,'*']);
 				}
