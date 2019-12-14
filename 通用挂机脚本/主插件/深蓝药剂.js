@@ -342,7 +342,7 @@ var loop = ()=>{
 			return;
 		}
 
-		console.log('xxxx');
+		//console.log('xxxx');
 
 		//物品栏里的东西超过15个
 		var inventory = cga.getInventoryItems();
@@ -369,13 +369,11 @@ var loop = ()=>{
 		})
 
 		if(lackStuffs !== null){
-			console.log('yyyy');
+			//console.log('yyyy');
 			waitStuffs(lackStuffs.name, craft_target.materials, loop);
 			return;
 		}
-		
-		console.log('zzzz');
-		
+
 		var craft = ()=>{
 
 			//没蓝
@@ -396,7 +394,7 @@ var loop = ()=>{
 				return;
 			}
 
-			console.log('craft');
+			//console.log('craft');
 			
 			cga.craftItemEx({
 				craftitem : craft_target.name,
