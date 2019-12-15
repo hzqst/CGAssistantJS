@@ -1,5 +1,6 @@
 var Async = require('async');
-var sellStore = require('./../公共模块/里堡卖石');
+var supplyCastle = require('./../公共模块/里堡回补');
+var sellCastle = require('./../公共模块/里堡卖石');
 var teamMode = require('./../公共模块/组队模式');
 var logbackEx = require('./../公共模块/登出防卡住');
 
@@ -12,6 +13,30 @@ var interrupt = require('./../公共模块/interrupt');
 var moveThinkInterrupt = new interrupt();
 var playerThinkInterrupt = new interrupt();
 var playerThinkRunning = false;
+
+var supplyArray = [supplyCastle];
+
+var getSupplyObject = (map, mapindex)=>{
+	if(typeof map != 'string')
+		map = cga.GetMapName();
+	if(typeof mapindex != 'number')
+		mapindex = cga.GetMapIndex().index3;
+	return supplyArray.find((s)=>{
+		return s.isAvailable(map, mapindex);
+	})
+}
+
+var sellArray = [sellCamp, sellCastle];
+
+var getSellObject = (map, mapindex)=>{
+	if(typeof map != 'string')
+		map = cga.GetMapName();
+	if(typeof mapindex != 'number')
+		mapindex = cga.GetMapIndex().index3;
+	return sellArray.find((s)=>{
+		return s.isAvailable(map, mapindex);
+	})
+}
 
 var moveThink = (arg)=>{
 
@@ -33,12 +58,19 @@ var playerThink = ()=>{
 		return true;
 	
 	var playerinfo = cga.GetPlayerInfo();
+	var items = cga.GetItemsInfo();
 	var ctx = {
 		playerinfo : playerinfo,
 		petinfo : playerinfo.petid >= 0 ? cga.GetPetInfo(playerinfo.petid) : null,
 		teamplayers : cga.getTeamPlayers(),
-		result : null,
 		dangerlevel : thisobj.getDangerLevel(),
+		inventory : items.filter((item)=>{
+			return item.pos >= 8 && item.pos < 100;
+		}),
+		equipment : items.filter((item)=>{
+			return item.pos >= 0 && item.pos < 8;
+		}),
+		result : null,
 	}
 
 	teamMode.think(ctx);
@@ -140,12 +172,24 @@ var loop = ()=>{
 		return;
 	}
 
+	if(thisobj.sellStore == 1 && cga.getSellStoneItem().length > 0)
+	{
+		var sellObject = getSellObject(map, mapindex);
+		if(sellObject)
+		{
+			sellObject.func(loop);
+			return;
+		}
+	}
+
 	if(cga.needSupplyInitial())
 	{
-		cga.travel.falan.toCastleHospital(()=>{
-			setTimeout(loop, 5000);
-		});
-		return;
+		var supplyObject = getSupplyObject(map, mapindex);
+		if(supplyObject)
+		{
+			supplyObject.func(loop);
+			return;
+		}
 	}
 	
 	callSubPluginsAsync('prepare', ()=>{
@@ -154,13 +198,7 @@ var loop = ()=>{
 			cga.travel.falan.toStone('C', loop);
 			return;
 		}
-		
-		if(cga.getSellStoneItem().length > 0)
-		{
-			sellStore.func(loop);
-			return;
-		}
-		
+				
 		cga.walkList([
 		[52, 72]
 		], ()=>{

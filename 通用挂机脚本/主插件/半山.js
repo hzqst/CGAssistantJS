@@ -1,6 +1,6 @@
 var Async = require('async');
-var supplyMode = require('./../公共模块/里堡回补');
-var sellStore2 = require('./../公共模块/里堡卖石');
+var supplyCastle = require('./../公共模块/里堡回补');
+var sellCastle = require('./../公共模块/里堡卖石');
 var teamMode = require('./../公共模块/组队模式');
 var logbackEx = require('./../公共模块/登出防卡住');
 
@@ -13,6 +13,31 @@ var interrupt = require('./../公共模块/interrupt');
 var moveThinkInterrupt = new interrupt();
 var playerThinkInterrupt = new interrupt();
 var playerThinkRunning = false;
+
+var supplyArray = [ supplyCastle ];
+
+var getSupplyObject = (map, mapindex)=>{
+	if(typeof map != 'string')
+		map = cga.GetMapName();
+	if(typeof mapindex != 'number')
+		mapindex = cga.GetMapIndex().index3;
+	return supplyArray.find((s)=>{
+		return s.isAvailable(map, mapindex);
+	})
+}
+
+
+var sellArray = [sellCastle];
+
+var getSellObject = (map, mapindex)=>{
+	if(typeof map != 'string')
+		map = cga.GetMapName();
+	if(typeof mapindex != 'number')
+		mapindex = cga.GetMapIndex().index3;
+	return sellArray.find((s)=>{
+		return s.isAvailable(map, mapindex);
+	})
+}
 
 var walkMazeForward = (cb)=>{
 	var map = cga.GetMapName();
@@ -57,12 +82,19 @@ var playerThink = ()=>{
 		return true;
 	
 	var playerinfo = cga.GetPlayerInfo();
+	var items = cga.GetItemsInfo();
 	var ctx = {
 		playerinfo : playerinfo,
 		petinfo : playerinfo.petid >= 0 ? cga.GetPetInfo(playerinfo.petid) : null,
 		teamplayers : cga.getTeamPlayers(),
-		result : null,
 		dangerlevel : thisobj.getDangerLevel(),
+		inventory : items.filter((item)=>{
+			return item.pos >= 8 && item.pos < 100;
+		}),
+		equipment : items.filter((item)=>{
+			return item.pos >= 0 && item.pos < 8;
+		}),
+		result : null,
 	}
 
 	teamMode.think(ctx);
@@ -78,9 +110,6 @@ var playerThink = ()=>{
 			ctx.result = 'supply';
 			interruptFromMoveThink = true;
 		}
-
-		if(ctx.result == 'supply' && supplyMode.isLogBack())
-			ctx.result = 'logback';
 		
 		if( ctx.result == 'supply' || ctx.result == 'logback' || ctx.result == 'logback_forced' )
 		{
@@ -163,22 +192,20 @@ var loop = ()=>{
 	
 	if(thisobj.sellStore == 1 && cga.getSellStoneItem().length > 0)
 	{
-		sellStore2.func(loop);
-		return;
+		var sellObject = getSellObject(map, mapindex);
+		if(sellObject)
+		{
+			sellObject.func(loop);
+			return;
+		}
 	}
 	
 	if(cga.needSupplyInitial())
 	{
-		if(supplyMode.isInitialSupply())
+		var supplyObject = getSupplyObject(map, mapindex);
+		if(supplyObject)
 		{
-			supplyMode.func(loop);
-			return;
-		}
-		else
-		{
-			cga.travel.falan.toCastleHospital(()=>{
-				setTimeout(loop, 3000);
-			});
+			supplyObject.func(loop);
 			return;
 		}
 	}
@@ -228,9 +255,6 @@ var thisobj = {
 			pair.translated = true;
 			return true;
 		}
-		
-		if(supplyMode.translate(pair))
-			return true;
 
 		if(teamMode.translate(pair))
 			return true;
@@ -239,9 +263,6 @@ var thisobj = {
 	},
 	loadconfig : (obj)=>{
 
-		if(!supplyMode.loadconfig(obj))
-			return false;
-		
 		if(!teamMode.loadconfig(obj))
 			return false;
 		
@@ -256,7 +277,7 @@ var thisobj = {
 		return true;
 	},
 	inputcb : (cb)=>{
-		Async.series([supplyMode.inputcb, teamMode.inputcb, (cb2)=>{
+		Async.series([teamMode.inputcb, (cb2)=>{
 			var sayString = '【半山插件】请选择是否卖石: 0不卖石 1卖石';
 			cga.sayLongWords(sayString, 0, 3, 1);
 			cga.waitForChatInput((msg, val)=>{

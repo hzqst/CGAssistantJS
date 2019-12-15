@@ -1,6 +1,7 @@
 var Async = require('async');
-var supplyMode = require('./../公共模块/诅咒回补');
-var sellStore2 = require('./../公共模块/里堡卖石');
+var supplyMode = require('./../公共模块/法兰回补');
+var supplyCastle = require('./../公共模块/里堡回补');
+var sellCastle = require('./../公共模块/里堡卖石');
 var teamMode = require('./../公共模块/组队模式');
 var logbackEx = require('./../公共模块/登出防卡住');
 
@@ -13,6 +14,30 @@ var interrupt = require('./../公共模块/interrupt');
 var moveThinkInterrupt = new interrupt();
 var playerThinkInterrupt = new interrupt();
 var playerThinkRunning = false;
+
+var supplyArray = [supplyMode, supplyCastle];
+
+var getSupplyObject = (map, mapindex)=>{
+	if(typeof map != 'string')
+		map = cga.GetMapName();
+	if(typeof mapindex != 'number')
+		mapindex = cga.GetMapIndex().index3;
+	return supplyArray.find((s)=>{
+		return s.isAvailable(map, mapindex);
+	})
+}
+
+var sellArray = [sellCastle];
+
+var getSellObject = (map, mapindex)=>{
+	if(typeof map != 'string')
+		map = cga.GetMapName();
+	if(typeof mapindex != 'number')
+		mapindex = cga.GetMapIndex().index3;
+	return sellArray.find((s)=>{
+		return s.isAvailable(map, mapindex);
+	})
+}
 
 var walkMazeForward = (cb)=>{
 	var map = cga.GetMapName();
@@ -79,12 +104,19 @@ var playerThink = ()=>{
 		return true;
 	
 	var playerinfo = cga.GetPlayerInfo();
+	var items = cga.GetItemsInfo();
 	var ctx = {
 		playerinfo : playerinfo,
 		petinfo : playerinfo.petid >= 0 ? cga.GetPetInfo(playerinfo.petid) : null,
 		teamplayers : cga.getTeamPlayers(),
-		result : null,
 		dangerlevel : thisobj.getDangerLevel(),
+		inventory : items.filter((item)=>{
+			return item.pos >= 8 && item.pos < 100;
+		}),
+		equipment : items.filter((item)=>{
+			return item.pos >= 0 && item.pos < 8;
+		}),
+		result : null,
 	}
 
 	teamMode.think(ctx);
@@ -101,10 +133,18 @@ var playerThink = ()=>{
 			interruptFromMoveThink = true;
 		}
 
-		if(ctx.result == 'supply' && supplyMode.isLogBack())
-			ctx.result = 'logback';
+		var supplyObject = null;
+
+		if(ctx.result == 'supply')
+		{
+			var map = cga.GetMapName();
+			var mapindex = cga.GetMapIndex().index3;
+			supplyObject = getSupplyObject(map, mapindex);
+			if(supplyObject && supplyObject.isLogBack(map, mapindex))
+				ctx.result = 'logback';
+		}
 		
-		if( ctx.result == 'supply' )
+		if( ctx.result == 'supply' && supplyObject)
 		{
 			if(interruptFromMoveThink)
 			{
@@ -240,27 +280,24 @@ var loop = ()=>{
 		return;
 	}
 	
-	if(thisobj.sellStore == 1 && cga.getSellStoneItem().length > 0 && (map == '里谢里雅堡' || map == '艾尔莎岛'))
+	if(thisobj.sellStore == 1 && cga.getSellStoneItem().length > 0)
 	{
-		sellStore2.func(loop);
-		return;
+		var sellObject = getSellObject(map, mapindex);
+		if(sellObject)
+		{
+			sellObject.func(loop);
+			return;
+		}
 	}
 	
-	if(cga.needSupplyInitial() && (map == '里谢里雅堡' || map == '艾尔莎岛'))
+	if(cga.needSupplyInitial())
 	{
-		if(supplyMode.isInitialSupply())
+		var supplyObject = getSupplyObject(map, mapindex);
+		if(supplyObject)
 		{
-			supplyMode.func(loop);
+			supplyObject.func(loop);
 			return;
 		}
-		else
-		{
-			cga.travel.falan.toCastleHospital(()=>{
-				setTimeout(loop, 3000);
-			});
-			return;
-		}
-		return;
 	}
 	
 	callSubPluginsAsync('prepare', ()=>{

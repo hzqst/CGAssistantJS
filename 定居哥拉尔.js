@@ -182,11 +182,19 @@ var cga = require('./cgaapi')(function(){
 														cga.walkList([
 														[15, 45, 43210],
 														[9, 46, 43200],
-														[23, 37, '哥拉尔镇'],
+														[22, 37, '哥拉尔镇'],
 														[118, 214],
-														], ()=>{
+														], ()=>{															
 															cga.travel.gelaer.toStone('N', ()=>{
-																cb2(true);
+																cga.walkList([
+																[118, 106],
+																], ()=>{
+																	cga.turnTo(118, 105);
+																	cga.AsyncWaitNPCDialog(()=>{
+																		cga.ClickNPCDialog(4, -1);
+																		cb2(true);
+																	});
+																});																
 															});
 														});
 													}, 1000);

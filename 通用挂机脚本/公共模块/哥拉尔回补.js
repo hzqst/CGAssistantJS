@@ -3,18 +3,18 @@ var configTable = global.configTable;
 
 module.exports = {
 	func : (cb)=>{
-		cga.travel.falan.toCastleHospital(()=>{
+		cga.travel.gelaer.toHospital(()=>{
 			setTimeout(cb, 5000);
 		});
 	},
 	isLogBack : (map, mapindex)=>{
-		return (map == '里谢里雅堡' || map == '艾尔莎岛') ? false : true;
+		return (map == '哥拉尔镇') ? false : true;
 	},
 	isAvailable : (map, mapindex)=>{
-		if(cga.travel.newisland.isSettled)
+		if(cga.travel.gelaer.isSettled)
 			return true;
 		
-		return (map == '里谢里雅堡' || map == '艾尔莎岛') ? true : false;
+		return (map == '哥拉尔镇') ? true : false;
 	},
 	translate : (pair)=>{
 		return false;

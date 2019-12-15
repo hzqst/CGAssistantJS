@@ -1,5 +1,5 @@
 var Async = require('async');
-var supplyMode = require('./../公共模块/里堡回补');
+var supplyCastle = require('./../公共模块/里堡回补');
 var teamMode = require('./../公共模块/组队模式');
 var logbackEx = require('./../公共模块/登出防卡住');
 
@@ -11,6 +11,18 @@ var interrupt = require('./../公共模块/interrupt');
 var moveThinkInterrupt = new interrupt();
 var playerThinkInterrupt = new interrupt();
 var playerThinkRunning = false;
+
+var supplyArray = [ supplyCastle ];
+
+var getSupplyObject = (map, mapindex)=>{
+	if(typeof map != 'string')
+		map = cga.GetMapName();
+	if(typeof mapindex != 'number')
+		mapindex = cga.GetMapIndex().index3;
+	return supplyArray.find((s)=>{
+		return s.isAvailable(map, mapindex);
+	})
+}
 
 var battleAreaArray = [
 {
@@ -59,12 +71,19 @@ var playerThink = ()=>{
 		return true;
 	
 	var playerinfo = cga.GetPlayerInfo();
+	var items = cga.GetItemsInfo();
 	var ctx = {
 		playerinfo : playerinfo,
 		petinfo : playerinfo.petid >= 0 ? cga.GetPetInfo(playerinfo.petid) : null,
 		teamplayers : cga.getTeamPlayers(),
-		result : null,
 		dangerlevel : thisobj.getDangerLevel(),
+		inventory : items.filter((item)=>{
+			return item.pos >= 8 && item.pos < 100;
+		}),
+		equipment : items.filter((item)=>{
+			return item.pos >= 0 && item.pos < 8;
+		}),
+		result : null,
 	}
 
 	teamMode.think(ctx);
@@ -80,30 +99,8 @@ var playerThink = ()=>{
 			ctx.result = 'supply';
 			interruptFromMoveThink = true;
 		}
-
-		if(ctx.result == 'supply' && supplyMode.isLogBack())
-			ctx.result = 'logback';
 		
-		if( ctx.result == 'supply' )
-		{
-			if(interruptFromMoveThink)
-			{
-				supplyMode.func(loop);
-				return false;
-			}
-			else
-			{
-				moveThinkInterrupt.requestInterrupt(()=>{
-					if(cga.isInNormalState()){
-						supplyMode.func(loop);
-						return true;
-					}
-					return false;
-				});
-				return false;
-			}
-		}
-		else if( ctx.result == 'logback' || ctx.result == 'logback_forced' )
+		if( ctx.result == 'supply' || ctx.result == 'logback' || ctx.result == 'logback_forced' )
 		{
 			if(interruptFromMoveThink)
 			{
@@ -188,19 +185,13 @@ var loop = ()=>{
 		playerThinkRunning = true;
 		return;
 	}
-
+	
 	if(cga.needSupplyInitial())
 	{
-		if(supplyMode.isInitialSupply())
+		var supplyObject = getSupplyObject(map, mapindex);
+		if(supplyObject)
 		{
-			supplyMode.func(loop);
-			return;
-		}
-		else
-		{
-			cga.travel.falan.toCastleHospital(()=>{
-				setTimeout(loop, 3000);
-			});
+			supplyObject.func(loop);
 			return;
 		}
 	}
@@ -248,18 +239,12 @@ var thisobj = {
 			return true;
 		}
 		
-		if(supplyMode.translate(pair))
-			return true;
-		
 		if(teamMode.translate(pair))
 			return true;
 		
 		return false;
 	},
 	loadconfig : (obj)=>{
-
-		if(!supplyMode.loadconfig(obj))
-			return false;
 
 		if(!teamMode.loadconfig(obj))
 			return false;
@@ -280,7 +265,7 @@ var thisobj = {
 		return true;
 	},
 	inputcb : (cb)=>{
-		Async.series([supplyMode.inputcb, teamMode.inputcb, (cb2)=>{
+		Async.series([teamMode.inputcb, (cb2)=>{
 			
 			var sayString = '【盆地插件】请选择练级地点:';
 			for(var i in battleAreaArray){

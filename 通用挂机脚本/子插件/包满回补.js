@@ -7,7 +7,7 @@ module.exports = {
 
 	},
 	think : (ctx)=>{
-		if(cga.getInventoryItems().length >= 20)
+		if(ctx.inventory.length >= 20)
 		{
 			ctx.result = 'supply';
 			ctx.reason = '包满回补';

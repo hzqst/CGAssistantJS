@@ -1138,7 +1138,7 @@ module.exports = function(callback){
 		});
 	}
 	
-	//从法兰城到阿凯鲁法
+	//从法兰城到哥拉尔
 	cga.travel.falan.toGelaer = (cb)=>{
 		
 		if(cga.GetMapName() == '哥拉尔'){
@@ -1227,7 +1227,7 @@ module.exports = function(callback){
 	
 	cga.travel.AKLF = {};
 	
-	cga.travel.AKLF.isSettled = true;
+	cga.travel.AKLF.isSettled = false;
 	
 	cga.travel.AKLF.toFalan = (cb)=>{
 		if(cga.GetMapName() != '阿凯鲁法村'){
@@ -1620,7 +1620,7 @@ module.exports = function(callback){
 	cga.travel.gelaer = {};
 	
 	//定居？
-	cga.travel.gelaer.isSettled = true;
+	cga.travel.gelaer.isSettled = false;
 	
 	cga.travel.gelaer.xy2name = function(x, y, mapname){
 		if(x == 120 && y == 107 && mapname == '哥拉尔镇')
@@ -1641,44 +1641,59 @@ module.exports = function(callback){
 	cga.travel.gelaer.toStoneInternal = (stone, cb)=>{
 		var curXY = cga.GetMapXY();
 		var curMap = cga.GetMapName();
-		const desiredMap = ['哥拉尔镇'];
 		if(curMap == '哥拉尔镇'){			
-			var curStone = cga.travel.gelaer.xy2name(curXY.x, curXY.y);
+			var curStone = cga.travel.gelaer.xy2name(curXY.x, curXY.y, curMap);
 			if(curStone !== null) {
-				var turn = false;
-				if(stone.length >= 2 && curStone.charAt(1) == stone.charAt(1)) {
-					if(curStone == stone){
-						cb(null);
-						return;
-					}
-					turn = true;
-				} else if(stone.length < 2){
-					if(curStone.charAt(0) == stone.charAt(0)){
-						cb(null);
-						return;
-					}
-					turn = true;
-				}
-				if(turn){
-					switch(curStone){
-						case 'N':cga.turnDir(6);break;
-						case 'S':cga.turnDir(0);break;
-					}
-					cga.AsyncWaitMovement({map:desiredMap, delay:1000, timeout:5000}, (err, reason)=>{
-						if(err){
-							cb(err, reason);
-							return;
-						}
-						cga.travel.gelaer.toStoneInternal(stone, cb);
-					});
+				if(curStone == stone){
+					cb(null);
 					return;
 				}
+				
+				var desiredTarget = undefined;
+				switch(curStone){
+					case 'N':
+						cga.turnDir(6);
+						desiredTarget = [118, 214];
+						break;
+					case 'S':
+						cga.turnDir(0);
+						desiredTarget = [120, 107];
+						break;
+				}
+				cga.AsyncWaitMovement({x : desiredTarget[0], y : desiredTarget[1], delay:1000, timeout:5000}, (err, reason)=>{
+					if(err){
+						cb(err, reason);
+						return;
+					}
+					cga.travel.gelaer.toStoneInternal(stone, cb);
+				});
+				return;
+			} else if(!cga.travel.gelaer.isSettle){
+				var northPath = cga.calculatePath(curXY.x, curXY.y, 118, 214, null, null, null, []);
+				northPath = PF.Util.expandPath(northPath);
+				
+				var southPath = cga.calculatePath(curXY.x, curXY.y, 120, 107, null, null, null, []);
+				southPath = PF.Util.expandPath(southPath);
+				
+				var path = northPath;
+				var target = [118, 214];
+
+				if(path.length > southPath.length)
+				{
+					path = southPath;
+					target = [120, 107];
+				}
+				
+				cga.walkList([target], ()=>{
+					cga.travel.gelaer.toStoneInternal(stone, cb);
+				});
+				return;
 			}
 		}
 
 		if(cga.travel.gelaer.isSettled){
 			cga.LogBack();
-			cga.AsyncWaitMovement({map:desiredMap, delay:1000, timeout:5000}, (err, reason)=>{
+			cga.AsyncWaitMovement({map:'哥拉尔镇', delay:1000, timeout:5000}, (err, reason)=>{
 				if(err){
 					cb(err, reason);
 					return;
@@ -1700,14 +1715,92 @@ module.exports = function(callback){
 	
 	//前往到哥拉尔医院
 	cga.travel.gelaer.toHospital = (cb)=>{
+		if(cga.GetMapName() != '哥拉尔镇'){
+			cb(new Error('必须从哥拉尔镇启动'));
+			return;
+		}
 		cga.travel.gelaer.toStone('N', ()=>{
 			cga.walkList([
-				[165, 91, '医院']
+				[165, 91, '医院'],
 				[29, 27],
 			], ()=>{
-				cga.TurnTo(30, 26);
+				cga.turnTo(30, 26);
 				cb(true);
 			});
+		});
+	}
+
+	//前往到哥拉尔银行
+	cga.travel.gelaer.toBank = (cb)=>{
+		if(cga.GetMapName() != '哥拉尔镇'){
+			cb(new Error('必须从哥拉尔镇启动'));
+			return;
+		}
+		cga.travel.gelaer.toStone('N', ()=>{
+			cga.walkList([
+				[167, 66, '银行'],
+				[25, 10],
+			], ()=>{
+				cga.turnDir(0);
+				cb(null);
+			});
+		});
+	}
+
+	//前往鲁米那斯村
+	cga.travel.gelaer.toLumi = (cb)=>{
+		if(cga.GetMapName() != '哥拉尔镇'){
+			cb(new Error('必须从哥拉尔镇启动'));
+			return;
+		}
+		cga.travel.gelaer.toStone('N', ()=>{
+			cga.walkList([
+				[176,105,'库鲁克斯岛'],
+				[477,525],
+			], ()=>{
+				cga.turnTo(477, 526);
+				cga.AsyncWaitNPCDialog(()=>{
+					cga.ClickNPCDialog(4, 0);
+					cga.AsyncWaitMovement({x : 476, y : 528, delay:1000, timeout:5000}, ()=>{
+						cga.walkList([
+						[322, 883,'鲁米那斯']
+						], ()=>{
+							cb(null);
+						});
+					});
+				});
+			});
+		});
+	}
+	
+	cga.travel.lumi = {};
+	
+	cga.travel.lumi.toStore = (cb)=>{
+		if(cga.GetMapName() != '鲁米那斯'){
+			cb(new Error('必须从鲁米那斯启动'));
+			return;
+		}
+		cga.walkList([
+			[88, 51,'杂货店'],
+			[11, 12],
+		], ()=>{
+			cga.turnTo(13, 12);
+			cb(null);
+		});
+	}
+	
+	cga.travel.lumi.toHospital = (cb, isPro)=>{
+		if(cga.GetMapName() != '鲁米那斯'){
+			cb(new Error('必须从鲁米那斯启动'));
+			return;
+		}
+		cga.walkList(
+		[
+			[87, 35, '医院'],
+			isPro == true ? [17, 5] : [17, 16],
+		], ()=>{
+			cga.turnDir(0);
+			cb(null);
 		});
 	}
 
@@ -3180,9 +3273,9 @@ module.exports = function(callback){
 				return;
 			}
 			
-			cga.SayWords('防遇敌卡住', 0, 3, 1);
+			cga.SayWords('遇敌防卡住', 0, 3, 1);
 			cga.waitForChatInput((msg, val)=>{
-				if(msg == '防遇敌卡住')
+				if(msg == '遇敌防卡住')
 				{
 					//restart the walk procedure
 					if(!cga.isInNormalState())
@@ -3198,8 +3291,7 @@ module.exports = function(callback){
 				}
 				
 				return true;
-			});
-			
+			});			
 		}
 		
 		walk();

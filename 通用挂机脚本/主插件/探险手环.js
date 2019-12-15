@@ -34,7 +34,7 @@ var task = cga.task.Task('探险专家(贝爷)', [
 		intro: '2.前往莎莲娜岛西方洞窟与贝尔的助手（13.10）对话，交出【证明信】进入隐秘的山道。',
 		workFunc: function(cb2){
 			
-			if(cga.needSupplyInitial({  })){
+			if(cga.needSupplyInitial()){
 				cga.travel.falan.toCastleHospital(()=>{
 					setTimeout(()=>{
 						cb2('restart stage');
@@ -148,7 +148,7 @@ var task = cga.task.Task('探险专家(贝爷)', [
 		intro: '4.返回法兰城里谢里雅堡与贝尔（53.22）对话，交出【贝尔的军刀】并传送至贝尔的隐居地。',
 		workFunc: function(cb2){
 
-			if(cga.needSupplyInitial({  })){
+			if(cga.needSupplyInitial()){
 				cga.travel.falan.toCastleHospital(()=>{
 					setTimeout(()=>{
 						cb2('restart stage');

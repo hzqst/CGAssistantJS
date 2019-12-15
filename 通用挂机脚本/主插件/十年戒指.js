@@ -12,7 +12,8 @@ var task = cga.task.Task('十周年戒指', [
 	workFunc: function(cb2){
 		
 		//补血
-		if(cga.needSupplyInitial({  })){
+		if(cga.needSupplyInitial())
+		{
 			cga.travel.falan.toCastleHospital(()=>{
 				setTimeout(()=>{
 					cga.travel.newisland.toStone('X', ()=>{
@@ -23,10 +24,11 @@ var task = cga.task.Task('十周年戒指', [
 			return;
 		}
 		
+		//存银行
 		if(thisobj.saveBank == 1 && cga.getItemCount('十周年纪念戒指') >= 1)
 		{
 			cga.travel.falan.toBank(()=>{
-				cga.AsyncWaitNPCDialog(function(dlg){
+				cga.AsyncWaitNPCDialog(()=>{
 					cga.saveToBankAll('十周年纪念戒指', 0, (r)=>{
 						cb2('restart stage');
 					});

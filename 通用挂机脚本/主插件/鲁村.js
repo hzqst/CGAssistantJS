@@ -1,11 +1,16 @@
 var Async = require('async');
-var supplyMode = require('./../公共模块/高地回补');
+var supplyMode = require('./../公共模块/鲁村回补');
+var supplyGelaer = require('./../公共模块/哥拉尔回补');
 var supplyCastle = require('./../公共模块/里堡回补');
+var sellLumi = require('./../公共模块/鲁村卖石');
+var sellCastle = require('./../公共模块/里堡卖石');
+var checkSettle = require('./../公共模块/登出检查定居地');
 var teamMode = require('./../公共模块/组队模式');
 var logbackEx = require('./../公共模块/登出防卡住');
 
 var cga = global.cga;
 var configTable = global.configTable;
+var sellStoreArray = ['不卖石', '卖石'];
 
 var interrupt = require('./../公共模块/interrupt');
 
@@ -13,125 +18,31 @@ var moveThinkInterrupt = new interrupt();
 var playerThinkInterrupt = new interrupt();
 var playerThinkRunning = false;
 
-var supplyArray = [supplyMode, supplyCastle];
+var supplyArray = [supplyMode, supplyGelaer, supplyCastle];
 
 var getSupplyObject = (map, mapindex)=>{
+	
 	if(typeof map != 'string')
 		map = cga.GetMapName();
 	if(typeof mapindex != 'number')
 		mapindex = cga.GetMapIndex().index3;
+
 	return supplyArray.find((s)=>{
 		return s.isAvailable(map, mapindex);
 	})
 }
 
-var battleAreaArray = [
-{
-	name : '刀鸡',
-	walkTo : (cb)=>{
-		var map = cga.GetMapName();
-		var mapindex = cga.GetMapIndex().index3;
-		if(map == '医院' && mapindex == 59539){
-			cga.walkList([
-				[28, 52, '艾夏岛'],
-				[190, 116, '盖雷布伦森林'],
-				[231, 222, '布拉基姆高地'],
-				[34, 188],
-			], cb);
-		} else {
-			cga.travel.newisland.toStone('D', ()=>{
-				cga.walkList([
-					[190, 116, '盖雷布伦森林'],
-					[231, 222, '布拉基姆高地'],
-					[34, 188],
-				], cb);
-			});
-		}
-	},
-	moveDir : 0,
-	isDesiredMap : (map)=>{
-		return (map == '布拉基姆高地');
-	}
-},
-{
-	name : '黄金龙骨',
-	walkTo : (cb)=>{
-		var map = cga.GetMapName();
-		var mapindex = cga.GetMapIndex().index3;
-		if(map == '医院' && mapindex == 59539){
-			cga.walkList([
-				[28, 52, '艾夏岛'],
-				[190, 116, '盖雷布伦森林'],
-				[231, 222, '布拉基姆高地'],
-				[135, 175],
-			], cb);
-		} else {
-			cga.travel.newisland.toStone('D', ()=>{
-				cga.walkList([
-					[190, 116, '盖雷布伦森林'],
-					[231, 222, '布拉基姆高地'],
-					[135, 175],
-				], cb);
-			});
-		}
-	},
-	moveDir : 6,
-	isDesiredMap : (map)=>{
-		return (map == '布拉基姆高地');
-	}
-},
-{
-	name : '银狮',
-	walkTo : (cb)=>{
-		var map = cga.GetMapName();
-		var mapindex = cga.GetMapIndex().index3;
-		if(map == '医院' && mapindex == 59539){
-			cga.walkList([
-				[28, 52, '艾夏岛'],
-				[190, 116, '盖雷布伦森林'],
-				[231, 222, '布拉基姆高地'],
-				[147, 117],
-			], cb);
-		} else {
-			cga.travel.newisland.toStone('D', ()=>{
-				cga.walkList([
-					[190, 116, '盖雷布伦森林'],
-					[231, 222, '布拉基姆高地'],
-					[147, 117],
-				], cb);
-			});
-		}
-	},
-	moveDir : 2,
-	isDesiredMap : (map)=>{
-		return (map == '布拉基姆高地');
-	}
-},
-{
-	name : '低地鸡',
-	walkTo : (cb)=>{
-		var map = cga.GetMapName();
-		if(map == '医院' && mapindex == 59539){
-			cga.walkList([
-				[28, 52, '艾夏岛'],
-				[190, 116, '盖雷布伦森林'],
-				[210, 116],
-			], cb);
-		} else {
-			cga.travel.newisland.toStone('D', ()=>{
-				cga.walkList([
-					[190, 116, '盖雷布伦森林'],
-					[210, 116],
-				], cb);
-			});
-		}
-	},
-	moveDir : 0,
-	isDesiredMap : (map)=>{
-		return (map == '盖雷布伦森林');
-	}
-},
-]
+var sellArray = [sellLumi, sellCastle];
+
+var getSellObject = (map, mapindex)=>{
+	if(typeof map != 'string')
+		map = cga.GetMapName();
+	if(typeof mapindex != 'number')
+		mapindex = cga.GetMapIndex().index3;
+	return sellArray.find((s)=>{
+		return s.isAvailable(map, mapindex);
+	})
+}
 
 var moveThink = (arg)=>{
 
@@ -259,19 +170,36 @@ var loop = ()=>{
 	var mapindex = cga.GetMapIndex().index3;
 	var isleader = cga.isTeamLeaderEx();
 	
-	if(isleader && teamMode.is_enough_teammates())
-	{
-		if(thisobj.battleArea.isDesiredMap(map))
-		{
-			cga.freqMove(thisobj.battleArea.moveDir);
+	if(isleader && teamMode.object.is_enough_teammates()){
+		if(map == '医院' && mapindex == 43610){
+			if(thisobj.sellStore == 1){
+				var sellObject = getSellObject(map, mapindex);
+				if(sellObject)
+				{
+					sellObject.func(loop);
+					return;
+				}
+			}
+		}
+		if(map == '杂货店'){
+			cga.walkList([
+			[4, 13, '鲁米那斯']
+			], loop);
 			return;
 		}
-		else
-		{
+		if(map == '库鲁克斯岛'){
+			supplyMode.func(loop);
+			return;
+		}
+		if(map == '鲁米那斯' ){
 			console.log('playerThink on');
 			playerThinkRunning = true;
-			
-			thisobj.battleArea.walkTo(loop);
+			cga.walkList([
+				[60, 29, '库鲁克斯岛'],
+				[320, 883],
+			], ()=>{
+				cga.freqMove(2);
+			});
 			return;
 		}
 	} else if(!isleader){
@@ -280,44 +208,75 @@ var loop = ()=>{
 		return;
 	}
 
-	if(cga.needSupplyInitial())
+	if(thisobj.sellStore == 1 && cga.getSellStoneItem().length > 0)
 	{
-		var sup = getSupplyObject(map, mapindex);
-		if(sup)
+		var sellObject = getSellObject(map, mapindex);
+		if(sellObject)
 		{
-			sup.func(loop);
+			sellObject.func(loop);
 			return;
 		}
 	}
 
-	callSubPluginsAsync('prepare', ()=>{
-		cga.travel.newisland.toStone('X', ()=>{
-			cga.walkList([
-			cga.isTeamLeader ? [144, 106] : [143, 106],
-			], ()=>{
-				teamMode.wait_for_teammates(loop);
-			});
+	if(cga.needSupplyInitial())
+	{
+		var supplyObject = getSupplyObject(map, mapindex);
+		if(supplyObject)
+		{
+			supplyObject.func(loop);
+			return;
+		}
+	}
+
+	var lumi = ()=>{
+		cga.walkList([
+			cga.isTeamLeader ? [67, 29] : [66, 29],
+		], ()=>{
+			teamMode.object.wait_for_teammates(loop);
 		});
+	}
+
+	callSubPluginsAsync('prepare', ()=>{
+		if(map == '鲁米那斯'){
+			lumi();
+			return;
+		}
+		checkSettle.func((err, mapname)=>{
+			if(err)
+				throw err;
+						
+			if(mapname == '艾尔莎岛' || mapname == '法兰城')
+			{
+				cga.travel.falan.toCity('哥拉尔镇', ()=>{
+					cga.travel.gelaer.toLumi(lumi)
+				});
+			}
+			else if(mapname == '哥拉尔镇')
+			{
+				cga.travel.gelaer.toLumi(lumi)
+			}
+			else
+			{
+				throw new Error('不支持除法兰、新城、哥拉尔以外的定居地启动！')				
+			}
+		});		
 	});
 }
 
 var thisobj = {
 	getDangerLevel : ()=>{
 		var map = cga.GetMapName();
-
-		if(map == '盖雷布伦森林' )
-			return 1;
-
-		if(map == '布拉基姆高地' )
-			return 2;
 		
+		if(map == '库鲁克斯岛' )
+			return 2;
+				
 		return 0;
 	},
 	translate : (pair)=>{
 		
-		if(pair.field == 'battleArea'){
-			pair.field = '练级地点';
-			pair.value = battleAreaArray[pair.value].name;
+		if(pair.field == 'sellStore'){
+			pair.field = '是否卖石';
+			pair.value = pair.value == 1 ? '卖石' : '不卖石';
 			pair.translated = true;
 			return true;
 		}
@@ -330,45 +289,34 @@ var thisobj = {
 		
 		return false;
 	},
-	loadconfig : (obj)=>{
+	loadconfig : (obj, cb)=>{
 
-		if(!supplyMode.loadconfig(obj))
-			return false;
-
-		if(!teamMode.loadconfig(obj))
+		if(!supplyMode.loadconfig(obj, cb))
 			return false;
 		
-		for(var i in battleAreaArray){
-			if(i == obj.battleArea){
-				configTable.battleArea = i;
-				thisobj.battleArea = battleAreaArray[i];
-				break;
-			}
-		}
+		if(!teamMode.loadconfig(obj, cb))
+			return false;
 		
-		if(!thisobj.battleArea){
-			console.error('读取配置：练级地点失败！');
+		configTable.sellStore = obj.sellStore;
+		thisobj.sellStore = obj.sellStore
+		
+		if(thisobj.sellStore == undefined){
+			console.error('读取配置：是否卖石失败！');
 			return false;
 		}
 		
 		return true;
 	},
 	inputcb : (cb)=>{
-		Async.series([supplyMode.inputcb, teamMode.inputcb, (cb2)=>{
-			
-			var sayString = '【高地插件】请选择练级地点:';
-			for(var i in battleAreaArray){
-				if(i != 0)
-					sayString += ', ';
-				sayString += '('+ (parseInt(i)+1) + ')' + battleAreaArray[i].name;
-			}
+		Async.series([supplyMode.inputcb, sellStore.inputcb, teamMode.inputcb, (cb2)=>{
+			var sayString = '【鲁村插件】请选择是否卖石: 0不卖石 1卖石';
 			cga.sayLongWords(sayString, 0, 3, 1);
-			cga.waitForChatInput((msg, index)=>{
-				if(index !== null && index >= 1 && battleAreaArray[index - 1]){
-					configTable.battleArea = index - 1;
-					thisobj.battleArea = battleAreaArray[index - 1];
+			cga.waitForChatInput((msg, val)=>{
+				if(val !== null && val >= 0 && val <= 1){
+					configTable.sellStore = val;
+					thisobj.sellStore = val;
 					
-					var sayString2 = '当前已选择:[' + thisobj.battleArea.name + ']。';
+					var sayString2 = '当前已选择:'+sellStoreArray[thisobj.sellStore]+'。';
 					cga.sayLongWords(sayString2, 0, 3, 1);
 					
 					cb2(null);
@@ -387,6 +335,6 @@ var thisobj = {
 		logbackEx.init();
 		loop();
 	},
-}
+};
 
 module.exports = thisobj;

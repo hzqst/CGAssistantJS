@@ -1,26 +1,26 @@
 var supplyModeArray = [
 {
-	name : '圣骑士营地资深护士回补',
+	name : '法兰西医资深护士回补',
 	func : (cb)=>{
 		var map = cga.GetMapName();
 		
 		var path = [
-			[9, 11],
-			[9, 12],
-			[9, 11],
-			[9, 12],
-			[9, 11],
+			[8, 33],
+			[7, 33],
+			[8, 33],
+			[7, 33],
+			[8, 33],
 		];
-		if(map == '肯吉罗岛'){
-			path.unshift([95, 72, '医院']);
-			path.unshift([551, 332, '圣骑士营地']);
+		if(map == '芙蕾雅'){
+			path.unshift([82, 83, '医院']);
+			path.unshift([378, 195, '法兰城']);
 		}
-		else if(map == '圣骑士营地'){
-			path.unshift([95, 72, '医院']);
+		else if(map == '法兰城'){
+			path.unshift([82, 83, '医院']);
 		}
 		
 		cga.walkList(path, ()=>{
-			cga.TurnTo(11, 11);
+			cga.TurnTo(6, 31);
 			setTimeout(cb, 5000);
 		});
 	},
@@ -28,30 +28,31 @@ var supplyModeArray = [
 		return false;
 	},
 	isAvailable : (map, mapindex)=>{
-		return (map == '肯吉罗岛' || map == '圣骑士营地' || mapindex == 44692 || map.indexOf('黑龙沼泽') >= 0 || map.indexOf('蜥蜴洞穴') >= 0 || map.indexOf('隐秘之洞地下') >= 0) ? true : false;
+		return (map == '芙蕾雅' || map == '法兰城' || map.indexOf('诅咒的迷宫') >= 0) ? true : false;
 	},
 },
 {
-	name : '圣骑士营地普通护士回补',
+	name : '法兰西医普通护士回补',
 	func : (cb)=>{
 		var map = cga.GetMapName();
+		
 		var path = [
-			[18, 15],
-			[17, 15],
-			[18, 15],
-			[17, 15],
-			[18, 15],
+			[9, 31],
+			[8, 31],
+			[9, 31],
+			[8, 31],
+			[9, 31],
 		];
-		if(map == '肯吉罗岛'){
-			path.unshift([95, 72, '医院']);
-			path.unshift([551, 332, '圣骑士营地']);
+		if(map == '芙蕾雅'){
+			path.unshift([82, 83, '医院']);
+			path.unshift([378, 195, '法兰城']);
 		}
-		else if(map == '圣骑士营地'){
-			path.unshift([95, 72, '医院']);
+		else if(map == '法兰城'){
+			path.unshift([82, 83, '医院']);
 		}
 		
 		cga.walkList(path, ()=>{
-			cga.TurnTo(18, 14);
+			cga.TurnTo(9, 29);
 			setTimeout(cb, 5000);
 		});
 	},
@@ -59,7 +60,7 @@ var supplyModeArray = [
 		return false;
 	},
 	isAvailable : (map, mapindex)=>{
-		return (map == '肯吉罗岛' || map == '圣骑士营地' || mapindex == 44692 || map.indexOf('黑龙沼泽') >= 0 || map.indexOf('蜥蜴洞穴') >= 0 || map.indexOf('隐秘之洞地下') >= 0) ? true : false;
+		return (map == '芙蕾雅' || map == '法兰城' || map.indexOf('诅咒的迷宫') >= 0) ? true : false;
 	},
 },
 {
@@ -76,32 +77,6 @@ var supplyModeArray = [
 		return true;
 	},
 },
-{
-	name : '登出曙光营地医院回补',
-	func : (cb)=>{		
-		cga.travel.falan.toCamp(()=>{
-			cga.walkList([
-			[42, 56, '曙光营地医院'],
-			[11, 8]
-			], ()=>{
-				cga.TurnTo(11, 6);
-				setTimeout(()=>{
-					cga.walkList([
-					[1, 8, '曙光骑士团营地'],
-					], ()=>{
-						cga.travel.falan.toCamp(cb);
-					});
-				}, 5000);
-			})
-		}, true);
-	},
-	isLogBack : (map, mapindex)=>{
-		return true;
-	},
-	isAvailable : (map, mapindex)=>{
-		return true;
-	},
-}
 ]
 
 var cga = global.cga;
@@ -143,7 +118,7 @@ var thisobj = {
 		return true;
 	},
 	inputcb : (cb)=>{
-		var sayString = '【营地插件】请选择回补方式:';
+		var sayString = '【法兰插件】请选择回补方式:';
 		for(var i in supplyModeArray){
 			if(i != 0)
 				sayString += ', ';

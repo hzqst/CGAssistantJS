@@ -6,26 +6,31 @@ var cga = require('./cgaapi')(function(){
 		cga.walkList([
 		[141, 105]
 		], ()=>{
-			cga.TurnTo(143, 105);
+			cga.turnTo(142, 105);
 			cga.AsyncWaitNPCDialog(()=>{
 				cga.ClickNPCDialog(4, -1);
 			});
 		});
 	};
 	
-	if(cga.GetMapName() == '阿凯鲁法村'){
+	var map = cga.GetMapName();
+	
+	if(map == '阿凯鲁法村'){
 		cga.travel.AKLF.toFalan(()=>{
 			cga.travel.falan.toCity('艾尔莎岛', next);
 		});
 	}
-	else if(cga.GetMapName() == '哥拉尔镇'){
+	else if(map == '哥拉尔镇'){
 		cga.travel.gelaer.toFalan(()=>{
 			cga.travel.falan.toCity('艾尔莎岛', next);
 		});
 	}
-	else
+	else if(map == '法兰城' || map == '里谢里雅堡')
 	{
 		cga.travel.falan.toCity('艾尔莎岛', next);
 	}
-	
+	else
+	{
+		throw new Error('无法从'+map+'启动脚本，只能从法兰城、里堡、阿凯鲁法、哥拉尔启动！');
+	}
 });

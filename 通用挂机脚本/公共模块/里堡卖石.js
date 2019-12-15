@@ -1,15 +1,47 @@
 var cga = global.cga;
 var configTable = global.configTable;
 
-var thisobj = {
+module.exports = {
 	func : (cb)=>{
 		var gogogo = ()=>{
 			cga.walkList([
-				[30, 79],
+				[31, 77],
 			], ()=>{
-				cga.TurnTo(30, 77);
-				cga.sellStone(()=>{
-					setTimeout(cb, cga.getTeamPlayers().length ? 5000 : 3000, true);
+				cga.walkTeammateToPosition([
+				[31, 77],
+				[31, 76],
+				] , ()=>{
+					cga.turnTo(30, 77);
+					cga.sellStone(()=>{
+												
+						setTimeout(()=>{
+							
+							if(cga.GetPlayerInfo().gold >= 990000)
+							{
+								if(cga.getTeamPlayers().length)
+									cga.DoRequest(cga.REQUEST_TYPE_LEAVETEAM);
+								
+								cga.walkList([
+								[30, 37, '圣骑士营地'],
+								[116, 105, '银行'],
+								[27, 23],
+								], ()=>{
+									cga.turnDir(0);
+									cga.AsyncWaitNPCDialog(()=>{
+										cga.MoveGold(980000, cga.MOVE_GOLD_TOBANK);
+										setTimeout(()=>{
+											cga.walkList([
+											[3, 23, '圣骑士营地'],
+											], cb);
+										}, 1000);
+									});
+								});
+							}
+							
+							cb(null);
+							
+						}, cga.getTeamPlayers().length ? 5000 : 3000);
+					});
 				});
 			});
 		}
@@ -19,6 +51,9 @@ var thisobj = {
 		} else {
 			gogogo();
 		}		
+	},
+	isAvailable : (map, mapindex)=>{
+		return (map == '里谢里雅堡' || map == '艾尔莎岛') ? true : false;
 	},
 	translate : (pair)=>{
 		return false;
@@ -30,5 +65,3 @@ var thisobj = {
 		cb(null);
 	}
 }
-
-module.exports = thisobj;
