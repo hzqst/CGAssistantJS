@@ -298,6 +298,21 @@ module.exports = new Promise(resolve => {
 		});
 		return level;
 	};
+	cga.emogua.parseTeams = (teams, player = cga.GetPlayerInfo()) => {
+		const team = teams.find(t => t.find(n => n == player.name));
+		if (!team) {
+			console.log('未知队伍', player.name);
+			return {};
+		}
+		console.log('current team: ', team);
+		return {
+			team: team,
+			captain: team[0],
+			isCaptain: player.name == team[0],
+			teamNumber: team.length,
+			player: player
+		};
+	};
 	cga.emogua.delay = (millis) => new Promise((resolve, reject) => {
 		setTimeout(() => {
 			resolve();
