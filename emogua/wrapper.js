@@ -2333,12 +2333,12 @@ module.exports = new Promise(resolve => {
 			};
 			if (repairFlag > 0 && cga.GetItemsInfo().findIndex(needRepairChecker) >= 0 && cga.getInventoryItems().length < 20) {
 				return Promise.resolve().then(() => {
-					// cga.emogua.goto(n => n.falan.mbank).then(
-					// 	() => cga.emogua.autoWalk([82,8])
-					// );
-					return cga.emogua.goto(n => n.elsa.x).then(
-						() => cga.emogua.autoWalk([143,110])
+					return cga.emogua.goto(n => n.falan.mbank).then(
+						() => cga.emogua.autoWalk([82,8])
 					);
+					// return cga.emogua.goto(n => n.elsa.x).then(
+					// 	() => cga.emogua.autoWalk([143,110])
+					// );
 				}).then(() => cga.emogua.recursion(() => {
 					let item = cga.getInventoryItems().find(needRepairChecker);
 					if (item) {
