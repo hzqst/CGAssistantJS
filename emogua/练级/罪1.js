@@ -42,6 +42,14 @@ require('../wrapper').then(cga => {
 						() => cga.emogua.sayWords('对话神官')
 					).then(
 						() => cga.emogua.talkNpc(150,334,cga.emogua.talkNpcSelectorNo,'*')
+					).then(
+						() => cga.emogua.autoWalk([32,53])
+					).then(
+						() => cga.emogua.waitTeamBlock(teamNumber)
+					).then(
+						() => cga.emogua.encounter(protect)
+					).then(
+						() => cga.emogua.leaveTeam()
 					);
 				}
 				return cga.emogua.autoWalk([57,43]).then(
@@ -50,19 +58,9 @@ require('../wrapper').then(cga => {
 					() => cga.emogua.waitMessageUntil(chat => chat.msg && chat.msg.indexOf('对话神官') > -1)
 				).then(
 					() => cga.emogua.talkNpc(150,334,cga.emogua.talkNpcSelectorYes,'*')
+				).then(
+					() => cga.emogua.joinTeamBlock(32,53,captain)
 				);
-			}
-		}
-		if (currentMap == '贝兹雷姆小道') {
-			if (currentTeamNumber == 1) {
-				if (isCaptain) {
-					return cga.emogua.autoWalk([32,53]).then(
-						() => cga.emogua.waitTeamBlock(teamNumber)
-					).then(
-						() => cga.emogua.encounter(protect)
-					);
-				}
-				return cga.emogua.joinTeamBlock(32,53,captain);
 			}
 		}
 		if (currentTeamNumber == 1) {

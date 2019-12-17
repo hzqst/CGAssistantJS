@@ -298,6 +298,21 @@ module.exports = new Promise(resolve => {
 		});
 		return level;
 	};
+	cga.emogua.parseTeams = (teams, player = cga.GetPlayerInfo()) => {
+		const team = teams.find(t => t.find(n => n == player.name));
+		if (!team) {
+			console.log('未知队伍', player.name);
+			return {};
+		}
+		console.log('current team: ', team);
+		return {
+			team: team,
+			captain: team[0],
+			isCaptain: player.name == team[0],
+			teamNumber: team.length,
+			player: player
+		};
+	};
 	cga.emogua.delay = (millis) => new Promise((resolve, reject) => {
 		setTimeout(() => {
 			resolve();
@@ -2318,12 +2333,12 @@ module.exports = new Promise(resolve => {
 			};
 			if (repairFlag > 0 && cga.GetItemsInfo().findIndex(needRepairChecker) >= 0 && cga.getInventoryItems().length < 20) {
 				return Promise.resolve().then(() => {
-					// cga.emogua.goto(n => n.falan.mbank).then(
-					// 	() => cga.emogua.autoWalk([82,8])
-					// );
-					return cga.emogua.goto(n => n.elsa.x).then(
-						() => cga.emogua.autoWalk([143,110])
+					return cga.emogua.goto(n => n.falan.mbank).then(
+						() => cga.emogua.autoWalk([82,8])
 					);
+					// return cga.emogua.goto(n => n.elsa.x).then(
+					// 	() => cga.emogua.autoWalk([143,110])
+					// );
 				}).then(() => cga.emogua.recursion(() => {
 					let item = cga.getInventoryItems().find(needRepairChecker);
 					if (item) {
