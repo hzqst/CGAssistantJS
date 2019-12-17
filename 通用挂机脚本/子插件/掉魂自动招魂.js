@@ -25,12 +25,12 @@ module.exports = {
 								throw '招魂钱不够！';
 							}
 							
-							cb(true);
+							cb(null);
 						});
 					}
 					else
 					{
-						cb(true);
+						cb(null);
 					}
 				});
 			});

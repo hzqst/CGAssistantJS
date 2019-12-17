@@ -21,7 +21,7 @@ module.exports = {
 							throw '受伤治疗钱不够！';
 						}
 						
-						cb(true);
+						cb(null);
 					});
 				});
 			});

@@ -14,7 +14,7 @@ module.exports = {
 				
 				if(cga.getTeamPlayers().length > 0){
 					cga.DoRequest(cga.REQUEST_TYPE_LEAVETEAM);
-					setTimeout(cb, 1500, true);
+					setTimeout(cb, 1500, null);
 					return;
 				}
 				
