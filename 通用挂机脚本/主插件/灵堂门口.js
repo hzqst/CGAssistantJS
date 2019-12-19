@@ -246,7 +246,7 @@ var thisobj = {
 		return true;
 	},
 	inputcb : (cb)=>{
-		Async.series([supplyMode.inputcb, teamMode.inputcb], cb);
+		Async.series([teamMode.inputcb], cb);
 	},
 	execute : ()=>{
 		playerThinkTimer();
