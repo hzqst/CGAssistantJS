@@ -26,7 +26,7 @@ var getSupplyObject = (map, mapindex)=>{
 	})
 }
 
-var sellArray = [sellCamp, sellCastle];
+var sellArray = [sellCastle];
 
 var getSellObject = (map, mapindex)=>{
 	if(typeof map != 'string')
