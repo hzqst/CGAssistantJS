@@ -200,6 +200,7 @@ var playerThink = ()=>{
 
 var playerThinkTimer = ()=>{
 	if(playerThinkRunning){
+		playerThinkInterrupt.hasInterrupt();//restore interrupt state
 		if(!playerThink()){
 			console.log('playerThink off');
 			playerThinkRunning = false;

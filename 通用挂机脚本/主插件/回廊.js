@@ -118,7 +118,8 @@ var playerThink = ()=>{
 }
 
 var playerThinkTimer = ()=>{
-	if(playerThinkRunning){
+	if(playerThinkRunning){		
+		playerThinkInterrupt.hasInterrupt();//restore interrupt state
 		if(!playerThink()){
 			console.log('playerThink off');
 			playerThinkRunning = false;
@@ -158,7 +159,7 @@ var loop = ()=>{
 			else
 			{
 				
-				console.log('playerThink on');
+				console.log('playerThink on');				
 				playerThinkRunning = true;
 				//队长：人满了，开始遇敌
 				cga.freqMove(0);
