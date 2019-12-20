@@ -74,6 +74,11 @@ var gatherArray = [
 	skill : '伐木',
 	path : './../公共模块/深蓝百里香',
 },
+{
+	name : '鉴定刷家具',
+	skill : '鉴定',
+	path : './../公共模块/鉴定刷家具',
+},
 ]
 
 var check_drop = ()=>{
@@ -108,7 +113,7 @@ var loop = ()=>{
 			return;
 		}
 		if(mineObject.object && skill.lv < mineObject.object.level){
-			var errmsg = gatherObject.skill+'技能等级不够，挖'+mineObject.object.name+'需要'+mineObject.object.level+'级，而你只有'+skill.lv+'级';
+			var errmsg = gatherObject.skill+'技能等级不够，'+mineObject.object.name+'需要'+mineObject.object.level+'级技能，而你只有'+skill.lv+'级技能';
 			cga.SayWords(errmsg , 0, 3, 1);
 			return;
 		}
@@ -123,11 +128,6 @@ var loop = ()=>{
 			supplyObject.func(loop);		
 		return;
 	}
-	
-	if(playerInfo.health > 0){
-		healObject.func(loop);
-		return;
-	}
 
 	if(mineObject.check_done())
 	{
@@ -137,88 +137,41 @@ var loop = ()=>{
 			doneObject.func(loop, mineObject.object);
 		return;
 	}
-	
-	var waitwait = (cb)=>{
-		cga.AsyncWaitWorkingResult((err, result)=>{
-			var playerInfo = cga.GetPlayerInfo();
-			if(playerInfo.mp == 0){
-				cb('restart');
-				return;
-			}
 
-			if(mineObject.check_done(result))
-			{
-				cb('restart');
-				return;
-			}
-			if(playerInfo.health > 0){
-				cb('heal');
-				return;
-			}
-			
-			check_drop();
-			
-			cga.StartWork(skill.index, 0);
-			
-			waitwait(cb);
-		}, 10000);
-	}
-	
-	var waitwait2 = (cb)=>{
-		var playerInfo = cga.GetPlayerInfo();
-		if(playerInfo.mp == 0){
-			cb('restart');
-			return;
-		}
-		if(mineObject.check_done()){
-			cb('restart');
-			return;
-		}
-		if(playerInfo.health > 0){
-			cb('heal');
-			return;
-		}
+	var workwork = ()=>{
 		
 		check_drop();
-		
-		setTimeout(waitwait2, 1500, cb);
-	}
-	
-	var workwork = ()=>{
 		
 		var playerInfo = cga.GetPlayerInfo();
 		if(playerInfo.mp == 0){
 			loop();
 			return;
 		}
+
+		if(mineObject.check_done()){
+			loop();
+			return;
+		}
 		
-		if(skill != null){
+		if(playerInfo.health > 0){
+			healObject.func(workwork);
+			return;
+		}
+		
+		if(skill != null && !mineObject.workManager){
 			cga.StartWork(skill.index, 0);
-			waitwait((r)=>{
-				if(r == 'restart')
-				{
-					loop();
-					return;
-				}
-				if(r == 'heal')
-				{
-					healObject.func(workwork);
-					return;
-				}
-			});
+			cga.AsyncWaitWorkingResult((err, result)=>{
+				workwork();
+			}, 10000);
 		} else {
-			waitwait2((r)=>{
-				if(r == 'restart')
-				{
-					loop();
-					return;
-				}
-				if(r == 'heal')
-				{
-					healObject.func(workwork);
-					return;
-				}
-			});
+			if(mineObject.workManager){
+				mineObject.workManager((err, result)=>{
+					console.log('done');
+					workwork();
+				});
+			} else {
+				setTimeout(workwork, 1500);
+			}
 		}
 	}
 	

@@ -4,17 +4,22 @@ var configTable = global.configTable;
 var thisobj = {
 	func : (cb)=>{
 		var mapname = cga.GetMapName();
-		if(mapname != '艾尔莎岛' && mapname != '法兰城' && mapname != '阿凯鲁法村')
+		if(mapname != '艾尔莎岛' && mapname != '里谢里雅堡' && mapname != '法兰城' && mapname != '阿凯鲁法村' && mapname != '哥拉尔镇')
 			cga.LogBack();
 		
 		setTimeout(()=>{
 			var mapname = cga.GetMapName();
 			switch(mapname)
 			{
-				case '艾尔莎岛':
+				case '艾尔莎岛':case '里谢里雅堡':
 					cga.travel.falan.toCastleHospital(()=>{
 						setTimeout(cb, 3000);
 					});
+					break;
+				case '哥拉尔镇':
+					cga.travel.gelaer.toHospital(()=>{
+						setTimeout(cb, 3000);
+					}, false);
 					break;
 				case '阿凯鲁法村':
 					cga.LogBack();

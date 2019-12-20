@@ -1714,7 +1714,7 @@ module.exports = function(callback){
 	}
 	
 	//前往到哥拉尔医院
-	cga.travel.gelaer.toHospital = (cb)=>{
+	cga.travel.gelaer.toHospital = (cb, isPro)=>{
 		if(cga.GetMapName() != '哥拉尔镇'){
 			cb(new Error('必须从哥拉尔镇启动'));
 			return;
@@ -1722,9 +1722,12 @@ module.exports = function(callback){
 		cga.travel.gelaer.toStone('N', ()=>{
 			cga.walkList([
 				[165, 91, '医院'],
-				[29, 27],
+				isPro ? [28, 25] : [29, 26],
 			], ()=>{
-				cga.turnTo(30, 26);
+				if(isPro)
+					cga.turnTo(28, 24);
+				else
+					cga.turnTo(30, 26);
 				cb(true);
 			});
 		});
@@ -2250,6 +2253,14 @@ module.exports = function(callback){
 				if(item.itemid == itemid)
 					count += item.count > 0 ? item.count : 1;
 			});
+		} else if(typeof filter == 'function'){
+			var itemid = filter;
+			items.forEach((item)=>{
+				if(!includeEquipment && item.pos < 8)
+					return false;
+				if(filter(item) == true)
+					count += item.count > 0 ? item.count : 1;
+			});
 		} else {
 			items.forEach((item)=>{
 				if(!includeEquipment && item.pos < 8)
@@ -2636,7 +2647,6 @@ module.exports = function(callback){
 	//鉴定背包中所有的物品
 	cga.assessAllItems = (cb)=>{
 		var item = cga.findAssessableItem();
-		var times = 0;
 		if(item)
 		{
 			cga.manipulateItemEx({
@@ -2644,7 +2654,6 @@ module.exports = function(callback){
 				itempos : item.pos,
 				immediate : true,
 			}, (err, results)=>{
-
 				setTimeout(cga.assessAllItems, 500, cb);
 			})
 		} else {

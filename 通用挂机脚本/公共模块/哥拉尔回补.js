@@ -4,7 +4,13 @@ var configTable = global.configTable;
 module.exports = {
 	func : (cb)=>{
 		cga.travel.gelaer.toHospital(()=>{
-			setTimeout(cb, 5000);
+			setTimeout(()=>{
+				cga.walkList([
+				[9, 23, '哥拉尔镇']
+				], ()=>{
+					cb(null);
+				});
+			}, 5000);
 		});
 	},
 	isLogBack : (map, mapindex)=>{
