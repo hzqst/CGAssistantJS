@@ -2075,7 +2075,17 @@ module.exports = function(callback){
 					{
 						if(cga.isInNormalState())
 						{
-							if(arg.pos)
+							if(arg.map)
+							{
+								var curmap = cga.GetMapName();
+								var curmapindex = cga.GetMapIndex().index3;
+								if(curmap == arg.map || curmapindex == arg.map)
+								{
+									cga.isMoveThinking = false;
+									cb(null);
+									return false;
+								}
+							} else if(arg.pos)
 							{
 								var curpos = cga.GetMapXY();
 								if(curpos.x == arg.pos[0] && curpos.y == arg.pos[1])
@@ -2085,35 +2095,15 @@ module.exports = function(callback){
 									return false;
 								}
 							}
-							else if(arg.map)
-							{
-								var curmap = cga.GetMapName();
-								if(curmap == arg.map)
-								{
-									cga.isMoveThinking = false;
-									cb(null);
-									return false;
-								}
-							}
-							else if(arg.mapindex)
-							{
-								var curmapindex = cga.GetMapIndex().index3;
-								if(curmapindex == arg.mapindex)
-								{
-									cga.isMoveThinking = false;
-									cb(null);
-									return false;
-								}
-							}
-							
 							console.log('坐标错误，回滚到最后一个路径点');
+							var curpos = cga.GetMapXY();
 							var endpos = walkedList.pop();
 							newList = cga.calculatePath(curpos.x, curpos.y, endpos[0], endpos[1], endpos[2], null, null, newList);
 							walkCb();
 							return false;
 						}
 						//battle?
-						setTimeout(end, 1000);
+						setTimeout(end, 1000, arg);
 						return false;
 					}
 					
@@ -2210,7 +2200,7 @@ module.exports = function(callback){
 								
 								if(newList.length == 0){
 									console.log('寻路结束2');
-									end({ mapindex : targetMap });
+									end({ map : targetMap });
 									return;
 								}
 								
@@ -2263,7 +2253,7 @@ module.exports = function(callback){
 
 				if(newList.length == 0){
 					console.log('寻路结束3');
-					end( {pos : [targetX, targetY]} );
+					end( {pos : [targetX, targetY], map : targetMap} );
 					return;
 				}
 				
