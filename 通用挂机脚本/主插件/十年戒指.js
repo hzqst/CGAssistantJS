@@ -80,6 +80,7 @@ var task = cga.task.Task('十周年戒指', [
 	workFunc: function(cb2){
 		
 		var retry = ()=>{
+			console.log('拿戒指')
 			cga.cleanInventory(1, ()=>{
 				cga.turnTo(15, 4);
 				cga.AsyncWaitNPCDialog((err)=>{

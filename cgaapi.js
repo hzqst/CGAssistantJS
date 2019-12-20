@@ -3168,6 +3168,9 @@ module.exports = function(callback){
 				var msgheader = fromTeammate.name + ': ';
 				if(r.msg.indexOf(msgheader) >= 0){
 					var msg = r.msg.substr(r.msg.indexOf(msgheader) + msgheader.length);
+					
+					if (msg.indexOf('[交易]') == 0)
+						msg = msg.substr('[交易]' .length);
 					listen = cb(fromTeammate, msg);
 				}
 			}
@@ -3244,7 +3247,7 @@ module.exports = function(callback){
 			
 			if(!cga.isInNormalState())
 			{
-				setTimeout(walk, 500);
+				setTimeout(walk, 1000);
 				return;
 			}
 			
@@ -3274,7 +3277,7 @@ module.exports = function(callback){
 			}
 			
 			cga.waitForChatInput((msg, val)=>{
-				if(msg == '遇敌防卡住')
+				if(msg.indexOf('遇敌防卡住') >= 0)
 				{
 					//restart the walk procedure
 					if(!cga.isInNormalState())

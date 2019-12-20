@@ -6,8 +6,7 @@ var thisobj = {
 	callbackAfterLogBack : null,
 	init : ()=>{
 		cga.waitForChatInput((msg)=>{
-			if(msg == '登出防卡住' && cga.isInNormalState() && thisobj.readyToLogBack == true){
-				console.log('登出防卡住');
+			if(msg.indexOf('登出防卡住') >= 0 && cga.isInNormalState() && thisobj.readyToLogBack == true){
 				thisobj.readyToLogBack = false;
 				cga.LogBack();
 				setTimeout(thisobj.callbackAfterLogBack, 1500);
