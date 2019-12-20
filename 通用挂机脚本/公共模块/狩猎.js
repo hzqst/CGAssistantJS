@@ -450,7 +450,7 @@ var thisobj = {
 		for(var i in mineArray){
 			if(i != 0)
 				sayString += ', ';
-			sayString += '('+ (parseInt(i)+1) + ')' + thisobj.object.display_name;
+			sayString += '('+ (parseInt(i)+1) + ')' + mineArray[i].display_name;
 		}
 		cga.sayLongWords(sayString, 0, 3, 1);
 		cga.waitForChatInput((msg, index)=>{
