@@ -113,7 +113,7 @@ var task = cga.task.Task('十周年戒指', [
 					cga.ClickNPCDialog(1, 0);
 					cga.waitForBattleEnd(()=>{
 						if(cga.GetMapXY().y != 103){
-							cb(new Error('没有打过露比！请检查战斗配置是否有问题！'));
+							cb2(new Error('没有打过露比！请检查战斗配置是否有问题！'));
 							return;
 						}
 						console.log('法尔肯')
@@ -125,7 +125,7 @@ var task = cga.task.Task('十周年戒指', [
 								cga.ClickNPCDialog(1, 0);
 								cga.waitForBattleEnd(()=>{
 									if(cga.GetMapXY().y != 92){
-										cb(new Error('没有打过法尔肯！请检查战斗配置是否有问题！'));
+										cb2(new Error('没有打过法尔肯！请检查战斗配置是否有问题！'));
 										return;
 									}
 									console.log('犹大')
@@ -137,7 +137,7 @@ var task = cga.task.Task('十周年戒指', [
 											cga.ClickNPCDialog(1, 0);
 											cga.waitForBattleEnd(()=>{
 												if(cga.GetMapXY().y != 81){
-													cb(new Error('没有打过犹大！请检查战斗配置是否有问题！'));
+													cb2(new Error('没有打过犹大！请检查战斗配置是否有问题！'));
 													return;
 												}
 												console.log('海贼')
@@ -149,7 +149,7 @@ var task = cga.task.Task('十周年戒指', [
 														cga.ClickNPCDialog(1, 0);
 														cga.waitForBattleEnd(()=>{
 															if(cga.GetMapXY().y != 70){
-																cb(new Error('没有打过海贼！请检查战斗配置是否有问题！'));
+																cb2(new Error('没有打过海贼！请检查战斗配置是否有问题！'));
 																return;
 															}
 															console.log('双王')
@@ -161,7 +161,7 @@ var task = cga.task.Task('十周年戒指', [
 																	cga.ClickNPCDialog(1, 0);
 																	cga.waitForBattleEnd(()=>{
 																		if(cga.GetMapXY().y != 59){
-																			cb(new Error('没有打过双王！请检查战斗配置是否有问题！'));
+																			cb2(new Error('没有打过双王！请检查战斗配置是否有问题！'));
 																			return;
 																		}
 																		cga.walkList([//帕鲁凯斯的亡灵
@@ -172,7 +172,7 @@ var task = cga.task.Task('十周年戒指', [
 																				cga.ClickNPCDialog(1, 0);
 																				cga.waitForBattleEnd(()=>{
 																					if(cga.GetMapXY().y != 48){
-																						cb(new Error('没有打过小帕！请检查战斗配置是否有问题！'));
+																						cb2(new Error('没有打过小帕！请检查战斗配置是否有问题！'));
 																						return;
 																					}
 																					cga.walkList([

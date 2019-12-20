@@ -2010,7 +2010,8 @@ module.exports = function(callback){
 	'阿巴尼斯村',
 	'魔法大学',
 	'魔法大学内部',
-	//'杂货店',
+	'杂货店',
+	'追忆之路',
 	];
 	
 	cga.walkList = (list, cb)=>{
