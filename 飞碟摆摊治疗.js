@@ -1,5 +1,13 @@
 var cga = require('./cgaapi')(function(){
 	
+	var originalPos = cga.GetMapXY();
+	var originalDir = cga.GetPlayerInfo().direction;
+	
+	if(cga.GetMapName() != '里谢里雅堡')
+	{
+		throw new Error('必须从里谢里雅堡启动！');
+	}
+	
 	var loop = ()=>{
 		
 		var skill = cga.findPlayerSkill('治疗');
@@ -16,12 +24,12 @@ var cga = require('./cgaapi')(function(){
 			cga.walkList([
 			[34, 89],
 			], ()=>{
-				cga.TurnTo(35, 88);
+				cga.turnTo(35, 88);
 				setTimeout(()=>{
 					cga.walkList([
-					[29, 85],
+					[originalPos.x, originalPos.y],
 					], ()=>{
-						cga.turnTo(28, 85);
+						cga.turnDir(originalDir);
 						loop();
 					});
 				}, 3000);

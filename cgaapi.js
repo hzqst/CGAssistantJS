@@ -3273,14 +3273,13 @@ module.exports = function(callback){
 				return;
 			}
 			
-			cga.SayWords('遇敌防卡住', 0, 3, 1);
 			cga.waitForChatInput((msg, val)=>{
 				if(msg == '遇敌防卡住')
 				{
 					//restart the walk procedure
 					if(!cga.isInNormalState())
 					{
-						setTimeout(walk, 500);
+						setTimeout(walk, 1000);
 					}
 					else
 					{
@@ -3291,7 +3290,9 @@ module.exports = function(callback){
 				}
 				
 				return true;
-			});			
+			});
+			
+			cga.SayWords('遇敌防卡住', 0, 3, 1);	
 		}
 		
 		walk();
