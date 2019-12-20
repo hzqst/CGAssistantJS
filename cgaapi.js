@@ -4107,7 +4107,7 @@ module.exports = function(callback){
 			}
 			if(result == cga.FL_BATTLE_ACTION_END)
 			{
-				cb(null, true);
+				setTimeout(cb, 1000, null, true);
 			}
 			else
 			{

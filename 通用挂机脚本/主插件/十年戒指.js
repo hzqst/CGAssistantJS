@@ -81,7 +81,7 @@ var task = cga.task.Task('十周年戒指', [
 		
 		var retry = ()=>{
 			cga.cleanInventory(1, ()=>{
-				cga.TurnTo(15, 4);
+				cga.turnTo(15, 4);
 				cga.AsyncWaitNPCDialog((err)=>{
 					if(err){
 						cga.walkList([ [14, 5], [15, 5] ], retry);
@@ -106,52 +106,57 @@ var task = cga.task.Task('十周年戒指', [
 			cga.walkList([
 				[15, 111],
 			], ()=>{
-				cga.TurnTo(15, 109);
+				console.log('露比')
+				cga.turnTo(15, 110);
 				cga.AsyncWaitNPCDialog(()=>{
 					cga.ClickNPCDialog(1, 0);
-					cga.waitForBattleEnd(()=>{
+					cga.AsyncWaitMovement({x:15 , y:103 , delay:1000, timeout:0}, ()=>{
 						cga.walkList([
 						[15, 100]
 						], ()=>{
-							cga.TurnTo(15, 98);
+							console.log('法尔肯')
+							cga.turnTo(15, 99);
 							cga.AsyncWaitNPCDialog(()=>{
 								cga.ClickNPCDialog(1, 0);
-								cga.waitForBattleEnd(()=>{
+								cga.AsyncWaitMovement({x:15 , y:92 , delay:1000, timeout:0}, ()=>{
 									cga.walkList([
 									[15, 89]
 									], ()=>{
-										cga.TurnTo(15, 87);
+										console.log('犹大')
+										cga.turnTo(15, 88);
 										cga.AsyncWaitNPCDialog(()=>{
 											cga.ClickNPCDialog(1, 0);
-											cga.waitForBattleEnd(()=>{
+											cga.AsyncWaitMovement({x:15 , y:81 , delay:1000, timeout:0}, ()=>{
 												cga.walkList([
 												[15, 78]
 												], ()=>{
-													cga.TurnTo(15, 76);
+													console.log('双王')
+													cga.turnTo(15, 77);
 													cga.AsyncWaitNPCDialog(()=>{
 														cga.ClickNPCDialog(1, 0);
-														cga.waitForBattleEnd(()=>{
-															cga.walkList([
+														cga.AsyncWaitMovement({x:15 , y:70 , delay:1000, timeout:0}, ()=>{
+															cga.walkList([//海贼头目
 															[15, 67]
 															], ()=>{
-																cga.TurnTo(15, 67);
+																cga.turnTo(15, 66);
 																cga.AsyncWaitNPCDialog(()=>{
 																	cga.ClickNPCDialog(1, 0);
-																	cga.waitForBattleEnd(()=>{
-																		cga.walkList([
+																	cga.AsyncWaitMovement({x:15 , y:59 , delay:1000, timeout:0}, ()=>{
+																		cga.walkList([//帕鲁凯斯的亡灵
 																		[15, 56]
 																		], ()=>{
-																			cga.TurnTo(15, 54);
+																			cga.turnTo(15, 55);
 																			cga.AsyncWaitNPCDialog(()=>{
 																				cga.ClickNPCDialog(1, 0);
-																				cga.waitForBattleEnd(()=>{
+																				cga.AsyncWaitMovement({x:15 , y:48 , delay:1000, timeout:0}, ()=>{
 																					cga.walkList([
-																					[15, 5],
-																					[14, 5],
-																					[15, 5],
-																					[14, 5],
-																					[15, 5],
-																					], retry);
+																						[15, 5],
+																					], ()=>{
+																						cga.walkTeammateToPosition([
+																						[15, 5],
+																						[14, 5],
+																						], retry);
+																					});
 																				});
 																			});
 																		});
