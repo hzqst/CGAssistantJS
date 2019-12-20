@@ -251,6 +251,8 @@ module.exports = function(callback){
 			return;
 		}
 		
+		var beginTime = (new Date()).getTime();
+		
 		var handler = (err, results)=>{
 			if(results){
 				cb(null, results);
@@ -259,8 +261,23 @@ module.exports = function(callback){
 			
 			var craftStatus = cga.GetCraftStatus();
 			
+			var curTime = (new Date()).getTime();
+			
 			if(err){
 				if(craftStatus == 0 || craftStatus == 2){
+					cga.manipulateItemEx(options, cb);
+					return;
+				}
+				
+				//强制重试
+				var isImmediate = cga.GetImmediateDoneWorkState();
+				if(isImmediate != 2 && curTime > beginTime + 1000 * 120)
+				{
+					cga.manipulateItemEx(options, cb);
+					return;
+				}
+				else if(isImmediate == 2 && curTime > beginTime + 1000 * 5)
+				{
 					cga.manipulateItemEx(options, cb);
 					return;
 				}
@@ -334,6 +351,8 @@ module.exports = function(callback){
 		cga.StartWork(info.skill.index, info.craft.index);
 		cga.CraftItem(info.skill.index, info.craft.index, 0, itemArray);
 		
+		var beginTime = (new Date()).getTime();
+		
 		var handler = (err, results)=>{
 			if(results){
 				cb(null, results);
@@ -342,8 +361,23 @@ module.exports = function(callback){
 			
 			var craftStatus = cga.GetCraftStatus();
 			
+			var curTime = (new Date()).getTime();
+			
 			if(err){
 				if(craftStatus == 0 || craftStatus == 2){
+					cga.craftItemEx(options, cb);
+					return;
+				}
+				
+				//强制重试
+				var isImmediate = cga.GetImmediateDoneWorkState();
+				if(isImmediate != 2 && curTime > beginTime + 1000 * 120)
+				{
+					cga.craftItemEx(options, cb);
+					return;
+				}
+				else if(isImmediate == 2 && curTime > beginTime + 1000 * 5)
+				{
 					cga.craftItemEx(options, cb);
 					return;
 				}
@@ -1964,6 +1998,16 @@ module.exports = function(callback){
 		return {x: parseInt(f.x/64.0), y:parseInt(f.y/64.0)};
 	}
 	
+	cga.NoRollbackMap = [
+	'艾尔莎岛',
+	'艾夏岛',
+	'法兰城',
+	'里谢里雅堡',
+	'医院',
+	'工房',
+	'圣骑士营地',
+	];
+	
 	cga.walkList = (list, cb)=>{
 		
 		//console.log('初始化寻路列表');
@@ -2015,8 +2059,70 @@ module.exports = function(callback){
 			console.log('目标地图');
 			console.log(targetMap);
 			
-			var end = ()=>{
-				var waitBattle2 = ()=>{
+			var end = (arg)=>{
+				
+				if(cga.NoRollbackMap.find((n)=>{
+					return n == curmap;
+				}) != undefined)
+				{
+					cga.isMoveThinking = false;
+					cb(null);
+					return;
+				}
+				
+				cga.waitForChatInput((msg, val)=>{
+					if(msg.indexOf('遇敌防卡住') >= 0)
+					{
+						if(cga.isInNormalState())
+						{
+							if(arg.pos)
+							{
+								var curpos = cga.GetMapXY();
+								if(curpos.x == arg.pos[0] && curpos.y == arg.pos[1])
+								{
+									cga.isMoveThinking = false;
+									cb(null);
+									return false;
+								}
+							}
+							else if(arg.map)
+							{
+								var curmap = cga.GetMapName();
+								if(curmap == arg.map)
+								{
+									cga.isMoveThinking = false;
+									cb(null);
+									return false;
+								}
+							}
+							else if(arg.mapindex)
+							{
+								var curmapindex = cga.GetMapIndex().index3;
+								if(curmapindex == arg.mapindex)
+								{
+									cga.isMoveThinking = false;
+									cb(null);
+									return false;
+								}
+							}
+							
+							console.log('坐标错误，回滚到最后一个路径点');
+							var endpos = walkedList.pop();
+							newList = cga.calculatePath(curpos.x, curpos.y, endpos[0], endpos[1], endpos[2], null, null, newList);
+							walkCb();
+							return false;
+						}
+						//battle?
+						setTimeout(end, 1000);
+						return false;
+					}
+					
+					return true;
+				});
+				
+				cga.SayWords('遇敌防卡住', 0, 3, 1);
+				
+				/*var waitBattle2 = ()=>{
 					if(!cga.isInNormalState()){
 						setTimeout(waitBattle2, 1500);
 						return;
@@ -2047,7 +2153,7 @@ module.exports = function(callback){
 					cb(null);
 					return;
 				}
-				setTimeout(waitBattle2, 1500);
+				setTimeout(waitBattle2, 1500);*/
 			}
 			
 			var walker = (err, reason)=>{
@@ -2093,7 +2199,7 @@ module.exports = function(callback){
 								
 								if(newList.length == 0){
 									console.log('寻路结束1');
-									end();
+									end({ map : targetMap });
 									return;
 								}
 								
@@ -2104,7 +2210,7 @@ module.exports = function(callback){
 								
 								if(newList.length == 0){
 									console.log('寻路结束2');
-									end();
+									end({ mapindex : targetMap });
 									return;
 								}
 								
@@ -2154,10 +2260,10 @@ module.exports = function(callback){
 					cb(err, reason);
 					return;
 				}
-								
+
 				if(newList.length == 0){
 					console.log('寻路结束3');
-					end();
+					end( {pos : [targetX, targetY]} );
 					return;
 				}
 				
@@ -3304,7 +3410,7 @@ module.exports = function(callback){
 				return true;
 			});
 			
-			cga.SayWords('遇敌防卡住', 0, 3, 1);	
+			cga.SayWords('遇敌防卡住', 0, 3, 1);
 		}
 		
 		walk();

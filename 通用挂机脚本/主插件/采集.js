@@ -166,7 +166,6 @@ var loop = ()=>{
 		} else {
 			if(mineObject.workManager){
 				mineObject.workManager((err, result)=>{
-					console.log('done');
 					workwork();
 				});
 			} else {
