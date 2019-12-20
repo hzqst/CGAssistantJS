@@ -1,8 +1,13 @@
 var cga = require('./cgaapi')(function(){
 	
-	var healme = function(){
+	var loop = ()=>{
 		
 		var skill = cga.findPlayerSkill('治疗');
+		
+		if(!skill)
+		{
+			throw new Error('没有治疗技能！');
+		}
 		
 		var requiremp = 25 + skill.lv * 5;
 		
@@ -12,12 +17,12 @@ var cga = require('./cgaapi')(function(){
 			[34, 89],
 			], ()=>{
 				cga.TurnTo(35, 88);
-				setTimeout(function(){
+				setTimeout(()=>{
 					cga.walkList([
 					[29, 85],
 					], ()=>{
-						cga.TurnTo(27, 85);
-						healme();
+						cga.turnTo(28, 85);
+						loop();
 					});
 				}, 3000);
 			})
@@ -42,35 +47,34 @@ var cga = require('./cgaapi')(function(){
 		if(index != -1)
 		{
 			cga.StartWork(skill.index, skill.lv-1);
-			cga.AsyncWaitPlayerMenu(function(players){
+			cga.AsyncWaitPlayerMenu((err, players)=>{
 				
-				console.log(teamplayers);
-				console.log(players);
-				
-				for(var i in players){
-					if(players[i].name == teamplayers[index].name){
-						
-						cga.AsyncWaitUnitMenu(function(units){
-							console.log(units);
+				if(players){
+					for(var i in players){
+						if(players[i].name == teamplayers[index].name){
 							
-							cga.AsyncWaitWorkingResult(function(r){
-								healme();
+							cga.AsyncWaitUnitMenu((err, units)=>{
+								cga.AsyncWaitWorkingResult(()=>{
+									loop();
+								});
+								cga.UnitMenuSelect(0);
 							});
-							cga.UnitMenuSelect(0);
-						});
-						cga.PlayerMenuSelect(i);
-						break;
+							cga.PlayerMenuSelect(i);
+							break;
+						}
 					}
+					return;
 				}
+				
+				setTimeout(loop, 1000);
 			});
+			return;
 		}
-		else
-		{
-			//说话防掉线
-			cga.SayWords('', 0, 3, 1);
-			setTimeout(healme, 2000);
-		}
+		
+		//说话防掉线
+		cga.SayWords('', 0, 3, 1);
+		setTimeout(loop, 1000);
 	}
 	
-	healme();
+	loop();
 });
