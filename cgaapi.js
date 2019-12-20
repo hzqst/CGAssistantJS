@@ -153,27 +153,33 @@ module.exports = function(callback){
 		return -1;
 	}
 	
-	cga.turnOrientation = (orientation) => {
+	cga.getOrientationPosition = (orientation, offset)=>{
 		const current = cga.GetMapXY();
 		switch (orientation) {
 			case 0:
-				cga.TurnTo(current.x + 2, current.y); break;
+				return [current.x + offset, current.y];
 			case 1:
-				cga.TurnTo(current.x + 2, current.y + 2); break;
+				return [current.x + offset, current.y + offset];
 			case 2:
-				cga.TurnTo(current.x, current.y + 2); break;
+				return [current.x, current.y + offset];
 			case 3:
-				cga.TurnTo(current.x - 2, current.y + 2); break;
+				return [current.x - offset, current.y + offset];
 			case 4:
-				cga.TurnTo(current.x - 2, current.y); break;
+				return [current.x - offset, current.y];
 			case 5:
-				cga.TurnTo(current.x - 2, current.y - 2); break;
+				return [current.x - offset, current.y - offset];
 			case 6:
-				cga.TurnTo(current.x, current.y - 2); break;
+				return [current.x, current.y - offset];
 			case 7:
-				cga.TurnTo(current.x + 2, current.y - 2); break;
+				return [current.x + offset, current.y - offset];
 			default:
+				return new Error('无效参数');
 		}
+	}
+		
+	cga.turnDir = cga.turnOrientation = (orientation, offset = 2) => {
+		var pos = cga.getOrientationPosition(orientation, offset);
+		cga.TurnTo(pos[0], pos[1]);
 	}
 	
 	cga.turnTo = (x, y)=>{
@@ -410,25 +416,6 @@ module.exports = function(callback){
 			return [parseInt(regex[1]), parseInt(regex[2])];
 		}
 		return null;
-	}
-
-	//转向指定方向
-	//参数： 方向, 0=右上，2=右下, 4=左下，6=左上
-	cga.turnDir = function(dir){
-		var xy = cga.GetMapXY();
-		var x = xy.x;
-		var y = xy.y;
-		switch(dir){
-			case 0: cga.TurnTo(x+2, y);break;
-			case 1: cga.TurnTo(x+2, y+2);break;
-			case 2: cga.TurnTo(x, y+2);break;
-			case 3: cga.TurnTo(x-2, y+2);break;
-			case 4: cga.TurnTo(x-2, y);break;
-			case 5: cga.TurnTo(x-2, y-2);break;
-			case 6: cga.TurnTo(x, y-2);break;
-			case 7: cga.TurnTo(x+2, y-2);break;
-			default: throw new Error('无效的方向');
-		}
 	}
 	
 	cga.travel = {};
@@ -2001,11 +1988,29 @@ module.exports = function(callback){
 	cga.NoRollbackMap = [
 	'艾尔莎岛',
 	'艾夏岛',
+	'利夏岛',
 	'法兰城',
 	'里谢里雅堡',
 	'医院',
 	'工房',
+	'曙光骑士团营地',
 	'圣骑士营地',
+	'哥拉尔镇',
+	'鲁米那斯',
+	'阿凯鲁法村',
+	'坎那贝拉村',
+	'加纳村',
+	'奇利村',
+	'杰诺瓦镇',
+	'伊尔村',
+	'维诺亚村',
+	'乌克兰村',
+	'亚留特村',
+	'圣拉鲁卡村',
+	'阿巴尼斯村',
+	'魔法大学',
+	'魔法大学内部',
+	//'杂货店',
 	];
 	
 	cga.walkList = (list, cb)=>{
@@ -2056,8 +2061,11 @@ module.exports = function(callback){
 			console.log('当前地图序号: ' + curmapindex);
 			console.log('当前坐标: (%d, %d)', curpos.x, curpos.y);
 			console.log('目标坐标: (%d, %d)', targetX, targetY);
-			console.log('目标地图');
-			console.log(targetMap);
+			if(targetMap)
+			{
+				console.log('目标地图');
+				console.log(targetMap);
+			}
 			
 			var end = (arg)=>{
 				
@@ -2067,6 +2075,31 @@ module.exports = function(callback){
 				{
 					cga.isMoveThinking = false;
 					cb(null);
+					return;
+				}
+				
+				var faceDir = cga.GetPlayerInfo().direction;
+				var facedPos = cga.getOrientationPosition(faceDir, 1);
+				var npc = cga.findNPCEx((u)=>{
+					return u.xpos == facedPos[0] && u.ypos == facedPos[1];
+				});
+				
+				if(npc)
+				{
+					cga.turnDir((faceDir + 1) % 7);
+					setTimeout(end, 500, arg);
+					return;
+				}
+				
+				var facedPos2 = cga.getOrientationPosition(faceDir, 2);
+				var npc2 = cga.findNPCEx((u)=>{
+					return u.xpos == facedPos2[0] && u.ypos == facedPos2[1];
+				});
+				
+				if(npc2)
+				{
+					cga.turnDir((faceDir + 1) % 7);
+					setTimeout(end, 500, arg);
 					return;
 				}
 				
