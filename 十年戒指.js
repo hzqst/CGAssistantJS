@@ -21,7 +21,7 @@ var cga = require('./cgaapi')(function(){
 		workFunc: function(cb2){
 			
 			//补血
-			if(cga.needSupplyInitial({  })){
+			if(cga.needSupplyInitial()){
 				cga.travel.falan.toCastleHospital(()=>{
 					setTimeout(()=>{
 						cga.travel.newisland.toStone('X', ()=>{
@@ -59,8 +59,9 @@ var cga = require('./cgaapi')(function(){
 		workFunc: function(cb2){
 			
 			var retry = ()=>{
+				console.log('拿戒指')
 				cga.cleanInventory(1, ()=>{
-					cga.TurnTo(15, 4);
+					cga.turnTo(15, 4);
 					cga.AsyncWaitNPCDialog((err)=>{
 						if(err){
 							cga.walkList([ [14, 5], [15, 5] ], retry);
@@ -82,55 +83,85 @@ var cga = require('./cgaapi')(function(){
 			}
 
 			var go = ()=>{
+				console.log('露比')
 				cga.walkList([
 					[15, 111],
 				], ()=>{
-					cga.TurnTo(15, 109);
+					cga.turnTo(15, 110);
 					cga.AsyncWaitNPCDialog(()=>{
 						cga.ClickNPCDialog(1, 0);
 						cga.waitForBattleEnd(()=>{
+							if(cga.GetMapXY().y != 103){
+								cb(new Error('没有打过露比！请检查战斗配置是否有问题！'));
+								return;
+							}
+							console.log('法尔肯')
 							cga.walkList([
 							[15, 100]
 							], ()=>{
-								cga.TurnTo(15, 98);
+								cga.turnTo(15, 99);
 								cga.AsyncWaitNPCDialog(()=>{
 									cga.ClickNPCDialog(1, 0);
 									cga.waitForBattleEnd(()=>{
+										if(cga.GetMapXY().y != 92){
+											cb(new Error('没有打过法尔肯！请检查战斗配置是否有问题！'));
+											return;
+										}
+										console.log('犹大')
 										cga.walkList([
 										[15, 89]
 										], ()=>{
-											cga.TurnTo(15, 87);
+											cga.turnTo(15, 88);
 											cga.AsyncWaitNPCDialog(()=>{
 												cga.ClickNPCDialog(1, 0);
 												cga.waitForBattleEnd(()=>{
+													if(cga.GetMapXY().y != 81){
+														cb(new Error('没有打过犹大！请检查战斗配置是否有问题！'));
+														return;
+													}
+													console.log('海贼')
 													cga.walkList([
 													[15, 78]
 													], ()=>{
-														cga.TurnTo(15, 76);
+														cga.turnTo(15, 77);
 														cga.AsyncWaitNPCDialog(()=>{
 															cga.ClickNPCDialog(1, 0);
 															cga.waitForBattleEnd(()=>{
+																if(cga.GetMapXY().y != 70){
+																	cb(new Error('没有打过海贼！请检查战斗配置是否有问题！'));
+																	return;
+																}
+																console.log('双王')
 																cga.walkList([
 																[15, 67]
 																], ()=>{
-																	cga.TurnTo(15, 65);
+																	cga.turnTo(15, 66);
 																	cga.AsyncWaitNPCDialog(()=>{
 																		cga.ClickNPCDialog(1, 0);
 																		cga.waitForBattleEnd(()=>{
-																			cga.walkList([
+																			if(cga.GetMapXY().y != 59){
+																				cb(new Error('没有打过双王！请检查战斗配置是否有问题！'));
+																				return;
+																			}
+																			cga.walkList([//帕鲁凯斯的亡灵
 																			[15, 56]
 																			], ()=>{
-																				cga.TurnTo(15, 54);
+																				cga.turnTo(15, 55);
 																				cga.AsyncWaitNPCDialog(()=>{
 																					cga.ClickNPCDialog(1, 0);
 																					cga.waitForBattleEnd(()=>{
+																						if(cga.GetMapXY().y != 48){
+																							cb(new Error('没有打过小帕！请检查战斗配置是否有问题！'));
+																							return;
+																						}
 																						cga.walkList([
-																						[15, 5],
-																						[14, 5],
-																						[15, 5],
-																						[14, 5],
-																						[15, 5],
-																						], retry);
+																							[15, 5],
+																						], ()=>{
+																							cga.walkTeammateToPosition([
+																							[15, 5],
+																							[14, 5],
+																							], retry);
+																						});
 																					});
 																				});
 																			});
