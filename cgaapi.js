@@ -2087,6 +2087,8 @@ module.exports = function(callback){
 				
 				if(npc)
 				{
+					console.log('方向'+faceDir+'发现NPC，为防止说话触发NPC对话，转向一次');
+					console.log(npc);
 					cga.turnDir((faceDir + 1) % 7);
 					setTimeout(end, 500, arg);
 					return;
@@ -2099,6 +2101,8 @@ module.exports = function(callback){
 				
 				if(npc2)
 				{
+					console.log('方向'+faceDir+'发现NPC，为防止说话触发NPC对话，转向一次');
+					console.log(npc2);
 					cga.turnDir((faceDir + 1) % 7);
 					setTimeout(end, 500, arg);
 					return;
@@ -2337,11 +2341,10 @@ module.exports = function(callback){
 	
 	cga.findNPCEx = function(filter){
 		var unit = cga.GetMapUnits().find((u)=>{
-			if(u.valid == 0)
-				return false;
-			if((u.type != 2 && u.type != 1) || u.model_id == 0)
-				return false;
-			return filter(u);
+			if(u.valid == 2 && u.type == 1 && u.model_id != 0 && (u.flags & 4096) != 0)
+				return filter(u);
+			
+			return false;
 		});
 		
 		return unit != undefined ? unit : null;
@@ -3676,7 +3679,7 @@ module.exports = function(callback){
 
 	cga.findPlayerUnit = (filter)=>{
 		var found = cga.GetMapUnits().find((u)=>{
-			return u.type == 8 && ((typeof filter == 'function' && filter(u)) || (typeof filter == 'string' && filter == u.unit_name)) ;
+			return u.valid == 2 && u.type == 8 && (u.flags & 256) != 0 && ((typeof filter == 'function' && filter(u)) || (typeof filter == 'string' && filter == u.unit_name)) ;
 		});
 		return found != undefined ? found : null;
 	}
