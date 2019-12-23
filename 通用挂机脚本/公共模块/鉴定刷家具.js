@@ -12,7 +12,7 @@ var thisobj = {
 		thisobj.object.doneManager(cb);
 	},
 	object : {
-		level : 2,
+		level : 1,
 		name :'刷家具',
 		func : (cb) =>{
 			if(cga.GetMapName() != '哈丝塔的家')
@@ -66,6 +66,8 @@ var thisobj = {
 		},
 		extra_dropping : (item)=>{
 			if(skill.lv < 5 && item.itemid == 14670)
+				return true;
+			if(skill.lv < 3 && item.itemid == 14668)
 				return true;
 			return item.assessed && (item.itemid == 14668 || item.itemid == 14669 || item.itemid == 14670);
 		},
