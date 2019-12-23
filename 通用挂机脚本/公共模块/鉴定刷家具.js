@@ -12,6 +12,7 @@ var thisobj = {
 		thisobj.object.doneManager(cb);
 	},
 	object : {
+		level : 2,
 		name :'刷家具',
 		func : (cb) =>{
 			if(cga.GetMapName() != '哈丝塔的家')
@@ -32,6 +33,7 @@ var thisobj = {
 		},
 		workManager : (cb)=>{
 			
+			thisobj.object.skill = cga.findPlayerSkill('鉴定');
 			cga.turnTo(12, 10);
 			cga.AsyncWaitNPCDialog((err, dlg)=>{
 				if(dlg && dlg.message.indexOf('要的话就拿走吧') > 0)
@@ -63,8 +65,11 @@ var thisobj = {
 			cb(null);
 		},
 		extra_dropping : (item)=>{
+			if(skill.lv < 5 && item.itemid == 14670)
+				return true;
 			return item.assessed && (item.itemid == 14668 || item.itemid == 14669 || item.itemid == 14670);
-		}
+		},
+		skill : null,
 	},
 	check_done : ()=>{
 		return (cga.getItemCount('家具？') > 0 && cga.findAssessableItem() == null) ? true : false;
