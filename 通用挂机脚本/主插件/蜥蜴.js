@@ -337,10 +337,7 @@ var thisobj = {
 
 		if(supplyMode.translate(pair))
 			return true;
-		
-		if(sellStore.translate(pair))
-			return true;
-		
+
 		if(teamMode.translate(pair))
 			return true;
 		
