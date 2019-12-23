@@ -200,7 +200,6 @@ var playerThink = ()=>{
 
 var playerThinkTimer = ()=>{
 	if(playerThinkRunning){
-		playerThinkInterrupt.hasInterrupt();//restore interrupt state
 		if(!playerThink()){
 			console.log('playerThink off');
 			playerThinkRunning = false;
@@ -243,6 +242,7 @@ var loop = ()=>{
 			return;
 		}
 		if(map == '圣骑士营地'){
+			playerThinkInterrupt.hasInterrupt();//restore interrupt state
 			console.log('playerThink on');
 			playerThinkRunning = true;
 			
@@ -255,6 +255,7 @@ var loop = ()=>{
 		}
 		if(map == '蜥蜴洞穴上层第1层')
 		{
+			playerThinkInterrupt.hasInterrupt();//restore interrupt state
 			console.log('playerThink on');
 			playerThinkRunning = true;
 			walkMazeForward((r)=>{
@@ -269,6 +270,7 @@ var loop = ()=>{
 			return;
 		}
 	} else if(!isleader){
+		playerThinkInterrupt.hasInterrupt();//restore interrupt state
 		console.log('playerThink on');
 		playerThinkRunning = true;
 		return;

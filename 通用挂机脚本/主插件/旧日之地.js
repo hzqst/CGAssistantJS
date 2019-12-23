@@ -166,7 +166,6 @@ var playerThink = ()=>{
 
 var playerThinkTimer = ()=>{
 	if(playerThinkRunning){
-		playerThinkInterrupt.hasInterrupt();//restore interrupt state
 		if(!playerThink()){
 			console.log('playerThink off');
 			playerThinkRunning = false;
@@ -200,6 +199,7 @@ var loop = ()=>{
 			return;
 		}
 		if(map == '迷宫入口'){
+			playerThinkInterrupt.hasInterrupt();//restore interrupt state
 			console.log('playerThink on');
 			playerThinkRunning = true;
 			cga.walkList([
@@ -209,6 +209,7 @@ var loop = ()=>{
 		}
 		if(map == '旧日迷宫第1层')
 		{
+			playerThinkInterrupt.hasInterrupt();//restore interrupt state
 			console.log('playerThink on');
 			playerThinkRunning = true;
 			walkMazeForward((r)=>{
@@ -223,6 +224,7 @@ var loop = ()=>{
 			return;
 		}
 	} else if(!isleader){
+		playerThinkInterrupt.hasInterrupt();//restore interrupt state
 		console.log('playerThink on');
 		playerThinkRunning = true;
 		return;

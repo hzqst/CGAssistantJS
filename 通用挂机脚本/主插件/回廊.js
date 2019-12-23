@@ -86,7 +86,11 @@ var playerThink = ()=>{
 			ctx.result = 'supply';
 			interruptFromMoveThink = true;
 		}
-
+		
+		if(ctx.result){
+			console.log(ctx.result);
+			console.log(ctx.reason);
+		}
 		if( ctx.result == 'supply' || ctx.result == 'logback' || ctx.result == 'logback_forced' )
 		{
 			if(interruptFromMoveThink)
@@ -118,8 +122,7 @@ var playerThink = ()=>{
 }
 
 var playerThinkTimer = ()=>{
-	if(playerThinkRunning){		
-		playerThinkInterrupt.hasInterrupt();//restore interrupt state
+	if(playerThinkRunning){
 		if(!playerThink()){
 			console.log('playerThink off');
 			playerThinkRunning = false;
@@ -158,7 +161,7 @@ var loop = ()=>{
 			}
 			else
 			{
-				
+				playerThinkInterrupt.hasInterrupt();//restore interrupt state
 				console.log('playerThink on');				
 				playerThinkRunning = true;
 				//队长：人满了，开始遇敌
@@ -168,6 +171,7 @@ var loop = ()=>{
 		}
 	} else {
 		//进队了
+		playerThinkInterrupt.hasInterrupt();//restore interrupt state
 		console.log('playerThink on');
 		playerThinkRunning = true;
 		return;

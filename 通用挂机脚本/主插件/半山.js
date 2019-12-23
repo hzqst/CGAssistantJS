@@ -143,7 +143,6 @@ var playerThink = ()=>{
 
 var playerThinkTimer = ()=>{
 	if(playerThinkRunning){
-		playerThinkInterrupt.hasInterrupt();//restore interrupt state
 		if(!playerThink()){
 			console.log('playerThink off');
 			playerThinkRunning = false;
@@ -161,6 +160,7 @@ var loop = ()=>{
 	
 	if(isleader && teamMode.is_enough_teammates()){
 		if(map == '半山腰'){
+			playerThinkInterrupt.hasInterrupt();//restore interrupt state
 			console.log('playerThink on');
 			playerThinkRunning = true;
 			cga.walkList([
@@ -171,6 +171,7 @@ var loop = ()=>{
 			return;
 		}
 		if(map == '小岛'){
+			playerThinkInterrupt.hasInterrupt();//restore interrupt state
 			console.log('playerThink on');
 			playerThinkRunning = true;			
 			cga.walkList([
@@ -180,12 +181,14 @@ var loop = ()=>{
 		}
 		if(map == '通往山顶的路100M')
 		{
+			playerThinkInterrupt.hasInterrupt();//restore interrupt state
 			console.log('playerThink on');
 			playerThinkRunning = true;
 			walkMazeForward(loop);
 			return;
 		}
 	} else if(!isleader){
+		playerThinkInterrupt.hasInterrupt();//restore interrupt state
 		console.log('playerThink on');
 		playerThinkRunning = true;
 		return;

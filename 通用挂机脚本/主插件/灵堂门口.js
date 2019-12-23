@@ -136,7 +136,6 @@ var playerThink = ()=>{
 
 var playerThinkTimer = ()=>{
 	if(playerThinkRunning){
-		playerThinkInterrupt.hasInterrupt();//restore interrupt state
 		if(!playerThink()){
 			console.log('playerThink off');
 			playerThinkRunning = false;
@@ -156,6 +155,7 @@ var loop = ()=>{
 	if(isleader && teamMode.is_enough_teammates()){
 		if(map == '灵堂')
 		{
+			playerThinkInterrupt.hasInterrupt();//restore interrupt state
 			console.log('playerThink on');
 			playerThinkRunning = true;
 			
@@ -171,6 +171,7 @@ var loop = ()=>{
 					[23, 19, '灵堂'],
 					[30, 49],
 				], ()=>{
+					playerThinkInterrupt.hasInterrupt();//restore interrupt state
 					console.log('playerThink on');
 					playerThinkRunning = true;
 					cga.freqMove(0);
@@ -184,6 +185,7 @@ var loop = ()=>{
 				[23, 19, '灵堂'],
 				[30, 49],
 			], ()=>{
+				playerThinkInterrupt.hasInterrupt();//restore interrupt state
 				console.log('playerThink on');
 				playerThinkRunning = true;
 				cga.freqMove(4);
@@ -191,6 +193,7 @@ var loop = ()=>{
 			return;
 		}
 	} else if(!isleader){
+		playerThinkInterrupt.hasInterrupt();//restore interrupt state
 		console.log('playerThink on');
 		playerThinkRunning = true;
 		return;

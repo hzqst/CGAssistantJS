@@ -132,7 +132,6 @@ var playerThink = ()=>{
 
 var playerThinkTimer = ()=>{
 	if(playerThinkRunning){
-		playerThinkInterrupt.hasInterrupt();//restore interrupt state
 		if(!playerThink()){
 			console.log('playerThink off');
 			playerThinkRunning = false;
@@ -171,6 +170,7 @@ var loop = ()=>{
 			else
 			{
 				//队长：人满了，开始遇敌
+				playerThinkInterrupt.hasInterrupt();//restore interrupt state
 				console.log('playerThink on');
 				playerThinkRunning = true;
 				cga.walkList([
@@ -182,6 +182,7 @@ var loop = ()=>{
 			}
 		}
 	} else {
+		playerThinkInterrupt.hasInterrupt();//restore interrupt state
 		console.log('playerThink on');
 		playerThinkRunning = true;
 		return;
