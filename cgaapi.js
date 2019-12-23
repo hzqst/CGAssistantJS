@@ -2079,7 +2079,7 @@ module.exports = function(callback){
 					return;
 				}
 				
-				var faceDir = cga.GetPlayerInfo().direction;
+				/*var faceDir = cga.GetPlayerInfo().direction;
 				var facedPos = cga.getOrientationPosition(faceDir, 1);
 				var npc = cga.findNPCEx((u)=>{
 					return u.xpos == facedPos[0] && u.ypos == facedPos[1];
@@ -2148,9 +2148,9 @@ module.exports = function(callback){
 					return true;
 				});
 				
-				cga.SayWords('遇敌防卡住', 0, 3, 1);
+				cga.SayWords('遇敌防卡住', 0, 3, 1);*/
 				
-				/*var waitBattle2 = ()=>{
+				var waitBattle2 = ()=>{
 					if(!cga.isInNormalState()){
 						setTimeout(waitBattle2, 1500);
 						return;
@@ -2181,7 +2181,7 @@ module.exports = function(callback){
 					cb(null);
 					return;
 				}
-				setTimeout(waitBattle2, 1500);*/
+				setTimeout(waitBattle2, 1500);
 			}
 			
 			var walker = (err, reason)=>{
