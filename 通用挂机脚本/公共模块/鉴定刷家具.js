@@ -65,9 +65,7 @@ var thisobj = {
 			cb(null);
 		},
 		extra_dropping : (item)=>{
-			if(skill.lv < 5 && item.itemid == 14670)
-				return true;
-			if(skill.lv < 3 && item.itemid == 14668)
+			if(thisobj.object.skill.lv < 5 && item.itemid == 14670)
 				return true;
 			return item.assessed && (item.itemid == 14668 || item.itemid == 14669 || item.itemid == 14670);
 		},
