@@ -3379,6 +3379,12 @@ module.exports = function(callback){
 	
 	cga.walkTeammateToPosition = (posArray, cb) =>{
 		
+		if(cga.getTeamPlayers().length == 0)
+		{
+			cb(null);
+			return;
+		}
+		
 		var index = 0;
 		
 		var walk = ()=>{
