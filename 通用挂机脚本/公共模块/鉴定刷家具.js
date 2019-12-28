@@ -35,31 +35,33 @@ var thisobj = {
 			
 			thisobj.object.skill = cga.findPlayerSkill('鉴定');
 			cga.turnTo(12, 10);
-			cga.AsyncWaitNPCDialog((err, dlg)=>{
-				if(dlg && dlg.message.indexOf('要的话就拿走吧') > 0)
+			
+			var dialogHandler = (err, dlg)=>{
+				if(dlg && (dlg.options & 4) == 4)
 				{
 					cga.ClickNPCDialog(4, 0);
-					cga.AsyncWaitNPCDialog((err, dlg)=>{
-						if(dlg && dlg.message.indexOf('谢谢你的帮忙') > 0)
-						{
-							cga.ClickNPCDialog(1, 0);
-							setTimeout(()=>{
-								cga.assessAllItems(cb);
-							}, 500);
-						}
-						else
-						{
-							cga.assessAllItems(cb);
-							return;
-						}
-					});
+					cga.AsyncWaitNPCDialog(dialogHandler);
+				}
+				if(dlg && (dlg.options & 32) == 32)
+				{
+					cga.ClickNPCDialog(32, 0);
+					cga.AsyncWaitNPCDialog(dialogHandler);
+				}
+				else if(dlg && dlg.options == 1)
+				{
+					cga.ClickNPCDialog(1, 0);
+					setTimeout(()=>{
+						cga.assessAllItems(cb);
+					}, 500);
 				}
 				else
 				{
 					cga.assessAllItems(cb);
 					return;
 				}
-			});
+			}
+			
+			cga.AsyncWaitNPCDialog(dialogHandler);
 		},
 		doneManager : (cb)=>{
 			cb(null);

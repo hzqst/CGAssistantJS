@@ -3604,83 +3604,137 @@ module.exports = function(callback){
 		setTimeout(cga.waitForMultipleLocation, 1000, arr);
 	}
 	
+	cga.cachedMapTileMatrix = null;
+	cga.cachedMapTileMatrixTime = 0;
+	
 	cga.buildMapTileMatrix = ()=>{
-		var wall = cga.GetMapTileTable(true);
-		var matrix = [];
-		for(var y = 0; y < wall.y_size; ++y){
-			if(!matrix[y])
-				matrix[y] = [];
-			for(var x = 0; x < wall.x_size; ++x){
-				matrix[y][x] = wall.cell[x + y * wall.x_size];
+		var curtime = (new Date()).getTime();
+		if(cga.cachedMapTileMatrix == null || curtime > cga.cachedMapTileMatrixTime + 200)
+		{
+			var wall = cga.GetMapTileTable(true);
+			var matrix = [];
+			for(var y = 0; y < wall.y_size; ++y){
+				if(!matrix[y])
+					matrix[y] = [];
+				for(var x = 0; x < wall.x_size; ++x){
+					matrix[y][x] = wall.cell[x + y * wall.x_size];
+				}
 			}
+			
+			cga.cachedMapTileMatrix = curtime;
+			cga.cachedMapTileMatrix = {matrix : matrix, x_bottom : wall.x_bottom, y_bottom : wall.y_bottom, x_size : wall.x_size, y_size : wall.y_size};
 		}
-		return {matrix : matrix, x_bottom : wall.x_bottom, y_bottom : wall.y_bottom, x_size : wall.x_size, y_size : wall.y_size};
+		return cga.cachedMapTileMatrix;
 	}
+	
+	cga.cachedMapCollisionRawMatrix = null;
+	cga.cachedMapCollisionRawMatrixTime = 0;
 	
 	cga.buildMapCollisionRawMatrix = ()=>{
-		var wall = cga.GetMapCollisionTableRaw(true);
-		var matrix = [];
-		for(var y = 0; y < wall.y_size; ++y){
-			if(!matrix[y])
-				matrix[y] = [];
-			for(var x = 0; x < wall.x_size; ++x){
-				matrix[y][x] = wall.cell[x + y * wall.x_size];
+		var curtime = (new Date()).getTime();
+		if(cga.cachedMapCollisionRawMatrix == null || curtime > cga.cachedMapCollisionRawMatrixTime + 200)
+		{
+			var wall = cga.GetMapCollisionTableRaw(true);
+			var matrix = [];
+			for(var y = 0; y < wall.y_size; ++y){
+				if(!matrix[y])
+					matrix[y] = [];
+				for(var x = 0; x < wall.x_size; ++x){
+					matrix[y][x] = wall.cell[x + y * wall.x_size];
+				}
 			}
+			
+			cga.cachedMapCollisionRawMatrixTime = curtime;
+			cga.cachedMapCollisionRawMatrix = {matrix : matrix, x_bottom : wall.x_bottom, y_bottom : wall.y_bottom, x_size : wall.x_size, y_size : wall.y_size};
 		}
-		return {matrix : matrix, x_bottom : wall.x_bottom, y_bottom : wall.y_bottom, x_size : wall.x_size, y_size : wall.y_size};
+		
+		return cga.cachedMapCollisionRawMatrix;
 	}
 	
+	cga.cachedMapCollisionMatrix = null;
+	cga.cachedMapCollisionMatrixTime = 0;
+	
 	cga.buildMapCollisionMatrix = (exitIsBlocked)=>{
-		var wall = cga.GetMapCollisionTable(true);
-		var objs = null;
-		if(exitIsBlocked == true)
-			objs = cga.GetMapObjectTable(true);
-		var matrix = [];
-		for(var y = 0; y < wall.y_size; ++y){
-			if(!matrix[y])
-				matrix[y] = [];
-			for(var x = 0; x < wall.x_size; ++x){
-				matrix[y][x] = wall.cell[x + y * wall.x_size] == 1 ? 1 : 0;
-				if(exitIsBlocked == true){
-					if(objs.cell[x + y * objs.x_size] & 0xff){
-						matrix[y][x] = 1;
+		var curtime = (new Date()).getTime();
+		if(cga.cachedMapCollisionMatrix == null || curtime > cga.cachedMapCollisionMatrixTime + 200)
+		{
+			var wall = cga.GetMapCollisionTable(true);
+			var objs = null;
+			if(exitIsBlocked == true)
+				objs = cga.GetMapObjectTable(true);
+			var matrix = [];
+			for(var y = 0; y < wall.y_size; ++y){
+				if(!matrix[y])
+					matrix[y] = [];
+				for(var x = 0; x < wall.x_size; ++x){
+					matrix[y][x] = wall.cell[x + y * wall.x_size] == 1 ? 1 : 0;
+					if(exitIsBlocked == true){
+						if(objs.cell[x + y * objs.x_size] & 0xff){
+							matrix[y][x] = 1;
+						}
 					}
 				}
 			}
+		
+			cga.cachedMapCollisionMatrixTime = curtime;
+			cga.cachedMapCollisionMatrix = {matrix : matrix, x_bottom : wall.x_bottom, y_bottom : wall.y_bottom, x_size : wall.x_size, y_size : wall.y_size};
 		}
-		return {matrix : matrix, x_bottom : wall.x_bottom, y_bottom : wall.y_bottom, x_size : wall.x_size, y_size : wall.y_size};
+		
+		return cga.cachedMapCollisionMatrix;
 	}
+	
+	cga.cachedMapObjectMatrix = null;
+	cga.cachedMapObjectMatrixTime = 0;
 	
 	cga.buildMapObjectMatrix = ()=>{
-		var wall = cga.GetMapObjectTable(true);
-		var matrix = [];
-		for(var y = 0; y < wall.y_size; ++y){
-			if(!matrix[y])
-				matrix[y] = [];
-			for(var x = 0; x < wall.x_size; ++x){
-				matrix[y][x] = wall.cell[x + y * wall.x_size] & 0xff;
+		var curtime = (new Date()).getTime();
+		if(cga.cachedMapObjectMatrix == null || curtime > cga.cachedMapObjectMatrixTime + 200)
+		{
+			var wall = cga.GetMapObjectTable(true);
+			var matrix = [];
+			for(var y = 0; y < wall.y_size; ++y){
+				if(!matrix[y])
+					matrix[y] = [];
+				for(var x = 0; x < wall.x_size; ++x){
+					matrix[y][x] = wall.cell[x + y * wall.x_size] & 0xff;
+				}
 			}
+			
+			cga.cachedMapObjectMatrixTime = curtime;
+			cga.cachedMapObjectMatrix = {matrix : matrix, x_bottom : wall.x_bottom, y_bottom : wall.y_bottom, x_size : wall.x_size, y_size : wall.y_size};
 		}
-		return {matrix : matrix, x_bottom : wall.x_bottom, y_bottom : wall.y_bottom, x_size : wall.x_size, y_size : wall.y_size};
+		
+		return cga.cachedMapObjectMatrix;
 	}
 	
+	cga.cachedMapObjects = null;
+	cga.cachedMapObjectsTime = 0;
+	
 	cga.getMapObjects = ()=>{
-		var wall = cga.GetMapObjectTable(true);
-		var objs = [];
-		for(var y = 0; y < wall.y_size; ++y){
-			for(var x = 0; x < wall.x_size; ++x){
-				if((wall.cell[x + y * wall.x_size] & 0xff) != 0)
-					objs.push({
-						x:x,
-						y:y,
-						mapx:x+wall.x_bottom,
-						mapy:y+wall.y_bottom,
-						cell:wall.cell[x + y * wall.x_size] & 0xff,
-						rawcell:wall.cell[x + y * wall.x_size]
-					});
+		var curtime = (new Date()).getTime();
+		if(cga.cachedMapObjects == null || curtime > cga.cachedMapObjectsTime + 200)
+		{
+			var wall = cga.GetMapObjectTable(true);
+			var objs = [];
+			for(var y = 0; y < wall.y_size; ++y){
+				for(var x = 0; x < wall.x_size; ++x){
+					if((wall.cell[x + y * wall.x_size] & 0xff) != 0)
+						objs.push({
+							x:x,
+							y:y,
+							mapx:x+wall.x_bottom,
+							mapy:y+wall.y_bottom,
+							cell:wall.cell[x + y * wall.x_size] & 0xff,
+							rawcell:wall.cell[x + y * wall.x_size]
+						});
+				}
 			}
+			
+			cga.cachedMapObjectsTime = curtime;
+			cga.cachedMapObjects = objs;
 		}
-		return objs;
+		
+		return cga.cachedMapObjects;
 	}
 
 	cga.findPlayerUnit = (filter)=>{
