@@ -37,15 +37,18 @@ var thisobj = {
 			cga.turnTo(12, 10);
 			
 			var dialogHandler = (err, dlg)=>{
+				console.log(dlg)
 				if(dlg && (dlg.options & 4) == 4)
 				{
 					cga.ClickNPCDialog(4, 0);
 					cga.AsyncWaitNPCDialog(dialogHandler);
+					return;
 				}
 				if(dlg && (dlg.options & 32) == 32)
 				{
 					cga.ClickNPCDialog(32, 0);
 					cga.AsyncWaitNPCDialog(dialogHandler);
+					return;
 				}
 				else if(dlg && dlg.options == 1)
 				{
@@ -53,6 +56,7 @@ var thisobj = {
 					setTimeout(()=>{
 						cga.assessAllItems(cb);
 					}, 500);
+					return;
 				}
 				else
 				{
