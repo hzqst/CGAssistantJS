@@ -37,7 +37,6 @@ var thisobj = {
 			cga.turnTo(12, 10);
 			
 			var dialogHandler = (err, dlg)=>{
-				console.log(dlg)
 				if(dlg && (dlg.options & 4) == 4)
 				{
 					cga.ClickNPCDialog(4, 0);

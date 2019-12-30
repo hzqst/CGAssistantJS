@@ -44,6 +44,7 @@ module.exports = {
 									setTimeout(cb, 1000);
 								});
 							});
+							return;
 						}
 						
 						cb(null);
