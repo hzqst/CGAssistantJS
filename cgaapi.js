@@ -3609,7 +3609,7 @@ module.exports = function(callback){
 	
 	cga.buildMapTileMatrix = ()=>{
 		var curtime = (new Date()).getTime();
-		if(cga.cachedMapTileMatrix == null || curtime > cga.cachedMapTileMatrixTime + 200)
+		if(1 || cga.cachedMapTileMatrix == null || curtime > cga.cachedMapTileMatrixTime + 200)
 		{
 			var wall = cga.GetMapTileTable(true);
 			var matrix = [];
@@ -3632,7 +3632,7 @@ module.exports = function(callback){
 	
 	cga.buildMapCollisionRawMatrix = ()=>{
 		var curtime = (new Date()).getTime();
-		if(cga.cachedMapCollisionRawMatrix == null || curtime > cga.cachedMapCollisionRawMatrixTime + 200)
+		if(1 || cga.cachedMapCollisionRawMatrix == null || curtime > cga.cachedMapCollisionRawMatrixTime + 200)
 		{
 			var wall = cga.GetMapCollisionTableRaw(true);
 			var matrix = [];
@@ -3656,7 +3656,7 @@ module.exports = function(callback){
 	
 	cga.buildMapCollisionMatrix = (exitIsBlocked)=>{
 		var curtime = (new Date()).getTime();
-		if(cga.cachedMapCollisionMatrix == null || curtime > cga.cachedMapCollisionMatrixTime + 200)
+		if(1 || cga.cachedMapCollisionMatrix == null || curtime > cga.cachedMapCollisionMatrixTime + 200)
 		{
 			var wall = cga.GetMapCollisionTable(true);
 			var objs = null;
@@ -3688,7 +3688,7 @@ module.exports = function(callback){
 	
 	cga.buildMapObjectMatrix = ()=>{
 		var curtime = (new Date()).getTime();
-		if(cga.cachedMapObjectMatrix == null || curtime > cga.cachedMapObjectMatrixTime + 200)
+		if(1 || cga.cachedMapObjectMatrix == null || curtime > cga.cachedMapObjectMatrixTime + 200)
 		{
 			var wall = cga.GetMapObjectTable(true);
 			var matrix = [];
@@ -3712,7 +3712,7 @@ module.exports = function(callback){
 	
 	cga.getMapObjects = ()=>{
 		var curtime = (new Date()).getTime();
-		if(cga.cachedMapObjects == null || curtime > cga.cachedMapObjectsTime + 200)
+		if(1 || cga.cachedMapObjects == null || curtime > cga.cachedMapObjectsTime + 200)
 		{
 			var wall = cga.GetMapObjectTable(true);
 			var objs = [];
