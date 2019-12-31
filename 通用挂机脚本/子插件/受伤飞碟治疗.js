@@ -47,7 +47,7 @@ module.exports = {
 	think : (ctx)=>{
 		if(cga.GetPlayerInfo().health != 0)
 		{
-			ctx.result = 'logout_forced';
+			ctx.result = 'logback_forced';
 			ctx.reason = '受伤飞碟治疗';
 		}
 	},

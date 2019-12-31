@@ -39,7 +39,7 @@ module.exports = {
 	think : (ctx)=>{
 		if(cga.GetPlayerInfo().souls != 0)
 		{
-			ctx.result = 'logout_forced';
+			ctx.result = 'logback_forced';
 			ctx.reason = '掉魂自动招魂';
 		}
 	},
