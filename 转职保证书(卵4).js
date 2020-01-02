@@ -165,12 +165,12 @@ var cga = require('./cgaapi')(function(){
 	
 	var goodToGoZDZ = (cb)=>{
 		
-		var findZDZ_C = (cb2)=>{
+		var findZDZ_D = ()=>{
 			cga.walkList([
-				[234, 202],
+				[193, 184],
 			], ()=>{
-				if(cga.findNPCByPosition('障碍物', 235, 202)){
-					cga.turnTo(235, 202);
+				if(cga.findNPCByPosition('障碍物', 192, 184)){
+					cga.turnTo(192, 184);
 					return;
 				}
 				cga.SayWords('错误：找不到任何活着的障碍物!', 0, 3, 1);
@@ -178,7 +178,20 @@ var cga = require('./cgaapi')(function(){
 			});
 		}
 		
-		var findZDZ_B = (cb2)=>{
+		var findZDZ_C = ()=>{
+			cga.walkList([
+				[234, 202],
+			], ()=>{
+				if(cga.findNPCByPosition('障碍物', 235, 202)){
+					cga.turnTo(235, 202);
+					return;
+				}
+				findZDZ_D();
+				return;
+			});
+		}
+		
+		var findZDZ_B = ()=>{
 			cga.walkList([
 				[229, 177],
 			], ()=>{
@@ -280,17 +293,20 @@ var cga = require('./cgaapi')(function(){
 	{//1
 		intro: '1.黄昏或夜晚前往艾尔莎岛神殿·伽蓝（200.96）三楼神殿·里侧大厅，至（48.60）处进入约尔克神庙。调查(39.21)处，获得【琥珀之卵】。',
 		workFunc: function(cb2){
-			cga.travel.newisland.toStone('X', ()=>{
-				cga.walkList([
-				[201, 96, '神殿　伽蓝'],
-				[95, 104, '神殿　前廊'],
-				[44, 41, '神殿　里侧大厅'],
-				[34, 34, 59535],
-				[48, 60, '约尔克神庙'],
-				[39, 22],
-				], ()=>{
-					cga.TurnTo(39, 20);
-					cga.AsyncWaitNPCDialog(()=>{
+			
+			if(cga.getItemCount('琥珀之卵') > 0){
+				cb2(true);
+				return;
+			}
+			
+			var retry = ()=>{
+				cga.cleanInventory(1, ()=>{
+					cga.turnTo(39, 21);
+					cga.AsyncWaitNPCDialog((err, dlg)=>{
+						if(!(dlg && dlg.message.indexOf('感觉脑海中有什么声响') >= 0)){
+							setTimeout(retry, 5000);
+							return;
+						}
 						cga.ClickNPCDialog(32, 0);
 						cga.AsyncWaitNPCDialog(()=>{
 							cga.ClickNPCDialog(32, 0);
@@ -312,6 +328,19 @@ var cga = require('./cgaapi')(function(){
 							});
 						});
 					});
+				});				
+			}
+			
+			cga.travel.newisland.toStone('X', ()=>{
+				cga.walkList([
+				[201, 96, '神殿　伽蓝'],
+				[95, 104, '神殿　前廊'],
+				[44, 41, '神殿　里侧大厅'],
+				[34, 34, 59535],
+				[48, 60, '约尔克神庙'],
+				[39, 22],
+				], ()=>{
+					retry();
 				});
 			});
 		}
@@ -424,8 +453,8 @@ var cga = require('./cgaapi')(function(){
 					[201, 96, '神殿　伽蓝'],
 					[91, 138],
 				], (r)=>{
-					cga.task.waitForNPC('荷特普', function(){
-						cga.TurnTo(92, 138);
+					cga.task.waitForNPC('荷特普', ()=>{
+						cga.turnTo(92, 138);
 						cga.AsyncWaitNPCDialog(()=>{
 							cga.ClickNPCDialog(32, -1);
 							cga.AsyncWaitNPCDialog(()=>{
@@ -449,20 +478,28 @@ var cga = require('./cgaapi')(function(){
 	{//5
 		intro: '前往艾夏岛冒险者旅馆(102.115)与安洁可(55.32)对话，获得【逆十字】。',
 		workFunc: function(cb2){
+			
+			if(cga.getItemCount('逆十字') > 0){
+				cb2(true);
+				return;
+			}
+			
 			cga.travel.newisland.toPUB(()=>{
 				cga.walkList([
 					[56, 32],
 				], (r)=>{
-					cga.TurnTo(56, 31);
-					cga.AsyncWaitNPCDialog(()=>{
-						cga.ClickNPCDialog(32, -1);
+					cga.cleanInventory(1, ()=>{
+						cga.turnTo(56, 31);
 						cga.AsyncWaitNPCDialog(()=>{
-							cga.ClickNPCDialog(1, -1);
-							setTimeout(()=>{
-								cb2(true);
-							}, 1000);
+							cga.ClickNPCDialog(32, -1);
+							cga.AsyncWaitNPCDialog(()=>{
+								cga.ClickNPCDialog(1, -1);
+								setTimeout(()=>{
+									cb2(true);
+								}, 1000);
+							});
 						});
-					});
+					});					
 				});
 			});
 		}
@@ -514,7 +551,7 @@ var cga = require('./cgaapi')(function(){
 		intro: '8.击倒(136.197)一带的阻挡者后，进入(156.197)的传送石。9.击倒(213.226)、(235.202)等位置的任意一个阻挡者，随机被传送。',
 		workFunc: function(cb2){
 			cga.walkList([
-				[135, 197, null],
+				[135, 197],
 			], (r)=>{
 				var step = 7;
 				var go = ()=>{
@@ -526,7 +563,7 @@ var cga = require('./cgaapi')(function(){
 						cga.walkList((cga.isTeamLeader == true) ? 
 						[
 						[156, 197, '？？？', 213, 164],
-						[213, 165, null],
+						[213, 165],
 						] : [
 						[156, 197, '？？？', 213, 164],
 						], ()=>{
@@ -576,7 +613,7 @@ var cga = require('./cgaapi')(function(){
 			}
 			
 			cga.walkList([
-				[163, 107, null],
+				[163, 107],
 			], (r)=>{
 				var step = 4;
 				var go = ()=>{
@@ -586,13 +623,11 @@ var cga = require('./cgaapi')(function(){
 						setTimeout(go, 500);
 					}else{
 						cga.walkList([
-						[163, 123, null],
-						[212, 123, null],
-						[218, 117, null],
+						[218, 117],
 						[242, 117, 59716],
-						[221, 187, null],
+						[221, 187],
 						], ()=>{
-							cga.TurnTo(222, 188);
+							cga.turnTo(222, 188);
 							cga.AsyncWaitNPCDialog(()=>{
 								cga.ClickNPCDialog(32, -1);
 								cga.AsyncWaitNPCDialog(()=>{
