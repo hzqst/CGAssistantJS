@@ -31,13 +31,32 @@ var cga = require('./cgaapi')(function(){
 	var walkMazeForward = (cb)=>{
 		cga.walkRandomMaze(null, (err)=>{
 			console.log(err);
-			cb(err === true ? true : false);
+			cb(err);
 		}, {
 			layerNameFilter : (layerIndex)=>{
 				return '海底墓场外苑第'+(layerIndex + 1)+'地带';
 			},
 			entryTileFilter : (e)=>{
-				return e.colraw == 0x462F || e.colraw == 0;
+				return e.colraw == 0x462F;
+			}
+		});
+	}
+	
+	var walkMazeBack = (cb)=>{
+		var map = cga.GetMapName();
+		if(map == '？？？'){
+			cb(null);
+			return;
+		}
+		cga.walkRandomMaze(null, (err)=>{
+			console.log(err);
+			cb(err);
+		}, {
+			layerNameFilter : (layerIndex)=>{
+				return layerIndex > 1 ? '海底墓场外苑第'+(layerIndex - 1)+'地带': '？？？';
+			},
+			entryTileFilter : (e)=>{
+				return e.colraw == 0x462E || e.colraw == 0;
 			}
 		});
 	}
@@ -146,15 +165,28 @@ var cga = require('./cgaapi')(function(){
 	
 	var goodToGoZDZ = (cb)=>{
 		
-		var findZDZ_B = (cb2)=>{
+		var findZDZ_C = (cb2)=>{
 			cga.walkList([
 				[234, 202],
 			], ()=>{
-				if(cga.findNPCByPosition('障碍物', 235, 202) != false){
-					cga.TurnTo(235, 202);
+				if(cga.findNPCByPosition('障碍物', 235, 202)){
+					cga.turnTo(235, 202);
 					return;
 				}
 				cga.SayWords('错误：找不到任何活着的障碍物!', 0, 3, 1);
+				return;
+			});
+		}
+		
+		var findZDZ_B = (cb2)=>{
+			cga.walkList([
+				[229, 177],
+			], ()=>{
+				if(cga.findNPCByPosition('障碍物', 230, 177)){
+					cga.turnTo(230, 177);
+					return;
+				}
+				findZDZ_C();
 				return;
 			});
 		}
@@ -163,8 +195,8 @@ var cga = require('./cgaapi')(function(){
 			cga.walkList([
 				[213, 225],
 			], ()=>{
-				if(cga.findNPCByPosition('障碍物', 213, 226) != false){
-					cga.TurnTo(213, 226);
+				if(cga.findNPCByPosition('障碍物', 213, 226)){
+					cga.turnTo(213, 226);
 					return;
 				}
 				findZDZ_B();
@@ -372,9 +404,9 @@ var cga = require('./cgaapi')(function(){
 						});
 						return;
 					}
-					walkMazeForward(walkShit);
+					walkMazeBack(walkShit);
 				}
-				walkMazeForward(walkShit);				
+				walkMazeBack(walkShit);				
 				return;
 			}
 			else
