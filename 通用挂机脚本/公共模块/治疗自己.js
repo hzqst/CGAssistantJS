@@ -13,9 +13,7 @@ var thisobj = {
 		var playerinfo = cga.GetPlayerInfo();
 		
 		if (playerinfo.mp < requiremp){
-			cga.travel.falan.toCastleHospital(()=>{
-				setTimeout(thisobj.func, 3000, cb);
-			});
+			cb(new Error('治疗蓝量不足'));
 			return;
 		}
 
@@ -28,7 +26,7 @@ var thisobj = {
 					if(playerinfo.health != 0)
 						thisobj.func(cb);
 					else
-						cb(true);
+						cb(null);
 				});
 			});
 		});

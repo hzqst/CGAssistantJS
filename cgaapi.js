@@ -2490,17 +2490,14 @@ module.exports = function(callback){
 	}
 	
 	//等待NPC出现
-	cga.task.waitForNPC = function(name, cb2){
-		var waitNpc = ()=>{
-			if(cga.findNPC(name) == false){
-				setTimeout(waitNpc, 10000);
-				cga.SayWords('', 0, 3, 1);
-				return;
-			}
-			
-			cb2(true);
+	cga.task.waitForNPC = (filter, cb2)=>{
+		if(!cga.findNPC(filter)){
+			setTimeout(cga.task.waitForNPC, 10000, filter, cb);
+			cga.SayWords('', 0, 3, 1);
+			return;
 		}
-		waitNpc();
+		
+		cb2(null);
 	}
 	
 	cga.task.joinJobBattleCommon = function(jobname, cb) {
@@ -2517,7 +2514,7 @@ module.exports = function(callback){
 					cga.walkList([
 					[npc.xpos-1, npc.ypos]
 					], (r)=>{
-						cga.TurnTo(npc.xpos, npc.ypos);
+						cga.turnTo(npc.xpos, npc.ypos);
 						cga.AsyncWaitNPCDialog(()=>{
 							cga.ClickNPCDialog(0, 0);
 							cga.AsyncWaitNPCDialog(()=>{

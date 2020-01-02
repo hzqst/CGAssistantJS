@@ -138,12 +138,12 @@ var loop = ()=>{
 		return;
 	}
 
-	var workwork = ()=>{
+	var workwork = (err)=>{
 		
 		check_drop();
 		
 		var playerInfo = cga.GetPlayerInfo();
-		if(playerInfo.mp == 0){
+		if(playerInfo.mp == 0 || (err && err.message == '治疗蓝量不足')){
 			loop();
 			return;
 		}
@@ -161,15 +161,15 @@ var loop = ()=>{
 		if(skill != null && !mineObject.workManager){
 			cga.StartWork(skill.index, 0);
 			cga.AsyncWaitWorkingResult((err, result)=>{
-				workwork();
+				workwork(null);
 			}, 10000);
 		} else {
 			if(mineObject.workManager){
 				mineObject.workManager((err, result)=>{
-					workwork();
+					workwork(null);
 				});
 			} else {
-				setTimeout(workwork, 1500);
+				setTimeout(workwork, 1500, null);
 			}
 		}
 	}
