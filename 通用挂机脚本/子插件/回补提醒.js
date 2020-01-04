@@ -57,7 +57,7 @@ var thisobj = {
 			}
 		}
 		if(thisobj.minMpPercent !== undefined)
-		{
+		{			
 			if(ctx.playerinfo.mp < ctx.playerinfo.maxmp * thisobj.minMpPercent / 100 && curTime >= thisobj.muteUntil){
 				cga.SayWords('人物蓝量不够，需要回补!', 0, 3, 1);
 				thisobj.muteUntil = curTime + 1000 * thisobj.mute;
@@ -142,7 +142,7 @@ var thisobj = {
 			console.error('读取配置：回补蓝量失败！');
 			return false;
 		}
-		
+
 		return true;
 	},
 	inputcb : (cb)=>{

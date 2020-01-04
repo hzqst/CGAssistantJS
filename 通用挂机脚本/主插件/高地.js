@@ -263,6 +263,10 @@ var loop = ()=>{
 	{
 		if(thisobj.battleArea.isDesiredMap(map))
 		{
+			playerThinkInterrupt.hasInterrupt();//restore interrupt state
+			console.log('playerThink on');
+			playerThinkRunning = true;
+			
 			cga.freqMove(thisobj.battleArea.moveDir);
 			return;
 		}
