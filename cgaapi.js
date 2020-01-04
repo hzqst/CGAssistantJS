@@ -2932,6 +2932,25 @@ module.exports = function(callback){
 		return -1;
 	}
 
+	cga.getInventoryEmptySlotCount = () =>{
+		
+		var items = cga.GetItemsInfo();
+
+		var arr = [];
+
+		for(var i = 0; i < items.length; ++i){
+			arr[items[i].pos-8] = items[i];
+		}
+		var count = 0;
+		
+		for(var i = 0; i < 20; ++i){
+			if(!arr[i])
+				count ++;
+		}
+		
+		return count;
+	}
+
 	cga.saveToBankOnce = (filter, maxcount, cb)=>{
 		var itempos = cga.findItem(filter);
 		if(itempos == -1){
