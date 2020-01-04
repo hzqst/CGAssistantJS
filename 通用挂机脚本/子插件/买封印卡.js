@@ -31,9 +31,6 @@ const buyLoop = (cb)=>{
 					buyCount ++;
 				}
 			});
-			
-			console.log(buyitem);
-			
 			if(!buyitem.length)
 			{
 				cb(new Error('商店没有封印卡出售，可能已被买完'));
