@@ -47,9 +47,14 @@ module.exports = {
 							cga.LogBack();
 							setTimeout(()=>{
 								cga.travel.falan.toBank(()=>{
-									cga.AsyncWaitNPCDialog(()=>{
-										cga.MoveGold(980000, cga.MOVE_GOLD_TOBANK);
-										setTimeout(cb, 1000, null);
+									cga.walkList([
+									[11, 8],
+									], ()=>{
+										cga.turnDir(0);
+										cga.AsyncWaitNPCDialog(()=>{
+											cga.MoveGold(980000, cga.MOVE_GOLD_TOBANK);
+											setTimeout(cb, 1000, null);
+										});
 									});
 								});
 							}, 1000);

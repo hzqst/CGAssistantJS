@@ -41,10 +41,12 @@ const putdownEquipments = (cb)=>{
 	var items = cga.getEquipItems().filter(repairFilter);
 	if(items.length){
 		var emptyslot = cga.findInventoryEmptySlot();
-		if(emptyslot == -1)
-			throw new Error('物品栏没有空位');
+		if(emptyslot == -1){
+			cb(new Error('物品栏没有空位'));
+			return;
+		}
 		cga.MoveItem(items[0].pos, emptyslot, -1)
-		setTimeout(putdownEquipments, 500, cb);
+		setTimeout(putdownEquipments, 1000, cb);
 		return;
 	}
 	
@@ -52,17 +54,18 @@ const putdownEquipments = (cb)=>{
 }
 
 const putupEquipments = (equipped, cb)=>{
+	var currentEquip = cga.getEquipItems();
 	var item = cga.getInventoryItems().find((eq)=>{
 		return equipped.find((eq2)=>{
 			return eq2.name == eq.name;
-		}) != undefined && cga.getEquipItems().find((eq2)=>{
+		}) != undefined && currentEquip.find((eq2)=>{
 			return eq2.name == eq.name;
 		}) == undefined;
 	});
 	
 	if(item != undefined){
 		cga.UseItem(item.pos)
-		setTimeout(putupEquipments, 500, equipped, cb);
+		setTimeout(putupEquipments, 1000, equipped, cb);
 		return;
 	}
 	
@@ -79,22 +82,28 @@ const repairLoop = (needRepair, cb)=>{
 	});
 }
 
-module.exports = {
+var thisobj = {
 	prepare : (cb)=>{
 		var items = cga.getEquipItems().filter(repairFilter);
 		if(!items.length){
 			cb(null);
 			return;
 		}
-		
-		var needRepair = [];
-		
+
+		if(cga.getTeamPlayers().length){
+			cga.DoRequest(cga.REQUEST_TYPE_LEAVETEAM);
+			setTimeout(thisobj.prepare, 1000, cb);
+			return;
+		}
+
 		cga.travel.falan.toMineStore(null, ()=>{
 			cga.walkList([
 			[8, 9],
 			], (r)=>{
 				var equipped = cga.getEquipItems();
 				putdownEquipments(()=>{
+					
+					var needRepair = [];
 					
 					cga.getInventoryItems().filter((item)=>{
 						if(repairFilter(item)){							
@@ -122,3 +131,5 @@ module.exports = {
 		cb(null);
 	}
 };
+
+module.exports = thisobj;

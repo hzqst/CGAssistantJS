@@ -28,11 +28,16 @@ var task = cga.task.Task('十周年戒指', [
 		if(thisobj.saveBank == 1 && cga.getItemCount('十周年纪念戒指') >= 1)
 		{
 			cga.travel.falan.toBank(()=>{
-				cga.AsyncWaitNPCDialog(()=>{
-					cga.saveToBankAll('十周年纪念戒指', 0, (r)=>{
-						cb2('restart stage');
-					});
-				}, 1000);
+				cga.walkList([
+				[11, 8],
+				], ()=>{
+					cga.turnDir(0);
+					cga.AsyncWaitNPCDialog(()=>{
+						cga.saveToBankAll('十周年纪念戒指', 0, (r)=>{
+							cb2('restart stage');
+						});
+					}, 1000);
+				});
 			});
 			return;
 		}

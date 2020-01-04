@@ -41,10 +41,12 @@ const putdownEquipments = (cb)=>{
 	var items = cga.getEquipItems().filter(repairFilter);
 	if(items.length){
 		var emptyslot = cga.findInventoryEmptySlot();
-		if(emptyslot == -1)
-			throw new Error('物品栏没有空位');
+		if(emptyslot == -1){
+			cb(new Error('物品栏没有空位'));
+			return;
+		}
 		cga.MoveItem(items[0].pos, emptyslot, -1)
-		setTimeout(putdownEquipments, 500, cb);
+		setTimeout(putdownEquipments, 1000, cb);
 		return;
 	}
 	
@@ -52,17 +54,18 @@ const putdownEquipments = (cb)=>{
 }
 
 const putupEquipments = (equipped, cb)=>{
+	var currentEquip = cga.getEquipItems();
 	var item = cga.getInventoryItems().find((eq)=>{
 		return equipped.find((eq2)=>{
 			return eq2.name == eq.name;
-		}) != undefined && cga.getEquipItems().find((eq2)=>{
+		}) != undefined && currentEquip.find((eq2)=>{
 			return eq2.name == eq.name;
 		}) == undefined;
 	});
 	
 	if(item != undefined){
 		cga.UseItem(item.pos)
-		setTimeout(putupEquipments, 500, equipped, cb);
+		setTimeout(putupEquipments, 1000, equipped, cb);
 		return;
 	}
 	
@@ -83,6 +86,8 @@ const repairLoop = (flags, failure, cb)=>{
 		setTimeout(cb, 1000);
 		return;
 	}
+	
+	cga.turnDir(words == '修理武器' ? 6 : 2);
 	
 	var tradePlayerName = '';
 	cga.waitTrade({
@@ -137,7 +142,7 @@ const repairLoop = (flags, failure, cb)=>{
 	cga.SayWords(words, 0, 3, 1);
 }
 
-module.exports = {
+var thisobj = {
 	prepare : (cb)=>{
 		var items = cga.getEquipItems().filter(repairFilter);
 		if(!items.length){
@@ -145,12 +150,41 @@ module.exports = {
 			return;
 		}
 		
-		cga.travel.falan.toStone('M3', ()=>{
+		if(cga.getTeamPlayers().length){
+			cga.DoRequest(cga.REQUEST_TYPE_LEAVETEAM);
+			setTimeout(thisobj.prepare, 1000, cb);
+			return;
+		}
+		
+		/*cga.travel.falan.toStone('M3', ()=>{
 			cga.walkList([
 			[82, 8]
 			], ()=>{
 				cga.TurnTo(84, 8);
 				setTimeout(()=>{
+					cga.EnableFlags(cga.ENABLE_FLAG_TRADE, true);
+					cga.EnableFlags(cga.ENABLE_FLAG_TEAMCHAT, false);
+					setTimeout(()=>{
+						var equipped = cga.getEquipItems();
+						putdownEquipments(()=>{
+							repairLoop(0, 0, ()=>{
+								putupEquipments(equipped, ()=>{
+									cga.EnableFlags(cga.ENABLE_FLAG_TRADE, false);
+									cga.EnableFlags(cga.ENABLE_FLAG_TEAMCHAT, true);
+									cb(null);
+								});
+							});
+						});
+					}, 1000);
+				}, 1000);
+			});
+		});*/
+		
+		cga.travel.newisland.toStone('X', ()=>{
+			cga.walkList([
+			[143, 110]
+			], ()=>{
+			setTimeout(()=>{
 					cga.EnableFlags(cga.ENABLE_FLAG_TRADE, true);
 					cga.EnableFlags(cga.ENABLE_FLAG_TEAMCHAT, false);
 					setTimeout(()=>{
@@ -176,3 +210,5 @@ module.exports = {
 		cb(null);
 	}
 };
+
+module.exports = thisobj;

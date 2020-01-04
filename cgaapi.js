@@ -408,12 +408,27 @@ module.exports = function(callback){
 			return item.pos >= 0 && item.pos < 8;
 		});
 	}
-	
+		
 	//获取装备耐久，返回数组[当前耐久,最大耐久]
 	cga.getEquipEndurance = (item)=>{
-		var regex = item.attr.match(/\$4耐久 (\d+)\/(\d+)/);
-		if(regex && regex.length >= 3){
-			return [parseInt(regex[1]), parseInt(regex[2])];
+
+		if(item.attr){
+			var regex = item.attr.match(/\$4耐久 (\d+)\/(\d+)/);
+			if(regex && regex.length >= 3){
+				return [parseInt(regex[1]), parseInt(regex[2])];
+			}
+		}
+		if(item.info){
+			regex = item.info.match(/\$4耐久 (\d+)\/(\d+)/);
+			if(regex && regex.length >= 3){
+				return [parseInt(regex[1]), parseInt(regex[2])];
+			}
+		}
+		if(item.info2){
+			regex = item.info2.match(/\$4耐久 (\d+)\/(\d+)/);
+			if(regex && regex.length >= 3){
+				return [parseInt(regex[1]), parseInt(regex[2])];
+			}
 		}
 		return null;
 	}
@@ -656,7 +671,7 @@ module.exports = function(callback){
 	//前往到法兰城东医院
 	//参数1：回调函数function(result), result 为true或false
 	cga.travel.falan.toEastHospital = (cb)=>{
-		cga.travel.falan.toStone('E', (r)=>{
+		cga.travel.falan.toStone('E', ()=>{
 			cga.walkList([
 			[221, 83, '医院']
 			], cb);
@@ -674,36 +689,25 @@ module.exports = function(callback){
 	}
 	
 	//前往到法兰城银行
-	//参数1：回调函数function(result), result 为true或false
-	cga.travel.falan.toBank = function(cb){
+	cga.travel.falan.toBank = (cb)=>{
 		
-		if(cga.GetMapName() == '银行'){
-			cga.walkList([
-				[11, 8],
-			], (r)=>{
-				cga.TurnTo(12, 8);
-				cb(true);
-			});
+		if(cga.GetMapIndex().index3 == 1121){
+			cb(null);
 			return;
 		}
 		
 		cga.travel.falan.toStone('E', (r)=>{
 			cga.walkList([
 			[238, 111, '银行'],
-			[11, 8],
-			], (r)=>{
-				cga.TurnTo(12, 8);
-				cb(true);
-			});
+			], cb);
 		});
 	}
 	
 	//从法兰城到里谢里雅堡，启动地点：登出到法兰城即可
-	//参数1：回调函数function(result), result 为true或false
 	cga.travel.falan.toCastle = (cb)=>{
 		
 		if(cga.GetMapName() == '里谢里雅堡'){
-			cb(true);
+			cb(null);
 			return;
 		}
 		
@@ -853,7 +857,31 @@ module.exports = function(callback){
 			cb(null);
 			return;
 		}
-
+		var mapindex = cga.GetMapIndex().index3;
+		if(mapindex == 44692){
+			cga.walkList([
+				[0, 20, '圣骑士营地'],
+			], cb);
+			return;
+		}
+		if(mapindex == 44693){
+			cga.walkList([
+				[30, 37, '圣骑士营地'],
+			], cb);
+			return;
+		}
+		if(mapindex == 44698){
+			cga.walkList([
+				[3, 23, '圣骑士营地'],
+			], cb);
+			return;
+		}
+		if(mapindex == 44699){
+			cga.walkList([
+				[0, 14, '圣骑士营地'],
+			], cb);
+			return;
+		}
 		if(mapname == '辛希亚探索指挥部' && cga.GetMapIndex().index3 == 27101){
 			cga.walkList([[8, 21]], warp);
 			return;
@@ -868,7 +896,7 @@ module.exports = function(callback){
 
 	cga.travel.falan.toFashionStore = cga.travel.falan.toFabricStore = (cb)=>{
 		if(cga.GetMapName()=='流行商店'){
-			cb(true);
+			cb(null);
 			return;
 		}
 		
@@ -890,7 +918,7 @@ module.exports = function(callback){
 	
 	cga.travel.falan.toKatieStore = cga.travel.falan.toAssessStore = (cb)=>{
 		if(cga.GetMapName()=='凯蒂夫人的店'){
-			cb(true);
+			cb(null);
 			return;
 		}
 		
@@ -905,6 +933,28 @@ module.exports = function(callback){
 				cga.walkList([
 					[65, 53, '法兰城'],
 					[196, 78, '凯蒂夫人的店'],
+				], cb);
+			});
+		}
+	}
+	
+	cga.travel.falan.toDameiStore = cga.travel.falan.toCrystalStore = (cb)=>{
+		if(cga.GetMapName()=='达美姊妹的店'){
+			cb(null);
+			return;
+		}
+		
+		if(cga.GetMapName() == '法兰城'){
+			cga.travel.falan.toStone('W1', function(r){
+				cga.walkList([
+					[94, 78, '达美姊妹的店'],
+				], cb);
+			});
+		} else {
+			cga.travel.falan.toStone('C', ()=>{
+				cga.walkList([
+					[17, 53, '法兰城'],
+					[94, 78, '达美姊妹的店'],
 				], cb);
 			});
 		}
@@ -1055,7 +1105,7 @@ module.exports = function(callback){
 											], cb);
 										});
 									} else {
-										cb(false);
+										cb(new Error('对话失败'));
 									}
 								});
 							});
@@ -3021,6 +3071,41 @@ module.exports = function(callback){
 		}
 		
 		move();
+	}
+	
+	cga.parseBuyStoreMsg = (dlg)=>{
+		
+		if(!dlg.message)
+			return null;
+		
+		var reg = new RegExp(/([^|\n]+)/g)
+		var match = dlg.message.match(reg);
+		
+		if(match.length < 5)
+			return null;
+		
+		var storeItemCount = (match.length - 5) / 6;
+		
+		var obj = {
+			storeid : match[0],
+			name : match[1],
+			welcome : match[2],
+			insuff_funds : match[3],
+			insuff_inventory : match[4],
+			items : []
+		}
+		for(var i = 0; i < storeItemCount; ++i){
+			obj.items.push({
+				index : i,
+				name : match[5 + 6 * i + 0],
+				image_id : match[5 + 6 * i + 1],
+				cost : match[5 + 6 * i + 2],
+				attr : match[5 + 6 * i + 3],
+				unk1 : match[5 + 6 * i + 4],
+				max_buy : match[5 + 6 * i + 5],
+			});
+		}
+		return obj;
 	}
 	
 	cga.getTeamPlayers = ()=>{

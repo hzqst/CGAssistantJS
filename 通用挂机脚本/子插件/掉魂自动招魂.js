@@ -1,10 +1,16 @@
 var cga = global.cga;
 var configTable = global.configTable;
 
-module.exports = {
+var thisobj = {
 	prepare : (cb)=>{
 		if(cga.GetPlayerInfo().souls == 0){
 			cb(null);
+			return;
+		}
+		
+		if(cga.getTeamPlayers().length){
+			cga.DoRequest(cga.REQUEST_TYPE_LEAVETEAM);
+			setTimeout(thisobj.prepare, 1000, cb);
 			return;
 		}
 		
@@ -50,3 +56,5 @@ module.exports = {
 		cb(null);
 	}
 };
+
+module.exports = thisobj;

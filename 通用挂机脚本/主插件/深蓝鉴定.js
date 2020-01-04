@@ -130,13 +130,18 @@ var loop = ()=>{
 		return (inv.assessed == true && inv.itemid == 18526);
 	});
 	if(found_assessed != undefined){
-		console.log('savebank')
+
 		cga.travel.falan.toBank(()=>{
-			cga.AsyncWaitNPCDialog(()=>{
-				cga.saveToBankAll((item)=>{
-					return item.itemid == 18526 && item.assessed == true;
-				}, 3, (err)=>{
-					loop();
+			cga.walkList([
+			[11, 8],
+			], ()=>{
+				cga.turnDir(0);
+				cga.AsyncWaitNPCDialog(()=>{
+					cga.saveToBankAll((item)=>{
+						return item.itemid == 18526 && item.assessed == true;
+					}, 3, (err)=>{
+						loop();
+					});
 				});
 			});
 		});

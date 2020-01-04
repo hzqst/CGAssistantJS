@@ -314,30 +314,36 @@ var loop = ()=>{
 			return;
 		}
 		if(map == '圣骑士营地'){
-			playerThinkInterrupt.hasInterrupt();//restore interrupt state
-			console.log('playerThink on');
-			playerThinkRunning = true;
-			
-			cga.walkList([
-				[36, 87, '肯吉罗岛'],
-			], ()=>{
-				getMazeEntrance((obj)=>{
-					cga.walkList([
-						[obj.mapx, obj.mapy, '隐秘之洞地下1层']
-					], (err)=>{
-						console.log(err);
-						if(err && err.message == 'Unexcepted map changed.'){
-							var xy = cga.GetMapXY();
-							cachedEntrance = null;
-							blacklistEntrance.push(obj);
-							cga.walkList([
-							[xy.x, xy.y, '肯吉罗岛'],
-							], loop);
-							return;
-						}
-						loop();
-					});
-				})
+			callSubPluginsAsync('prepare', ()=>{
+				if(cga.GetMapName() != '圣骑士营地'){
+					loop();
+					return;
+				}
+				playerThinkInterrupt.hasInterrupt();//restore interrupt state
+				console.log('playerThink on');
+				playerThinkRunning = true;
+				
+				cga.walkList([
+					[36, 87, '肯吉罗岛'],
+				], ()=>{
+					getMazeEntrance((obj)=>{
+						cga.walkList([
+							[obj.mapx, obj.mapy, '隐秘之洞地下1层']
+						], (err)=>{
+							console.log(err);
+							if(err && err.message == 'Unexcepted map changed.'){
+								var xy = cga.GetMapXY();
+								cachedEntrance = null;
+								blacklistEntrance.push(obj);
+								cga.walkList([
+								[xy.x, xy.y, '肯吉罗岛'],
+								], loop);
+								return;
+							}
+							loop();
+						});
+					})
+				});
 			});
 			return;
 		}

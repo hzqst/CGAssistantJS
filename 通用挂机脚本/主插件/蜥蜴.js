@@ -242,16 +242,22 @@ var loop = ()=>{
 			return;
 		}
 		if(map == '圣骑士营地'){
-			playerThinkInterrupt.hasInterrupt();//restore interrupt state
-			console.log('playerThink on');
-			playerThinkRunning = true;
-			
-			cga.walkList([
-				[36, 87, '肯吉罗岛'],
-				[384, 245, '蜥蜴洞穴'],
-				[17, 4, '蜥蜴洞穴上层第1层'],
-			], loop);
-			return;
+			callSubPluginsAsync('prepare', ()=>{
+				if(cga.GetMapName() != '圣骑士营地'){
+					loop();
+					return;
+				}
+				playerThinkInterrupt.hasInterrupt();//restore interrupt state
+				console.log('playerThink on');
+				playerThinkRunning = true;
+				
+				cga.walkList([
+					[36, 87, '肯吉罗岛'],
+					[384, 245, '蜥蜴洞穴'],
+					[17, 4, '蜥蜴洞穴上层第1层'],
+				], loop);
+			});
+			return;			
 		}
 		if(map == '蜥蜴洞穴上层第1层')
 		{

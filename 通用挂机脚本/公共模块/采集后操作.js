@@ -13,9 +13,14 @@ var doneArray = [
 					cga.BuyNPCStore([{index:0, count:exchangeCount}]);
 					cga.AsyncWaitNPCDialog(()=>{
 						cga.travel.falan.toBank(()=>{
-							cga.AsyncWaitNPCDialog(()=>{
-								cga.saveToBankAll(mineObject.name+'条', 20, (err)=>{
-									cb(null);
+							cga.walkList([
+							[11, 8],
+							], ()=>{
+								cga.turnDir(0);
+								cga.AsyncWaitNPCDialog(()=>{
+									cga.saveToBankAll(mineObject.name+'条', 20, (err)=>{
+										cb(null);
+									});
 								});
 							});
 						});
@@ -34,9 +39,14 @@ var doneArray = [
 	name: '直接存银行',
 	func: (cb, mineObject)=>{
 		cga.travel.falan.toBank(()=>{
-			cga.AsyncWaitNPCDialog(()=>{
-				cga.saveToBankAll(mineObject.name, 20, (err)=>{
-					cb(null);
+			cga.walkList([
+			[11, 8],
+			], ()=>{
+				cga.turnDir(0);
+				cga.AsyncWaitNPCDialog(()=>{
+					cga.saveToBankAll(mineObject.name, 20, (err)=>{
+						cb(null);
+					});
 				});
 			});
 		});

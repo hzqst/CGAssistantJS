@@ -233,14 +233,20 @@ var loop = ()=>{
 			return;
 		}
 		if(map == '圣骑士营地'){
-			playerThinkInterrupt.hasInterrupt();//restore interrupt state
-			console.log('playerThink on');
-			playerThinkRunning = true;
-			
-			cga.walkList([
-				[36, 87, '肯吉罗岛'],
-				[424, 345, '黑龙沼泽1区'],
-			], loop);
+			callSubPluginsAsync('prepare', ()=>{
+				if(cga.GetMapName() != '圣骑士营地'){
+					loop();
+					return;
+				}
+				playerThinkInterrupt.hasInterrupt();//restore interrupt state
+				console.log('playerThink on');
+				playerThinkRunning = true;
+				
+				cga.walkList([
+					[36, 87, '肯吉罗岛'],
+					[424, 345, '黑龙沼泽1区'],
+				], loop);
+			});
 			return;
 		}
 		if(map == '黑龙沼泽1区')
