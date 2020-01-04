@@ -330,9 +330,6 @@ var thisobj = {
 			return true;
 		}
 
-		if(supplyMode.translate(pair))
-			return true;
-
 		if(teamMode.translate(pair))
 			return true;
 		
@@ -340,9 +337,6 @@ var thisobj = {
 	},
 	loadconfig : (obj)=>{
 
-		if(!supplyMode.loadconfig(obj))
-			return false;
-		
 		if(!teamMode.loadconfig(obj))
 			return false;
 		
@@ -365,7 +359,7 @@ var thisobj = {
 		return true;
 	},
 	inputcb : (cb)=>{
-		Async.series([supplyMode.inputcb, teamMode.inputcb, (cb2)=>{
+		Async.series([teamMode.inputcb, (cb2)=>{
 			var sayString = '【旧日插件】请选择是否卖石: 0不卖石 1卖石';
 			cga.sayLongWords(sayString, 0, 3, 1);
 			cga.waitForChatInput((msg, val)=>{
