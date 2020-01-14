@@ -70,7 +70,7 @@ var thisobj = {
 			cb(null);
 		},
 		extra_dropping : (item)=>{
-			if(thisobj.object.skill && thisobj.object.skill.lv < 5 && item.itemid == 14670)
+			if(thisobj.object.skill && thisobj.object.skill.lv < 6 && item.itemid == 14670)
 				return true;
 			return item.assessed && (item.itemid == 14668 || item.itemid == 14669 || item.itemid == 14670);
 		},
