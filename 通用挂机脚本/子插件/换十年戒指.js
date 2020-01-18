@@ -4,7 +4,7 @@ var configTable = global.configTable;
 const repairFilter = (eq) => {
 	if (eq.name == '十周年纪念戒指') {
 		const durability = cga.getEquipEndurance(eq);
-		return durability && durability[0] <= 250;
+		return durability && durability[0] < 250;
 	}
 	return false;
 }
@@ -60,7 +60,15 @@ const putupEquipments = (equipped, cb)=>{
 		}
 	});
 	if(item != undefined){
-		cga.UseItem(item.pos)
+		var equippedItem = equipped.find((eq)=>{
+			return item.name == eq.name;
+		});
+		
+		if(equippedItem)
+			cga.MoveItem(item.pos, equippedItem.pos, -1);
+		else
+			cga.UseItem(item.pos);
+		
 		setTimeout(putupEquipments, 1000, equipped, cb);
 		return;
 	}
@@ -70,18 +78,20 @@ const putupEquipments = (equipped, cb)=>{
 
 const repairLoop = (cb)=>{
 	cga.turnDir(0);
-	cga.AsyncWaitNPCDialog(()=>{
+	cga.AsyncWaitNPCDialog((err, dlg)=>{
 		var banks = cga.GetBankItemsInfo();
 		var found = banks.find(fullFilter);
 		if(found == undefined){
-			setTimeout(cb, 1000, null);
+			cb(new Error('银行里没有满耐的十年戒指'));
 			return;
 		}
 		var emptyslot = cga.findInventoryEmptySlot();
 		if(emptyslot == -1){
-			cb(new Error('物品栏没有空位'));
+			cb(new Error('物品栏没有空位，无法从银行取出十年戒指'));
 			return;
 		}
+		console.log(found.pos)
+		console.log(emptyslot)
 		cga.MoveItem(found.pos, emptyslot, -1);
 		setTimeout(cb, 1000, null);
 	});
@@ -102,7 +112,15 @@ var thisobj = {
 		}
 
 		var buy = (cb2)=>{
-			repairLoop(()=>{
+			repairLoop((err)=>{
+				
+				if(err){
+					console.log(err);
+					cb2(null);
+					return;
+				}
+				
+				var equipped = cga.getEquipItems();
 				putupEquipments(equipped, ()=>{
 					
 					var drop = cga.getInventoryItems().filter(repairFilter);
@@ -184,6 +202,11 @@ var thisobj = {
 		}
 	},
 	loadconfig : (obj, cb)=>{
+		if(thisobj.repairLocation === undefined){
+			console.error('读取配置：修理地点失败！默认使用新城登入点修理！');
+			thisobj.repairLocation = repairLocArray[0];
+		}
+		
 		return true;
 	},
 	inputcb : (cb)=>{
