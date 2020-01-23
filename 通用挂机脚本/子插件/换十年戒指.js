@@ -202,11 +202,7 @@ var thisobj = {
 		}
 	},
 	loadconfig : (obj, cb)=>{
-		if(thisobj.repairLocation === undefined){
-			console.error('读取配置：修理地点失败！默认使用新城登入点修理！');
-			thisobj.repairLocation = repairLocArray[0];
-		}
-		
+
 		return true;
 	},
 	inputcb : (cb)=>{

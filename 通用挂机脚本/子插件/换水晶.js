@@ -4,7 +4,7 @@ var configTable = global.configTable;
 const repairFilter = (eq) => {
 	if (eq.type == 22) {
 		const durability = cga.getEquipEndurance(eq);
-		return durability && durability[0] <= 300;
+		return durability && durability[0] < 100;
 	}
 	return false;
 }
