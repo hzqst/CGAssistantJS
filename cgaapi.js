@@ -434,7 +434,7 @@ module.exports = function(callback){
 	}
 	
 	cga.travel = {};
-	
+		
 	cga.travel.falan = {};
 	
 	cga.travel.falan.xy2name = (x, y, mapname)=>{
@@ -805,6 +805,29 @@ module.exports = function(callback){
 				});
 			});
 		});	
+	}
+	
+	cga.travel.camp = {};
+
+	cga.travel.camp.getRegion = (mapname, mapXY)=>{
+		if(mapname == '肯吉罗岛')
+		{
+			if(mapXY.x <= 316 && mapXY.y >= 325)
+			{
+				return '矮人城镇域';
+			}
+			if(mapXY.x >= 355 && mapXY.x <= 516 && mapXY.y <= 181)
+			{
+				return '沼泽洞穴出口域';
+			}
+			if(mapXY.x < 355 && mapXY.y <= 212)
+			{
+				return '沼泽洞穴出口域';
+			}
+			
+			return '圣骑士营地域';
+		}
+		return null;
 	}
 
 	cga.travel.falan.toCamp = (cb, noWarp)=>{
