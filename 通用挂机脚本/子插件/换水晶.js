@@ -186,6 +186,17 @@ var thisobj = {
 					cga.travel.falan.toCamp(cb);
 				});
 			});
+		} else if(map == '哥拉尔镇'){
+			cga.walkList([
+				[146, 117, '魔法屋'],
+				[18, 12],
+			], ()=>{
+				buy(()=>{
+					cga.walkList([
+					[5, 14, '哥拉尔镇'],
+					], cb);
+				});
+			});
 		} else {
 			cga.travel.falan.toCrystalStore(()=>{
 				cga.walkList([
