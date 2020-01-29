@@ -5,7 +5,7 @@ var cga = require('./cgaapi')(function(){
 	
 	if(cga.GetMapName() != '里谢里雅堡')
 	{
-		throw new Error('必须从里谢里雅堡启动！');
+		console.error('提示：飞碟摆摊只能在里谢里雅堡使用！');
 	}
 	
 	var loop = ()=>{
