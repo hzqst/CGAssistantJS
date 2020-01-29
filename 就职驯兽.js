@@ -4,33 +4,38 @@ var cga = require('./cgaapi')(function(){
 	{
 		intro: '1.与法兰城平民武器贩售处（150.122）对话，购买就职职业对应的武器。',
 		workFunc: function(cb2){
-			cga.travel.falan.toStone('C', ()=>{
-				cga.walkList([
-				[41, 98, '法兰城'],
-				[151, 122],
-				], ()=>{
-					cga.turnTo(150, 122);
+			var findWeap = cga.findItem((item)=>{
+				return item.type == 5;
+			})
+			if(findWeap >= 8)
+			{
+				cga.UseItem(findWeap);
+				setTimeout(cb2, 1000, true);
+				return;
+			}
+			
+			cga.travel.falan.toStone('B1', ()=>{
+				cga.turnTo(150, 122);
+				cga.AsyncWaitNPCDialog(()=>{
+					cga.ClickNPCDialog(0, 0);
 					cga.AsyncWaitNPCDialog(()=>{
-						cga.ClickNPCDialog(0, 0);
-						cga.AsyncWaitNPCDialog(()=>{
-							cga.BuyNPCStore([{index:5, count:1}]);
-							cga.AsyncWaitNPCDialog((err, dlg)=>{
-								if(dlg && dlg.message.indexOf('谢谢') >= 0){
-									cga.UseItem(cga.findItem((item)=>{
-										return item.type == 5;
-									}));
-									setTimeout(cb2, 1000, true);
-									return;
-								}
-								else
-								{
-									cb2(false);
-									return;
-								}
-							});
+						cga.BuyNPCStore([{index:5, count:1}]);
+						cga.AsyncWaitNPCDialog((err, dlg)=>{
+							if(dlg && dlg.message.indexOf('谢谢') >= 0){
+								cga.UseItem(cga.findItem((item)=>{
+									return item.type == 5;
+								}));
+								setTimeout(cb2, 1000, true);
+								return;
+							}
+							else
+							{
+								cb2(false);
+								return;
+							}
 						});
 					});
-				})
+				});
 			});
 		}
 	},
@@ -80,7 +85,12 @@ var cga = require('./cgaapi')(function(){
 					cga.AsyncWaitNPCDialog(()=>{
 						cga.ClickNPCDialog(4, 0);
 						cga.AsyncWaitNPCDialog(()=>{
-							cb2(true);
+							cga.walkList([
+								[9, 24, '法兰城'],
+								[63, 79],
+							], ()=>{
+								cb2(true);
+							})
 						});
 					});
 				});
@@ -169,12 +179,14 @@ var cga = require('./cgaapi')(function(){
 	[//任务阶段是否完成
 		function(){//小刀
 			var job = cga.GetPlayerInfo().job;
-			if(job == '游民' || cga.getItemCount((item)=>{
-				return item.type == 5;
-			}) > 0) return true;
+			if(job == '游民' && cga.getItemCount((item)=>{
+				return item.type == 5 && item.pos < 8;
+			}, true) > 0) return true;
 			
 			if(job != '游民')
 				return true;
+			
+			return false;
 		},
 		function(){//止痛药
 			return (cga.getItemCount('#18233') > 0) ? true : false;

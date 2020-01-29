@@ -261,22 +261,17 @@ var cleanUseless = (inventory, cb)=>{
 		}
 	}
 
-	cga.travel.falan.toStone('C', ()=>{
-		cga.walkList([
-			[41, 98, '法兰城'],
-			[151, 122],
-		], ()=>{
-			cga.TurnTo(149, 122);
-			var sellarray = cga.findItemArray((item)=>{
-				if ( thisobj.craftItemList.find((craftItem)=>{
-					return item.name == craftItem.name;
-				}) !== undefined){
-					return true;
-				}
-			});
-			cga.sellArray(sellarray, ()=>{
-				setTimeout(cb, 1000);
-			});
+	cga.travel.falan.toStone('B1', ()=>{
+		cga.turnTo(150, 122);
+		var sellarray = cga.findItemArray((item)=>{
+			if ( thisobj.craftItemList.find((craftItem)=>{
+				return item.name == craftItem.name;
+			}) !== undefined){
+				return true;
+			}
+		});
+		cga.sellArray(sellarray, ()=>{
+			setTimeout(cb, 1000);
 		});
 	});
 }

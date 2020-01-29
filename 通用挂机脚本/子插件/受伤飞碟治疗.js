@@ -48,7 +48,11 @@ var thisobj = {
 			}
 		}
 		
-		cga.travel.falan.toStone('C', retry);
+		cga.travel.falan.toStone('C', ()=>{
+			cga.walkList([
+			[27, 82],
+			], retry);
+		});
 	},
 	think : (ctx)=>{
 		if(cga.GetPlayerInfo().health != 0)

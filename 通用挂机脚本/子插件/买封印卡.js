@@ -33,7 +33,7 @@ const buyLoop = (cb)=>{
 			});
 			if(!buyitem.length)
 			{
-				cb(new Error('商店没有封印卡出售，可能已被买完'));
+				cb(new Error('商店没有封印卡出售，可能已被买完或者背包没空间'));
 				return;
 			}
 			

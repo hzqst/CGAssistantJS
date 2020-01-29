@@ -454,6 +454,10 @@ module.exports = function(callback){
 			return 'M3';
 		if(x == 46 && y == 16 && mapname == '市场一楼 - 宠物交易区')
 			return 'M1';
+		if(x == 151 && y == 122 && mapname == '法兰城')
+			return 'B1';
+		if(x == 155 && y == 122 && mapname == '法兰城')
+			return 'B2';
 		return null;
 	}
 	
@@ -470,6 +474,8 @@ module.exports = function(callback){
 			case 'W2': return true;
 			case 'M1': return true;//市场
 			case 'M3': return true;
+			case 'B1': return true;//桥头
+			case 'B2': return true;
 			case 'C': return true;//里谢里雅堡
 		}
 		return false;
@@ -484,14 +490,22 @@ module.exports = function(callback){
 				cga.travel.falan.toCastle(cb);
 				return;
 			}
-
+			if(stone == 'B1'){
+				cga.walkList([
+				[151, 122]
+				], cb);
+				return;
+			}
+			if(stone == 'B1'){
+				cga.walkList([
+				[155, 122]
+				], cb);
+				return;
+			}
 			var curStone = cga.travel.falan.xy2name(curXY.x, curXY.y, curMap);
 			if(curStone) {
 				var turn = false;
 				if(stone == 'M1' || stone == 'M3') {
-					turn = true;
-				}
-				else if(stone.length >= 2 && curStone.charAt(1) == stone.charAt(1)) {
 					if(curStone == stone){
 						cb(null);
 						return;
@@ -499,6 +513,12 @@ module.exports = function(callback){
 					turn = true;
 				}
 				else if(stone.length >= 2 && curStone.charAt(1) == stone.charAt(1)) {
+					if(curStone.charAt(0) == 'S' && stone.charAt(0) == 'B'){
+						cga.walkList([
+						stone == 'B1' ? [151, 122] : [155, 122]
+						], cb);
+						return;
+					}
 					if(curStone == stone){
 						cb(null);
 						return;
@@ -583,14 +603,19 @@ module.exports = function(callback){
 				[40, 98, '法兰城'],
 				[162, 130]
 			];
+			const walkOutOfCastle_3 = [
+				[41, 98, '法兰城'],
+			];
 			if(stone == 'M1')
 				walks = walkOutOfCastle_2;
 			else if(stone == 'M3')
 				walks = walkOutOfCastle_1;
+			else if(stone.length >= 2 && stone.charAt(0) == 'B')
+				walks = walkOutOfCastle_3; 
 			else if(stone.length == 1)
 				walks = walkOutOfCastle_2;
 			else if(stone.length >= 2 && stone.charAt(1) == '1')
-				walks = walkOutOfCastle_1; 
+				walks = walkOutOfCastle_1;
 			else
 				walks = walkOutOfCastle_2;
 
@@ -2451,7 +2476,7 @@ module.exports = function(callback){
 	//参数2：是否包括装备栏
 	cga.getItemCount = function(filter){
 		var includeEquipment = arguments[1] === true ? true : false;
-		var items = cga.getInventoryItems();
+		var items = cga.GetItemsInfo();
 		var count = 0;
 		if(typeof filter == 'string' && filter.charAt(0) == '#'){
 			var itemid = parseInt(filter.substring(1));
