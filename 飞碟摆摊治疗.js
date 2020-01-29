@@ -8,36 +8,38 @@ var cga = require('./cgaapi')(function(){
 		console.error('提示：飞碟摆摊只能在里谢里雅堡使用！');
 	}
 	
+	var skill = cga.findPlayerSkill('治疗');
+	
+	if(!skill)
+	{
+		console.error('提示：没有治疗技能！');
+	}
+	
 	var loop = ()=>{
 		
-		var skill = cga.findPlayerSkill('治疗');
-		
-		if(!skill)
+		if(skill)
 		{
-			throw new Error('没有治疗技能！');
-		}
-		
-		var requiremp = 25 + skill.lv * 5;
-		
-		//补魔
-		if (cga.GetPlayerInfo().mp < requiremp){
-			cga.walkList([
-			[34, 89],
-			], ()=>{
-				cga.turnTo(35, 88);
-				setTimeout(()=>{
-					cga.walkList([
-					[originalPos.x, originalPos.y],
-					], ()=>{
-						cga.turnDir(originalDir);
-						loop();
-					});
-				}, 3000);
-			})
+			var requiremp = 25 + skill.lv * 5;
 			
-			return;
+			//补魔
+			if (cga.GetPlayerInfo().mp < requiremp){
+				cga.walkList([
+				[34, 89],
+				], ()=>{
+					cga.turnTo(35, 88);
+					setTimeout(()=>{
+						cga.walkList([
+						[originalPos.x, originalPos.y],
+						], ()=>{
+							cga.turnDir(originalDir);
+							loop();
+						});
+					}, 3000);
+				})
+				
+				return;
+			}
 		}
-		
 		//寻找队伍里带拐杖的玩家
 		
 		var teamplayers = cga.getTeamPlayers();
@@ -52,7 +54,7 @@ var cga = require('./cgaapi')(function(){
 		}
 
 		//找到了
-		if(index != -1)
+		if(skill && index != -1)
 		{
 			cga.StartWork(skill.index, skill.lv-1);
 			cga.AsyncWaitPlayerMenu((err, players)=>{
