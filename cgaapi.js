@@ -198,7 +198,7 @@ module.exports = function(callback){
 	
 	//将字符串转义为windows下合法的文件名
 	cga.FileNameEscape = (str)=>{
-		return str.replace(/[\\/:\*\?"<>|]/g, (c)=>{return {'\\':'%5C','/':'%2F',':':'%3A','*':'%2A','?':'%3F','"':'%22','<':'%3C','>':'%3E','|':'%7C'}[c];});
+		return str.replace(/[\\/:\*\?"<>|]/g, (c)=>{return {"\\":'%5C','/':'%2F',':':'%3A','*':'%2A','?':'%3F','"':'%22','<':'%3C','>':'%3E','|':'%7C'}[c];});
 	}
 
 	//FileNameEscape的反向操作，反转义
@@ -2412,6 +2412,17 @@ module.exports = function(callback){
 		return skill != undefined ? skill : null;
 	}
 	
+	cga.findCrate = function(filter){
+		var unit = cga.GetMapUnits().find((u)=>{
+			if(u.valid == 2 && u.type == 2 && u.model_id != 0 && (u.flags & 1024) != 0)
+				return filter(u);
+			
+			return false;
+		});
+		
+		return unit != undefined ? unit : null;
+	}
+	
 	cga.findNPCEx = function(filter){
 		var unit = cga.GetMapUnits().find((u)=>{
 			if(u.valid == 2 && u.type == 1 && u.model_id != 0 && (u.flags & 4096) != 0)
@@ -2422,7 +2433,6 @@ module.exports = function(callback){
 		
 		return unit != undefined ? unit : null;
 	}
-	
 
 	cga.findNPC = function(name){
 		return cga.findNPCEx((u)=>{
