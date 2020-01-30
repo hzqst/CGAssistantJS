@@ -144,6 +144,17 @@ var thisobj = {
 			});
 		});
 	},
+	translate : (pair)=>{
+		
+		if(pair.field == 'buyWeapon'){
+			pair.field = '购买武器';
+			pair.value = pair.value;
+			pair.translated = true;
+			return true;
+		}
+		
+		return false;
+	},
 	loadconfig : (obj, cb)=>{
 		for(var i in buyArray){
 			if(buyArray[i].name == obj.buyWeapon){
