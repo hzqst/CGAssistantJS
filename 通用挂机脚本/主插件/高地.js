@@ -111,6 +111,7 @@ var battleAreaArray = [
 	name : '低地鸡',
 	walkTo : (cb)=>{
 		var map = cga.GetMapName();
+		var mapindex = cga.GetMapIndex().index3;
 		if(map == '医院' && mapindex == 59539){
 			cga.walkList([
 				[28, 52, '艾夏岛'],
