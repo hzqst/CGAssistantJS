@@ -81,6 +81,10 @@ module.exports = function(callback){
 	cga.PET_STATE_BATTLE = 2;
 	cga.PET_STATE_REST = 3;
 	cga.PET_STATE_WALK = 16;
+	
+	cga.UI_DIALOG_TRADE = 1;
+	cga.UI_DIALOG_BATTLE_SKILL = 2;
+
 
 	//延迟x毫秒
 	cga.delay = (millis) => new Promise((resolve, reject) => {
@@ -2049,33 +2053,35 @@ module.exports = function(callback){
 			
 			var path = finder.findPath(frompos[0], frompos[1], topos[0], topos[1], grid);
 			
-			var joint = PF.Util.compressPath(path);
-			for(var i in joint){
-				joint[i][0] += walls.x_bottom;
-				joint[i][1] += walls.y_bottom;
-				if(joint[i][0] == targetX && joint[i][1] == targetY){
-					joint[i][2] = targetMap;
-					joint[i][3] = dstX;
-					joint[i][4] = dstY;
+			if(path.length)
+			{
+				var joint = PF.Util.compressPath(path);
+				for(var i in joint){
+					joint[i][0] += walls.x_bottom;
+					joint[i][1] += walls.y_bottom;
+					if(joint[i][0] == targetX && joint[i][1] == targetY){
+						joint[i][2] = targetMap;
+						joint[i][3] = dstX;
+						joint[i][4] = dstY;
+					}
+					joint[i][5] = true;
 				}
-				joint[i][5] = true;
-			}
 
-			//console.log('result joints');
+				//console.log('result joints');
+					
+				//console.log(joint);
+
+				newList = joint.concat(newList);
 				
-			//console.log(joint);
-
-			newList = joint.concat(newList);
-			
-			console.log('新寻路列表:');			
-			console.log(newList);
-			
-		} else {
-			console.log('错误：寻路失败！');
-			newList.unshift([targetX, targetY, targetMap, null, null, true]);
+				console.log('新寻路列表:');			
+				console.log(newList);
+				
+				return newList;
+			}
 		}
 		
-		return newList;
+		console.error(new Error('错误：寻路失败！'));
+		return [];
 	}
 	
 	cga.getMapXY = ()=>{
@@ -4104,7 +4110,7 @@ module.exports = function(callback){
 					tradeFinished = true;
 					resolve({
 						success: false,
-						received: receivedStuffs,
+						received: [],
 						reason : 'refused'
 					});
 					return false;
@@ -4113,7 +4119,7 @@ module.exports = function(callback){
 					tradeFinished = true;
 					resolve({
 						success: false,
-						received: receivedStuffs,
+						received: [],
 						reason : 'no target'
 					});
 					return false;
@@ -4171,9 +4177,20 @@ module.exports = function(callback){
 			var waitTradeState = () => {
 
 				cga.AsyncWaitTradeState((err, state) => {
-					
+
 					if(tradeFinished)
 						return;
+					
+					if(cga.IsUIDialogPresent(cga.UI_DIALOG_TRADE) == false)
+					{
+						tradeFinished = true;
+						resolve({
+							success: false,
+							received: [],
+							reason : 'refused'
+						});
+						return;
+					}
 					
 					console.log('AsyncWaitTradeState='+state);
 					
