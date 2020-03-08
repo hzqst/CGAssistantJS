@@ -4173,18 +4173,7 @@ module.exports = function(callback){
 
 					if(tradeFinished)
 						return;
-					
-					if(cga.IsUIDialogPresent(cga.UI_DIALOG_TRADE) == false)
-					{
-						tradeFinished = true;
-						resolve({
-							success: false,
-							received: [],
-							reason : 'refused'
-						});
-						return;
-					}
-					
+										
 					var timeout_trade = (typeof timeout == 'number') ? timeout : 30000;
 					if( (new Date()).getTime() > beginTime + timeout_trade){
 						tradeFinished = true;
