@@ -208,6 +208,18 @@ var doneArray = [
 		});
 	}
 },
+{
+	name: '哥拉尔存银行',
+	func: (cb, mineObject)=>{
+		cga.travel.gelaer.toBank(()=>{
+			cga.AsyncWaitNPCDialog(()=>{
+				cga.saveToBankAll(mineObject.name, 20, (err)=>{
+					cb(null);
+				});
+			});
+		});
+	}
+},
 ]
 
 var thisobj = {

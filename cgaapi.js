@@ -122,7 +122,7 @@ module.exports = function(callback){
 	}
 	
 	cga.isTeamLeaderEx = ()=>{
-		return (cga.isTeamLeader == true || !cga.getTeamPlayers().length);
+		return (cga.isTeamLeader == true || cga.getTeamPlayers().length <= 1);
 	}
 	
 	cga.getMapInfo = () => {
