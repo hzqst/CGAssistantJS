@@ -13,8 +13,6 @@ const io = require('socket.io')();
 
 io.on('connection', (socket) => { 
 
-	console.log('A client is connected');
-	
 	socket.emit('init', {
 		craft_player : cga.GetPlayerInfo().name,
 		craft_materials : craft_target ? craft_target.materials : [],
@@ -23,7 +21,7 @@ io.on('connection', (socket) => {
 	socket.on('register', (data) => {
 		socket.cga_data = data;
 		socket.join('gather_'+data.gather_name);
-		console.log('client '+ socket.cga_data.player_name +' is registered');
+		console.log(socket.cga_data.player_name +' 已加入双百节点');
 	});
 
 	socket.on('done', (data) => {
@@ -52,7 +50,7 @@ io.on('connection', (socket) => {
 					count ++;
 			})
 			
-			console.log('exchange_finish='+count);
+			console.log('交易阶段结束：'+count);
 			
 			fn(count);
 		}
@@ -60,13 +58,13 @@ io.on('connection', (socket) => {
 	
 	socket.on('disconnect', (err) => {
 		if(socket.cga_data)
-			console.log('client '+ socket.cga_data.player_name +' is disconnected');
+			console.log(socket.cga_data.player_name +' 已退出双百节点');
 	})
 });
 
 var waitStuffs = (name, materials, cb)=>{
 	
-	console.log('waitStuffsX ' + name);
+	console.log('等待材料 ' + name);
 
 	var repeat = ()=>{
 		var s = io.in('buddy_'+name).sockets;
@@ -82,7 +80,7 @@ var waitStuffs = (name, materials, cb)=>{
 		
 		if(find_player){
 			
-			console.log('waitStuffs ' + name);
+			console.log('等待材料... ' + name);
 			
 			find_player.cga_data.state = 'trade';
 			find_player.emit('init', {
@@ -155,7 +153,7 @@ var exchangeItem2 = (name, cb)=>{
 	
 	if(find_player){
 		
-		console.log('exchangeItem2 ' + find_player.cga_data.state);
+		console.log('交易阶段： ' + find_player.cga_data.state);
 		
 		cga.waitTrade(stuffs, null, (result)=>{
 			if(find_player.cga_data.state == 'exchange_finish')
@@ -238,7 +236,7 @@ var getInRoom = (name, cb)=>{
 
 var waitAssess = (cb)=>{
 
-	console.log('waitAssess0');
+	console.log('等待鉴定师');
 
 	cga.EnableFlags(cga.ENABLE_FLAG_JOINTEAM, true);
 
@@ -254,7 +252,7 @@ var waitAssess = (cb)=>{
 	
 	if(find_player){
 		
-		console.log('waitAssess1');
+		console.log('等待鉴定师...');
 
 		find_player.cga_data.state = 'addteam';
 		find_player.emit('addteam');
@@ -342,8 +340,6 @@ var loop = ()=>{
 			return;
 		}
 
-		//console.log('xxxx');
-
 		//物品栏里的东西超过15个
 		var inventory = cga.getInventoryItems();
 		var count = getExtractedItemCount(inventory);
@@ -369,7 +365,6 @@ var loop = ()=>{
 		})
 
 		if(lackStuffs !== null){
-			//console.log('yyyy');
 			waitStuffs(lackStuffs.name, craft_target.materials, loop);
 			return;
 		}
@@ -394,7 +389,7 @@ var loop = ()=>{
 				return;
 			}
 
-			//console.log('craft');
+			console.log('开始制造');
 			
 			cga.craftItemEx({
 				craftitem : craft_target.name,
@@ -417,7 +412,6 @@ var loop = ()=>{
 }
 
 var thisobj = {
-	craftedCount : 0,
 	getDangerLevel : ()=>{
 		return 0;
 	},

@@ -18,18 +18,17 @@ var exchangeItem2 = (name, cb)=>{
 		}
 	}
 
-	console.log('exchangeItem2, '+ thisobj.state);
+	console.log('交易阶段2： '+ thisobj.state);
 
 	cga.positiveTrade(name, thisobj.state == 'exchange_finish' ? {} : stuffs, null, (result)=>{
 		if(result && result.success == true)
 		{
-			//console.log(result.received);
 			if(thisobj.state == 'exchange_finish' && result.received 
 			&& result.received.items && result.received.items.find((item)=>{
 				return item.itemid == 18526;
 			}))
 			{
-				console.log('get all2');
+				console.log('已经拿到所有深蓝');
 				cb(null);
 			}
 			else
@@ -39,7 +38,7 @@ var exchangeItem2 = (name, cb)=>{
 			return;
 		}
 		if(thisobj.state != 'exchange_finish' && thisobj.state != 'exchange' && thisobj.state != 'addteam'){
-			console.log('state mismatch2='+thisobj.state);
+			console.log('状态错误：'+thisobj.state);
 			cb(new Error('状态错误'));
 		} else {
 			exchangeItem2(name, cb);
@@ -49,7 +48,7 @@ var exchangeItem2 = (name, cb)=>{
 
 //从NPC那里换取药？
 var exchangeNPC = (name, cb)=>{
-	console.log('exchangeNPC');
+	console.log('从NPC那里换取药');
 	
 	cga.TurnTo(6, 7);
 	cga.AsyncWaitNPCDialog((err, dlg)=>{
@@ -73,7 +72,7 @@ var exchangeNPC = (name, cb)=>{
 						exchangeItem2(name, cb);
 					} else {
 						//药剂没有剩余的药？了
-						console.log('get all');
+						console.log('已经拿到所有深蓝');
 						cb(null);
 					}
 				});
@@ -96,12 +95,14 @@ var exchangeItem = (name, cb)=>{
 		}
 		
 		if(thisobj.state != 'exchange_finish' && thisobj.state != 'exchange' && thisobj.state != 'addteam'){
-			console.log('state mismatch='+thisobj.state);
+			console.log('状态错误：'+thisobj.state);
 			cb(new Error('状态错误'));
 		} else {
 			exchangeItem(name, cb);
 		}
-	});
+	});++
+	
+	
 }
 
 var addTeam = (cb)=>{
@@ -193,7 +194,7 @@ var loop = ()=>{
 		return (inv.assessed == false && inv.itemid == 18526);
 	});
 	if(found_unassessed != undefined){
-		console.log('ass')
+		console.log('开始鉴定')
 		cga.assessAllItems(loop);
 		return;
 	}
@@ -220,9 +221,7 @@ var loop = ()=>{
 			});
 			return;
 		}
-		
-		console.log('yyy')
-	
+			
 		cga.walkList([
 			[34, 45],
 		], ()=>{			
@@ -299,7 +298,7 @@ var thisobj = {
 		socket = require('socket.io-client')('http://localhost:'+thisobj.serverPort, { reconnection: true });
 
 		socket.on('connect', ()=>{
-			console.log('connect');
+			console.log('连接到深蓝节点');
 			socket.emit('register', {
 				state : thisobj.state,
 				player_name : cga.GetPlayerInfo().name,
@@ -314,16 +313,16 @@ var thisobj = {
 
 		socket.on('exchange', ()=>{
 			thisobj.state = 'exchange';
-			console.log('exchange');
+			console.log('进入交易阶段');
 		})
 
 		socket.on('disconnect', ()=>{
-			console.log('disconnect');
+			console.log('退出深蓝节点');
 		});
 				
 		socket.on('addteam', ()=>{
 			if(thisobj.state == 'ready_addteam'){
-				console.log('addteam');
+				console.log('进入组队阶段');
 				thisobj.state = 'addteam';
 				addTeam(loop);
 			}
