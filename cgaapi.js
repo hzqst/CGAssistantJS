@@ -4089,14 +4089,7 @@ module.exports = function(callback){
 					return false;
 				
 				console.log('waitSysMsg='+msg);
-				
-				var timeout_trade = (typeof timeout == 'number') ? timeout : 30000;
-				if( (new Date()).getTime() > beginTime + timeout_trade){
-					tradeFinished = true;
-					cga.DoRequest(cga.REQUEST_TYPE_TRADE_REFUSE);
-					return false;
-				}
-								
+												
 				if(msg.indexOf('交易完成') >= 0){
 					tradeFinished = true;
 					resolve({
@@ -4184,6 +4177,18 @@ module.exports = function(callback){
 					if(cga.IsUIDialogPresent(cga.UI_DIALOG_TRADE) == false)
 					{
 						tradeFinished = true;
+						resolve({
+							success: false,
+							received: [],
+							reason : 'refused'
+						});
+						return;
+					}
+					
+					var timeout_trade = (typeof timeout == 'number') ? timeout : 30000;
+					if( (new Date()).getTime() > beginTime + timeout_trade){
+						tradeFinished = true;
+						cga.DoRequest(cga.REQUEST_TYPE_TRADE_REFUSE);
 						resolve({
 							success: false,
 							received: [],
