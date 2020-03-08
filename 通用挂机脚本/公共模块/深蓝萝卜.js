@@ -178,7 +178,7 @@ var thisobj = {
 		socket = require('socket.io-client')('http://localhost:'+thisobj.serverPort, { reconnection: true });
 
 		socket.on('connect', ()=>{
-			console.log('connect');
+			console.log('成功连接到深蓝节点');
 			socket.emit('register', {
 				state : thisobj.object.state,
 				player_name : cga.GetPlayerInfo().name,
@@ -231,7 +231,7 @@ var thisobj = {
 		});
 
 		socket.on('disconnect', ()=>{
-			console.log('disconnect');
+			console.log('退出深蓝节点');
 		});
 	}
 }

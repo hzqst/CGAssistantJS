@@ -36,8 +36,6 @@ const io = require('socket.io')();
 
 io.on('connection', (socket) => { 
 
-	console.log('A client is connected');
-	
 	socket.emit('init', {
 		craft_player : cga.GetPlayerInfo().name,
 		craft_materials : craft_target ? craft_target.materials : [],
@@ -46,7 +44,7 @@ io.on('connection', (socket) => {
 	socket.on('register', (data) => {
 		socket.cga_data = data;
 		socket.join('buddy_'+data.job_name);
-		console.log('client '+ socket.cga_data.player_name +' is registered');
+		console.log(socket.cga_data.player_name +' 已加入双百节点');
 	});
 
 	socket.on('done', (data) => {
@@ -60,15 +58,23 @@ io.on('connection', (socket) => {
 	
 	socket.on('disconnect', (err) => {
 		if(socket.cga_data)
-			console.log('client '+ socket.cga_data.player_name +' is disconnected');
+			console.log(socket.cga_data.player_name +' 已退出双百节点');
 	})
 });
 
 var waitStuffs = (name, materials, cb)=>{
 
-	console.log('waitStuffs ' + name);
+	console.log('正在等待材料 ' + name);
 
 	var repeat = ()=>{
+		
+		//修复：防止面向方向不正确导致无法交易
+		if(cga.GetPlayerInfo().direction != 4){
+			cga.TurnTo(32, 88);
+			setTimeout(repeat, 500);
+			return;
+		}
+		
 		var s = io.in('buddy_'+name).sockets;
 		var find_player = null;
 		for(var key in s){
@@ -188,7 +194,7 @@ var getBestCraftableItem = ()=>{
 	
 	return item;
 }
-	
+
 var forgetAndLearn = (teacher, cb)=>{
 	cga.travel.falan.toTeleRoom('圣拉鲁卡村', ()=>{
 		cga.walkList(teacher.path, ()=>{
@@ -355,15 +361,13 @@ var loop = ()=>{
 				return;
 			}
 			
-			console.log('craft');
+			console.log('开始制造：'+craft_target.name);
 			
 			cga.craftItemEx({
 				craftitem : craft_target.name,
 				immediate : true
 			}, (err, results)=>{
-				//console.log(err);
-				//console.log(results);
-				
+
 				if(results && results.success){
 					craft_count ++;
 					console.log('已造' + craft_count + '次');
@@ -380,7 +384,6 @@ var loop = ()=>{
 }
 
 var thisobj = {
-	craftedCount : 0,
 	getDangerLevel : ()=>{
 		return 0;
 	},
@@ -478,7 +481,7 @@ var thisobj = {
 		
 		var stage2 = (cb2)=>{
 			
-			var sayString = '【双百插件】请选择几级之后删除技能: (2~11)';
+			var sayString = '【双百插件】请选择几级之后删除技能: (2~11) (只支持鞋子，11代表不删)';
 			cga.sayLongWords(sayString, 0, 3, 1);
 			cga.waitForChatInput((msg, val)=>{
 				if(val !== null && 2 >= 2 && 11 <= 11){
