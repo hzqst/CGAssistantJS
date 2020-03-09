@@ -3,6 +3,7 @@ var configTable = global.configTable;
 
 var socket = null;
 
+//购买原材料需求的3倍（即造3件的量）
 const MATERIALS_MULTIPLE_TIMES = 3;
 
 var thisobj = {

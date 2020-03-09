@@ -101,7 +101,7 @@ var thisobj = {
 			cga.AsyncWaitNPCDialog(()=>{
 				cga.ClickNPCDialog(0, 0);
 				cga.AsyncWaitNPCDialog((err, dlg)=>{
-					var store = cga.parseBuyStoreMsg(dlg);			
+					var store = cga.parseBuyStoreMsg(dlg);
 					if(!store)
 					{
 						cb(new Error('商店内容解析失败'));
@@ -120,7 +120,7 @@ var thisobj = {
 					});
 					if(!buyitem.length)
 					{
-						cb(new Error('商店没有武器出售，可能已被买完或者背包没空间'));
+						cb(new Error('桥头武器购买失败，可能已被买完或者背包没空间'));
 						return;
 					}
 

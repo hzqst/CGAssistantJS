@@ -307,7 +307,6 @@
 		if(cga.GetMapName() != '哥拉尔镇')
 			throw new Error('必须从哥拉尔镇启动');
 		cga.walkList([
-			[9, 23, '哥拉尔镇'],
 			[176, 105, '库鲁克斯岛'],
 			[321, 367],
 		], cb);
@@ -420,6 +419,19 @@
 				[67, 135],
 			], cb);
 		});
+	}
+},
+{
+	level : 10,
+	name : '鱼翅',
+	display_name : '鱼翅哥拉尔',
+	func : (cb)=>{
+		if(cga.GetMapName() != '哥拉尔镇')
+			throw new Error('必须从哥拉尔镇启动');
+		cga.walkList([
+			[176, 105, '库鲁克斯岛'],
+			[389, 528],
+		], cb);
 	}
 },
 ];

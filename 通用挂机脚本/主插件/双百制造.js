@@ -70,7 +70,7 @@ var waitStuffs = (name, materials, cb)=>{
 		
 		//修复：防止面向方向不正确导致无法交易
 		if(cga.GetPlayerInfo().direction != 4){
-			cga.TurnTo(32, 88);
+			cga.turnTo(32, 88);
 			setTimeout(repeat, 500);
 			return;
 		}
@@ -145,7 +145,7 @@ var waitStuffs = (name, materials, cb)=>{
 		cga.walkList([
 		[34, 88]
 		], ()=>{
-			cga.TurnTo(32, 88);
+			cga.turnTo(32, 88);
 			setTimeout(repeat, 500);
 		});
 	});
@@ -240,8 +240,8 @@ var forgetAndLearn = (teacher, cb)=>{
 	});
 }
 
-var cleanUseless = (inventory, cb)=>{
-	if(inventory.find((inv)=>{
+var dropUseless = (cb)=>{
+	if(cga.getInventoryItems().find((inv)=>{
 		return inv.name == '木棉布';
 	}) != undefined && craft_target.materials.find((mat)=>{
 		return mat.name == '木棉布';
@@ -249,12 +249,12 @@ var cleanUseless = (inventory, cb)=>{
 		var itempos = cga.findItem('木棉布');
 		if(itempos != -1){
 			cga.DropItem(itempos);
-			setTimeout(cleanUseless, 500, cga.getInventoryItems(), cb);
+			setTimeout(dropUseless, 500, cb);
 			return;
 		}
 	}
 	
-	if(inventory.find((inv)=>{
+	if(cga.getInventoryItems().find((inv)=>{
 		return inv.name == '毛毡';
 	}) != undefined && craft_target.materials.find((mat)=>{
 		return mat.name == '毛毡';
@@ -262,11 +262,15 @@ var cleanUseless = (inventory, cb)=>{
 		var itempos = cga.findItem('毛毡');
 		if(itempos != -1){
 			cga.DropItem(itempos);
-			setTimeout(cleanUseless, 500, cga.getInventoryItems(), cb);
+			setTimeout(dropUseless, 500, cb);
 			return;
 		}
 	}
+	
+	cb(null);
+}
 
+var cleanUseless = (cb)=>{
 	cga.travel.falan.toStone('B1', ()=>{
 		cga.turnTo(150, 122);
 		var sellarray = cga.findItemArray((item)=>{
@@ -277,7 +281,11 @@ var cleanUseless = (inventory, cb)=>{
 			}
 		});
 		cga.sellArray(sellarray, ()=>{
-			setTimeout(cb, 1000);
+			cga.walkList([
+			[153, 129]//扔布点
+			], ()=>{
+				dropUseless(cb);
+			});
 		});
 	});
 }

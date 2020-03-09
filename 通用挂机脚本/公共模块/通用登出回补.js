@@ -18,7 +18,11 @@ var thisobj = {
 					break;
 				case '哥拉尔镇':
 					cga.travel.gelaer.toHospital(()=>{
-						setTimeout(cb, 3000);
+						setTimeout(()=>{
+							cga.walkList([
+							[9, 23, '哥拉尔镇']
+							], cb);
+						}, 3000);
 					}, false);
 					break;
 				case '阿凯鲁法村':

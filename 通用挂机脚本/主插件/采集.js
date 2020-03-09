@@ -79,6 +79,26 @@ var gatherArray = [
 	skill : '鉴定',
 	path : './../公共模块/鉴定刷家具',
 },
+{
+	name : '鱼翅流水线鱼翅',
+	skill : '狩猎',
+	path : './../公共模块/鱼翅流水线鱼翅',
+},
+{
+	name : '鱼翅流水线葱',
+	skill : '狩猎',
+	path : './../公共模块/鱼翅流水线葱',
+},
+{
+	name : '鱼翅流水线鸡蛋',
+	skill : '狩猎',
+	path : './../公共模块/鱼翅流水线鸡蛋',
+},
+{
+	name : '鱼翅流水线盐',
+	skill : '狩猎',
+	path : './../公共模块/鱼翅流水线盐',
+},
 ]
 
 var check_drop = ()=>{
@@ -120,12 +140,12 @@ var loop = ()=>{
 	}
 	
 	var playerInfo = cga.GetPlayerInfo();
-	if(playerInfo.mp < playerInfo.maxmp)
+	if(playerInfo.mp < playerInfo.maxmp * 0.2 || playerInfo.hp < playerInfo.maxhp * 0.8)
 	{
 		if(mineObject.supplyManager)
 			mineObject.supplyManager(loop);
 		else if(supplyObject.func)
-			supplyObject.func(loop);		
+			supplyObject.func(loop);
 		return;
 	}
 
@@ -138,7 +158,7 @@ var loop = ()=>{
 		return;
 	}
 
-	var workwork = (err)=>{
+	var workwork = (err, result)=>{
 		
 		check_drop();
 		
@@ -148,7 +168,7 @@ var loop = ()=>{
 			return;
 		}
 
-		if(mineObject.check_done()){
+		if(mineObject.check_done(result)){
 			loop();
 			return;
 		}
@@ -161,12 +181,12 @@ var loop = ()=>{
 		if(skill != null && !mineObject.workManager){
 			cga.StartWork(skill.index, 0);
 			cga.AsyncWaitWorkingResult((err, result)=>{
-				workwork(null);
+				workwork(err, result);
 			}, 10000);
 		} else {
 			if(mineObject.workManager){
 				mineObject.workManager((err, result)=>{
-					workwork(null);
+					workwork(err, rseult);
 				});
 			} else {
 				setTimeout(workwork, 1500, null);

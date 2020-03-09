@@ -3,8 +3,16 @@ var configTable = global.configTable;
 
 var socket = null;
 
-//购买原材料需求的4倍（即造4件的量）
-const MATERIALS_MULTIPLE_TIMES = 3;
+//挖80个原材料（即2组）
+const MATERIALS_MULTIPLE_COUNT = 80;
+
+//一次交易80个（即2组）
+const MATERIALS_TRADE_COUNT = 80;
+
+//必须定居哥拉尔
+cga.travel.gelaer.isSettled = true;
+cga.travel.falan.isSettled = false;
+cga.travel.newisland.isSettled = false;
 
 var thisobj = {
 	func : (cb) =>{
@@ -14,27 +22,22 @@ var thisobj = {
 		thisobj.object.doneManager(cb);
 	},
 	object : {
-		name :'鹿皮',
+		name :'葱',
 		func : (cb) =>{
-			
-			if(thisobj.object.gatherCount === null){
-				setTimeout(thisobj.object.func, 1500, cb);
-				return;
-			}
 			
 			if(thisobj.check_done()){
 				cb(null);
 				return
 			}
-			
-			cga.travel.falan.toStone('E1', ()=>{
+
+			cga.travel.gelaer.toStone('N', ()=>{
 				cga.walkList([
-				[281, 88, '芙蕾雅'],
-				[596, 247],
+				[176, 105, '库鲁克斯岛'],
+				[287, 436],
 				], cb);
 			});
 		},
-		gatherCount : null,
+		gatherCount : MATERIALS_MULTIPLE_COUNT,
 		doneManager : (cb)=>{
 			thisobj.object.state = 'done';
 			
@@ -48,31 +51,33 @@ var thisobj = {
 				}
 
 				if(thisobj.object.state == 'done'){
-					socket.emit('done', { count : cga.getItemCount('鹿皮') });
+					socket.emit('done', { count : cga.getItemCount(thisobj.object.name) });
 				}
 				
 				setTimeout(repeat, 1500);
 			}
 			
-			cga.travel.falan.toStone('C', ()=>{
-				cga.walkList([
-				[33, 88]
-				], ()=>{
-					cga.TurnTo(35, 88);
-					setTimeout(repeat, 1000);
-				});
+			cga.travel.gelaer.toStone('N', ()=>{
+				cga.turnTo(121, 107);
+				setTimeout(repeat, 1000);
 			});
 		},
 		state : 'gathering',
-		extra_dropping : (item)=>{
-			return (item.name == '传说中的鹿皮' && item.count >= 40);
-		},
+		gather_total_times : 0,
 	},
-	check_done : ()=>{
-		if(thisobj.object.gatherCount === null)
-			return false;
+	check_done : (result)=>{
+
+		if(result !== undefined){			
+			if(thisobj.object.gather_total_times < 25){
+				thisobj.object.gather_total_times ++;
+				console.log('已挖'+thisobj.object.gather_total_times+'次');
+			} else {
+				cga.LogOut();
+				return false;
+			}
+		}
 		
-		return cga.getItemCount('鹿皮') >= thisobj.object.gatherCount;
+		return cga.getItemCount(thisobj.object.name) >= thisobj.object.gatherCount;
 	},
 	translate : (pair)=>{
 		
@@ -120,7 +125,7 @@ var thisobj = {
 		socket = require('socket.io-client')('http://localhost:'+thisobj.serverPort, { reconnection: true });
 
 		socket.on('connect', ()=>{
-			console.log('成功连接到双百节点');
+			console.log('成功连接到鱼翅流水线节点');
 			socket.emit('register', {
 				state : thisobj.object.state,
 				player_name : cga.GetPlayerInfo().name,
@@ -132,8 +137,8 @@ var thisobj = {
 			thisobj.craft_player = data.craft_player;
 			thisobj.craft_materials = data.craft_materials;
 			data.craft_materials.forEach((m)=>{
-				if( m.name == '鹿皮' )
-					thisobj.object.gatherCount = m.count * MATERIALS_MULTIPLE_TIMES;
+				if( m.name == thisobj.object.name )
+					thisobj.object.gatherCount = MATERIALS_MULTIPLE_COUNT;
 			});
 		});
 
@@ -145,10 +150,10 @@ var thisobj = {
 			var stuffs = 
 			{
 				itemFilter : (item)=>{
-					if(count >= thisobj.object.gatherCount)
+					if(count >= MATERIALS_TRADE_COUNT)
 						return false;
 					
-					if (item.name == '鹿皮' && item.count >= 20){
+					if (item.name == thisobj.object.name && item.count >= 20){
 						count += item.count;
 						return true;
 					}
@@ -173,7 +178,7 @@ var thisobj = {
 		});
 
 		socket.on('disconnect', ()=>{
-			console.log('退出双百节点');
+			console.log('退出鱼翅流水线节点');
 		});
 	}
 }

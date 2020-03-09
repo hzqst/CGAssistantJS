@@ -7,6 +7,7 @@ var isFabricName = (name)=>{
 	return name == '麻布' || name == '木棉布' || name == '毛毡';
 }
 
+//购买原材料需求的5倍（即造5件的量）
 const MATERIALS_MULTIPLE_TIMES = 5;
 
 var thisobj = {
@@ -29,8 +30,8 @@ var thisobj = {
 				cb(true);
 				return
 			}
-						
-			console.log('func');
+
+			console.log('开始买布...');
 			
 			var buyArray = [];
 			if(thisobj.object.gatherCount['麻布']){
@@ -96,7 +97,7 @@ var thisobj = {
 				cga.walkList([
 				[33, 88]
 				], ()=>{
-					cga.TurnTo(35, 88);
+					cga.turnTo(35, 88);
 					setTimeout(repeat, 1000);
 				});
 			});

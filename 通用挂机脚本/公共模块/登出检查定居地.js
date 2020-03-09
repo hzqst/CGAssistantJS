@@ -34,7 +34,7 @@ var thisobj = {
 					break;
 				default: cb(new Error('登出回到未知的定居地: '+mapname));
 			}
-			console.log('定居地:'+mapname);
+			console.log('登出检查定居地:'+mapname);
 			cb(null, mapname);
 		}, 1000);
 	},
