@@ -1228,36 +1228,44 @@ module.exports = function(callback){
 			});
 		}
 		
-		cga.travel.falan.toTeleRoom('伊尔村', (r)=>{
-			cga.walkList([
+		if(cga.GetMapName() != '伊尔村'){
+			cga.travel.falan.toTeleRoom('伊尔村', ()=>{
+				cga.walkList([
 				[12, 17, '村长的家'],
 				[6, 13, '伊尔村'],
-				[58, 71],
-			], (r)=>{
-				cga.TurnTo(60, 71);
-				cga.AsyncWaitNPCDialog(()=>{
-					cga.ClickNPCDialog(4, -1);
-					cga.AsyncWaitMovement({map:'伊尔'}, ()=>{
-						cga.walkList([
-							[30, 21, '港湾管理处'],
-							[23, 25],
-						], ()=>{
-							cga.TurnTo(23, 23);
+				], ()=>{
+					cga.travel.falan.toAKLF(cb);
+				});
+			});
+			return;
+		}
+		
+		cga.walkList([
+			[58, 71],
+		], ()=>{
+			cga.turnTo(60, 71);
+			cga.AsyncWaitNPCDialog(()=>{
+				cga.ClickNPCDialog(4, -1);
+				cga.AsyncWaitMovement({map:'伊尔'}, ()=>{
+					cga.walkList([
+						[30, 21, '港湾管理处'],
+						[23, 25],
+					], ()=>{
+						cga.TurnTo(23, 23);
+						cga.AsyncWaitNPCDialog(()=>{
+							cga.ClickNPCDialog(32, -1);
 							cga.AsyncWaitNPCDialog(()=>{
-								cga.ClickNPCDialog(32, -1);
-								cga.AsyncWaitNPCDialog(()=>{
-									cga.ClickNPCDialog(4, -1);
-									cga.AsyncWaitMovement({map:'往阿凯鲁法栈桥'}, ()=>{
-										cga.walkList([
-											[51, 50],
-										], retry);
-									});
+								cga.ClickNPCDialog(4, -1);
+								cga.AsyncWaitMovement({map:'往阿凯鲁法栈桥'}, ()=>{
+									cga.walkList([
+										[51, 50],
+									], retry);
 								});
 							});
 						});
 					});
-				}, 1000);	
-			});
+				});
+			}, 1000);	
 		});
 	}
 	
@@ -1272,8 +1280,8 @@ module.exports = function(callback){
 		var stage3 = ()=>{
 			cga.walkList([
 				[84, 55],
-			], (r)=>{
-				cga.TurnTo(84, 53);
+			], ()=>{
+				cga.turnTo(84, 53);
 				cga.AsyncWaitNPCDialog(()=>{
 					cga.ClickNPCDialog(4, -1);
 					cga.AsyncWaitMovement({map:'哥拉尔镇 港湾管理处'}, ()=>{
@@ -1315,36 +1323,44 @@ module.exports = function(callback){
 			});
 		}
 		
-		cga.travel.falan.toTeleRoom('伊尔村', (r)=>{
-			cga.walkList([
+		if(cga.GetMapName() != '伊尔村'){
+			cga.travel.falan.toTeleRoom('伊尔村', ()=>{
+				cga.walkList([
 				[12, 17, '村长的家'],
 				[6, 13, '伊尔村'],
-				[58, 71],
-			], (r)=>{
-				cga.TurnTo(60, 71);
-				cga.AsyncWaitNPCDialog(()=>{
-					cga.ClickNPCDialog(4, -1);
-					cga.AsyncWaitMovement({map:'伊尔'}, ()=>{
-						cga.walkList([
-							[30, 21, '港湾管理处'],
-							[25, 25],
-						], ()=>{
-							cga.TurnTo(25, 23);
+				], ()=>{
+					cga.travel.falan.toGelaer(cb);
+				});
+			});
+			return;
+		}
+		
+		cga.walkList([
+			[58, 71],
+		], ()=>{
+			cga.turnTo(60, 71);
+			cga.AsyncWaitNPCDialog(()=>{
+				cga.ClickNPCDialog(4, -1);
+				cga.AsyncWaitMovement({map:'伊尔'}, ()=>{
+					cga.walkList([
+						[30, 21, '港湾管理处'],
+						[25, 25],
+					], ()=>{
+						cga.TurnTo(25, 23);
+						cga.AsyncWaitNPCDialog(()=>{
+							cga.ClickNPCDialog(32, -1);
 							cga.AsyncWaitNPCDialog(()=>{
-								cga.ClickNPCDialog(32, -1);
-								cga.AsyncWaitNPCDialog(()=>{
-									cga.ClickNPCDialog(4, -1);
-									cga.AsyncWaitMovement({map:'往哥拉尔栈桥'}, ()=>{
-										cga.walkList([
-											[51, 50],
-										], retry);
-									});
+								cga.ClickNPCDialog(4, -1);
+								cga.AsyncWaitMovement({map:'往哥拉尔栈桥'}, ()=>{
+									cga.walkList([
+										[51, 50],
+									], retry);
 								});
 							});
 						});
 					});
-				}, 1000);	
-			});
+				});
+			}, 1000);	
 		});
 	}
 	
@@ -2097,6 +2113,7 @@ module.exports = function(callback){
 	'里谢里雅堡',
 	'医院',
 	'工房',
+	'村长的家',
 	'曙光骑士团营地',
 	'圣骑士营地',
 	'哥拉尔镇',
@@ -2107,6 +2124,7 @@ module.exports = function(callback){
 	'奇利村',
 	'杰诺瓦镇',
 	'伊尔村',
+	'伊尔',
 	'维诺亚村',
 	'乌克兰村',
 	'亚留特村',
@@ -2115,7 +2133,12 @@ module.exports = function(callback){
 	'魔法大学',
 	'魔法大学内部',
 	'杂货店',
+	'启程之间',
 	'追忆之路',
+	'港湾管理处',
+	'往哥拉尔栈桥',
+	'往伊尔栈桥',
+	'哥拉尔 港湾管理处',
 	];
 	
 	cga.walkList = (list, cb)=>{
@@ -2904,12 +2927,20 @@ module.exports = function(callback){
 				if(cb)
 					setTimeout(cga.cleanInventory, 500, count, cb);
 			} else {
-				if(cb)
-					cb(new Error('没有可以扔的物品了'));
+				cb(new Error('没有可以扔的物品了'));
 			}
 		} else {
-			if(cb)
-				cb(null);
+			cb(null);
+		}
+	}
+	
+	cga.cleanInventoryEx = (filter, cb)=>{
+		var items = cga.getInventoryItems().filter(filter);
+		if(items.length > 0){
+			cga.DropItem(items[0].pos);
+			setTimeout(cga.cleanInventory, 500, count, filter, cb);
+		} else {
+			cb(null);
 		}
 	}
 	
