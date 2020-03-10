@@ -92,7 +92,7 @@ var doneArray = [
 							cga.walkList([
 							[27, 82]
 							], ()=>{
-								cb(true);
+								cb(null);
 							});
 						});
 					});
@@ -147,7 +147,7 @@ var doneArray = [
 						cga.walkList([
 						[15, 24, '阿凯鲁法村']
 						], ()=>{
-							cb(true);
+							cb(null);
 						});
 					});
 				});
@@ -200,7 +200,7 @@ var doneArray = [
 						cga.walkList([
 						[18, 30, '哥拉尔镇']
 						], ()=>{
-							cb(true);
+							cb(null);
 						});
 					});
 				});
@@ -214,7 +214,11 @@ var doneArray = [
 		cga.travel.gelaer.toBank(()=>{
 			cga.AsyncWaitNPCDialog(()=>{
 				cga.saveToBankAll(mineObject.name, 20, (err)=>{
-					cb(null);
+					cga.walkList([
+					[12, 12, '哥拉尔镇']
+					], ()=>{
+						cb(null);
+					});
 				});
 			});
 		});

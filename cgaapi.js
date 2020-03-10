@@ -1017,7 +1017,7 @@ module.exports = function(callback){
 		if(mine == '铜'){
 			mineExchange = (cb2)=>{
 				cga.walkList([[26, 5]], ()=>{
-					cga.TurnTo(26, 4);
+					cga.turnTo(26, 4);
 					cb2(null);
 				});
 			}
@@ -1025,7 +1025,7 @@ module.exports = function(callback){
 		if(mine == '铁'){
 			mineExchange = (cb2)=>{
 				cga.walkList([[28, 6]], ()=>{
-					cga.TurnTo(28, 5);
+					cga.turnTo(28, 5);
 					cb2(null);
 				});
 			}
@@ -1033,7 +1033,7 @@ module.exports = function(callback){
 		if(mine == '银'){
 			mineExchange = (cb2)=>{
 				cga.walkList([[29, 6]], ()=>{
-					cga.TurnTo(30, 5);
+					cga.turnTo(30, 5);
 					cb2(null);
 				});
 			}
@@ -1041,7 +1041,7 @@ module.exports = function(callback){
 		if(mine == '纯银'){
 			mineExchange = (cb2)=>{
 				cga.walkList([[27, 7]], ()=>{
-					cga.TurnTo(27, 5);
+					cga.turnTo(27, 5);
 					cb2(null);
 				});
 			}
@@ -1049,7 +1049,7 @@ module.exports = function(callback){
 		if(mine == '金'){
 			mineExchange = (cb2)=>{
 				cga.walkList([[24, 6]], ()=>{
-					cga.TurnTo(24, 5);
+					cga.turnTo(24, 5);
 					cb2(null);
 				});
 			}
@@ -1057,7 +1057,7 @@ module.exports = function(callback){
 		if(mine == '白金'){
 			mineExchange = (cb2)=>{
 				cga.walkList([[29, 6]], ()=>{
-					cga.TurnTo(30, 7);
+					cga.turnTo(30, 7);
 					cb2(null);
 				});
 			}
@@ -1065,7 +1065,7 @@ module.exports = function(callback){
 		if(mine == '幻之钢'){
 			mineExchange = (cb2)=>{
 				cga.walkList([[26, 10]], ()=>{
-					cga.TurnTo(28, 10);
+					cga.turnTo(28, 10);
 					cb2(null);
 				});
 			}
@@ -1073,7 +1073,7 @@ module.exports = function(callback){
 		if(mine == '幻之银'){
 			mineExchange = (cb2)=>{
 				cga.walkList([[27, 9]], ()=>{
-					cga.TurnTo(28, 8);
+					cga.turnTo(28, 8);
 					cb2(null);
 				});
 			}
@@ -1081,7 +1081,7 @@ module.exports = function(callback){
 		if(mine == '勒格耐席鉧'){
 			mineExchange = (cb2)=>{
 				cga.walkList([[23, 7]], ()=>{
-					cga.TurnTo(22, 6);
+					cga.turnTo(22, 6);
 					cb2(null);
 				});
 			}
@@ -1089,7 +1089,7 @@ module.exports = function(callback){
 		if(mine == '奥利哈钢'){
 			mineExchange = (cb2)=>{
 				cga.walkList([[26, 12]], ()=>{
-					cga.TurnTo(27, 12);
+					cga.turnTo(27, 12);
 					cb2(null);
 				});
 			}
@@ -1129,6 +1129,119 @@ module.exports = function(callback){
 				});
 			});
 		}
+	}
+	
+	cga.travel.falan.toNewMineStore = (mine, cb)=>{
+		var mineExchange = null;
+		if(mine == '铜'){
+			mineExchange = (cb2)=>{
+				cga.walkList([[35, 46]], ()=>{
+					cga.turnTo(35, 45);
+					cb2(null);
+				});
+			}
+		}
+		if(mine == '铁'){
+			mineExchange = (cb2)=>{
+				cga.walkList([[32, 47]], ()=>{
+					cga.turnTo(31, 47);
+					cb2(null);
+				});
+			}
+		}
+		if(mine == '银'){
+			mineExchange = (cb2)=>{
+				cga.walkList([[42, 51]], ()=>{
+					cga.turnTo(41, 51);
+					cb2(null);
+				});
+			}
+		}
+		if(mine == '纯银'){
+			mineExchange = (cb2)=>{
+				cga.walkList([[37, 49]], ()=>{
+					cga.turnTo(37, 48);
+					cb2(null);
+				});
+			}
+		}
+		if(mine == '金'){
+			mineExchange = (cb2)=>{
+				cga.walkList([[40, 50]], ()=>{
+					cga.turnTo(39, 49);
+					cb2(null);
+				});
+			}
+		}
+		if(mine == '白金'){
+			mineExchange = (cb2)=>{
+				cga.walkList([[38, 43]], ()=>{
+					cga.turnTo(39, 44);
+					cb2(null);
+				});
+			}
+		}
+		if(mine == '幻之钢'){
+			mineExchange = (cb2)=>{
+				cga.walkList([[26, 10]], ()=>{
+					cga.turnTo(28, 10);
+					cb2(null);
+				});
+			}
+		}
+		if(mine == '幻之银'){
+			mineExchange = (cb2)=>{
+				cga.walkList([[37, 44]], ()=>{
+					cga.turnTo(38, 45);
+					cb2(null);
+				});
+			}
+		}
+		if(mine == '勒格耐席鉧'){
+			mineExchange = (cb2)=>{
+				cga.walkList([[33, 46]], ()=>{
+					cga.turnTo(33, 45);
+					cb2(null);
+				});
+			}
+		}
+		if(mine == '奥利哈钢'){
+			mineExchange = (cb2)=>{
+				cga.walkList([[44, 48]], ()=>{
+					cga.turnTo(43, 48);
+					cb2(null);
+				});
+			}
+		}
+		if(mine == '铝'){
+			mineExchange = (cb2)=>{
+				cga.walkList([[38, 54]], ()=>{
+					cga.turnTo(38, 53);
+					cb2(null);
+				});
+			}
+		}
+		if(cga.GetMapName()=='画廊'){
+			if(mineExchange){
+				mineExchange(cb);
+			}else{
+				cb(null);
+			}
+			return;
+		}
+		
+		cga.travel.newisland.toStone('B', ()=>{
+			cga.walkList([
+				[144, 120, '武器工房'],
+				[28, 21, '画廊'],
+			], ()=>{
+				if(mineExchange){
+					mineExchange(cb);
+				}else{
+					cb(null);
+				}
+			});
+		});
 	}
 
 	//从法兰城到新城
