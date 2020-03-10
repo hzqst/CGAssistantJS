@@ -199,8 +199,8 @@ var loop = ()=>{
 			}, 10000);
 		} else {
 			if(mineObject.workManager){
-				mineObject.workManager((err, result)=>{
-					workwork(err, rseult);
+				mineObject.workManager((err)=>{
+					workwork(err);
 				});
 			} else {
 				setTimeout(workwork, 1500, null);
