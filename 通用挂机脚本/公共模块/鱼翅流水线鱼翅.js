@@ -63,20 +63,9 @@ var thisobj = {
 			});
 		},
 		state : 'gathering',
-		gather_total_times : 0,
 	},
 	check_done : (result)=>{
 
-		if(result !== undefined){			
-			if(thisobj.object.gather_total_times < 25){
-				thisobj.object.gather_total_times ++;
-				console.log('已挖'+thisobj.object.gather_total_times+'次');
-			} else {
-				cga.LogOut();
-				return false;
-			}
-		}
-		
 		return cga.getItemCount(thisobj.object.name) >= thisobj.object.gatherCount;
 	},
 	translate : (pair)=>{

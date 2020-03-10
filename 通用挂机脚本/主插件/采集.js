@@ -181,6 +181,20 @@ var loop = ()=>{
 		if(skill != null && !mineObject.workManager){
 			cga.StartWork(skill.index, 0);
 			cga.AsyncWaitWorkingResult((err, result)=>{
+				
+				if(thisobj.logoutTimes > 0 && result !== undefined){
+					if(thisobj.gatherTimes == undefined)
+						thisobj.gatherTimes = 0;
+					
+					if(thisobj.gatherTimes < thisobj.logoutTimes){
+						thisobj.gatherTimes ++;
+						console.log('已挖'+thisobj.gatherTimes+'次');
+					} else {
+						cga.LogOut();
+						return false;
+					}
+				}
+				
 				workwork(err, result);
 			}, 10000);
 		} else {
@@ -216,6 +230,13 @@ var thisobj = {
 		
 		if(pair.field == 'gatherObject'){
 			pair.field = '采集类型';
+			pair.value = pair.value;
+			pair.translated = true;
+			return true;
+		}
+		
+		if(pair.field == 'logoutTimes'){
+			pair.field = '采集次数';
 			pair.value = pair.value;
 			pair.translated = true;
 			return true;
@@ -258,12 +279,41 @@ var thisobj = {
 				return false;
 		}
 		
+		//legacy
+		configTable.logoutTimes = obj.logoutTimes;
+		thisobj.logoutTimes = obj.logoutTimes;
+		
+		if(typeof thisobj.logoutTimes == 'undefined'){
+			configTable.logoutTimes = 0;
+			thisobj.logoutTimes = 0;
+		}
+		
 		if(!healObject.loadconfig(obj))
 			return false;
 		
 		return true;
 	},
 	inputcb : (cb)=>{
+		var logoutTimesStage = (cb2)=>{
+			var sayString = '【采集插件】请选择采集多少下之后登出服务器 (0~100，0代表不登出):';
+
+			cga.sayLongWords(sayString, 0, 3, 1);
+			cga.waitForChatInput((msg, index)=>{
+				if(index !== null && index >= 0 && index <= 100){
+					configTable.logoutTimes = index;
+					thisobj.logoutTimes = index;
+					
+					var sayString2 = '当前已选择: 采集[' + thisobj.logoutTimes + ']下之后登出服务器。';
+					cga.sayLongWords(sayString2, 0, 3, 1);
+					
+					cb2(null);
+					return false;
+				}
+				
+				return true;
+			});
+		}
+		
 		var sayString = '【采集插件】请选择采集类型:';
 		for(var i in gatherArray){
 			if(i != 0)
@@ -283,9 +333,9 @@ var thisobj = {
 					mineObject = require(gatherObject.path);
 				
 				if(!mineObject.doneManager){
-					Async.series([mineObject.inputcb, doneObject.inputcb, healObject.inputcb], cb);
+					Async.series([mineObject.inputcb, logoutTimesStage, doneObject.inputcb, healObject.inputcb], cb);
 				} else {
-					Async.series([mineObject.inputcb, healObject.inputcb], cb);
+					Async.series([mineObject.inputcb, logoutTimesStage, healObject.inputcb], cb);
 				}
 				return false;
 			}

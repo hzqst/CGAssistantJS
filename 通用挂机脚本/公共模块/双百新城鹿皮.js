@@ -64,22 +64,11 @@ var thisobj = {
 			});
 		},
 		state : 'gathering',
-		gather_total_times : 0,
 	},
 	check_done : (result)=>{
 		if(thisobj.object.gatherCount === null)
 			return false;
-		
-		if(result !== undefined){
-			if(thisobj.object.gather_total_times < 25){
-				thisobj.object.gather_total_times ++;
-				console.log('已挖'+thisobj.object.gather_total_times+'次');
-			} else {
-				cga.LogOut();
-				return false;
-			}
-		}
-		
+				
 		return cga.getItemCount('鹿皮') >= thisobj.object.gatherCount;
 	},
 	translate : (pair)=>{
