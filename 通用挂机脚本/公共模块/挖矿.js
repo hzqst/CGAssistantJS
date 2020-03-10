@@ -38,7 +38,6 @@ var mineArray = [
 		}
 		cga.travel.falan.toStone('S', ()=>{
 			cga.walkList([
-				[41, 98, '法兰城'],
 				[153, 241, '芙蕾雅'],
 			], retry);
 		});
@@ -71,7 +70,6 @@ var mineArray = [
 		}
 		cga.travel.falan.toStone('S', ()=>{
 			cga.walkList([
-				[41, 98, '法兰城'],
 				[153, 241, '芙蕾雅'],
 			], retry);
 		});
@@ -103,7 +101,6 @@ var mineArray = [
 		}
 		cga.travel.falan.toStone('S', ()=>{
 			cga.walkList([
-				[41, 98, '法兰城'],
 				[153, 241, '芙蕾雅'],
 			], retry);
 		});
@@ -136,7 +133,6 @@ var mineArray = [
 
 		cga.travel.falan.toStone('S', ()=>{
 			cga.walkList([
-				[41, 98, '法兰城'],
 				[153, 241, '芙蕾雅'],
 			], retry);
 		});
@@ -168,7 +164,6 @@ var mineArray = [
 		}
 		cga.travel.falan.toStone('S', ()=>{
 			cga.walkList([
-				[41, 98, '法兰城'],
 				[153, 241, '芙蕾雅'],
 			], retry);
 		});

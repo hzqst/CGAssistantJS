@@ -1518,7 +1518,7 @@ module.exports = function(callback){
 	}
 	
 	cga.travel.falan.toTeleRoom = (villageName, cb)=>{
-		var mapname = cga.GetMapName();
+		
 		switch(villageName){
 			case '亚留特村':
 				cga.travel.falan.toTeleRoomTemplate('亚留特村', [43, 23], [43, 22], [44, 22], cb);
@@ -1531,9 +1531,6 @@ module.exports = function(callback){
 				break;
 			case '维诺亚村':
 				cga.travel.falan.toTeleRoomTemplate('维诺亚村', [9, 22], [9, 23], [8, 22], cb);
-				break;
-			case '奇利村':
-				cga.travel.falan.toTeleRoomTemplate('奇利村', [9, 33], [8, 33], [8, 32], cb);
 				break;
 			case '奇利村':
 				cga.travel.falan.toTeleRoomTemplate('奇利村', [9, 33], [8, 33], [8, 32], cb);
@@ -1551,6 +1548,7 @@ module.exports = function(callback){
 				cga.travel.falan.toTeleRoomTemplate('蒂娜村', [25, 4], [25, 5], [26, 4], cb);
 				break;
 			case '魔法大学':
+				var mapname = cga.GetMapName();
 				if(mapname == '魔法大学'){
 					cb(null);
 					return;
