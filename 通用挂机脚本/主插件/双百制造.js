@@ -198,21 +198,24 @@ var getBestCraftableItem = ()=>{
 var forgetAndLearn = (teacher, cb)=>{
 	cga.travel.falan.toTeleRoom('圣拉鲁卡村', ()=>{
 		cga.walkList(teacher.path, ()=>{
-			cga.TurnTo(teacher.pos[0], teacher.pos[1]);
+			cga.turnTo(teacher.pos[0], teacher.pos[1]);
 			
 			var dialogHandler = (err, dialog)=>{
 				if(dialog){
-					if (dialog.type == 16) {
-						cga.ClickNPCDialog(-1, 1);
-						cga.AsyncWaitNPCDialog(dialogHandler);
-						return;
-					}
-					if (dialog.type == 18) {
-						const skillIndex = cga.GetSkillsInfo().sort((a,b) => a.pos - b.pos).findIndex(s => s.name == teacher.skillname);
-						if (skillIndex > -1) {
-							cga.ClickNPCDialog(0, skillIndex);
+					if( cga.findPlayerSkill(teacher.skillname) )
+					{
+						if (dialog.type == 16) {
+							cga.ClickNPCDialog(-1, 1);
 							cga.AsyncWaitNPCDialog(dialogHandler);
 							return;
+						}
+						if (dialog.type == 18) {
+							const skillIndex = cga.GetSkillsInfo().sort((a,b) => a.pos - b.pos).findIndex(s => s.name == teacher.skillname);
+							if (skillIndex > -1) {
+								cga.ClickNPCDialog(0, skillIndex);
+								cga.AsyncWaitNPCDialog(dialogHandler);
+								return;
+							}
 						}
 					}
 					if (dialog.options == 12) {

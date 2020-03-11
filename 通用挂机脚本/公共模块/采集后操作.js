@@ -215,7 +215,7 @@ var doneArray = [
 			cga.AsyncWaitNPCDialog(()=>{
 				cga.saveToBankAll(mineObject.name, 20, (err)=>{
 					cga.walkList([
-					[12, 12, '哥拉尔镇']
+					[11, 12, '哥拉尔镇']
 					], ()=>{
 						cb(null);
 					});
