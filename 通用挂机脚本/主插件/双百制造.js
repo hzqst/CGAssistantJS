@@ -7,10 +7,6 @@ var craft_target = null;
 
 var healObject = require('./../公共模块/治疗自己');
 
-var craftSkillList = cga.GetSkillsInfo().filter((sk)=>{
-	return (sk.name.indexOf('制') == 0 || sk.name.indexOf('造') == 0 || sk.name.indexOf('铸') == 0 );
-});
-
 const allowMats = ['麻布', '印度轻木', '铜条', '鹿皮', '毛毡', '木棉布'];
 
 const isFabricName = (name)=>{
@@ -202,7 +198,8 @@ var forgetAndLearn = (teacher, cb)=>{
 			
 			var dialogHandler = (err, dialog)=>{
 				if(dialog){
-					if( cga.findPlayerSkill(teacher.skillname) )
+					var hasSkill = cga.findPlayerSkill(teacher.skillname) ? true : false;
+					if( hasSkill )
 					{
 						if (dialog.type == 16) {
 							cga.ClickNPCDialog(-1, 1);
@@ -223,7 +220,7 @@ var forgetAndLearn = (teacher, cb)=>{
 						cga.AsyncWaitNPCDialog(dialogHandler);
 						return;
 					}
-					if (dialog.message.indexOf('已经删除') >= 0) {
+					if (dialog.message.indexOf('已经删除') >= 0 || !hasSkill) {
 						setTimeout(()=>{
 							cga.TurnTo(teacher.pos[0], teacher.pos[1]);
 							cga.AsyncWaitNPCDialog((dlg)=>{
@@ -294,6 +291,32 @@ var cleanUseless = (cb)=>{
 }
 
 var loop = ()=>{
+
+	var craftSkillList = cga.GetSkillsInfo().filter((sk)=>{
+		return (sk.name.indexOf('制') == 0 || sk.name.indexOf('造') == 0 || sk.name.indexOf('铸') == 0 );
+	});
+
+	for(var i in craftSkillList){
+		if(craftSkillList[i].name == configTable.craftType){				
+			thisobj.craftSkill = craftSkillList[i];
+			thisobj.craftItemList = cga.GetCraftsInfo(thisobj.craftSkill.index);
+			break;
+		}
+	}
+	
+	if(!thisobj.craftSkill)
+	{
+		var teacher = teachers.find((t)=>{
+			return t.skillname == configTable.craftType;
+		})
+		if(teacher != undefined){
+			craft_count = 0;
+			forgetAndLearn(teacher, loop);
+			return;
+		} else {
+			throw new Error('没有学习对应的制造技能!');
+		}
+	}
 
 	callSubPluginsAsync('prepare', ()=>{
 		
@@ -428,16 +451,9 @@ var thisobj = {
 	},
 	loadconfig : (obj)=>{
 		
-		for(var i in craftSkillList){
-			if(craftSkillList[i].name == obj.craftType){
-				configTable.craftType = craftSkillList[i].name;
-				thisobj.craftSkill = craftSkillList[i];
-				thisobj.craftItemList = cga.GetCraftsInfo(thisobj.craftSkill.index);
-				break;
-			}
-		}
-		
-		if(!thisobj.craftSkill){
+		configTable.craftType = obj.craftType;
+				
+		if(!configTable.craftType){
 			console.error('读取配置：制造类型失败！');
 			return false;
 		}
@@ -466,6 +482,10 @@ var thisobj = {
 	inputcb : (cb)=>{
 
 		var stage1 = (cb2)=>{
+			var craftSkillList = cga.GetSkillsInfo().filter((sk)=>{
+				return (sk.name.indexOf('制') == 0 || sk.name.indexOf('造') == 0 || sk.name.indexOf('铸') == 0 );
+			});
+			
 			var sayString = '【双百插件】请选择刷的技能:';
 			for(var i in craftSkillList){
 				if(i != 0)
@@ -535,6 +555,7 @@ var thisobj = {
 		Async.series([stage1, stage2, stage3, healObject.inputcb], cb);
 	},
 	execute : ()=>{
+	
 		io.listen(thisobj.listenPort);
 		callSubPlugins('init');
 		loop();
