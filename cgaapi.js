@@ -2226,6 +2226,7 @@ module.exports = function(callback){
 	'工房',
 	'村长的家',
 	'曙光骑士团营地',
+	'辛希亚探索指挥部',
 	'圣骑士营地',
 	'哥拉尔镇',
 	'鲁米那斯',
@@ -2240,6 +2241,7 @@ module.exports = function(callback){
 	'乌克兰村',
 	'亚留特村',
 	'圣拉鲁卡村',
+	'地下工房',
 	'阿巴尼斯村',
 	'魔法大学',
 	'魔法大学内部',
@@ -3567,6 +3569,8 @@ module.exports = function(callback){
 	
 	cga.walkTeammateToPosition = (posArray, cb) =>{
 		
+		console.log('cga.walkTeammateToPosition stage1');
+		
 		if(cga.getTeamPlayers().length == 0)
 		{
 			cb(null);
@@ -3576,14 +3580,19 @@ module.exports = function(callback){
 		var index = 0;
 		
 		var walk = ()=>{
+			console.log('cga.walkTeammateToPosition walk');
+			
 			cga.AsyncWalkTo(posArray[index][0], posArray[index][1], null, null, null, checkTeammateAtPosition);
 		}
 		
 		var checkTeammateAtPosition = (err)=>{
 			
+			console.log('checkTeammateAtPosition 0');
+			
 			if(!cga.isInNormalState())
 			{
-				setTimeout(walk, 1000);
+				console.log('checkTeammateAtPosition 1');
+				setTimeout(checkTeammateAtPosition, 1000);
 				return;
 			}
 			
@@ -3605,6 +3614,8 @@ module.exports = function(callback){
 			}
 			
 			if(someoneNotInPosArray){
+				console.log('someoneNotInPosArray');
+				
 				index ++;
 				if(index > posArray.length - 1)
 					index = 0;
@@ -3618,10 +3629,12 @@ module.exports = function(callback){
 					//restart the walk procedure
 					if(!cga.isInNormalState())
 					{
-						setTimeout(walk, 1000);
+						console.log('waitForChatInput 0');
+						setTimeout(checkTeammateAtPosition, 1000);
 					}
 					else
 					{
+						console.log('waitForChatInput 1');
 						//or we are at position
 						cb(null);
 					}
