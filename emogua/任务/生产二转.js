@@ -1,9 +1,5 @@
-/**
- * 需要卡好交易再运行
- */
-
 require('../wrapper').then(cga => {
-	console.log('生产二转');
+	console.log('生产二转,需要卡好交易再运行', new Date().toLocaleString());
 	cga.emogua.autoBattle(cga.emogua.AutoBattlePreset.getEscapeSets());
 
 	cga.emogua.keepAlive();
@@ -12,9 +8,9 @@ require('../wrapper').then(cga => {
 			cga.emogua.dropItems([i.pos]);
 		}
 	});
-	let timer = Date.now();
+	let timer;
 	cga.emogua.logBack().then(
-		() => cga.emogua.prepare({repairFlag: -1})
+		() => cga.emogua.prepare({repairFlag: 0})
 	).then(
 		() => cga.emogua.goto(n => n.teleport.ghana)
 	).then(
@@ -51,7 +47,7 @@ require('../wrapper').then(cga => {
 		])
 	).then(
 		() => cga.emogua.waitUntil(() => {
-			return (Date.now() - timer) >= 3603000
+			return (Date.now() - timer) >= 3603000;
 		}, 3000)
 	).then(
 		() => cga.emogua.talkNpc(6, cga.emogua.talkNpcSelectorYes)
@@ -86,14 +82,12 @@ require('../wrapper').then(cga => {
 		// 	])
 		// );
 		return cga.emogua.logBack().then(
-			() => cga.emogua.prepare({repairFlag: -1})
+			() => cga.emogua.prepare({repairFlag: 0})
 		);
 	}).then(
 		() => cga.emogua.goto(n => n.falan.wout)
 	).then(
-		() => cga.emogua.autoWalkList([
-			[200,165]
-		])
+		() => cga.emogua.autoWalk([200,165])
 	).then(
 		() => cga.emogua.talkNpc(0, cga.emogua.talkNpcSelectorYes)
 	).then(
@@ -107,7 +101,7 @@ require('../wrapper').then(cga => {
 		])
 	).then(
 		() => cga.emogua.waitUntil(() => {
-			return (Date.now() - timer) >= 3603000
+			return (Date.now() - timer) >= 3603000;
 		}, 3000)
 	).then(
 		() => cga.emogua.talkNpc(6, cga.emogua.talkNpcSelectorYes)

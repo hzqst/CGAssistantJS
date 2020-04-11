@@ -3,16 +3,17 @@
  * direction 0(右上)
  * 高速移动中不可丢东西
  * cga.ForceMove(direction, false); true 人物坐标移动 false 只发包服务器
+ * cga.ForceMoveTo(cga.GetMapXY().x, cga.GetMapXY().y, false); x或者y可同时跨越最多+5格子
+ *   true | false 本人是否可见 false只有地图可见
  * cga.getMapObjects()
  *     [ { x: 199, y: 209, mapx: 199, mapy: 209, cell: 10 }] cell 10(地图出入口) 3(迷宫出入口)
- *
  * dialog options:
  *     0  : 列表选择 cga.ClickNPCDialog(0, 6) 第一个参数应该是被忽略的，第二个参数选择列表序号，从0开始
  *     1  : 确定按钮 cga.ClickNPCDialog(1, -1)
  *     2  : 取消按钮 cga.ClickNPCDialog(2, -1)
  *     3  : 确定取消 cga.ClickNPCDialog(1, -1) 1确定 2取消
  *     12 : 是否按钮 cga.ClickNPCDialog(4, -1) 4是 8否
- *     32 : 下一步   cga.ClickNPCDialog(32, -1) 32下一步
+ *     32 : 下一步 cga.ClickNPCDialog(32, -1) 32下一步
  * cga.MoveItem(packageSlot.pos, i, -1);  -1 表示全部 >0 表示存入数量
  * cga.AsyncWaitMovement 等
  *     js native callback 会导致resolve promise时等待setTimeout|setInterval等任务执行一次，一次需要用setTimeout(resolve,0)提升优先级
@@ -25,8 +26,6 @@
  *     1 未知
  *     2 卡住战斗 4 战斗选择 5 战斗中 8 战斗结束一瞬间的状态 11 战斗切图，不能用来判断战斗，因为战斗中会有小瞬间是3空闲状态
  *     3 空闲
- * cga.ForceMoveTo(cga.GetMapXY().x, cga.GetMapXY().y, false);
- *     true | false 本人是否可见 false只有地图可见
  * cga.AsyncWaitChatMsg
  *     unitid=-1 系统消息
  * 装备栏顺序
@@ -44,218 +43,27 @@
  *     x 速度值
  *     y 速度值
  *     都为0表示静止中
+ * cga.FixMapWarpStuck(1)
+ *     1 站在迷宫入口 如果卡着没进去就强制进去
+ *     0 切图的时候黑屏 强制切回来
+ * cga.GetMapUnits 返回附近11格范围内的units
+ *     unit_name 角色名
+ *     title_name 特别称号
+ *     nick_name 玩家称号
+ * cga.ChangePetState(petpos, 0~3 | 16) 1=待命 2=战斗 3=休息 16=宠物散步
+ * cga.DropPet(petpos)
  */
 const PF = require('pathfinding');
-const Professions = [
-	{
-		name: '暗黑骑士',
-		titles: ['见习暗黑骑士', '暗黑骑士', '高阶暗黑骑士', '暗黑领主', '暗黑之魂', '漆黑之影'],
-		category: '物理系'
-	}, {
-		name: '盗贼',
-		titles: ['见习盗贼', '盗贼', '小偷', '欺诈师', '偷窃高手', '盗贼头目'],
-		category: '物理系'
-	}, {
-		name: '格斗士',
-		titles: ['见习格斗士', '格斗士', '格斗专家', '格斗家师范', '格斗王', '斗圣'],
-		category: '物理系'
-	}, {
-		name: '弓箭手',
-		titles: ['见习弓箭手', '弓箭手', '王宫弓箭手', '弓术师范', '弓术大师', '神射手'],
-		category: '物理系'
-	}, {
-		name: '教团骑士',
-		titles: ['见习教团骑士', '教团骑士', '高阶教团骑士', '圣骑士', '光明骑士', '仲裁者'],
-		category: '物理系'
-	}, {
-		name: '骑士',
-		titles: ['见习骑士', '骑士', '王宫骑士', '近卫骑士', '枪术大师', '枪圣'],
-		category: '物理系'
-	}, {
-		name: '忍者',
-		titles: ['初级忍者', '中级忍者', '上级忍者', '影', '忍术大师', '鬼'],
-		category: '物理系'
-	}, {
-		name: '士兵',
-		titles: ['见习士兵', '士兵', '王宫士兵', '士兵长', '重战士', '指挥官'],
-		category: '物理系'
-	}, {
-		name: '舞者',
-		titles: ['见习舞者', '串场艺人', '舞者', '超级巨星', '天王巨星', '舞圣'],
-		category: '物理系'
-	}, {
-		name: '战斧斗士',
-		titles: ['见习战斧斗士', '战斧斗士', '王宫战斧斗士', '战斧师范', '战斧大师', '斧圣'],
-		category: '物理系'
-	}, {
-		name: '传教士',
-		titles: ['见习传教士', '传教士', '牧师', '主教', '大主教', '圣使'],
-		category: '魔法系'
-	}, {
-		name: '魔术师',
-		titles: ['见习魔术师', '魔术师', '王宫魔法师', '魔导士', '大魔术师', '狂魔导师'],
-		category: '魔法系'
-	}, {
-		name: '巫师',
-		titles: ['见习巫师', '巫师', '王宫巫师', '巫术大师', '巫王', '幻之巫王'],
-		category: '魔法系'
-	}, {
-		name: '咒术师',
-		titles: ['见习咒术师', '咒术师', '王宫咒术师', '降头师', '咒术大师', '咒缚者'],
-		category: '魔法系'
-	}, {
-		category: '宠物系',
-		name: '封印师',
-		titles: ['见习封印师', '封印师', '王宫封印师', '封印术师范', '封印大师', '召唤师']
-	}, {
-		category: '宠物系',
-		name: '饲养师',
-		titles: ['见习饲养师', '饲养师', '王宫饲养师', '高级饲养师', '饲养大师', '星之饲养师']
-	}, {
-		category: '宠物系',
-		name: '驯兽师',
-		titles: ['见习驯兽师', '驯兽师', '王宫驯兽师', '驯兽师范', '驯兽大师', '兽王']
-	}, {
-		category: '制造系',
-		name: '裁缝工',
-		titles: ['裁缝学徒', '裁缝工', '资深裁缝师傅', '御用裁缝师', '裁缝名师']
-	}, {
-		category: '制造系',
-		name: '长袍工',
-		titles: ['长袍学徒', '长袍工', '资深长袍师傅', '御用长袍师', '长袍名师']
-	}, {
-		ategory: '制造系',
-		name: '厨师',
-		titles: ['料理学徒', '厨师', '资深大厨师', '御用厨师', '料理达人']
-	}, {
-		category: '制造系',
-		name: '铠甲工',
-		titles: ['铠甲学徒', '铠甲工', '资深铠甲师傅', '御用铠甲师', '铠甲名师']
-	}, {
-		category: '制造系',
-		name: '帽子工',
-		titles: ['帽子学徒', '帽子工', '资深帽子师傅', '御用帽子师', '帽子名师']
-	}, {
-		category: '制造系',
-		name: '头盔工',
-		titles: ['头盔学徒', '头盔工', '资深头盔师傅', '御用头盔师', '头盔名师']
-	}, {
-		category: '制造系',
-		name: '投掷武器工',
-		titles: ['投掷武器学徒', '投掷武器工', '资深投掷武器师傅', '御用投掷武器师傅', '投掷武器名师']
-	}, {
-		category: '制造系',
-		name: '小刀工',
-		titles: ['小刀学徒', '小刀工', '资深小刀师傅', '御用小刀师', '小刀名师']
-	}, {
-		category: '制造系',
-		name: '药剂师',
-		titles: ['实习药剂师', '药剂师', '资深药剂大师', '御用药剂师', '炼金术士']
-	}, {
-		category: '制造系',
-		name: '造盾工',
-		titles: ['造盾学徒', '造盾工', '资深造盾师傅', '御用造盾师', '造盾名师']
-	}, {
-		category: '制造系',
-		name: '造斧工',
-		titles: ['造斧学徒', '造斧工', '资深造斧师傅', '御用造斧师', '造斧名师']
-	}, {
-		category: '制造系',
-		name: '造弓工',
-		titles: ['造弓学徒', '造弓工', '资深造弓师傅', '御用造弓师', '造弓名师']
-	}, {
-		category: '制造系',
-		name: '造枪工',
-		titles: ['造枪学徒', '造枪工', '资深造枪师傅', '御用造枪师', '造枪名师']
-	}, {
-		category: '制造系',
-		name: '造杖工',
-		titles: ['造杖学徒', '造杖工', '资深造杖师傅', '御用造杖师', '造杖名师']
-	}, {
-		category: '制造系',
-		name: '制鞋工',
-		titles: ['制鞋学徒', '制鞋工', '资深制鞋师傅', '御用制鞋师', '制鞋名师']
-	}, {
-		category: '制造系',
-		name: '制靴工',
-		titles: ['制靴学徒', '制靴工', '资深制靴师傅', '御用制靴师', '制靴名师']
-	}, {
-		category: '制造系',
-		name: '铸剑工',
-		titles: ['铸剑学徒', '铸剑工', '资深铸剑师傅', '御用铸剑师', '铸剑名师']
-	}, {
-		category: '服务系',
-		name: '防具修理工',
-		titles: ['防具修理学徒', '防具修理工', '资深防具修理师', '御用防具修理师', '修理防具专家']
-	}, {
-		category: '服务系',
-		name: '护士',
-		titles: ['见习护士', '护士', '资深护士', '护士长', '护理专家', '白衣天使']
-	}, {
-		category: '服务系',
-		name: '鉴定师',
-		titles: ['鉴定学徒', '鉴定士', '资深鉴定师傅', '御用鉴定师', '鉴定专家']
-	}, {
-		category: '服务系',
-		name: '武器修理工',
-		titles: ['武器修理学徒', '武器修理工', '资深武器修理师', '御用武器修理师', '修理武器专家']
-	}, {
-		category: '服务系',
-		name: '仙人',
-		titles: ['道童', '道士', '半仙', '仙人', '歌仙']
-	}, {
-		category: '服务系',
-		name: '侦探',
-		titles: ['见习侦探', '侦探', '名侦探', '大侦探', '超级侦探']
-	}, {
-		name: '医生',
-		titles: ['见习医生','医生','资深医生','御医','超级医生','神医'],
-		category: '服务系'
-	}, {
-		category: '采集系',
-		name: '矿工',
-		titles: ['见习矿工', '矿工', '资深矿工', '御用矿工', '超级矿工']
-	}, {
-		category: '采集系',
-		name: '猎人',
-		titles: ['见习猎人', '猎人', '资深猎人', '御用猎人', '超级猎人']
-	}, {
-		category: '采集系',
-		name: '樵夫',
-		titles: ['见习樵夫', '樵夫', '资深樵夫', '御用樵夫', '超级樵夫']
-	}
-];
-const ProfessionsMap = (() => {
-	let obj = {};
-	Professions.forEach(p => p.titles.forEach(t => {
-		obj[t] = p;
-	}));
-	return obj;
-})();
 const CustomFunctionsFlag = 0;
 module.exports = new Promise(resolve => {
 	const cga = require('../cgaapi')(() => setTimeout(() => resolve(cga), 0));
 }).then(cga => {
-	const multicast = () => {
-		const dgram = require('dgram');
-		const server = dgram.createSocket({type:'udp4',reuseAddr:true});
-		server.on('error', (err) => {
-			console.log(`服务器异常：\n${err.stack}`);
-			server.close();
-		});
-
-		server.on('message', (msg, rinfo) => {
-			console.log(`服务器收到消息：${msg} 来自 ${rinfo.address}:${rinfo.port}`);
-		});
-
-		server.on('listening', () => {
-			server.addMembership('239.255.255.255'); //加入组播组
-			server.setMulticastTTL(128);
-			console.log(`服务器监听 1`);
-		});
-		server.bind(41234);
-	};
 	cga.emogua = {};
+	cga.emogua.UnitFlags = {
+		NpcEntry: 4096, // npc 或者 随机入口
+		Item: 1024,
+		Player: 256
+	};
 	cga.emogua.shuffle = (arr) => {
 		let i = arr.length;
 		while (i) {
@@ -265,29 +73,32 @@ module.exports = new Promise(resolve => {
 		return arr;
 	};
 	cga.emogua.getMapInfo = () => {
-		// const info = cga.GetMapXY();
-		// info.indexes = cga.GetMapIndex();
-		// info.name = cga.GetMapName();
-		return cga.getMapInfo();
+		const info = cga.GetMapXY();
+		info.name = cga.GetMapName();
+		info.indexes = cga.GetMapIndex();
+		return info;
 	};
 	cga.emogua.isMoving = () => {
 		const speed = cga.GetMoveSpeed();
 		return !(speed && speed.x === 0 && speed.y === 0);
 	};
-	cga.emogua.getPlayerProfession = () => ProfessionsMap[cga.GetPlayerInfo().job];
+	const getProfession = require('./component/profession');
+	cga.emogua.getPlayerProfession = () => getProfession(cga);
 	// 不可以在战斗中获取
 	let teammates = [];
 	cga.emogua.getTeammates = () => {
-		if (cga.isInNormalState()) {
-			try {
-				teammates = cga.getTeamPlayers().filter(e => e.is_me !== true);
-			} catch (e) {
-				console.log('获取teamplayers失败', e);
+		try {
+			if (cga.isInNormalState()) {
+				teammates = cga.getTeamPlayers().filter(e => !e.is_me);
 			}
+		} catch (e) {
+			console.log('获取teamplayers失败', e);
 		}
 		return teammates;
 	}
 	cga.emogua.getTeamNumber = () => cga.emogua.getTeammates().length + 1;
+	const cachedPlayer = cga.GetPlayerInfo();
+	cga.emogua.getCachedPlayer = () => cachedPlayer;
 	cga.emogua.getTeamLevel = () => {
 		let level = cga.GetPlayerInfo().level;
 		cga.emogua.getTeammates().forEach(e =>{
@@ -319,7 +130,7 @@ module.exports = new Promise(resolve => {
 		}, millis);
 	});
 	// range 0 最大 1 最小格
-	cga.emogua.sayWords = (words = '', color = 0, range = 1, size = 0) => {
+	cga.emogua.sayWords = (words = '', color = 0, range = 1, size = 1) => {
 		cga.SayWords(words, color, range, size);
 		return Promise.resolve();
 	}
@@ -329,10 +140,7 @@ module.exports = new Promise(resolve => {
 			return result.then(
 				() => cga.emogua.recursion(action, timer),
 				e => {
-					if (e && typeof e != 'number') console.log(e);
-					if (e == 'RPC Invocation failed.') {
-						console.log('aha!');
-					}
+					if (e && typeof e != 'number') console.log('recursion', e);
 					return e;
 				}
 			);
@@ -343,8 +151,11 @@ module.exports = new Promise(resolve => {
 		return Promise.resolve(result);
 	};
 	cga.emogua.waitUntil = (predict, interval = 2000, timer = Date.now()) => {
-		if (predict(timer)) {
-			return Promise.resolve();
+		const result = predict(timer);
+		if (result) {
+			return Promise.resolve(result).catch(
+				() => cga.emogua.waitUntil(predict, interval, timer)
+			);
 		} else {
 			return cga.emogua.delay(interval).then(
 				() => cga.emogua.waitUntil(predict, interval, timer)
@@ -352,41 +163,54 @@ module.exports = new Promise(resolve => {
 		}
 	};
 	// destination '艾尔莎岛' || 1111 || [147, 189]
-	cga.emogua.arrived = (destination, mapInfo = cga.getMapInfo()) => {
-		if (typeof destination == 'string' && (destination == '*' || destination == mapInfo.name)) {
-			return true;
-		} else if (destination instanceof Array && mapInfo.x == destination[0] && mapInfo.y == destination[1]) {
-			return true;
-		} else if (typeof destination == 'number' && mapInfo.indexes.index3 == destination) {
-			return true;
+	cga.emogua.arrived = (destination, oldMapInfo, currentMapInfo = cga.emogua.getMapInfo()) => {
+		if (destination) {
+			if (typeof destination == 'string' && (
+				(destination == '*' && oldMapInfo.indexes.index3 !== currentMapInfo.indexes.index3) ||
+				(destination == currentMapInfo.name && destination != oldMapInfo.name)
+			)) {
+				return true;
+			} else if (destination instanceof Array && currentMapInfo.x == destination[0] && currentMapInfo.y == destination[1]) {
+				return true;
+			} else if (typeof destination == 'number' && oldMapInfo.indexes.index3 !== currentMapInfo.indexes.index3 && currentMapInfo.indexes.index3 === destination) {
+				return true;
+			}
 		}
 		return false;
 	}
-	cga.emogua.waitDestination = (destination, timeout = 3000, timer = Date.now()) => {
+	cga.emogua.waitDestination = (destination, oldMapInfo, timeout = 5000, timer = Date.now()) => {
 		if ((Date.now() - timer) > timeout) {
-			console.log('不能抵达目的地->' + destination);
+			console.log('不能抵达目的地->', destination);
 			return Promise.reject();
 		}
 		if (destination) {
-			if (cga.emogua.arrived(destination)) return cga.emogua.waitAfterBattle();
-			else return cga.emogua.delay(500).then(
-				() => cga.emogua.waitDestination(destination, timeout, timer)
-			);
+			return cga.emogua.delay(300).then(() => {
+				if (cga.emogua.arrived(destination, oldMapInfo)) return cga.emogua.waitAfterBattle();
+				return cga.emogua.waitDestination(destination, oldMapInfo, timeout, timer);
+			});
 		}
 		return Promise.resolve();
 	};
 	cga.emogua.waitNPCDialog = (action, timeout = 5000) => new Promise(
 		resolve => cga.AsyncWaitNPCDialog((error, dialog) => setTimeout(() => resolve(action(dialog ? dialog : {})), 0), timeout)
 	);
-	cga.emogua.waitMessage = (check, timeout) => new Promise((resolve, reject) => {
+	cga.emogua.waitMessage = (check, teamOnly = false, timeout = 30000) => new Promise((resolve, reject) => {
 		cga.AsyncWaitChatMsg((error, chat) => setTimeout(() => {
-			const checkResult = check(chat ? chat : {});
-			if (checkResult instanceof Promise) checkResult.then(resolve).catch(reject);
-			else if (checkResult) resolve();
-			else reject();
-		}, 0), timeout ? timeout : 10000);
+			if (error) {
+				reject();
+			} else {
+				if (!teamOnly || cga.emogua.getTeammates().find(t => t.unit_id == chat.unitid) || cga.emogua.getCachedPlayer().unitid == chat.unitid) {
+					const checkResult = check(chat ? chat : {});
+					if (checkResult instanceof Promise) checkResult.then(resolve, reject);
+					else if (checkResult) resolve();
+					else reject();
+				} else {
+					reject();
+				}
+			}
+		}, 0), timeout);
 	});
-	cga.emogua.waitMessageUntil = (check) => cga.emogua.waitMessage(check).catch(() => cga.emogua.waitMessageUntil(check));
+	cga.emogua.waitMessageUntil = (check, teamOnly = false) => cga.emogua.waitMessage(check, teamOnly).catch(() => cga.emogua.waitMessageUntil(check, teamOnly));
 	const messagePattern = /^(\[GP\])?(.+)(\: )(.+)/;
 	cga.emogua.getNameFromMessage = (message) => {
 		const matched = messagePattern.exec(message);
@@ -398,13 +222,14 @@ module.exports = new Promise(resolve => {
 		else cga.LogBack();
 		return cga.emogua.delay(2000).then(() => cga.emogua.waitAfterBattle());
 	}).then(() => {
-		if (['法兰城','艾尔莎岛','哥拉尔镇'].indexOf(cga.GetMapName()) < 0) {
+		if (['法兰城','艾尔莎岛'].indexOf(cga.GetMapName()) < 0) {
 			return cga.emogua.logBack(times + 1);
 		}
 	}).catch(e => {
 		console.log('登出失败', e);
 		return cga.emogua.logBack(times + 1);
 	});
+	// 无法遇敌重试,只适合不遇敌场景
 	cga.emogua.forceMove = (orientation, times = 1) => {
 		if  (times > 0) {
 			cga.ForceMove(orientation, true);
@@ -429,156 +254,92 @@ module.exports = new Promise(resolve => {
 			}
 		});
 	};
-	/**
-	 * target: [x, y, destination]
-	 *     destination: 'map name' | '*' | [x, y] 切同图
-	 * count
-	 *     尝试计数, 方法内部使用
-	 * return
-	 *     Promise.reject(-1) -1 切到了不认识的地图,一般无法恢复 1 卡住，一般可重新寻路
-	 */
-	cga.emogua.walkTo = (target, startMapIndex = cga.GetMapIndex().index3) => {
-		const targetX = target[0];
-		const targetY = target[1];
-		const destination = target[2];
-		let lastPoint = cga.GetMapXY();
-		let lastPointTimer = Date.now();
-		let tryCount = 1;
-		if (cga.isInNormalState()) {
-			// console.log('send walk package ' + target);
-			cga.WalkTo(targetX, targetY);
+	const asyncWalkTo = (targetX, targetY, destination, currentMapInfo) => new Promise(resolve => {
+		let [targetMap, destinationX, destinationY] = (destination instanceof Array) ? [currentMapInfo.name, destination[0], destination[1]] : [destination, null, null];
+		if ((currentMapInfo.name == targetMap || currentMapInfo.indexes.index3 == targetMap) && destinationX === null && destinationY === null) {
+			targetMap = currentMapInfo.name;
+			destinationX = targetX;
+			destinationY = targetY;
 		}
-		return cga.emogua.recursion(
-			() => cga.emogua.delay(120).then(() => {
-				if (!cga.isInNormalState()) {
-					return cga.emogua.waitAfterBattle();
+		// console.log('walkTo', targetX, targetY, destination, targetMap, destinationX, destinationY);
+		cga.AsyncWalkTo(
+			targetX, targetY, targetMap, destinationX, destinationY,
+			(error, reason) => setTimeout(() => resolve({error: error, reason: reason}), 0)
+		);
+	});
+	cga.emogua.walkTo = (target, currentMapInfo = cga.emogua.getMapInfo()) => {
+		const [targetX, targetY, destination] = target;
+		return Promise.resolve().then(() => {
+			if (
+				(targetX == currentMapInfo.x && targetY == currentMapInfo.y && !destination) ||
+				cga.emogua.arrived(destination, currentMapInfo, currentMapInfo)
+			) {
+				return;
+			}
+			if (targetX == currentMapInfo.x && targetY == currentMapInfo.y && destination && destination != currentMapInfo.name) {
+				console.log('强制切图');
+				cga.FixMapWarpStuck(1);
+			}
+			return asyncWalkTo(targetX, targetY, destination, currentMapInfo);
+		}).then(result => {
+			if (result && result.error) {
+				if (result.reason == 4) { // Unexcepted map changed
+					if (destination === '*') {
+						return;
+					}
+				} else if (result.reason == 2 || result.reason == 5) { // 2 battle, 5 force to move back by server
+					return Promise.reject(7);
+				} else if (result.reason == 3) { // 卡住
+					return Promise.reject(3);
 				}
-			}).then(battled => {
-				const map = cga.emogua.getMapInfo();
-				if (startMapIndex != map.indexes.index3) {
-					if (destination instanceof Array && map.x == destination[0] && map.y == destination[1]) {
-						return Promise.reject(0);
-					}
-					if (typeof destination == 'string' && (map.name == destination || destination == '*')) {
-						return Promise.reject(0);
-					}
-					if (typeof destination == 'number' && map.indexes.index3 == destination) {
-						return Promise.reject(0);
-					}
-					console.log('Walked to unknown map, target=' + target + ' start=' + startMapIndex + ' current=' + map.indexes.index3);
-					return Promise.reject(-1);
-				} else {
-					if (map.x == targetX && map.y == targetY) {
-						if (!destination || (typeof destination == 'string' && (map.name == destination || destination == '*')) ||
-							(typeof destination == 'number' && map.indexes.index3 == destination)
-						) {
-							return Promise.reject(0);
-						}
-					} else if (destination instanceof Array && map.x == destination[0] && map.y == destination[1]) {
-						return Promise.reject(0);
-					}
-				}
-				if (battled || map.x != lastPoint.x || map.y != lastPoint.y) {
-					lastPoint = map;
-					lastPointTimer = Date.now();
-				}
-				const interval = Date.now() - lastPointTimer;
-				if (interval >= (500 * tryCount)) {
-					// console.log('send walk package ' + target);
-					if (map.x != targetX || map.y != targetY) {
-						cga.WalkTo(targetX, targetY);
-					}
-					if (battled) tryCount = 1;
-					else tryCount++;
-				}
-				if (tryCount > 4) {
-					console.log('Can not arrive target=' + target);
-					if (map.x == targetX && map.y == targetY) {
-						return Promise.reject(-3);
-					}
-					return Promise.reject(1);
-				}
-			})
-		).catch(e => {
-			if (!(e instanceof Error)) {
+				console.log('walkTo error', result);
 				return Promise.reject();
 			}
-			console.log('walk to', e);
 		});
 	};
 	// [ [x, y, destination] ]
-	cga.emogua.walkList = (list) => {
-		return list.reduce(
-			(a, c) => a.then(
-				() => cga.emogua.walkTo(c).then(r => r === 0 ? r : Promise.reject(r))
-			), Promise.resolve()
-		).then(() => {
-			const endTarget = list[list.length - 1];
-			if (endTarget) {
-				// 防止非切图或切图但未标明时，遇敌回退
-				const endDestination = endTarget[2];
-				if (!endDestination) {
-					return cga.emogua.delay(1500)
-					.then(cga.emogua.waitAfterBattle)
-					.then(cga.emogua.dropItems)
-					.then(() => {
-						const p = cga.GetMapXY();
-						if (p.x != endTarget[0] || p.y != endTarget[1]) {
-							console.log('最后一步战斗回退');
-							return cga.emogua.walkList([endTarget]);
-						}
-					});
-				} else {
-					return cga.emogua.delay(1000).then(cga.emogua.waitAfterBattle).then(() => cga.emogua.dropItems());
-				}
-			}
-		});
-	};
-	const excludedMaps = [27001,61001,43600,43000,2400,11036,11037,15596,11032,15001,15006,5008];
-	const isMapDownloaded = (walls, mapIndex = cga.GetMapIndex()) => {
+	cga.emogua.walkList = (list) => list.reduce(
+		(r, t) => r.then(() => cga.emogua.walkTo(t)),
+		Promise.resolve()
+	);
+	const excludedMaps = [27001,61001,43600,43000,15592,15593,15594,15595,15596,11032,11034,11035,11036,11037,15000,15001,15002,15003,15004,15005,15006,14000,14001,14002,14014,4400,5008,11000,11001,11002,11003,11004,11005,59501,2400];
+	cga.emogua.isMapDownloaded = (walls = cga.buildMapCollisionMatrix(), mapIndex = cga.GetMapIndex()) => {
 		if (mapIndex.index1 === 0 && excludedMaps.indexOf(mapIndex.index3) > -1) return true;
 		const downloadedFlag = mapIndex.index1 === 1 ? 0 : 1;
 		return walls.matrix[0][0] == downloadedFlag && walls.matrix[walls.y_size-1][0] == downloadedFlag && walls.matrix[walls.y_size-1][walls.x_size-1] == downloadedFlag && walls.matrix[0][walls.x_size-1] == downloadedFlag;
 	};
-	cga.emogua.isMapDownloaded = (walls = cga.buildMapCollisionMatrix(), mapIndex = cga.GetMapIndex()) => isMapDownloaded(walls, mapIndex);
-	cga.emogua.downloadMap = () => {
+	cga.emogua.downloadMap = (mapIndex = cga.GetMapIndex()) => {
 		const walls = cga.buildMapCollisionMatrix();
-		const mapIndex = cga.GetMapIndex();
-		if(!isMapDownloaded(walls, mapIndex)) {
+		if(!cga.emogua.isMapDownloaded(walls, mapIndex)) {
 			return new Promise((resolve, reject) => {
 				console.log('等待下载地图');
 				const ended = () => {
 					console.log('下载地图结束');
-					if (mapIndex.index1 === 0) excludedMaps.push(mapIndex.index3);
+					if (mapIndex.index1 === 0 && !excludedMaps.includes(mapIndex.index3)) excludedMaps.push(mapIndex.index3);
 					resolve(cga.buildMapCollisionMatrix());
 				};
 				const recursiveDownload = (xfrom, yfrom, xsize, ysize, times = 0) => {
-					var lastIndex3 = mapIndex.index3;
 					if (xfrom < xsize && yfrom < ysize) {
 						cga.RequestDownloadMap(xfrom, yfrom, xfrom + 24, yfrom + 24);
 						cga.AsyncWaitDownloadMap((error, info) => setTimeout(() => {
-							if (error || lastIndex3 != info.index3) {
+							const currentMap = cga.emogua.getMapInfo();
+							if (error) {
 								if (times <= 2) {
-									setTimeout(() => recursiveDownload(xfrom, yfrom, xsize, ysize, times + 1), 500);
+									setTimeout(() => recursiveDownload(xfrom, yfrom, xsize, ysize, times + 1), 1000);
 								} else {
-									console.log('下载地图出错 ' + error + ' last=' + lastIndex3 + ' info=' + info.index3);
+									console.log('下载地图出错 ' + error);
 									reject();
 								}
+							} else if (mapIndex.index3 != currentMap.indexes.index3) {
+								console.log('下载地图出错: 地图改变 last=' + mapIndex.index3 + ' info=' + currentMap);
+								reject();
 							} else {
-								if (info.xtop >= xsize && info.ytop >= ysize) {
-									ended();
-								} else {
-									xfrom += 24;
-									if (xfrom >= xsize) {
-										xfrom = 0;
-										yfrom += 24;
-									}
-									if (yfrom >= ysize) {
-										ended();
-									} else {
-										setTimeout(() => recursiveDownload(xfrom, yfrom, xsize, ysize), 500);
-									}
+								xfrom += 24;
+								if (xfrom >= xsize) {
+									xfrom = 0;
+									yfrom += 24;
 								}
+								setTimeout(() => recursiveDownload(xfrom, yfrom, xsize, ysize), 500);
 							}
 						}, 0), 5000);
 					} else ended();
@@ -588,47 +349,98 @@ module.exports = new Promise(resolve => {
 		}
 		return Promise.resolve(walls);
 	};
-	cga.emogua.autoWalk = (target, walls, tryCount = 0, compress = true) => Promise.resolve().then(
-		() => walls ? walls : cga.emogua.downloadMap()
-	).then(walls => {
-		const mapInfo = cga.getMapInfo();
-		const matrix = walls.matrix;
-		cga.getMapObjects().filter(e => [3,10].indexOf(e.cell) >= 0).forEach(entry => {
-			if (entry.x != target[0] || entry.y != target[1]) {
-				matrix[entry.y][entry.x] = 1;
-			}
-		});
-		const grid = new PF.Grid(matrix);
-		const finder = new PF.AStarFinder({
-			allowDiagonal: true,
-			dontCrossCorners: true
-		});
-		let apath = finder.findPath(mapInfo.x, mapInfo.y, target[0], target[1], grid);
-		// PF.Util.smoothenPath(grid, apath)
-		let path = compress ? PF.Util.compressPath(apath) : apath;
-		if (path.length > 0) {
-			path.shift();
-			if (path.length == 0) return Promise.resolve();
-			if (target[2]) path[path.length - 1].push(target[2]);
-			return cga.emogua.walkList(path).catch(r => {
-				if (r > 0) {
-					if (tryCount < 10) {
-						console.log('重试target=' + target + ' for ' + tryCount + 'times');
-						return cga.emogua.autoWalk(target, walls, tryCount + 1, compress);
-					}
-				}
-				console.log('自动寻路失败不可恢复target=' + target + ' ' + r);
-				return Promise.reject(r);
-			});
-		}
-		console.log(`Can not find path to ${target} tried ${tryCount}`);
-		if (tryCount < 3) {
-			return cga.emogua.autoWalk(target, undefined, tryCount + 1, compress);
-		}
+	cga.emogua.downloadMapEx = (xfrom, yfrom, xsize, ysize) => new Promise(resolve => cga.downloadMapEx(xfrom, yfrom, xsize, ysize, () => setTimeout(resolve, 0)));
+	cga.emogua.toRandomEntry = (xfrom, yfrom, xsize, ysize, except = []) => cga.emogua.downloadMapEx(xfrom, yfrom, xsize, ysize).then(() => {
+		xmax = xfrom + xsize;
+		ymax = yfrom + ysize;
+		const entry = cga.getMapObjects().find(o => o.cell == 3 && o.x >= xfrom && o.y >= yfrom && o.x <= xmax && o.y <= ymax && !except.find(p => p[0] == o.x && p[1] == o.y));
+		if (entry) return cga.emogua.autoWalk([entry.x, entry.y, '*']);
 		return Promise.reject();
 	});
+	const SafeMaps = ['法兰城','里谢里雅堡','艾尔莎岛','艾夏岛','圣骑士营地','矮人城镇','哥拉尔镇','医院','流行商店']
+	cga.emogua.autoWalk = (target, walls, mapInfo = cga.emogua.getMapInfo(), options = {compress: true}) => Promise.resolve().then(() => {
+		// console.log('walkto', target, mapInfo);
+		if (
+			(target[2] && cga.emogua.arrived(target[2], mapInfo, mapInfo)) ||
+			(!target[2] && mapInfo.x == target[0] && mapInfo.y == target[1])
+		) {
+			return;
+		} else if (target[2] && mapInfo.x == target[0] && mapInfo.y == target[1]) {
+			return cga.emogua.walkTo(target, mapInfo);
+		}
+		return Promise.resolve().then(() => {
+			if (Math.abs(mapInfo.x - target[0]) < 3 && Math.abs(mapInfo.y - target[1]) < 3) {
+				return [target];
+			} else {
+				return Promise.resolve().then(
+					() => walls ? walls : cga.emogua.downloadMap()
+				).then(confirmedWalls => {
+					const compress = (options && options.compress == false) ? false : true;
+					walls = confirmedWalls;
+					const matrix = confirmedWalls.matrix;
+					if (!compress) cga.getMapObjects().filter(e => [3,10].indexOf(e.cell) >= 0).forEach(entry => {
+						if (entry.x != target[0] || entry.y != target[1]) {
+							if (matrix[entry.y] && matrix[entry.y][entry.x] == 0) {
+								matrix[entry.y][entry.x] = 1;
+							}
+						}
+					});
+					const grid = new PF.Grid(matrix);
+					const finder = new PF.AStarFinder({
+						allowDiagonal: true,
+						dontCrossCorners: true
+					});
+					let apath = finder.findPath(mapInfo.x, mapInfo.y, target[0], target[1], grid);
+					return compress ? PF.Util.compressPath(apath) : apath;
+				});
+			}
+		}).then(path => {
+			if (path.length > 0) {
+				if (target[2]) path[path.length - 1][2] = target[2];
+				return cga.emogua.walkList(path);
+			}
+			console.log(`Can not find path to ${target}`);
+			return Promise.reject();
+		});
+	}).then(
+		() => {
+			var currentMapName = cga.GetMapName();
+			if (!target[2] || (mapInfo.name == currentMapName && target[2] === currentMapName)) {
+				// 非切图，防止遇敌或强制回退
+				return Promise.resolve().then(() => {
+					if (SafeMaps.includes(currentMapName)) return;
+					return cga.emogua.delay(2000).then(
+						() => cga.emogua.waitAfterBattle()
+					);
+				}).then(() => {
+					const p = cga.emogua.getMapInfo();
+					if (p.x != target[0] || p.y != target[1]) {
+						return cga.emogua.autoWalk(target, walls, p, options);
+					}
+				});
+			}
+		}, r => {
+			if (typeof r == 'number') {
+				if (r == 7) {
+					return cga.emogua.waitAfterBattle().then(() => {
+						const currentMapInfo = cga.emogua.getMapInfo();
+						if (cga.emogua.arrived(target[2], mapInfo, currentMapInfo)) {
+							return;
+						}
+						return cga.emogua.autoWalk(target, walls, currentMapInfo, options);
+					});
+				}
+				if (r == 3) {
+					console.log('被卡住');
+				}
+			}
+			console.log('自动寻路失败', target, r);
+			return Promise.reject(r);
+		}
+	);
 	// [ [x, y, destination] ]
 	cga.emogua.autoWalkList = (list) => list.reduce((a, c) => a.then(() => cga.emogua.autoWalk(c)), Promise.resolve());
+	cga.emogua.goto = require('./component/goto')(cga);
 	cga.emogua.getFarthestEntry = (current, mapObjects = cga.getMapObjects()) => {
 		return mapObjects.filter(e => [3,10].indexOf(e.cell) >= 0 && (e.mapx != current.x || e.mapy != current.y)).sort((a, b) => {
 			const distanceA = Math.abs(a.mapx - current.x) + Math.abs(a.mapy - current.y);
@@ -636,60 +448,44 @@ module.exports = new Promise(resolve => {
 			return distanceB - distanceA;
 		}).shift();
 	};
-
-	cga.emogua.walkRandomMaze = (times = 0) => cga.emogua.downloadMap().then(walls => {
-		const target = cga.emogua.getFarthestEntry(cga.GetMapXY());
-		if (target) {
-			return cga.emogua.autoWalk([target.mapx, target.mapy, '*'], walls);
+	/**
+	 * icon 大 down, 小 up; 12002 down 12000 up, 13997 down 13996 up
+	 * return [前进，后退]
+	 */
+	const getMazeEntries = (up = true, mapObjects = cga.getMapObjects(), current = cga.GetMapXY()) => {
+		const entryIcons = cga.buildMapCollisionRawMatrix().matrix;
+		return mapObjects.filter(o => {
+			const match = o.cell == 3;
+			if (match) {
+				o.icon = entryIcons[o.y][o.x];
+				if (o.icon == 0 && up) {
+					o.icon = Number.MAX_VALUE;
+				}
+			}
+			return match;
+		}).sort((a,b) => {
+			if (a.x == current.x && a.y == current.y) return 1;
+			if (b.x == current.x && b.y == current.y) return 0;
+			return up ? (a.icon - b.icon) : (b.icon - a.icon);
+		});
+	};
+	cga.emogua.getMazeEntries = (up = true) => cga.emogua.downloadMap().then(walls => getMazeEntries(up));
+	cga.emogua.walkRandomMaze = (up = true, back = false) => cga.emogua.downloadMap().then(walls => {
+		const mapInfo = cga.emogua.getMapInfo();
+		const entries = getMazeEntries(up, cga.getMapObjects(), mapInfo);
+		if (entries.length > 1) {
+			const target = back ? entries[1] : entries[0];
+			return cga.emogua.autoWalk([target.x, target.y, '*'], walls, mapInfo);
 		}
-		if (times < 3) {
-			return cga.emogua.walkRandomMaze(times + 1);
-		}
-		return Promise.reject('Fail to walk random maze');
+		console.log('Fail to walk random maze', entries);
+		return Promise.reject();
 	});
-	cga.emogua.walkRandomMazeUntil = (check) => cga.emogua.walkRandomMaze().then(() => {
+	cga.emogua.walkRandomMazeUntil = (check, up = true, back = false) => cga.emogua.walkRandomMaze(up, back).then(() => {
 		const checkResult = check();
 		if (checkResult instanceof Promise) return checkResult;
 		else if (checkResult) return Promise.resolve();
-		return cga.emogua.walkRandomMazeUntil(check);
+		return cga.emogua.walkRandomMazeUntil(check, up, back);
 	});
-	const getApexes = (map, start) => {
-		const searchedPointsCache = {};
-		const foundedApexes = [];
-		const findByNextPoints = (centre) => {
-			const key = centre.x + '-' + centre.y;
-			if (!searchedPointsCache[key]) {
-				const nextPoints = [];
-				let whiteCount = 0;
-				const push = (p) => {
-					if (p.x > map.x_bottom && p.x < map.x_size && p.y > map.y_bottom && p.y < map.y_size) {
-						p.v = map.matrix[p.y][p.x];
-						if (p.v === 0) {
-							whiteCount++;
-						}
-						nextPoints.push(p);
-					}
-				};
-				push({x: centre.x + 1, y: centre.y});
-				push({x: centre.x + 1, y: centre.y + 1});
-				push({x: centre.x, y: centre.y + 1});
-				push({x: centre.x - 1, y: centre.y + 1});
-				push({x: centre.x - 1, y: centre.y});
-				push({x: centre.x - 1, y: centre.y - 1});
-				push({x: centre.x, y: centre.y - 1});
-				push({x: centre.x + 1, y: centre.y - 1});
-				if (nextPoints.length == 8) {
-					if (whiteCount == 3) {
-						foundedApexes.push(centre);
-					}
-					searchedPointsCache[key] = true;
-					nextPoints.filter(p => p.v === 0).forEach(findByNextPoints);
-				}
-			}
-		};
-		findByNextPoints(start);
-		return foundedApexes;
-	};
 	const getMovablePoints = (map, start) => {
 		const foundedPoints = {};
 		foundedPoints[start.x + '-' + start.y] = start;
@@ -719,19 +515,24 @@ module.exports = new Promise(resolve => {
 		findByNextPoints(start);
 		return foundedPoints;
 	};
-	// targetFinder 返回unit object 或者 true 都将停止搜索
-	cga.emogua.searchMap = (targetFinder, recursion = true) => {
-		const start = cga.GetMapXY();
+	/**
+	 * targetFinder 返回unit object 或者 true 都将停止搜索
+	 * parameters
+	 *     diagonal: [[558,20], [526,40]] 限定寻找的矩形范围(对角线两个顶点,注意起点需要在范围内)
+	 */
+	cga.emogua.searchMap = (targetFinder, recursion = true, up = true, parameters = {}) => cga.emogua.downloadMap().then(walls => {
+		const entries = getMazeEntries(up);
 		const getTarget = () => {
-			const target = targetFinder(cga.GetMapUnits().filter(u => (u.flags & 4096) && u.model_id > 0));
+			const target = targetFinder(cga.GetMapUnits().filter(u => (u.flags & cga.emogua.UnitFlags.NpcEntry) && u.model_id > 0));
 			if (typeof target == 'object') {
-				target.start = start;
+				target.entries = entries;
+				target.found = true;
 				const walkTo = cga.emogua.getMovablePositionAround({x: target.xpos,y: target.ypos});
 				if (walkTo) {
-					return cga.emogua.autoWalk([walkTo.x,walkTo.y],undefined,0,false).then(() => Promise.reject(target));
+					return cga.emogua.autoWalk([walkTo.x,walkTo.y],undefined,undefined,{compress: false}).then(() => Promise.reject(target));
 				}
 			}
-			if (target === true) return Promise.reject(target);
+			if (target === true) return Promise.reject({found: true, entries: entries});
 			return Promise.resolve();
 		};
 		const toNextPoint = (points, centre) => {
@@ -743,25 +544,43 @@ module.exports = new Promise(resolve => {
 			}).sort((a,b) => a.d - b.d);
 			const next = remain.shift();
 			if (next) {
-				return cga.emogua.autoWalk([next.x,next.y],undefined,0,false).then(
+				return cga.emogua.autoWalk([next.x,next.y],undefined,undefined,{compress: false}).then(
 					() => getTarget()
 				).then(() => toNextPoint(remain,next))
 			}
 			return Promise.resolve();
 		};
-		let entry;
-		return getTarget().then(
-			() => cga.emogua.downloadMap()
-		).then(w => {
-			const current = cga.GetMapXY();
-			if (!entry && recursion) entry = cga.emogua.getFarthestEntry(start);
-			return toNextPoint(Object.values(getMovablePoints(w, current)), current).then(() => {
-				if (typeof entry == 'object') {
-					return cga.emogua.autoWalk([entry.x,entry.y,'*'],undefined,0,false).then(() => cga.emogua.searchMap(targetFinder, recursion));
+		if (parameters.diagonal && parameters.diagonal.length > 1) {
+			const [minX,maxX] = [parameters.diagonal[0][0],parameters.diagonal[1][0]].sort();
+			const [minY,maxY] = [parameters.diagonal[0][1],parameters.diagonal[1][1]].sort();
+			for (let y = 0; y < walls.matrix.length; y++) {
+				for (let x = 0; x < walls.matrix[y].length; x ++) {
+					if (!(x <= maxX && x >= minX && y <= maxY && y >= minY) && walls.matrix[y][x] == 0) {
+						walls.matrix[y][x] = 1;
+					}
 				}
-			});
-		}).catch(t => t);
-	};
+			}
+		}
+		return getTarget().then(() => {
+			const current = cga.GetMapXY();
+			return toNextPoint(Object.values(getMovablePoints(walls, current)), current);
+		}).then(
+			() => {
+				if (entries.length > 1 && recursion) {
+					return cga.emogua.autoWalk([entries[0].x, entries[0].y, '*'], undefined, undefined, {compress: false}).then(
+						() => cga.emogua.searchMap(targetFinder, recursion, up)
+					);
+				}
+				console.log('地图搜索失败');
+				return Promise.reject();
+			},
+			t => {
+				if (t && t.found) return t;
+				console.log('地图搜索失败');
+				return Promise.reject();
+			}
+		);
+	});
 	cga.emogua.battleZLZZ = (x, y, turned = false) => {
 		if(cga.isInBattle()) return cga.emogua.waitAfterBattle().then(() => cga.emogua.battleZLZZ(x,y,true));
 		if (cga.getItemCount('长老之证') >= 7) return Promise.resolve();
@@ -780,7 +599,7 @@ module.exports = new Promise(resolve => {
 		});
 	};
 	cga.emogua.turnOrientation = (orientation, destination) => {
-		const current = cga.GetMapXY();
+		const current = cga.emogua.getMapInfo();
 		switch (orientation) {
 			case 0:
 				cga.TurnTo(current.x + 2, current.y); break;
@@ -800,8 +619,8 @@ module.exports = new Promise(resolve => {
 				cga.TurnTo(current.x + 2, current.y - 2); break;
 			default:
 		}
-		if (destination) return cga.emogua.waitDestination(destination);
-		return cga.emogua.delay(2000); // 避免后续事件延迟导致判断有误
+		if (destination) return cga.emogua.waitDestination(destination, current);
+		return cga.emogua.delay(1500); // 避免后续事件延迟导致判断有误
 	};
 	cga.emogua.getOrientation = (x, y) => {
 		const p = cga.GetMapXY();
@@ -829,61 +648,63 @@ module.exports = new Promise(resolve => {
 	}
 	cga.emogua.turnTo = (x, y, destination) => cga.emogua.turnOrientation(cga.emogua.getOrientation(x, y), destination);
 	// 是否选是
-	cga.emogua.talkNpcSelectorYes = (dialog) => {
+	cga.emogua.talkNpcSelectorYesFixTimes = (max = 32) => (dialog, times) => {
 		if (dialog.options == 12) {
 			cga.ClickNPCDialog(4, -1);
-			return true;
+			return times < max;
 		} else if (dialog.options == 32) {
 			cga.ClickNPCDialog(32, -1);
-			return true;
+			return times < max;
 		} else if (dialog.options == 1) {
 			cga.ClickNPCDialog(1, -1);
-			return true;
+			return times < max;
 		} else if (dialog.options == 2) {
 			cga.ClickNPCDialog(2, -1);
-			return true;
+			return times < max;
 		} else if (dialog.options == 3) {
 			cga.ClickNPCDialog(1, -1);
-			return true;
+			return times < max;
 		} else if (dialog.options == 8) {
 			cga.ClickNPCDialog(8, -1);
-			return true;
+			return times < max;
 		} else if (dialog.options == 4) {
 			cga.ClickNPCDialog(4, -1);
-			return true;
+			return times < max;
 		} else if (dialog.options == 0) {
-			return true;
+			return times < max;
 		}
 		return false;
 	};
+	cga.emogua.talkNpcSelectorYes = cga.emogua.talkNpcSelectorYesFixTimes();
 	// 是否选否
-	cga.emogua.talkNpcSelectorNo = (dialog) => {
+	cga.emogua.talkNpcSelectorNoFixTimes = (max = 32) => (dialog, times) => {
 		if (dialog.options == 12) {
 			cga.ClickNPCDialog(8, -1);
-			return true;
+			return times < max;
 		} else if (dialog.options == 32) {
 			cga.ClickNPCDialog(32, -1);
-			return true;
+			return times < max;
 		} else if (dialog.options == 1) {
 			cga.ClickNPCDialog(1, -1);
-			return true;
+			return times < max;
 		} else if (dialog.options == 2) {
 			cga.ClickNPCDialog(2, -1);
-			return true;
+			return times < max;
 		} else if (dialog.options == 3) {
 			cga.ClickNPCDialog(1, -1);
-			return true;
+			return times < max;
 		} else if (dialog.options == 8) {
 			cga.ClickNPCDialog(8, -1);
-			return true;
+			return times < max;
 		} else if (dialog.options == 4) {
 			cga.ClickNPCDialog(4, -1);
-			return true;
+			return times < max;
 		} else if (dialog.options == 0) {
-			return true;
+			return times < max;
 		}
 		return false;
 	};
+	cga.emogua.talkNpcSelectorNo = cga.emogua.talkNpcSelectorNoFixTimes();
 	cga.emogua.talkNpc = function(x, y, select, dest) {
 		let selector, orientation, targetx, targety, destination;
 		for (let i = 0; i < arguments.length; i++) {
@@ -907,6 +728,7 @@ module.exports = new Promise(resolve => {
 					break;
 			}
 		}
+		const mapInfo = cga.emogua.getMapInfo();
 		if (targety >= 0) {
 			orientation = cga.emogua.getOrientation(targetx, targety);
 		}
@@ -916,21 +738,22 @@ module.exports = new Promise(resolve => {
 					cga.emogua.turnOrientation(orientation);
 				}
 			}).then(() => {
-				let timeout = 6000;
+				let timeout = 2000;
+				let times = 1;
 				return cga.emogua.recursion(
 					() => cga.emogua.waitNPCDialog(dialog => {
 						if (typeof dialog.type == 'number') {
-							timeout = 3000;
-							return selector(dialog);
+							return selector(dialog, times++);
 						}
 						return false;
 					}, timeout).then(r => r ? r : Promise.reject())
 				);
 			}).then(
-				() => cga.emogua.waitDestination(destination)
+				() => cga.emogua.waitDestination(destination, mapInfo)
 			);
 		}
-		return Promise.reject('Talk npc wrong arguments');
+		console.log('Talk npc wrong arguments');
+		return Promise.reject();
 	};
 	cga.emogua.learnPlayerSkill = (x, y) => cga.emogua.talkNpc(x, y, (dialog) => {
 		if (dialog.type == 16) {
@@ -981,498 +804,9 @@ module.exports = new Promise(resolve => {
 			return true;
 		}
 	});
-	class Station {
-		// id: [x,y,'map']
-		constructor(id) {
-			this.id = id;
-			this.idString = this.id.join('-');
-			this.links = []; // Need to initiated at the end;
-		}
-	}
-	class Link {
-		// arrive: () => Promise
-		constructor(station, arrive) {
-			this.station = station;
-			if (typeof arrive == 'function')
-				this.arrive = arrive;
-		}
-		arrive() {
-			return cga.emogua.autoWalk(this.station.id);
-		}
-	}
-	const Network = {
-		elsa: {
-			x: new Station([140, 105, '艾尔莎岛']),
-			a: new Station([157, 93, '艾尔莎岛']),
-			b: new Station([165, 153, '艾尔莎岛'])
-		}, asha: {
-			w: new Station([84, 112, '艾夏岛']),
-			s: new Station([164, 159, '艾夏岛']),
-			n: new Station([151, 97, '艾夏岛'])
-		}, falan: {
-			e1: new Station([242, 100, '法兰城']),
-			s1: new Station([141, 148, '法兰城']),
-			w1: new Station([63, 79, '法兰城']),
-			m1: new Station([46, 16, 32737]), // '市场三楼 - 修理专区'
-			e2: new Station([233, 78, '法兰城']),
-			s2: new Station([162, 130, '法兰城']),
-			w2: new Station([72, 123, '法兰城']),
-			m2: new Station([46, 16, 32735]), // '市场一楼 - 宠物交易区'
-			sell: new Station([156, 123, '法兰城']),
-			eout: new Station([475,196,'芙蕾雅']),
-			sout: new Station([424,259,'芙蕾雅']),
-			wout: new Station([374,195,'芙蕾雅']),
-			mbank: new Station([83,12,'市场三楼 - 修理专区']),
-			mrepair: new Station([82,8,'市场三楼 - 修理专区']),
-			bank: new Station([11, 8, '银行']),
-			ehospital: new Station([12, 42, 1112]),
-			whospital: new Station([12, 42, 1111]),
-			fabric: new Station([8, 4, '流行商店']),
-			isle:  new Station([65, 98, '小岛'])
-		}, castle: {
-			x: new Station([27, 82, '里谢里雅堡']),
-			s: new Station([41, 91, '里谢里雅堡']),
-			nurse: new Station([34, 88, '里谢里雅堡']),
-			clock: new Station([58, 83, '里谢里雅堡']),
-			f1: new Station([74, 40, '里谢里雅堡 1楼']),
-			teleport: new Station([25, 24, '启程之间'])
-		}, teleport: {
-			yer: new Station([47, 83, '伊尔村']),
-			laruka: new Station([49, 81, '圣拉鲁卡村']),
-			aleut: new Station([56, 48, '亚留特村']),
-			kili: new Station([50, 63, '奇利村']),
-			jenova: new Station([58, 43, '杰诺瓦镇']),
-			vinoy: new Station([40,36, '维诺亚村']),
-			ghana: new Station([36,40, '加纳村'])
-		}, aleut: {
-			eout: new Station([596,83,'芙蕾雅']),
-			nout: new Station([588,50,'芙蕾雅'])
-		}, grahl: {
-			s: new Station([118, 214, '哥拉尔镇']),
-			c: new Station([120, 107, '哥拉尔镇']),
-			lumi: new Station([61, 29, '鲁米那斯'])
-		}, lumi: {
-			sell: new Station([11, 12, '杂货店']),
-			hospital: new Station([4, 14, '医院']),
-			nurse: new Station([17, 16, '医院']),
-			hnurse: new Station([17, 5, '医院']),
-			door: new Station([321, 883, '鲁米那斯'])
-		}, camp: {
-			x: new Station([90, 86, '圣骑士营地']),
-			sell: new Station([20, 23, '工房']),
-			hnurse: new Station([10, 12, '医院']),
-			nurse: new Station([18, 15, '医院']),
-			out: new Station([550, 332, '医院'])
-		}, jenova: {
-			nout: new Station([265,434,'莎莲娜']),
-			wout: new Station([216,456,'莎莲娜'])
-		}
-	};
-	Network.getCurrentStation = () => {
-		const info = cga.emogua.getMapInfo();
-		for (let obj of Object.values(Network)) {
-			if (typeof obj == 'object') {
-				for (let station of Object.values(obj)) {
-					if (
-						station instanceof Station && (
-							station.idString == (info.x + '-' + info.y + '-' + info.name) ||
-							station.idString == (info.x + '-' + info.y + '-' + info.indexes.index3)
-						)
-					) {
-						return station;
-					}
-				}
-			}
-		}
-	};
-	Network.elsa.x.links = [
-		new Link(Network.elsa.a), new Link(Network.elsa.b),
-		new Link(Network.castle.x, () => {
-			let times = 0;
-			return cga.emogua.recursion(
-				() => cga.emogua.talkNpc(141,104,cga.emogua.talkNpcSelectorYes, '里谢里雅堡').then(
-					() => {
-						return Promise.reject();
-					},
-					() => {
-						if (times > 3) {
-							return cga.LogOut();
-						}
-						times++;
-						return cga.emogua.logBack();
-					}
-				)
-			);
-		})
-	];
-	Network.elsa.a.links = [
-		new Link(Network.asha.w, () => cga.emogua.turnOrientation(0))
-	];
-	Network.asha.w.links = [
-		new Link(Network.asha.s, () => cga.emogua.turnOrientation(4))
-	];
-	Network.asha.s.links = [
-		new Link(Network.asha.n, () => cga.emogua.turnOrientation(5))
-	];
-	Network.asha.n.links = [
-		new Link(Network.elsa.a, () => cga.emogua.turnOrientation(4))
-	];
-	const castleF1Link = new Link(Network.castle.f1, () => cga.emogua.autoWalk([41, 50, '里谢里雅堡 1楼']));
-	Network.castle.x.links = [
-		new Link(Network.castle.nurse), new Link(Network.castle.clock), new Link(Network.castle.s),
-		castleF1Link
-	];
-	Network.castle.s.links = [
-		new Link(Network.castle.nurse), new Link(Network.castle.clock), new Link(Network.castle.x),castleF1Link,
-		new Link(Network.falan.sell, () => cga.emogua.autoWalkList([
-			[40,98,'法兰城'], Network.falan.sell.id
-		])),
-		new Link(Network.falan.s1, () => cga.emogua.autoWalkList([
-			[40,98,'法兰城'], Network.falan.s1.id
-		])),
-		new Link(Network.falan.s2, () => cga.emogua.autoWalkList([
-			[40,98,'法兰城'], Network.falan.s2.id
-		])),
-	];
-	Network.castle.f1.links = [
-		new Link(Network.castle.teleport, () => cga.emogua.autoWalk([45, 20, '启程之间']))
-	];
-	Network.castle.nurse.links = [
-		new Link(Network.castle.s), new Link(Network.castle.x), new Link(Network.castle.clock), castleF1Link
-	];
-	Network.castle.clock.links = [
-		new Link(Network.castle.s), castleF1Link
-	];
-	Network.castle.teleport.links = [
-		new Link(Network.teleport.yer, () => cga.emogua.autoWalk([43,32]).then(
-			() => cga.emogua.talkNpc(0,cga.emogua.talkNpcSelectorYes,'伊尔村的传送点')
-		).then(
-			() => cga.emogua.autoWalkList([
-				[12,17,'村长的家'],[6,13,'伊尔村']
-			])
-		)),
-		new Link(Network.teleport.laruka, () => cga.emogua.autoWalk([43, 43]).then(
-			() => cga.emogua.talkNpc(0,cga.emogua.talkNpcSelectorYes,'圣拉鲁卡村的传送点')
-		).then(
-			() => cga.emogua.autoWalkList([
-				[7,3,'村长的家'],[2,9,'圣拉鲁卡村']
-			])
-		)),
-		new Link(Network.teleport.aleut, () => cga.emogua.autoWalk([43, 22]).then(
-			() => cga.emogua.talkNpc(0,cga.emogua.talkNpcSelectorYes,'亚留特村的传送点')
-		).then(
-			() => cga.emogua.autoWalkList([
-				[8,3,'村长的家'],[6,13,'亚留特村']
-			])
-		)),
-		new Link(Network.teleport.kili, () => cga.emogua.autoWalk([8, 33]).then(
-			() => cga.emogua.talkNpc(6,cga.emogua.talkNpcSelectorYes,'奇利村的传送点')
-		).then(
-			() => cga.emogua.autoWalkList([
-				[7, 6, '*'],[7, 1, '*'],[1, 8, '奇利村']
-			])
-		)),
-		new Link(Network.teleport.jenova, () => cga.emogua.autoWalk([15, 4]).then(
-			() => cga.emogua.talkNpc(0,cga.emogua.talkNpcSelectorYes,'杰诺瓦镇的传送点')
-		).then(
-			() => cga.emogua.autoWalkList([
-				[14,6,'村长的家'],[1,9,'杰诺瓦镇']
-			])
-		)),
-		new Link(Network.teleport.vinoy, () => cga.emogua.autoWalk([9, 22]).then(
-			() => cga.emogua.talkNpc(4,cga.emogua.talkNpcSelectorYes,'维诺亚村的传送点')
-		).then(
-			() => cga.emogua.autoWalkList([
-				[5,1,'村长家的小房间'],[0,5,'村长的家'],[10,16,'维诺亚村']
-			])
-		)),
-		new Link(Network.teleport.ghana, () => cga.emogua.autoWalk([9, 43]).then(
-			() => cga.emogua.talkNpc(8,43,cga.emogua.talkNpcSelectorYes,'加纳村的传送点')
-		).then(
-			() => cga.emogua.autoWalkList([
-				[5,12,'村长的家'],[1,9,'加纳村']
-			])
-		))
-	];
-	Network.teleport.aleut.links = [
-		new Link(Network.aleut.eout, () => cga.emogua.autoWalkList([
-			[51,65],[67,64,'芙蕾雅']
-		])),
-		new Link(Network.aleut.nout, () => cga.emogua.autoWalkList([
-			[58,31,'芙蕾雅']
-		]))
-	];
-	Network.teleport.yer.links = [
-		new Link(Network.grahl.s, () => cga.emogua.autoWalk([58,71]).then(
-			() => cga.emogua.talkNpc(59,71,cga.emogua.talkNpcSelectorYes, '伊尔')
-		).then(
-			() => cga.emogua.autoWalkList([
-				[30,21,'港湾管理处'], [25,25] // 23,35 阿凯鲁法
-			])
-		).then(
-			() => cga.emogua.talkNpc(6,cga.emogua.talkNpcSelectorYes, '往哥拉尔栈桥')
-		).then(
-			() => cga.emogua.autoWalk([51,50])
-		).then(() => cga.emogua.recursion(
-			() => cga.emogua.talkNpc(52,50,cga.emogua.talkNpcSelectorYes).then(() => {
-				if (cga.GetMapName() == '铁达尼号') return Promise.reject();
-				return cga.emogua.delay(10000);
-			})
-		)).then(
-			() => cga.emogua.autoWalk([70,26])
-		).then(
-			() => cga.emogua.delay(400000)
-		).then(() => cga.emogua.recursion(
-			() => cga.emogua.talkNpc(71,26,cga.emogua.talkNpcSelectorYes).then(() => {
-				if (cga.GetMapName() == '往伊尔栈桥') return Promise.reject();
-				return cga.emogua.delay(10000);
-			})
-		)).then(
-			() => cga.emogua.autoWalk([84,55])
-		).then(
-			() => cga.emogua.talkNpc(84,54,cga.emogua.talkNpcSelectorYes, '哥拉尔镇 港湾管理处')
-		).then(
-			() => cga.emogua.autoWalkList([
-				[14,15,'哥拉尔镇'], [118,214]
-			])
-		))
-	];
-	Network.falan.s1.links = [
-		new Link(Network.falan.s2), new Link(Network.falan.sell), new Link(Network.falan.sout,() => cga.emogua.autoWalk([153,241,'芙蕾雅'])),
-		new Link(Network.falan.w1, () => cga.emogua.turnOrientation(6)),
-		new Link(Network.falan.fabric, () => cga.emogua.autoWalkList([[117,112,'流行商店'],Network.falan.fabric.id]))
-	];
-	Network.falan.s2.links = [
-		new Link(Network.falan.s1), new Link(Network.falan.sell), new Link(Network.falan.sout,() => cga.emogua.autoWalk([153,241,'芙蕾雅'])),
-		new Link(Network.falan.w2, () => cga.emogua.turnOrientation(0)),
-		new Link(Network.falan.fabric, () => cga.emogua.autoWalkList([[117,112,'流行商店'],Network.falan.fabric.id]))
-	];
-	Network.falan.sell.links = [
-		new Link(Network.falan.s2), new Link(Network.falan.s1),
-		new Link(Network.falan.fabric, () => cga.emogua.autoWalkList([[117,112,'流行商店'],Network.falan.fabric.id])),
-		new Link(Network.castle.s, () => cga.emogua.autoWalkList([[153,100,'里谢里雅堡']]))
-	];
-	Network.falan.w1.links = [
-		new Link(Network.falan.w2), new Link(Network.falan.wout,() => cga.emogua.autoWalk([22,88,'芙蕾雅'])),
-		new Link(Network.falan.e1, () => cga.emogua.turnOrientation(6)),
-		new Link(Network.falan.whospital, () => cga.emogua.autoWalk([82,83,'医院']))
-	];
-	Network.falan.w2.links = [
-		new Link(Network.falan.w1), new Link(Network.falan.wout,() => cga.emogua.autoWalk([22,88,'芙蕾雅'])),
-		new Link(Network.falan.e2, () => cga.emogua.turnOrientation(0))
-	];
-	Network.falan.e1.links = [
-		new Link(Network.falan.e2), new Link(Network.falan.eout,() => cga.emogua.autoWalk([281,88,'芙蕾雅'])),
-		new Link(Network.falan.m1, () => cga.emogua.turnOrientation(0)),
-		new Link(Network.falan.bank, () => cga.emogua.autoWalkList([
-			[238,111,'银行'], Network.falan.bank.id
-		]))
-	];
-	Network.falan.e2.links = [
-		new Link(Network.falan.e1), new Link(Network.falan.eout,() => cga.emogua.autoWalk([281,88,'芙蕾雅'])),
-		new Link(Network.falan.m2, () => cga.emogua.turnOrientation(6)),
-		new Link(Network.falan.ehospital, () => cga.emogua.autoWalk([221,83,'医院']))
-	];
-	Network.falan.eout.links = [
-		new Link(Network.camp.x, () => cga.emogua.autoWalkList([
-			[513,282,'曙光骑士团营地'],[55,47,'辛希亚探索指挥部'],[7,4,[91, 6]],[95,9,[19, 28]],[8,21]
-		]).then(() => cga.emogua.turnOrientation(4, '圣骑士营地')).then(
-			() => cga.emogua.autoWalk(Network.camp.x.id)
-		))
-	];
-	Network.falan.wout.links = [
-		new Link(Network.falan.isle, () => cga.emogua.autoWalk([397,168]).then(
-			() => cga.emogua.talkNpc(398,168,cga.emogua.talkNpcSelectorYes,'小岛')
-		))
-	];
-	Network.falan.m1.links = [
-		new Link(Network.falan.mbank), new Link(Network.falan.mrepair),
-		new Link(Network.falan.s1, () => cga.emogua.turnOrientation(6))
-	];
-	Network.falan.mbank.links = [
-		new Link(Network.falan.m1), new Link(Network.falan.mrepair)
-	];
-	Network.falan.mrepair.links = [
-		new Link(Network.falan.m1), new Link(Network.falan.mbank)
-	];
-	Network.falan.m2.links = [
-		new Link(Network.falan.s2, () => cga.emogua.turnOrientation(6))
-	];
-	Network.grahl.s.links = [
-		new Link(Network.grahl.c, () => cga.emogua.turnOrientation(0))
-	];
-	Network.grahl.c.links = [
-		new Link(Network.grahl.s, () => cga.emogua.turnOrientation(6)),
-		new Link(Network.grahl.lumi, () => cga.emogua.autoWalkList([
-			[176,105,'库鲁克斯岛'],[477,525]
-		]).then(
-			() => cga.emogua.talkNpc(477,526,cga.emogua.talkNpcSelectorYes,[476,528])
-		).then(
-			() => cga.emogua.autoWalk([322,883,'鲁米那斯'])
-		))
-	];
-	Network.grahl.lumi.links = [
-		new Link(Network.lumi.hospital, () => cga.emogua.autoWalk([87,35,'医院'])),
-		new Link(Network.lumi.sell, () => cga.emogua.autoWalkList([
-			[88,51,'杂货店'],Network.lumi.sell.id
-		]))
-	];
-	Network.lumi.hospital.links = [
-		new Link(Network.lumi.nurse), new Link(Network.lumi.hnurse)
-	];
-	Network.lumi.nurse.links = [
-		new Link(Network.lumi.sell, () => cga.emogua.autoWalkList([
-			[4,14,'鲁米那斯'],[88,51,'杂货店'],Network.lumi.sell.id
-		])),
-		new Link(Network.lumi.door, () => cga.emogua.autoWalkList([
-			[4,14,'鲁米那斯'],[60,29,'库鲁克斯岛']
-		]))
-	];
-	Network.lumi.hnurse.links = Network.lumi.nurse.links;
-	Network.lumi.sell.links = [
-		new Link(Network.lumi.door, () => cga.emogua.autoWalkList([
-			[4,14,'鲁米那斯'],[60,29,'库鲁克斯岛']
-		])),
-		new Link(Network.lumi.hospital, () => cga.emogua.autoWalkList([
-			[4,14,'鲁米那斯'],[87,35,'医院']
-		]))
-	];
-	Network.lumi.door.links = [
-		new Link(Network.grahl.lumi, () => cga.emogua.autoWalk([322,883,'鲁米那斯']))
-	];
-	Network.camp.x.links = [
-		new Link(Network.camp.sell, () => cga.emogua.autoWalkList([
-			[87,72,'工房'],[20,23]
-		])),
-		new Link(Network.camp.nurse, () => cga.emogua.autoWalkList([
-			[95,72,'医院'],Network.camp.nurse.id
-		])),
-		new Link(Network.camp.hnurse, () => cga.emogua.autoWalkList([
-			[95,72,'医院'],Network.camp.hnurse.id
-		])),
-		new Link(Network.camp.out, () => cga.emogua.autoWalkList([
-			[36,87,'肯吉罗岛']
-		]))
-	];
-	Network.camp.sell.links = [
-		new Link(Network.camp.x, () => cga.emogua.autoWalkList([
-			[30,37,'圣骑士营地'],Network.camp.x.id
-		])),
-		new Link(Network.camp.nurse, () => cga.emogua.autoWalkList([
-			[30,37,'圣骑士营地'],[95,72,'医院'],Network.camp.nurse.id
-		])),
-		new Link(Network.camp.hnurse, () => cga.emogua.autoWalkList([
-			[30,37,'圣骑士营地'],[95,72,'医院'],Network.camp.hnurse.id
-		])),
-		new Link(Network.camp.out, () => cga.emogua.autoWalkList([
-			[30,37,'圣骑士营地'],[36,87,'肯吉罗岛']
-		]))
-	];
-	Network.camp.nurse.links = [
-		new Link(Network.camp.hnurse),
-		new Link(Network.camp.x, () => cga.emogua.autoWalkList([
-			[0,20,'圣骑士营地'],Network.camp.x.id
-		])),
-		new Link(Network.camp.out, () => cga.emogua.autoWalkList([
-			[0,20,'圣骑士营地'],[36,87,'肯吉罗岛']
-		]))
-	];
-	Network.camp.hnurse.links = [
-		new Link(Network.camp.nurse),
-		new Link(Network.camp.x, () => cga.emogua.autoWalkList([
-			[0,20,'圣骑士营地'],Network.camp.x.id
-		])),
-		new Link(Network.camp.out, () => cga.emogua.autoWalkList([
-			[0,20,'圣骑士营地'],[36,87,'肯吉罗岛']
-		]))
-	];
-	Network.teleport.jenova.links = [
-		new Link(Network.jenova.nout, () => cga.emogua.autoWalk([71,18,'莎莲娜'])),
-		new Link(Network.jenova.wout, () => cga.emogua.autoWalk([24,40,'莎莲娜']))
-	];
-	Network.landings = [Network.elsa.x, Network.falan.s1, Network.falan.s2, Network.falan.w1, Network.falan.w2, Network.falan.e1, Network.falan.e2];
-	const reducePaths = (paths) => {
-		const result = [];
-		paths.forEach(p => {
-			if (p.length > 0) {
-				if (p[0] instanceof Array) {
-					result.push(...p);
-				} else {
-					result.push(p);
-				}
-			}
-		});
-		return result;
-	};
-	Network.getLinkPaths = (links, target, preStations = []) => {
-		return reducePaths(
-			links.map(link => {
-				if (preStations.findIndex(s => s.idString == link.station.idString) > -1) return [];
-				if (link.station.idString == target.idString) return [link];
-				let subs = Network.getLinkPaths(link.station.links, target, preStations.concat(link.station));
-				subs.forEach(sub => sub.unshift(link));
-				return subs;
-			})
-		);
-	};
-	cga.emogua.goto = (targetFunction, count = 0) => {
-		const target = targetFunction(Network);
-		if (target) {
-			return Promise.resolve().then(() => {
-				if (cga.GetMapName() == '艾尔莎岛') {
-					return cga.emogua.autoWalk(Network.elsa.x.id);
-				}
-			}).then(
-				() => Network.getCurrentStation() || cga.emogua.logBack().then(() => Network.getCurrentStation())
-			).then(current => {
-				if (!current) {
-					console.log('No current to target=' + target.id);
-					return Promise.reject();
-				}
-				if (current.idString != target.idString) {
-					return Promise.resolve().then(() => {
-						const paths = Network.getLinkPaths(current.links, target);
-						if ((!paths || paths.length == 0) && Network.landings.findIndex(l => l.idString == current.idString) < 0) {
-							return cga.emogua.logBack().then(
-								() => Network.getLinkPaths(Network.getCurrentStation().links, target)
-							);
-						}
-						return paths;
-					}).then(paths => {
-						if (!paths || paths.length == 0) {
-							if (count > 3) {
-								console.log('No path to target=' + target.id);
-								return Promise.reject();
-							}
-							return cga.emogua.logBack().then(
-								() => cga.emogua.goto(targetFunction, count + 1)
-							);
-						}
-						let short;
-						for (let p of paths) {
-							if (!short) {
-								short = p;
-							} else if (short.length > p.length) {
-								short = p;
-							}
-						}
-						return short.reduce((a,c) => a.then(() => c.arrive()), Promise.resolve()).catch(() => {
-							if (count > 3) {
-								console.log('Goto tried ' + count + ' times failed');
-								return Promise.reject();
-							}
-							return cga.emogua.goto(targetFunction, count + 1);
-						});
-					});
-				}
-			});
-		}
-		console.log('targetFunction is not valid');
-		return Promise.reject();
-	};
 	cga.emogua.getDwarfBadge = () => {
 		if (cga.getInventoryItems().length == 20) {
-			return Promise.resolve();
+			return Promise.resolve(false);
 		}
 		return cga.emogua.autoBattle(cga.emogua.AutoBattlePreset.getEscapeSets()).then(() => {
 			const old = cga.GetItemsInfo().find(i => i.name == '矮人徽章');
@@ -1523,9 +857,12 @@ module.exports = new Promise(resolve => {
 			return r;
 		});
 	};
-	const DropItemNames = ['时间的碎片','时间的结晶','绿头盔','秘文之皮','星之砂','奇香木','巨石','龙角','坚硬的鳞片','传说的鹿皮','碎石头'];
+	const DropItemNames = ['时间的碎片','时间的结晶','绿头盔','红头盔','秘文之皮','星之砂','奇香木','巨石','龙角','坚硬的鳞片','传说的鹿皮','碎石头'];
 	cga.emogua.addDropItemNames = (names) => {
 		DropItemNames.push(...names);
+	};
+	cga.emogua.stopDropItems = () => {
+		DropItemNames.splice(0, DropItemNames.length);;
 	};
 	cga.emogua.dropItems = (positions) => {
 		if (cga.isInNormalState() && !cga.emogua.isMoving()) {
@@ -1534,10 +871,10 @@ module.exports = new Promise(resolve => {
 			} else if (typeof positions == 'function') {
 				cga.getInventoryItems().filter(positions).forEach(i => cga.DropItem(i.pos));
 			} else {
-				cga.getInventoryItems().filter(i => DropItemNames.indexOf(i.name) >= 0).forEach(i => cga.DropItem(i.pos));
+				cga.getInventoryItems().filter(i => DropItemNames.find(n => i.name.indexOf(n) >= 0)).forEach(i => cga.DropItem(i.pos));
 			}
 		}
-		return cga.emogua.delay(500);
+		return Promise.resolve();
 	};
 	cga.emogua.useItem = (position) => {
 		if (position) cga.UseItem(position);
@@ -1547,7 +884,7 @@ module.exports = new Promise(resolve => {
 		const itemIndexes = items.map(e => e.pos);
 		const result = new Array();
 		for (let bagIndex = 8; bagIndex < 28; bagIndex++) {
-			if (itemIndexes.indexOf(bagIndex) < 0) {
+			if (!itemIndexes.includes(bagIndex)) {
 				result.push(bagIndex);
 			}
 		}
@@ -1587,55 +924,41 @@ module.exports = new Promise(resolve => {
 		return result.then(() => bankListIndex >= bankList.length);
 	};
 	/**
-	 * list
-	 *     [[name | matcher, pileMax]]
-	 *     pileMax: 最大可叠加数
+	 * filter
+	 *     name | matcher
 	 *     空或者不传表示存全部
 	 * size
 	 *     银行大小  默认20
 	 * 返回
 	 *     true 银行已满
 	 */
-	cga.emogua.saveToBank = (list, size = 20) => {
+	cga.emogua.saveToBank = (filter, gold = 0, pets = [], size = 20) => {
 		const bankList = cga.GetBankItemsInfo();
 		const bankMax = 99 + size;
-		const isSavable = (slot) => {
-			return list && list.findIndex(e => {
-				if (typeof e[0] == 'string') return e[0] == slot.name && slot.count > 0 && slot.count < e[1];
-				else if (typeof e[0] == 'function') return e[0](slot) && slot.count > 0 && slot.count < e[1];
-				else return false;
-			}) > -1;
-		};
 		let bankSlotIndex = 100;
 		const toSavableSlotIndex = (item) => {
-			while (bankSlotIndex <= bankMax) {
-				const slot = bankList.find(b => b.pos == bankSlotIndex);
-				if ((!slot || isSavable(slot))) {
-					cga.MoveItem(item.pos, bankSlotIndex, -1);
-					if (slot) slot.count = slot.count + item.count;
-					else bankList.push({pos: bankSlotIndex, count: item.count});
-					return true;
+			let slot = bankList.find(b => b.name == item.name && b.count < getPileMax(item));
+			if (!slot) {
+				while (bankSlotIndex <= bankMax && bankList.find(b => b.pos == bankSlotIndex)) {
+					bankSlotIndex++;
 				}
-				bankSlotIndex++;
+				if (bankSlotIndex <= bankMax) {
+					cga.MoveItem(item.pos, bankSlotIndex, -1);
+					bankList.push({pos: bankSlotIndex, count: item.count});
+				}
+			} else {
+				cga.MoveItem(item.pos, slot.pos, -1);
+				slot.count = slot.count + item.count;
 			}
-			return false;
 		};
 
-		const items = cga.getInventoryItems().filter(item =>
-			!list ||
-			list.findIndex(e => {
-				if (typeof e[0] == 'string') return e[0] == item.name;
-				else if (typeof e[0] == 'function') return e[0](item);
-				else return false;
-			}) > -1
-		);
-		let result = Promise.resolve();
-		if (items.length > 0) {
-			for (let itemIndex = 0; itemIndex < items.length; itemIndex++) {
-				result = result.then(() => toSavableSlotIndex(items[itemIndex]));
-			}
+		cga.getInventoryItems().filter(
+			item => !filter || (filter instanceof Function ? filter(item) : item.name == filter)
+		).forEach(i => toSavableSlotIndex(i));
+		if (gold > 0) {
+			cga.MoveGold(options.gold, cga.MOVE_GOLD_TOBANK);
 		}
-		return result.then(() => cga.emogua.delay(1000)).then(() => bankList.length >= size);
+		return Promise.resolve(bankList.length >= size);
 	};
 	const getTradeItems = (filter = (c, previous) => false) => {
 		const tradeItems = [];
@@ -1742,48 +1065,56 @@ module.exports = new Promise(resolve => {
 		}, 0), 15000);
 	}).then(result => cga.emogua.delay(300).then(() => result));
 	cga.emogua.getNearEntry = (target) => {
-		return cga.getMapObjects().filter(e => e.cell === 3 || e.cell === 10).sort((a, b) => {
+		return cga.getMapObjects().filter(e => (e.cell === 3 || e.cell === 10) && !(e.x == target.x && e.y == target.y)).sort((a, b) => {
 			const distanceA = Math.abs(a.mapx - target.x) + Math.abs(a.mapy - target.y);
 			const distanceB = Math.abs(b.mapx - target.x) + Math.abs(b.mapy - target.y);
 			return distanceA - distanceB;
 		}).shift();
 	};
-	// target: {x: 0, y: 0}
-	cga.emogua.getMovablePositionAround = (target) => {
+	cga.emogua.getMovablePositionsAround = (target) => {
+		const result = [];
 		const walls = cga.buildMapCollisionMatrix();
 		const entries = cga.getMapObjects().filter(e => e.cell === 3 || e.cell === 10);
 		const isPositionMovable = (x, y) => {
 			return walls.matrix[y][x] == 0 && entries.findIndex(e => e.mapx == x && e.mapy == y) < 0;
 		};
 		if (isPositionMovable(target.x + 1, target.y)) {
-			return {
+			result.push({
 				orientation: 0,
 				x: target.x + 1,
 				y: target.y
-			};
-		} else if (isPositionMovable(target.x - 1, target.y)) {
-			return {
-				orientation: 4,
-				x: target.x - 1,
-				y: target.y
-			};
-		} else if (isPositionMovable(target.x, target.y + 1)) {
-			return {
+			});
+		}
+		if (isPositionMovable(target.x, target.y + 1)) {
+			result.push({
 				orientation: 2,
 				x: target.x,
 				y: target.y + 1
-			};
-		} else if (isPositionMovable(target.x, target.y - 1)) {
-			return {
+			});
+		}
+		if (isPositionMovable(target.x - 1, target.y)) {
+			result.push({
+				orientation: 4,
+				x: target.x - 1,
+				y: target.y
+			});
+		}
+		if (isPositionMovable(target.x, target.y - 1)) {
+			result.push({
 				orientation: 6,
 				x: target.x,
 				y: target.y - 1
-			};
+			});
 		}
-		return;
+		return result;
 	};
+	// target: {x: 0, y: 0}
+	cga.emogua.getMovablePositionAround = (target) => cga.emogua.getMovablePositionsAround(target)[0];
 	let encounterStopped = true;
-	cga.emogua.checkStopEncounter = (protect, talk = false) => {
+	cga.emogua.checkStopEncounter = (protect, talk = false, checkTeam = false) => {
+		if (!cga.isInNormalState()) {
+			return false;
+		}
 		const playerInfo = cga.GetPlayerInfo();
 		const pets = cga.GetPetsInfo();
 		const minHp = (protect && protect.minHp) ? protect.minHp : 100;
@@ -1793,12 +1124,14 @@ module.exports = new Promise(resolve => {
 		const maxPetNumber = (protect && protect.maxPetNumber) ? protect.maxPetNumber : 5;
 		const maxItemNumber = (protect && protect.maxItemNumber) ? protect.maxItemNumber : 20;
 		const checker = (protect && typeof protect.checker == 'function') ? protect.checker : null;
-		// cga.emogua.getTeammates().findIndex(t => t.hp < minHp || t.mp < minMp) > -1
+		const minTeamNumber = (protect && protect.minTeamNumber) ? protect.minTeamNumber : 1;
 		if (
-			playerInfo.hp < minHp || playerInfo.mp < minMp ||
-			cga.getInventoryItems().length > maxItemNumber ||
-			pets.length > maxPetNumber ||
-			pets.filter(e => e.battle_flags == 2).findIndex(p => p.hp < minPetHp || p.mp < minPetMp) >= 0 ||
+			playerInfo.hp < minHp || playerInfo.mp < minMp || cga.getInventoryItems().length > maxItemNumber ||
+			pets.length > maxPetNumber || pets.filter(e => e.battle_flags == 2).find(p => p.hp < minPetHp || p.mp < minPetMp) ||
+			(
+				checkTeam &&
+				(cga.emogua.getTeamNumber() < minTeamNumber || cga.emogua.getTeammates().find(t => t.hp > 0 && t.mp > 0 && (t.hp < minHp || t.mp < minMp)))
+			) ||
 			(checker && checker())
 		) {
 			if (talk) {
@@ -1810,47 +1143,55 @@ module.exports = new Promise(resolve => {
 	};
 	cga.emogua.encounter = (protect) => {
 		if (!encounterStopped) return Promise.reject('repeated encounter');
-		else return cga.emogua.delay(500).then(() => {
+		else return cga.emogua.downloadMap().then(() => {
 			encounterStopped = false;
 			let stopEncounter = false;
 			const mapName = cga.GetMapName();
-			const protectRecursion = () => cga.emogua.delay(2000).then(() => {
+			const protectRecursion = () => cga.emogua.delay(2000).then(
+				() => cga.emogua.waitAfterBattle()
+			).then(() => {
 				if (stopEncounter) {
 					return Promise.reject();
-				} else {
-					const minTeamNumber = (protect && protect.minTeamNumber) ? protect.minTeamNumber : 1;
-					if (
-						cga.emogua.checkStopEncounter(protect) ||
-						cga.emogua.getTeamNumber() < minTeamNumber ||
-						mapName != cga.GetMapName()
-					) {
-						stopEncounter = true;
-						return Promise.reject();
-					}
-					return Promise.resolve();
 				}
+				if (
+					cga.emogua.checkStopEncounter(protect, false, true) ||
+					mapName != cga.GetMapName()
+				) {
+					stopEncounter = true;
+					return Promise.reject();
+				}
+				return Promise.resolve();
 			}).then(() => protectRecursion());
 			const entries = cga.getMapObjects().filter(e => e.cell === 3 || e.cell === 10);
-			const start = () => {
+			let counter = 0;
+			let timer = new Date();
+			const start = () => new Promise((resolve, reject) => {
 				const startPosition = cga.GetMapXY();
 				const movePosition = cga.emogua.getMovablePositionAround(startPosition);
-				const recursion = (direction) => {
-					if (cga.isInNormalState()) {
-						cga.ForceMove(direction, false);
-					}
-					return cga.emogua.delay(80).then(() => {
-						if (stopEncounter) return Promise.reject();
-						else if (!cga.isInNormalState()) {
-							return cga.emogua.waitAfterBattle().then(() => {
-								const current = cga.GetMapXY();
-								return (current.x == startPosition.x && current.y == startPosition.y) ? recursion(movePosition.orientation) : recursion(cga.emogua.getOrientation(startPosition.x, startPosition.y));
-							});
-						}
-						else return recursion((direction + 4) % 8);
+				const afterBattle = () => {
+					cga.emogua.waitAfterBattle().then(() => {
+						counter++;
+						const current = cga.GetMapXY();
+						move(
+							(current.x == startPosition.x && current.y == startPosition.y) ? movePosition.orientation : cga.emogua.getOrientation(startPosition.x, startPosition.y)
+						);
 					});
 				};
+				const move = (direction) => {
+					try {
+						if (stopEncounter) resolve();
+						else if (cga.isInNormalState()) {
+							cga.ForceMove(direction, false);
+							setTimeout(() => move((direction + 4) % 8), 150);
+						} else afterBattle();
+					} catch(e) {
+						console.log('遇敌错误', e);
+						afterBattle();
+					}
+				};
 				if (movePosition) {
-					protectRecursion().catch(() => console.log('触发保护'));
+					console.log('开始遇敌', timer.toLocaleString());
+					protectRecursion().catch(r => console.log('触发保护'));
 					cga.emogua.waitMessageUntil((chat) => {
 						if (chat.msg && chat.msg.indexOf('触发战斗保护') >= 0) {
 							if (cga.emogua.getTeammates().find(t => t.unit_id == chat.unitid)) {
@@ -1858,38 +1199,40 @@ module.exports = new Promise(resolve => {
 							}
 						}
 					});
-					return recursion(movePosition.orientation).catch(() => {
-						console.log('已停止遇敌');
-						return cga.emogua.delay(2000).then(
-							() => cga.emogua.waitAfterBattle()
-						).then(
-							() => cga.emogua.delay(5000)
-						).then(
-							() => encounterStopped = true
-						);
-					});
+					move(movePosition.orientation);
+				} else {
+					console.log('无法遇敌');
+					reject();
 				}
-				return Promise.reject('无法遇敌');
-			};
+			}).catch(r => r).then(() => {
+				const cd = new Date();
+				console.log('已停止遇敌', counter, parseInt((cd.getTime() - timer.getTime()) / 1000), cd.toLocaleString());
+				return cga.emogua.delay(2000).then(
+					() => cga.emogua.waitAfterBattle()
+				).then(
+					() => cga.emogua.delay(2000)
+				).then(
+					() => encounterStopped = true
+				);
+			});
 			const p = cga.GetMapXY();
 			if (entries.findIndex(e => e.mapx == p.x && e.mapy == p.y) >= 0) {
 				let position = cga.emogua.getMovablePositionAround(p);
 				if (position) return cga.emogua.waitAfterBattle().then(
-					() => cga.emogua.walkList([[position.x, position.y]])
+					() => cga.emogua.autoWalk([position.x, position.y])
 				).then(
 					() => start()
 				);
-				return Promise.reject('无法遇敌');
+				console.log('无法遇敌');
+				return Promise.reject();
 			} else {
 				return start();
 			}
-		}).catch(e => {
-			console.log('encounter', e);
 		});
 	};
 	cga.emogua.joinTeam = (x, y, name) => {
 		if (cga.emogua.getTeamNumber() == 1) {
-			const captain = cga.GetMapUnits().find(e => e.type === 8 && e.unit_name === name);
+			const captain = cga.GetMapUnits().find(u => (u.flags & cga.emogua.UnitFlags.Player) && u.unit_name === name);
 			if (captain && captain.xpos === x && captain.ypos === y) {
 				return cga.emogua.turnTo(x, y).then(
 					() => cga.emogua.delay(500)
@@ -1914,12 +1257,36 @@ module.exports = new Promise(resolve => {
 	cga.emogua.leaveTeam = () => {
 		cga.DoRequest(cga.REQUEST_TYPE_LEAVETEAM);
 		return cga.emogua.delay(1000);
-	}
-	cga.emogua.waitTeamBlock = (total, interruptor, timer = Date.now()) => {
+	};
+	cga.emogua.kickStranger = (name) => {
+		cga.DoRequest(cga.REQUEST_TYPE_KICKTEAM);
+		return cga.emogua.waitNPCDialog(dialog => {
+			if (dialog && dialog.message && dialog.message.indexOf('你要把谁踢出队伍') > 0) {
+				const splits = dialog.message.replace(/\n/g,"\\n").split('\\n');
+				const kick = splits.slice(2, splits.length - 1).findIndex(n => n.startsWith(name));
+				if (kick >= 0) {
+					cga.ClickNPCDialog(-1, kick);
+				}
+			}
+		}).then(() => cga.emogua.delay(3000));
+	};
+	cga.emogua.waitTeamBlock = (total, teamates = [], interruptor, timer = Date.now()) => {
 		return Promise.resolve().then(() => {
 			const number = cga.emogua.getTeamNumber();
+			const currentTeamates = cga.emogua.getTeammates();
 			if (number >= total) {
-				console.log(`组队已满(${total})`);
+				if (teamates && teamates.length > 0) {
+					const strangers = currentTeamates.filter(t => !teamates.includes(t.name)).map(t => t.name);
+					if (strangers.length > 0) {
+						console.log('踢出陌生人', strangers);
+						let kick = Promise.resolve();
+						strangers.forEach(s => kick = kick.then(() => cga.emogua.kickStranger(s)));
+						return kick.then(
+							() => cga.emogua.waitTeamBlock(total, teamates, interruptor, timer)
+						);
+					}
+				}
+				console.log(`组队已满(${total})`, new Date().toLocaleString());
 				return number;
 			}
 			const inerval = Date.now() - timer;
@@ -1929,7 +1296,7 @@ module.exports = new Promise(resolve => {
 			}
 			if (inerval <= 3000) console.log(`等待组队满人数(${total})...`);
 			return cga.emogua.delay(3000).then(
-				() => cga.emogua.waitTeamBlock(total, interruptor, timer)
+				() => cga.emogua.waitTeamBlock(total, teamates, interruptor, timer)
 			);
 		});
 	};
@@ -1969,7 +1336,7 @@ module.exports = new Promise(resolve => {
 			if (dialog.type == 28) {
 				cga.BuyNPCStore(list);
 			}
-		}).then(() => cga.emogua.pile(true));
+		});
 		else return Promise.resolve();
 	};
 	// list: [{index: 0, count: 20}]
@@ -1986,7 +1353,7 @@ module.exports = new Promise(resolve => {
 			if (dialog.type == 6) {
 				cga.BuyNPCStore(list);
 			}
-		}).then(() => cga.emogua.pile(true));
+		});
 		else return Promise.resolve();
 	};
 	cga.emogua.sell = function(x, y, filter) {
@@ -2014,14 +1381,15 @@ module.exports = new Promise(resolve => {
 				if (dialog.type == 7) {
 					cga.SellNPCStore(sellList);
 				}
-			}).then(() => cga.emogua.delay(500)).then(
+			}).then(() => cga.emogua.delay(1000)).then(
 				() => cga.emogua.sell(x, y, filter)
 			);
 		}
 		return Promise.resolve();
 	};
+	cga.SetImmediateDoneWork(true);
 	// cga.GetCraftStatus() 0 打开制造界面 1 制造中 2 制造完成 4 修理中 | 鉴定中
-	cga.emogua.waitWorkResult = (timeout = 50000) => new Promise((resolve, reject) => {
+	cga.emogua.waitWorkResult = (timeout = 90000) => new Promise((resolve, reject) => {
 		cga.AsyncWaitWorkingResult((error, r) => setTimeout(() => {
 			let result = r;
 			if (error) {
@@ -2033,6 +1401,7 @@ module.exports = new Promise(resolve => {
 			resolve(result);
 		}, 0), timeout);
 	});
+	let craftedOnce = false;
 	cga.emogua.craft = (name) => {
 		const requireInfo = cga.getItemCraftInfo(name);
 		if (requireInfo) {
@@ -2055,10 +1424,14 @@ module.exports = new Promise(resolve => {
 						positions[index] = m.position;
 					});
 					if (jewelPosition > 0) positions[5] = jewelPosition;
-					cga.SetImmediateDoneWork(true);
 					if (cga.StartWork(requireInfo.skill.index, requireInfo.craft.index)) {
 						cga.CraftItem(requireInfo.skill.index, requireInfo.craft.index, 0, positions);
-						return cga.emogua.waitWorkResult().then(r => cga.emogua.pile(true));
+						return cga.emogua.waitWorkResult(craftedOnce ? 2000 : 90000).then(r => {
+							if (!craftedOnce) craftedOnce = r.success;
+							if (r.success) return cga.emogua.pile(true).then(
+								() => cga.emogua.delay(500)
+							);
+						});
 					}
 					return Promise.resolve();
 				}
@@ -2089,17 +1462,18 @@ module.exports = new Promise(resolve => {
 			rate: 0
 		};
 	};
+	let assessedOnce = false;
 	cga.emogua.assessAll = () => {
 		const skill = cga.GetSkillsInfo().find(e => e.name == '鉴定');
 		let result = Promise.resolve();
 		if (skill) {
 			cga.getInventoryItems().filter(i => !i.assessed && i.level <= skill.lv).forEach(item => {
 				result = result.then(() => cga.emogua.recursion(() => {
-					cga.SetImmediateDoneWork(true);
 					cga.StartWork(skill.index, 0);
 					if (cga.GetPlayerInfo().mp >= (item.level * 10) && cga.AssessItem(skill.index, item.pos)) {
-						return cga.emogua.waitWorkResult().then(r => {
+						return cga.emogua.waitWorkResult(assessedOnce ? 2000 : 900000).then(r => {
 							if (r.success) {
+								assessedOnce = true;
 								return Promise.reject();
 							}
 						});
@@ -2110,6 +1484,7 @@ module.exports = new Promise(resolve => {
 		}
 		return result.then(() => cga.emogua.delay(500));
 	};
+	let repairedOnce = false;
 	cga.emogua.repairAll = () => {
 		const skill = cga.GetSkillsInfo().filter(e => e.name.indexOf('修理') >= 0).sort((e1, e2) => e2.lv - e1.lv)[0];
 
@@ -2128,11 +1503,11 @@ module.exports = new Promise(resolve => {
 				return false;
 			}).forEach(item => result = result.then(
 				() => cga.emogua.recursion(() => {
-					cga.SetImmediateDoneWork(true);
 					cga.StartWork(skill.index, 0);
 					if (cga.GetPlayerInfo().mp >= (item.level * 10) && cga.AssessItem(skill.index, item.pos)) {
-						return cga.emogua.waitWorkResult().then(r => {
+						return cga.emogua.waitWorkResult(repairedOnce ? 2000 : 900000).then(r => {
 							if (r.success) {
+								repairedOnce = true;
 								return Promise.reject();
 							}
 						});
@@ -2143,9 +1518,16 @@ module.exports = new Promise(resolve => {
 		}
 		return result.then(() => cga.emogua.delay(500));
 	};
-	cga.emogua.recharge = (orientation) => {
-		return cga.emogua.turnOrientation(orientation).then(() => cga.emogua.delay(5000));
-	};
+	cga.emogua.recharge = (orientation) => cga.emogua.turnOrientation(orientation).then(() => cga.emogua.delay(3000)).then(() => {
+		const info = cga.GetPlayerInfo();
+		if (info.hp < info.maxhp || info.mp < info.maxmp) {
+			if (info.gold < 5000) {
+				console.log('无法补血魔！！！');
+				return Promise.reject();
+			}
+			return cga.emogua.recharge(orientation);
+		}
+	});
 	cga.emogua.healTeammate = () => new Promise((resolve, reject) => {
 		const skill = cga.GetSkillsInfo().find(s => s.name == '治疗');
 		const requireMp = 25 + skill.lv * 5;
@@ -2170,11 +1552,11 @@ module.exports = new Promise(resolve => {
 			}, 0), 2000);
 		} else resolve();
 	});
-	cga.emogua.healSelf = (playerInfo = cga.GetPlayerInfo()) => {
-		const skill = cga.GetSkillsInfo().find(s => s.name == '治疗');
+	cga.emogua.healSelf = (stopHealth = 200, skill = cga.GetSkillsInfo().find(s => s.name == '治疗')) => {
+		const playerInfo = cga.GetPlayerInfo();
 		if (skill) {
 			const requireMp = 25 + skill.lv * 5;
-			if (playerInfo.health > 0 && playerInfo.mp >= requireMp) {
+			if (playerInfo.health > 0 && playerInfo.health < stopHealth && playerInfo.mp >= requireMp) {
 				return new Promise((resolve, reject) => {
 					cga.StartWork(skill.index, skill.lv-1);
 					cga.AsyncWaitPlayerMenu((error, players) => setTimeout(() => {
@@ -2193,10 +1575,13 @@ module.exports = new Promise(resolve => {
 							} else resolve();
 						} else resolve();
 					}, 0), 2000);
-				}).then(() => cga.emogua.healSelf());
+				}).then(() => cga.emogua.healSelf(stopHealth, skill));
+			}
+			if (playerInfo.health == 0) {
+				return Promise.resolve();
 			}
 		}
-		return Promise.resolve();
+		return Promise.reject();
 	};
 	cga.emogua.useCrystal = (name) => {
 		const found = cga.GetItemsInfo().find(e => {
@@ -2220,6 +1605,8 @@ module.exports = new Promise(resolve => {
 				).then(
 					() => cga.emogua.buy(0, [{index: crystalStoreIndex, count: 1}])
 				).then(
+					() => cga.emogua.delay(1000)
+				).then(
 					() => cga.emogua.useCrystal(name)
 				);
 			}
@@ -2235,40 +1622,20 @@ module.exports = new Promise(resolve => {
 		return false;
 	};
 	let equipmentMinDurability = 30;
+	let autoEquip = true;
 	cga.emogua.setEquipmentMinDurability = (durability) => {
 		if (typeof durability == 'number') {
 			equipmentMinDurability = durability;
 		}
 		return Promise.resolve();
 	};
-	cga.emogua.tidyupEquipments = () => Promise.resolve().then(() => {
-		const availableEquipments = cga.getInventoryItems().filter(
-			i => i.type >= 0 && i.type <= 14 && i.name != '狐皮披风' && cga.emogua.getDurability(i).current > equipmentMinDurability
-		);
-		if (availableEquipments.length > 0 && cga.isInNormalState()) {
-			availableEquipments.forEach(e => cga.emogua.useItem(e.pos));
-			return cga.emogua.delay(500);
-		}
-	}).then(() => {
-		let index = 0;
-		let emptyIndexes = cga.emogua.getEmptyBagIndexes();
-		if (emptyIndexes.length > 0 && cga.isInNormalState()) {
-			cga.GetItemsInfo().filter(
-				i => i.pos <= 4 && cga.emogua.getDurability(i).current <= equipmentMinDurability
-			).forEach(takeOff => {
-				if (emptyIndexes[index]) {
-					cga.MoveItem(takeOff.pos, emptyIndexes[index++], -1);
-				}
-			});
-			return cga.emogua.delay(500);
-		}
-	});
+	cga.emogua.setAutoEquip = (on = true) => autoEquip = on;
 	/**
 	 * options
 	 *     {
-	 *         sellFilter: function | false
-	 *         rechargeFlag: -1 不补血魔
-	 *         repairFlag: 1 正常 2 全部 -1 not
+	 *         sellFilter: function
+	 *         rechargeFlag: 1 补血魔 0 不补血魔
+	 *         repairFlag: 1 修理 0 关闭
 	 *         crystalName: '',
 	 *         badge: false | true,
 	 *         doctorName: ''
@@ -2305,13 +1672,13 @@ module.exports = new Promise(resolve => {
 				if (item.name == '魔石' || item.name.indexOf('卡片') >= 0 || item.name == '锥形水晶') return true;
 				else if (item.type >= 0 && item.type <= 14 && item.level <= 10) {
 					const durability = cga.emogua.getDurability(item);
-					return durability && durability.current == durability.max && durability.current <= equipmentMinDurability;
+					return durability && durability.current == durability.max && durability.current <= equipmentMinDurability && !item.name.startsWith('平民') && item.name != 'ㄟ型手里剑';
 				} else if (options && typeof options.sellFilter == 'function') {
 					return options.sellFilter(item);
 				}
 				return false;
 			};
-			if (typeof options.sellFilter != 'boolean' && cga.getInventoryItems().filter(filter).length > 0) {
+			if (cga.getInventoryItems().filter(filter).length > 0) {
 				return cga.emogua.goto(n => n.falan.sell).then(
 					() => cga.emogua.sell(6, filter)
 				);
@@ -2325,7 +1692,7 @@ module.exports = new Promise(resolve => {
 					return durability &&
 						(
 							durability.rate < 0.75 ||
-							(durability.current < durability.max && (repairFlag == 2 || durability.current <= equipmentMinDurability))
+							(durability.current < durability.max && durability.current <= equipmentMinDurability)
 						)
 					;
 				}
@@ -2333,12 +1700,12 @@ module.exports = new Promise(resolve => {
 			};
 			if (repairFlag > 0 && cga.GetItemsInfo().findIndex(needRepairChecker) >= 0 && cga.getInventoryItems().length < 20) {
 				return Promise.resolve().then(() => {
-					return cga.emogua.goto(n => n.falan.mbank).then(
-						() => cga.emogua.autoWalk([82,8])
-					);
-					// return cga.emogua.goto(n => n.elsa.x).then(
-					// 	() => cga.emogua.autoWalk([143,110])
+					// cga.emogua.goto(n => n.falan.mbank).then(
+					// 	() => cga.emogua.autoWalk([82,8])
 					// );
+					return cga.emogua.goto(n => n.elsa.x).then(
+						() => cga.emogua.autoWalk([143,110])
+					);
 				}).then(() => cga.emogua.recursion(() => {
 					let item = cga.getInventoryItems().find(needRepairChecker);
 					if (item) {
@@ -2379,7 +1746,7 @@ module.exports = new Promise(resolve => {
 			const playerInfo = cga.GetPlayerInfo();
 			const pets = cga.GetPetsInfo();
 			const petHurt = pets.findIndex(e => e.health > 0) > -1;
-			if (rechargeFlag > 0 && (playerInfo.hp < playerInfo.maxhp || playerInfo.mp < playerInfo.maxmp || pets.find(p => p.hp < p.maxhp || p.mp < p.maxmp))) {
+			if (rechargeFlag > 0 && (playerInfo.hp < playerInfo.maxhp || playerInfo.mp < playerInfo.maxmp || pets.find(p => p.hp < p.maxhp || p.mp < p.maxmp) || petHurt)) {
 				return Promise.resolve().then(() => {
 					const needh = cga.emogua.needHnurse(playerInfo);
 					if (needh || petHurt) {
@@ -2392,6 +1759,8 @@ module.exports = new Promise(resolve => {
 							);
 						}).then(() => {
 							if (petHurt) return cga.emogua.autoWalk([10, 18]).then(
+								() => cga.emogua.delay(2000)
+							).then(
 								() => cga.emogua.talkNpc(6, dialog => {
 									if (dialog.options == 0) {
 										cga.ClickNPCDialog(-1, 6);
@@ -2403,12 +1772,6 @@ module.exports = new Promise(resolve => {
 					return cga.emogua.goto(n => n.castle.nurse).then(
 						() => cga.emogua.recharge(0)
 					);
-				}).then(() => {
-					const newInfo = cga.GetPlayerInfo();
-					if (newInfo.hp < newInfo.maxhp) {
-						console.log('无法补血魔！！！');
-						return Promise.reject();
-					}
 				});
 			}
 			return Promise.resolve();
@@ -2416,15 +1779,14 @@ module.exports = new Promise(resolve => {
 		const findDoctor = () => cga.emogua.recursion(() => {
 			if (cga.GetPlayerInfo().health > 0) {
 				return cga.emogua.goto(n => n.castle.x).then(() => {
-					const profession = Professions.find(p => p.name == '医生');
 					const units = cga.GetMapUnits();
 					let doctor;
 					if (options.doctorName) {
-						doctor = units.find(u => u.type == 8 && u.unit_name == options.doctorName);
+						doctor = units.find(u => (u.flags & cga.emogua.UnitFlags.Player) && u.unit_name == options.doctorName);
 					} else {
 						doctor = units.find(
-							u => u.type == 8 && (
-								profession.titles.indexOf(u.title_name) >= 0 || u.nick_name.indexOf('治疗') >= 0 || u.nick_name.indexOf('神医') >= 0 || u.nick_name.indexOf('医生') >= 0 || u.title_name.indexOf('医师') >= 0 || u.title_name.indexOf('医生') >= 0
+							u => (u.flags & cga.emogua.UnitFlags.Player) && (
+								u.nick_name.indexOf('治疗') >= 0 || u.nick_name.indexOf('医') >= 0 || u.title_name.indexOf('医') >= 0
 							)
 						);
 					}
@@ -2442,14 +1804,29 @@ module.exports = new Promise(resolve => {
 			return false;
 		});
 		if (cga.emogua.getTeamNumber() == 1 && validMaps.includes(cga.GetMapName())) {
-			return cga.emogua.pile(true).then(cga.emogua.dropItems).then(() => {
+			cga.emogua.updateSkillsCache();
+			return cga.emogua.pile(true).then(
+				() => cga.emogua.dropItems()
+			).then(
+				() => findDoctor()
+			).then(
+				() => getBackSouls()
+			).then(
+				() => recharge()
+			).then(
+				() => sell()
+			).then(
+				() => crystal()
+			).then(
+				() => repair()
+			).then(() => {
 				const badge = typeof options.badge == 'boolean' ? options.badge : false;
 				if (badge) {
-					return cga.emogua.getDwarfBadge().then(r => r ? cga.emogua.logBack() : Promise.resolve());
+					return cga.emogua.getDwarfBadge().then(r => r ? cga.emogua.logBack().then(() => recharge()) : Promise.resolve());
 				}
-			}).then(findDoctor).then(recharge).then(getBackSouls).then(sell).then(repair).then(cga.emogua.tidyupEquipments).then(crystal);
+			});
 		} else {
-			return cga.emogua.pile(true).then(cga.emogua.dropItems);
+			return cga.emogua.pile().then(() => cga.emogua.dropItems());
 		}
 	};
 
@@ -2471,9 +1848,10 @@ module.exports = new Promise(resolve => {
 		MEDUSA: 0x40,
 		DRUNK: 0x80,
 		CHAOS: 0x100,
-		FORGET: 0x200
+		FORGET: 0x200,
+		POISON: 0x400
 	};
-	DebuffFlags.ANY = DebuffFlags.SLEEP | DebuffFlags.MEDUSA | DebuffFlags.DRUNK | DebuffFlags.CHAOS | DebuffFlags.FORGET;
+	DebuffFlags.ANY = DebuffFlags.SLEEP | DebuffFlags.MEDUSA | DebuffFlags.DRUNK | DebuffFlags.CHAOS | DebuffFlags.FORGET | DebuffFlags.POISON;
 	const WeapAttackFlags = {
 		CLOSE: 0x80
 	};
@@ -2531,259 +1909,33 @@ module.exports = new Promise(resolve => {
 	};
 	cga.emogua.DebuffFlags = DebuffFlags;
 	cga.emogua.BattlePositionMatrix = BattlePositionMatrix;
+	cga.emogua.getBattleSets = require('./component/battle-sets');
 	cga.emogua.AutoBattlePreset = {
-		/**
-		 * options {
-		 *     rechargeMinHp: 300,
-		 *     rechargeMinMp: 300,
-		 * }
-		 */
-		getAttackSets: (options) => {
-			options = options ? options : {};
-			const sets = [];
-
-			sets.push(cga.emogua.AutoBattlePreset.getBattleRechargeHpAction(options.rechargeMinHp ? options.rechargeMinHp : 300));
-			sets.push(cga.emogua.AutoBattlePreset.getBattleRechargeMpAction(options.rechargeMinMp ? options.rechargeMinMp : 300));
-			const profession = cga.emogua.getPlayerProfession();
-			if (profession) {
-				if (profession.name == '弓箭手') {
-					sets.push({
-						user: 1,
-						check: context => context.enemies.length >= 3,
-						type: '技能',skillName: '乱射',skillLevel: 3,
-						targets: context => cga.emogua.AutoBattlePreset.getSortedEnemies(context)
-					});
-				}
-				if (profession.name == '暗黑骑士') {
-					sets.push({
-						user: 1,
-						check: context => context.playerUnit.hpRatio <= 0.4,
-						type: '技能',
-						skillName: '吸血攻击',
-						skillLevel: 6,
-						targets: context => context.enemies.sort((a, b) => b.curhp - a.curhp).map(u => u.pos)
-					});
-					// sets.push({
-					// 	user: 1,
-					// 	check: context => context.round_count == 0,
-					// 	type: '技能',
-					// 	skillName: '诸刃·碎玉',
-					// 	targets: context => cga.emogua.AutoBattlePreset.getSortedEnemies(context)
-					// });
-				}
-				if (profession.name == '传教士') {
-					sets.push({
-						user: 1,
-						check: context => {
-							const needHealUnits = context.teammates.filter(u => u.curhp > 0 && u.hpRatio <= 0.3);
-							return needHealUnits.length >= 2;
-						},
-						type: '技能',
-						skillName: '生命祈福',
-						targets: context => [context.player_pos]
-					});
-					sets.push({
-						user: 1,
-						check: context =>  {
-							const needReviveUnits = context.teammates.filter(u => u.curhp == 0);
-							return needReviveUnits.length > 0;
-						},
-						type: '技能',
-						skillName: '气绝回复',
-						targets: context => context.teammates.filter(u => u.curhp == 0).map(u => u.pos)
-					});
-					sets.push({
-						user: 1,
-						check: function(context) {
-							const needCleanPositions = context.teammates.filter(u => u.curhp > 0 && u.flags & cga.emogua.DebuffFlags.ANY).map(u => u.pos);
-							if (needCleanPositions.length >= 2) {
-								const t = cga.emogua.BattlePositionMatrix.getMaxTPosition(needCleanPositions);
-								if (t.count >= 3) {
-									subSkillInfo = context.getAvaliableSubSkillInfo(this);
-									return subSkillInfo && subSkillInfo.level == 6;
-								}
-							}
-							return false;
-						},
-						type: '技能',
-						skillName: '洁净魔法', skillLevel: 6,
-						targets: context => {
-							console.log('释放洁净魔法');
-							const needCleanPositions = context.teammates.filter(u => u.flags & cga.emogua.DebuffFlags.ANY).map(u => u.pos);
-							const t = cga.emogua.BattlePositionMatrix.getMaxTPosition(needCleanPositions);
-							return [t.position];
-						}
-					});
-					// sets.push({
-					// 	user: 1,
-					// 	check: function(context) {
-					// 		const needCleanPositions = context.teammates.filter(u => u.curhp > 0 && u.flags & cga.emogua.DebuffFlags.ANY).map(u => u.pos);
-					// 		if (needCleanPositions.length >= 3) {
-					// 			subSkillInfo = context.getAvaliableSubSkillInfo(this);
-					// 			return subSkillInfo && subSkillInfo.level == 8;
-					// 		}
-					// 		return false;
-					// 	},
-					// 	type: '技能',
-					// 	skillName: '洁净魔法', skillLevel: 8,
-					// 	targets: context => {
-					// 		const needCleanPositions = context.teammates.filter(u => u.flags & cga.emogua.DebuffFlags.ANY).map(u => u.pos);
-					// 		const t = cga.emogua.BattlePositionMatrix.getMaxTPosition(needCleanPositions);
-					// 		return [t.position];
-					// 	}
-					// });
-					const needHealChecker = (unit) => {
-						return unit.curhp > 0 && unit.hpRatio <= 0.7;
-					};
-					sets.push({
-						user: 1,
-						check: function(context) {
-							const needHealUnits = context.teammates.filter(needHealChecker);
-							if (needHealUnits.length >= 3) {
-								const t = cga.emogua.BattlePositionMatrix.getMaxTPosition(needHealUnits.map(u => u.pos));
-								return t.count > 1;
-							}
-							return false;
-						}, type: '技能', skillName: '强力补血魔法', skillLevel: 6,
-						targets: context => {
-							const t = cga.emogua.BattlePositionMatrix.getMaxTPosition(
-								context.teammates.filter(needHealChecker).map(u => u.pos)
-							);
-							return [t.position];
-						}
-					});
-					sets.push({
-						user: 1,
-						check: function(context) {
-							const needHealUnits = context.teammates.filter(needHealChecker);
-							return needHealUnits.length >= 3;
-						}, type: '技能', skillName: '超强补血魔法', skillLevel: 6,
-						targets: context => [context.player_pos]
-					});
-					sets.push({
-						user: 1,
-						check: function(context) {
-							const needHealUnits = context.teammates.filter(needHealChecker);
-							return needHealUnits.length > 0;
-						}, type: '技能', skillName: '补血魔法', skillLevel: 6,
-						targets: context => context.teammates.sort((a, b) => a.hpRatio - b.hpRatio).map(t => t.pos)
-					});
-				}
-				if (profession.name == '魔术师') {
-					sets.push({
-						user: 1,
-						check: context => context.enemies.length >= 5,
-						type: '技能', skillName: '超强冰冻魔法', skillLevel: 6,
-						targets: context => cga.emogua.AutoBattlePreset.getSortedEnemies(context)
-					});
-					sets.push({
-						user: 1,
-						check: context => true,
-						type: '技能', skillName: '冰冻魔法', skillLevel: 6,
-						targets: context => cga.emogua.AutoBattlePreset.getSortedEnemies(context)
-					});
-				}
-			}
-			sets.push({
-				user: 1,
-				check: context => context.enemies.front.length >= 3 || context.enemies.back.length >= 3,
-				type: '技能', skillName: '因果报应', skillLevel: 3,
-				targets: context => cga.emogua.AutoBattlePreset.getMaxHorizontalTargets(context)
-			});
-			sets.push({
-				user: 1,
-				check: context => context.enemies.length >= 3,
-				type: '技能', skillName: '气功弹', skillLevel: 5,
-				targets: context => cga.emogua.AutoBattlePreset.getSortedEnemies(context)
-			});
-			sets.push({
-				user: 5,
-				check: context => true,
-				type: '攻击',
-				targets: context => cga.emogua.AutoBattlePreset.getSortedEnemies(context)
-			});
-
-			sets.push({
-				user: 2,
-				check: context => context.petUnit.hpRatio <= 0.4,
-				skillName: '明镜止水',
-				targets: context => [context.petUnit.pos]
-			});
-			// sets.push({
-			// 	user: 2,
-			// 	check: context => context.enemies.length >= 7,
-			// 	skillName: '飓风吐息',
-			// 	targets: context => context.enemies.map(u => u.pos)
-			// });
-			sets.push({
-				user: 2,
-				check: context => context.enemies.length >= 3,
-				skillName: '气功弹',
-				targets: context => cga.emogua.AutoBattlePreset.getSortedEnemies(context)
-			});
-			sets.push({
-				user: 2,
-				check: context => true,
-				skillName: '攻击',
-				targets: context => cga.emogua.AutoBattlePreset.getSortedEnemies(context)
-			});
-			return sets;
+		getAttackSets: (options = {}) => {
+			options.flag = 1;
+			return cga.emogua.getBattleSets(cga, options);
 		},
-		/**
-		 * options {
-		 *     rechargeMinHp: 200
-		 * }
-		 */
-		getEscapeSets: (options) => {
-			options = options ? options : {};
-			const sets = [];
-			sets.push({
-				user: 2,
-				check: context => context.petUnit.hpRatio <= 0.4,
-				skillName: '明镜止水',
-				targets: context => [context.petUnit.pos]
-			});
-			sets.push({
-				user: 2,
-				check: context => true,
-				skillName: '防御',
-				targets: context => [context.petUnit.pos]
-			});
-			sets.push({
-				user: 2,
-				check: context => true,
-				type: '什么都不做',
-				targets: context => [context.player_pos]
-			});
-			sets.push(cga.emogua.AutoBattlePreset.getBattleRechargeHpAction(options.rechargeMinHp ? options.rechargeMinHp : 200));
-			sets.push({
-				user: 5,
-				check: context => true,
-				type: '逃跑',
-				targets: context => [context.player_pos]
-			});
-			return sets;
-		},
-		getBattleRechargeMpAction: (minMp = 200) => {
+		getEscapeSets: () => cga.emogua.getBattleSets(cga, {flag: 0}),
+		getBattleRechargeMpAction: (minMp = 300, pet = false) => {
 			return {
 				user: 1,
-				check: context => context.playerUnit.curmp <= minMp && cga.getInventoryItems().findIndex(i => i.type == 23) >= 0,
+				check: context => (context.playerUnit.curmp <= minMp || (pet && context.petUnit.curmp <= minMp)) && cga.getInventoryItems().find(i => i.type == 23 && !['星鳗饭团','香水：深蓝九号'].includes(i.name)),
 				type: '物品',
-				item: context => cga.getInventoryItems().find(i => i.type == 23).pos,
-				targets: context => [context.player_pos]
+				item: context => cga.getInventoryItems().find(i => i.type == 23 && i.name != '星鳗饭团').pos,
+				targets: context => pet ? [context.playerUnit, context.petUnit].filter(u => u.curmp <= minMp).map(u => u.pos) : [context.player_pos]
 			};
 		},
-		getBattleRechargeHpAction: (minHp = 200) => {
+		getBattleRechargeHpAction: (minHp = 300, pet = false) => {
 			return {
 				user: 1,
-				check: context => context.playerUnit.curhp <= minHp && cga.getInventoryItems().findIndex(i => i.type == 43) >= 0,
+				check: context => (context.playerUnit.curhp <= minHp || (pet && context.petUnit.curhp <= minHp)) && cga.getInventoryItems().find(i => i.type == 43 && i.name != '香水：深蓝九号'),
 				type: '物品',
 				item: context => cga.getInventoryItems().find(i => i.type == 43).pos,
-				targets: context => [context.player_pos]
+				targets: context => pet ? [context.playerUnit, context.petUnit].filter(u => u.curhp <= minHp).map(u => u.pos) : [context.player_pos]
 			};
 		},
 		getMaxHorizontalTargets: (context) => context.enemies.back.length > context.enemies.front.length ? context.enemies.back.map(u => u.pos) : context.enemies.front.map(u => u.pos),
-		KillFirstName: ['帕布提斯马'],
+		KillFirstName: ['帕布提斯马','被唤醒的亡魂'],
 		getSortedEnemies: (context) => context.enemies.sort((a, b) => {
 			if (cga.emogua.AutoBattlePreset.KillFirstName.findIndex(n => a.name == n) >= 0) return -1;
 			else if (cga.emogua.AutoBattlePreset.KillFirstName.findIndex(n => b.name == n) >= 0) return 1;
@@ -2802,18 +1954,21 @@ module.exports = new Promise(resolve => {
 	 *     petskill_allowbit: 127,
 	 *     petid: 0,
 	 *     effect_flags: 0
+	 *
+	 *     playerUnit
+	 *     petUnit
 	 * }
 	 * battleUnits:  [
 	 *     {
-	 *     name: 'xxx',
-	 *     level: 160,
-	 *     modelid: 100358,
-	 *     curhp: 3011,
-	 *     maxhp: 3011,
-	 *     curmp: 771,
-	 *     maxmp: 771,
-	 *     pos: 0,
-	 *     flags: 100663300
+	 *       name: 'xxx',
+	 *       level: 160,
+	 *       modelid: 100358,
+	 *       curhp: 3011,
+	 *       maxhp: 3011,
+	 *       curmp: 771,
+	 *       maxmp: 771,
+	 *       pos: 0,
+	 *       flags: 100663300
 	 *     }
 	 * ]
 	 * strategies: [
@@ -2825,6 +1980,7 @@ module.exports = new Promise(resolve => {
 	 *
 	 *         skillName: '因果报应', // cga.GetSkillsInfo() & cga.GetSubSkillsInfo(info.index)
 	 *         skillLevel: 1,
+	 *         force: false, //强制释放
 	 *         targets: context => [position],
 	 *         rollback: '不能释放回退: 攻击 | 防御 | 什么都不做',
 	 *         item: context => position,
@@ -2833,7 +1989,7 @@ module.exports = new Promise(resolve => {
 	 * 默认首回合不延迟，如果屏蔽切图且第一回合敌人全被飞或者己方全被飞会掉线
 	 * 什么都不做目前只有宠物支持
 	 */
-	const playerStrategies = [], player2Strategies = [], petStrategies = [];
+	let playerStrategies = [], player2Strategies = [], petStrategies = [];
 	const applyPlayerNormalAttack = (context, targets) => {
 		const matchedTarget = targets.find(target => {
 			if (
@@ -2852,15 +2008,21 @@ module.exports = new Promise(resolve => {
 		}
 	};
 	const applyPlayerRollbackAction = (context, type = '攻击') => {
-		if (type == '防御' || type == '什么都不做') {
+		if (type == '防御') {
 			cga.BattleGuard();
+		} else if (strategy.type == '什么都不做') {
+			cga.BattleDoNothing();
+			console.log('player rollabck 什么都不做');
 		} else {
 			applyPlayerNormalAttack(context, cga.emogua.AutoBattlePreset.getSortedEnemies(context));
 		}
 	};
 	const applyPlayerStrategy = (context, strategy) => {
 		try {
-			if (strategy.type == '防御' || strategy.type == '什么都不做') {
+			if (strategy.type == '什么都不做') {
+				cga.BattleDoNothing();
+				// console.log('player 什么都不做');
+			} else if (strategy.type == '防御') {
 				cga.BattleGuard();
 			} else if (strategy.type == '逃跑') {
 				cga.BattleEscape();
@@ -2871,7 +2033,7 @@ module.exports = new Promise(resolve => {
 				if (pets.length > 0) {
 					cga.BattleChangePet(pets[0]);
 				} else {
-					applyPlayerRollbackAction(context);
+					applyPlayerRollbackAction(context, strategy.rollback);
 				}
 			} else if (strategy.type == '攻击') {
 				let targets = strategy.targets(context);
@@ -2885,7 +2047,7 @@ module.exports = new Promise(resolve => {
 				if (targets.length > 0 && item) {
 					cga.BattleUseItem(item, targets[0]);
 				} else {
-					applyPlayerRollbackAction(context);
+					applyPlayerRollbackAction(context, strategy.rollback);
 				}
 			} else if (strategy.type == '技能')  {
 				const subSkillInfo = context.getAvaliableSubSkillInfo(strategy);
@@ -2901,24 +2063,22 @@ module.exports = new Promise(resolve => {
 						if (SkillFlags.BOOM & subSkillInfo.flags) {
 							target = 42;
 						}
-						if (!cga.BattleSkillAttack(subSkillInfo.skillIndex, subSkillInfo.level - 1, target)) {
-							applyPlayerRollbackAction(context, strategy.rollback)
-						}
+						cga.BattleSkillAttack(subSkillInfo.skillIndex, subSkillInfo.level - 1, target, strategy.force === true);
 					}
 				}
 			} else {
-				console.log('未识别的战斗配置 => ' + JSON.stringify(strategy));
+				console.log('未识别的战斗配置 => ', JSON.stringify(strategy));
 			}
 		} catch (e) {
-			console.log('战斗技能使用错误: ');
+			console.log('战斗技能使用错误:', e);
 			console.log(strategy);
-			console.log(e);
 		}
 	};
 	const applyPetStrategy = (context, strategy, twice = true) => {
 		try {
 			if (strategy.type == '什么都不做') {
-				cga.BattlePetSkillAttack(-1, -1);
+				cga.BattlePetSkillAttack(255, 255, twice);
+				// console.log('宠物 什么都不做');
 			} else {
 				const skillInfo = context.getAvaliablePetSkillInfo(strategy);
 				if (skillInfo) {
@@ -2934,23 +2094,23 @@ module.exports = new Promise(resolve => {
 							target = 42;
 						}
 						if (twice) {
-							cga.BattlePetSkillAttack(skillInfo.index, target, true);
-							cga.BattlePetSkillAttack(skillInfo.index, target, true);
+							cga.BattlePetSkillAttack(skillInfo.index, target, twice);
+							cga.BattlePetSkillAttack(skillInfo.index, target, twice);
 						} else {
-							cga.BattlePetSkillAttack(skillInfo.index, target, false);
+							cga.BattlePetSkillAttack(skillInfo.index, target, twice);
 						}
 					} else {
-						cga.BattlePetSkillAttack(-1, -1, false);
+						cga.BattlePetSkillAttack(255, 255, twice);
+						console.log('没有可用的宠物战斗策略，什么都不做');
 					}
 				} else {
-					cga.BattlePetSkillAttack(-1, -1, false);
+					cga.BattlePetSkillAttack(255, 255, twice);
 					console.log('没有可用的宠物战斗策略，什么都不做');
 				}
 			}
 		} catch (e) {
-			console.log('宠物自动战斗错误: ');
+			console.log('宠物自动战斗错误: ', e);
 			console.log(strategy);
-			console.log(e);
 		}
 	};
 	const petAction = (context, twice = true) => {
@@ -2959,14 +2119,17 @@ module.exports = new Promise(resolve => {
 		);
 		if (matchedStrategy) applyPetStrategy(context, matchedStrategy, twice);
 		else {
-			cga.BattlePetSkillAttack(-1, -1, false);
+			cga.BattlePetSkillAttack(255, 255, twice);
 			console.log('没有可用的宠物战斗策略，什么都不做');
 		}
 	};
 	const getSkillsInfoCache = () => {
 		try {
 			return cga.GetSkillsInfo().map(skillInfo => {
-				skillInfo.subSkillsInfo = cga.GetSubSkillsInfo(skillInfo.index).reverse();
+				const subSkills = cga.GetSubSkillsInfo(skillInfo.index).reverse();
+				if (!skillInfo.subSkillsInfo || subSkills.length > 0) {
+					skillInfo.subSkillsInfo = subSkills ? subSkills : [];
+				}
 				return skillInfo;
 			});
 		} catch (e) {
@@ -2977,7 +2140,12 @@ module.exports = new Promise(resolve => {
 	const getPetsSkillsInfoCache = () => {
 		try {
 			const result = {};
-			cga.GetPetsInfo().forEach(pet => result[pet.index] = cga.GetPetSkillsInfo(pet.index))
+			cga.GetPetsInfo().forEach(pet => {
+				const petSkills = cga.GetPetSkillsInfo(pet.index);
+				if (!result[pet.index] || petSkills.length > 0) {
+					result[pet.index] = petSkills ? petSkills : [];
+				}
+			});
 			return result;
 		} catch (e) {
 			console.log('getPetsSkillsInfoCache', e);
@@ -2986,6 +2154,14 @@ module.exports = new Promise(resolve => {
 	};
 	let SkillsInfoCache = getSkillsInfoCache();
 	let PetsSkillsInfoCache = getPetsSkillsInfoCache();
+	let pet2 = true;
+	cga.emogua.updateSkillsCache = () => {
+		SkillsInfoCache = getSkillsInfoCache();
+		PetsSkillsInfoCache = getPetsSkillsInfoCache();
+	};
+	cga.emogua.setBattlePet2 = (set = true) => {
+		pet2 = set;
+	};
 	const battle = (state, context) => {
 		context.isFront = BattlePositionMatrix.isFront;
 		context.getMaxTPosition = BattlePositionMatrix.getMaxTPosition;
@@ -3006,13 +2182,15 @@ module.exports = new Promise(resolve => {
 		context.considerBackPosition = (position) => !context.isFront(position) && context.units.findIndex(u => u.pos == (position + 5) && u.curhp > 0) >= 0;
 		context.petUnit = context.units.find(u => u.pos == (context.player_pos + (context.isFront(context.player_pos) ? -5 : 5)));
 		context.playerUnit = context.units.find(u => u.pos == context.player_pos);
+		context.playerSkills = SkillsInfoCache;
+		context.petSkills = PetsSkillsInfoCache[context.petid];
 		context.getAvaliableSubSkillInfo = (strategy) => {
 			const skillInfo = SkillsInfoCache.find(s => s.name == strategy.skillName);
 			if (skillInfo) {
 				if (skillInfo.subSkillsInfo) {
 					const subSkillInfo = skillInfo.subSkillsInfo.find(subSkill =>
 						(!strategy.skillLevel || subSkill.level <= strategy.skillLevel) &&
-						subSkill.available && (context.skill_allowbit & (1 << skillInfo.index)) &&
+						(strategy.force || (subSkill.available && (context.skill_allowbit & (1 << skillInfo.index)))) &&
 						subSkill.cost <= context.playerUnit.curmp
 					);
 					if (subSkillInfo) {
@@ -3021,16 +2199,15 @@ module.exports = new Promise(resolve => {
 					}
 				}
 			}
-		}
+		};
 		context.getAvaliablePetSkillInfo = (strategy) => {
-			const petSkillsInfo = PetsSkillsInfoCache[context.petid];
-			if (petSkillsInfo) {
-				const skillInfo = petSkillsInfo.find(info => info.name.startsWith(strategy.skillName));
+			if (context.petSkills) {
+				const skillInfo = context.petSkills.find(info => info.name.startsWith(strategy.skillName));
 				if (skillInfo && (context.petskill_allowbit & (1 << skillInfo.index)) && skillInfo.cost <= context.petUnit.curmp) {
 					return skillInfo;
 				}
 			}
-		}
+		};
 		context.getSkillTarget = (targets, skillFlags, position) => {
 			return targets.find(target => {
 				if (
@@ -3045,9 +2222,6 @@ module.exports = new Promise(resolve => {
 		};
 
 		if (state & BattleActionFlags.ISPLAYER) {
-			// 宠物二动
-			if (context.petUnit) petAction(context);
-
 			const matchedStrategy = (state & BattleActionFlags.ISDOUBLE ? player2Strategies : playerStrategies).find(strategy => {
 				if (strategy.check(context)) {
 					if (strategy.type == '技能') {
@@ -3057,8 +2231,13 @@ module.exports = new Promise(resolve => {
 				}
 				return false;
 			});
-			if (matchedStrategy) applyPlayerStrategy(context, matchedStrategy);
-			else {
+			if (matchedStrategy) {
+				// 宠物二动
+				if (pet2 && matchedStrategy.type != '逃跑' && context.petUnit && context.petUnit.curhp > 0) {
+					petAction(context);
+				}
+				applyPlayerStrategy(context, matchedStrategy);
+			} else {
 				console.log('人物没有可匹配的战斗策略->' + JSON.stringify(playerStrategies));
 			}
 		} else {
@@ -3066,48 +2245,57 @@ module.exports = new Promise(resolve => {
 		}
 	};
 	// 等待战斗或者切图
-	cga.emogua.waitAfterBattle = (battled = false, doubleCheck = true) => {
-		if (cga.isInNormalState()) {
-			if (doubleCheck) {
-				return cga.emogua.delay(500).then(() => cga.emogua.waitAfterBattle(battled, false));
-			}
-			return Promise.resolve(battled);
-		} else {
-			if (cga.isInBattle()) {
-				battled = true;
-			}
-			return cga.emogua.delay(1000).then(() => cga.emogua.waitAfterBattle(battled, true));
+	cga.emogua.waitAfterBattle = (battled = false) => Promise.resolve().then(() => {
+		const world = cga.GetWorldStatus();
+		const game = cga.GetGameStatus();
+		if (world == 9 && game == 3) {
+			return battled;
 		}
-	};
+		return cga.emogua.delay(1000).then(() => cga.emogua.waitAfterBattle(battled ? battled : world == 10));
+	}).catch(r => cga.emogua.waitAfterBattle(battled));
 	let AutoBattleFirstRoundDelay = 4000;
 	let AutoBattleRoundDelay = 4000;
 	let isFirstBattleAction = false;
+	let lastRound = -1;
+	let isBossBattle = false;
 	const waitBattleAction = () => {
 		cga.AsyncWaitBattleAction((error, state) => {
 			if (typeof state == 'number') {
 				if (BattleActionFlags.END & state) {
-					setTimeout(cga.emogua.pile, 2500);
+					cga.emogua.waitAfterBattle().then(() => {
+						cga.emogua.pile().then(
+							() => cga.emogua.dropItems()
+						);
+					});
+					isFirstBattleAction = true;
+					lastRound = -1;
+					isBossBattle = false;
 				} else if (BattleActionFlags.BEGIN & state) {
 					isFirstBattleAction = true;
+					lastRound = -1;
+					isBossBattle = false;
 				} else {
-					const context = cga.GetBattleContext();
-					let delay = AutoBattleRoundDelay;
-					if (isFirstBattleAction) {
-						SkillsInfoCache = getSkillsInfoCache();
-						PetsSkillsInfoCache = getPetsSkillsInfoCache();
-						delay = AutoBattleFirstRoundDelay;
-						if (context.round_count == 1) { // 被偷袭
-							console.log('被偷袭 @ ' + new Date());
-							delay += AutoBattleFirstRoundDelay;
+					if (playerStrategies.length > 0) {
+						const context = cga.GetBattleContext();
+						let delay = AutoBattleRoundDelay;
+						if (isFirstBattleAction) {
+							isBossBattle = (cga.GetBGMIndex() == 14);
+							delay = AutoBattleFirstRoundDelay;
+							if (isBossBattle) {
+								console.log('BOSS战斗');
+							}
+							if (context.round_count == 1) { // 被偷袭
+								console.log('被偷袭');
+								delay += AutoBattleFirstRoundDelay;
+							}
+						} else if (lastRound === context.round_count) {
+							delay = 0;
 						}
-					} else if (context.skill_performed === 1) {
-						delay = 0;
+						context.isBoss = isBossBattle;
+						if (delay > 0) setTimeout(() => battle(state, context), delay);
+						else battle(state, context);
+						lastRound = context.round_count;
 					}
-					setTimeout(() => {
-						if (playerStrategies.length > 0) {
-							battle(state, context);
-						}
-					}, delay);
 					isFirstBattleAction = false;
 				}
 			}
@@ -3115,20 +2303,16 @@ module.exports = new Promise(resolve => {
 		}, 120000);
 	};
 	let AutoBattleEnabled = false;
-	if (CustomFunctionsFlag > 0) {
-		AutoBattleEnabled = true;
-		waitBattleAction();
-	}
 	const BattleStrategyCache = [];
 	cga.emogua.autoBattle = (strategies, firstRoundDelay, roundDelay, force = false) => {
 		if (strategies && strategies.length > 0) {
-			if (force && !AutoBattleEnabled) {
+			if ((force || CustomFunctionsFlag) && !AutoBattleEnabled) {
 				AutoBattleEnabled = true;
 				waitBattleAction();
 			}
-			playerStrategies.splice(0, playerStrategies.length, ...strategies.filter(e => e.user & 1));
-			player2Strategies.splice(0, player2Strategies.length, ...strategies.filter(e => e.user & 4));
-			petStrategies.splice(0, petStrategies.length, ...strategies.filter(e => e.user & 2));
+			playerStrategies = strategies.filter(e => e.user & 1);
+			player2Strategies = strategies.filter(e => e.user & 4);
+			petStrategies = strategies.filter(e => e.user & 2);
 			if (typeof firstRoundDelay == 'number') {
 				AutoBattleFirstRoundDelay = Math.max(0, firstRoundDelay);
 			}
@@ -3139,6 +2323,11 @@ module.exports = new Promise(resolve => {
 				BattleStrategyCache.shift();
 			}
 			BattleStrategyCache.push(strategies);
+		} else {
+			console.log('取消脚本战斗');
+			playerStrategies = [];
+			player2Strategies = [];
+			petStrategies = [];
 		}
 		return Promise.resolve();
 	};
@@ -3160,13 +2349,31 @@ module.exports = new Promise(resolve => {
 		if (item.type == 31) return 20; // 布
 		if ([26,32,34,35].indexOf(item.type) >= 0) { // 狩猎材料
 			if (item.name.endsWith('元素碎片')) return 4;
+			if (item.name.startsWith('隐秘的徽记')) return 20;
 			return 40;
 		}
 	};
 	cga.emogua.pile = (force = false) => {
 		if (force || cga.isInNormalState()) {
 			const cache = {};
-			cga.getInventoryItems().forEach(item => {
+			const items = cga.GetItemsInfo();
+
+			let emptyCursor = 0;
+			const emptyIndexes = cga.emogua.getEmptyBagIndexes(items);
+			const equips = items.filter(i => {
+				if (i.pos <= 4) {
+					if (cga.emogua.getDurability(i).current <= equipmentMinDurability) {
+						if (emptyIndexes[emptyCursor]) {
+							cga.MoveItem(i.pos, emptyIndexes[emptyCursor++], -1);
+						}
+						return false;
+					}
+					return true;
+				}
+				return false;
+			});
+			let head, body, foot, weapon, shield;
+			items.filter(i => i.pos >= 8 && i.pos < 100).forEach(item => {
 				const pileMax = getPileMax(item);
 				if (pileMax && item.count < pileMax) {
 					const target = cache[item.itemid];
@@ -3185,34 +2392,38 @@ module.exports = new Promise(resolve => {
 					} else {
 						cache[item.itemid] = item;
 					}
+				} else {
+					if (autoEquip && item.type >= 0 && item.type <= 14 && item.name != '狐皮披风' && cga.emogua.getDurability(item).current > equipmentMinDurability) {
+						if (!weapon && item.type >= 0 && item.type <= 6 && !equips.find(i => [2,3].includes(i.pos) && i.type >= 0 && i.type <= 6)) {
+							weapon = item;
+							cga.MoveItem(item.pos, 2, -1);
+						} else if (!shield && item.type == 7 && !equips.find(i => [2,3].includes(i.pos) && i.type == 7)) {
+							shield = item;
+						} else if (!head && [8,9].includes(item.type) && !equips.find(i => i.pos == 0)) {
+							head = item;
+							cga.UseItem(item.pos);
+						} else if (!body && [10,11,12].includes(item.type) && !equips.find(i => i.pos == 1)) {
+							body = item;
+							cga.UseItem(item.pos);
+						} else if (!foot && [13,14].includes(item.type) && !equips.find(i => i.pos == 4)) {
+							foot = item;
+							cga.UseItem(item.pos);
+						}
+					}
 				}
 			});
+			const currentWeapon = weapon || equips.find(i => [2,3].includes(i.pos) && i.type >= 0 && i.type <= 6);
+			if (shield && (!currentWeapon || currentWeapon.type == 2 || ([0,1].includes(currentWeapon.type) && currentWeapon.attr.includes('$0种类 单手')))) {
+				cga.MoveItem(shield.pos, 3, -1);
+			}
 		}
-		return cga.emogua.delay(500);
+		return Promise.resolve();
 	};
 	cga.emogua.keepAlive = (say = false) => {
 		if (say && cga.isInNormalState()) {
-			cga.emogua.pile(true);
 			cga.emogua.sayWords();
 		}
-		setTimeout(() => cga.emogua.keepAlive(true), 50000);
+		setTimeout(() => cga.emogua.keepAlive(true), 55000);
 	};
-
-	// 定时任务
-	const schedule = () => {
-		if (cga.GetWorldStatus() == 11) {
-			console.log('已掉线,退出进程' + new Date());
-			process.exit();
-		} else {
-			// 装备保护
-			if (
-				cga.isInNormalState() && cga.GetItemsInfo().find(i => i.pos <= 4 && cga.emogua.getDurability(i).current <= equipmentMinDurability)
-			) {
-				cga.emogua.tidyupEquipments();
-			}
-			setTimeout(schedule, 30000);
-		}
-	};
-	schedule();
 	return cga;
 });
