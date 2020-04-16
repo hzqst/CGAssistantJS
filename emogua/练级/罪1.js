@@ -9,7 +9,8 @@ const protect = {
 	maxItemNumber: 19
 };
 const prepareOptions = {
-	crystalName: '火风的水晶（5：5）'
+	crystalName: '火风的水晶（5：5）',
+	repairFlag: 0
 };
 
 require('../wrapper').then(cga => {

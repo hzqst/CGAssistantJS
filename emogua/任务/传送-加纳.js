@@ -1,6 +1,6 @@
 
-const captain = '青西瓜';  // 队长名字
-const teamNumber = 2;  // 队伍人数
+const captain = 'xxx';  // 队长名字
+const teamNumber = 5;  // 队伍人数
 const joinPoint = {x: 141, y: 109}; // 新城集合点
 require('../wrapper').then(cga => {
 	console.log('加纳开传送');
@@ -10,7 +10,7 @@ require('../wrapper').then(cga => {
 			const npc = cga.GetMapUnits().find(u => u.unit_name.indexOf('传送石管理') >= 0);
 			if (npc) cga.emogua.turnTo(npc.xpos, npc.ypos);
 		}
-	});
+	}, true);
 	cga.emogua.recursion(
 		() => cga.emogua.prepare().then(() => {
 			const isCaptain = cga.GetPlayerInfo().name == captain;
@@ -61,6 +61,8 @@ require('../wrapper').then(cga => {
 							[4,4],[5,3],[4,4],[5,3]
 						])
 					).then(
+						() => cga.emogua.delay(3000)
+					).then(
 						() => cga.emogua.sayWords('开传送')
 					).then(
 						() => cga.emogua.delay(15000)
@@ -98,6 +100,8 @@ require('../wrapper').then(cga => {
 							[12,8],[13, 9],[12,8],[13, 9]
 						])
 					).then(
+						() => cga.emogua.delay(3000)
+					).then(
 						() => cga.emogua.sayWords('开传送')
 					).then(
 						() => cga.emogua.delay(15000)
@@ -109,7 +113,7 @@ require('../wrapper').then(cga => {
 							[79, 76, '索奇亚'],
 							[356, 334, '角笛大风穴'],
 							[133, 26, '索奇亚'],
-							[528,328]
+							[528,328],[527,328],[528,328],[527,328],[528,328]
 						])
 					).then(
 						() => cga.emogua.sayWords('学乱射')
@@ -126,6 +130,8 @@ require('../wrapper').then(cga => {
 						() => cga.emogua.walkList([
 							[14,7],[15, 8],[14,7],[15, 8]
 						])
+					).then(
+						() => cga.emogua.delay(3000)
 					).then(
 						() => cga.emogua.sayWords('开传送')
 					).then(
