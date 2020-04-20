@@ -24,7 +24,7 @@ require('../wrapper').then(cga => {
 	cga.emogua.autoBattle(cga.emogua.AutoBattlePreset.getAttackSets());
 	cga.emogua.recursion(
 		() => cga.emogua.logBack().then(
-			() => cga.emogua.prepare()
+			() => cga.emogua.prepare({repairFlag: 0})
 		).then(
 			() => cga.emogua.goto(n => n.falan.s1)
 		).then(
