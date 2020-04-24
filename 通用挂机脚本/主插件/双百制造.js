@@ -352,7 +352,7 @@ var loop = ()=>{
 		
 		var inventory = cga.getInventoryItems();
 		if(inventory.length >= 15){
-			cleanUseless(inventory, loop);
+			cleanUseless(loop);
 			return;
 		}
 				
