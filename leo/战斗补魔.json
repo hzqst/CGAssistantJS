@@ -1,0 +1,81 @@
+{
+    "battle": {
+        "autobattle": true,
+        "bossprot": false,
+        "delayfrom": 4000,
+        "delayto": 4500,
+        "highspeed": true,
+        "list": [
+            {
+                "condition": 2,
+                "condition2": 0,
+                "condition2rel": 0,
+                "condition2val": "",
+                "conditionrel": 3,
+                "conditionval": "25%",
+                "index": 0,
+                "petaction": 100,
+                "petskillname": "攻击",
+                "pettarget": 0,
+                "pettargetsel": 3,
+                "playeraction": 6,
+                "playeractionval": "魔力之泉",
+                "playertarget": 2,
+                "playertargetsel": -1
+            }
+        ],
+        "lockcd": false,
+        "lv1prot": false,
+        "pet2action": true,
+        "playerforceaction": false,
+        "r1nodelay": true,
+        "showhpmp": true
+    },
+    "chat": {
+        "displayname": true,
+        "displaytime": true,
+        "mychat": true,
+        "npcmsg": true,
+        "playerchat": true,
+        "sysmsg": true,
+        "todayonly": true
+    },
+    "itemdroplist": [
+        "巨石",
+        "绿头盔",
+        "星之砂",
+        "秘文之皮",
+        "奇香木",
+        "坚硬的鳞片",
+        "龙角"
+    ],
+    "itemidmap": {
+    },
+    "itemtweaklist": [
+        "地的水晶碎片|999",
+        "水的水晶碎片|999",
+        "火的水晶碎片|999",
+        "风的水晶碎片|999",
+        "神之金|20",
+        "龙角|20",
+        "隐秘的徽记（地）|20",
+        "隐秘的徽记（水）|20",
+        "隐秘的徽记（火）|20",
+        "隐秘的徽记（风）|20",
+        "阿尔卡迪亚古钱|999",
+        "魔族的水晶|5",
+        "钢骑之矿|5",
+        "德特家的布|5",
+        "誓言之证|5",
+        "能量结晶|99",
+        "巨石|20",
+        "长老之证|7"
+    ],
+    "player": {
+        "autosupply": true,
+        "movespd": 300,
+        "noswitchanim": false,
+        "workacc": 100,
+        "workdelay": 6500
+    }
+}
