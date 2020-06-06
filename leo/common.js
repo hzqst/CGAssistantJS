@@ -1,6 +1,8 @@
 module.exports = require('./wrapper').then(cga => {
     global.leo = cga.emogua;
-    leo.version = '2.2';
+    leo.version = '2.3';
+    leo.qq = '158583461'
+    leo.copyright = '红叶散落';
     leo.FORMAT_DATE = 'yyyy-MM-dd';
     leo.FORMAT_DATETIME = 'yyyy-MM-dd hh:mm:ss';
     leo.FORMAT_TIME = 'hh:mm:ss';
@@ -87,7 +89,7 @@ module.exports = require('./wrapper').then(cga => {
         }
     }
     //练级统计信息打印
-    leo.statistics = (beginTime,oldXp) => {
+    leo.statistics = (beginTime = leo.beginTime,oldXp = leo.oldXp) => {
     	var playerinfo = cga.GetPlayerInfo();
 	    var nowTime = leo.now();
 		var time = parseInt((nowTime - beginTime)/1000/60);//已持续练级时间
