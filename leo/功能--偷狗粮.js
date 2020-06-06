@@ -99,7 +99,7 @@ require('./common').then(cga=>{
                     return leo.logBack();
                 }
             })
-            .then(() => leo.checkHealth(prepareOptions.doctorName))
+            .then(() => leo.checkHealth(prepareOptions.doctorName,true))
             .then(() => leo.checkCrystal(prepareOptions.crystalName))
             .then(()=>{
                 //判断是否要去银行取钱
@@ -123,46 +123,46 @@ require('./common').then(cga=>{
                 }
             })
             .then(()=>{
-                var mapInfo = cga.getMapInfo();
-                if(mapInfo.indexes.index3 == 11019 && mapInfo.y < 32){
-                    return leo.autoWalkList([[27,16],[27,15]]);
-                }else if(mapInfo.indexes.index3 == 11019 && mapInfo.y >= 32){
-                    return leo.autoWalk([25,34])
-                    .then(()=>leo.talkNpc(25,33,leo.talkNpcSelectorYes))
-                    .then(()=>leo.delay(1000))
-                    .then(()=>leo.waitAfterBattle())
-                    .then(()=>leo.autoWalkList([[27,16],[27,15]]));
-                }else if(mapInfo.name.indexOf('牛鬼的洞窟')!=-1){
-                    return leo.findOne(targetFinder, todo)
-                    .then(()=>leo.walkRandomMazeUntil(() => {
-                        var mapInfo = leo.getMapInfo();
-                        if (mapInfo.indexes.index3 == 11019) {
-                            return true;
-                        }
-                        return false;
-                    },false))
-                    .then(()=>leo.autoWalk([25,34]))
-                    .then(()=>leo.talkNpc(25,33,leo.talkNpcSelectorYes))
-                    .then(()=>leo.delay(1000))
-                    .then(()=>leo.waitAfterBattle())
-                    .then(()=>leo.autoWalkList([[27,16],[27,15]]));
-                }else{
-                    return leo.goto(n => n.falan.eout)
-                    .then(()=>leo.autoWalk([665,184,'牛鬼的洞穴']))
-                    .then(()=>leo.findOne(targetFinder, todo))
-                    .then(()=>leo.walkRandomMazeUntil(() => {
-                        var mapInfo = leo.getMapInfo();
-                        if (mapInfo.indexes.index3 == 11019) {
-                            return true;
-                        }
-                        return false;
-                    },false))
-                    .then(()=>leo.autoWalk([25,34]))
-                    .then(()=>leo.talkNpc(25,33,leo.talkNpcSelectorYes))
-                    .then(()=>leo.delay(1000))
-                    .then(()=>leo.waitAfterBattle())
-                    .then(()=>leo.autoWalkList([[27,16],[27,15]]));
-                }
+                return leo.loop(()=>{
+                    var mapInfo = cga.getMapInfo();
+                    if(mapInfo.name == '艾尔莎岛' || mapInfo.name == '里谢里雅堡' ||mapInfo.name == '法兰城' ){
+                        return leo.goto(n => n.falan.eout);
+                    }
+                    if(mapInfo.name == '芙蕾雅'){
+                        return leo.autoWalk([665,184,'*']);
+                    }
+                    if(mapInfo.name == '牛鬼的洞穴'){
+                        return leo.autoWalk([16,10,'*']);
+                    }
+                    if(mapInfo.name == '洞窟'){
+                        return leo.log('现在是白天，进不了牛鬼的洞穴，等待3分钟')
+                        .then(()=>leo.delay(180000))
+                        .then(()=>leo.autoWalk([16,19,'芙蕾雅']))
+                        .then(()=>leo.delay(5000));
+                    }
+                    if(mapInfo.name.indexOf('牛鬼的洞窟')!=-1){
+                        return leo.findOne(targetFinder, todo, true)
+                        .then(()=>leo.walkRandomMazeUntil(() => {
+                            var mapInfo = leo.getMapInfo();
+                            if (mapInfo.indexes.index3 == 11019) {
+                                return true;
+                            }
+                            return false;
+                        },false))
+                    }
+                    if(mapInfo.indexes.index3 == 11019 && mapInfo.y >= 32){
+                        return leo.autoWalk([25,34])
+                        .then(()=>leo.talkNpc(25,33,leo.talkNpcSelectorYes))
+                        .then(()=>leo.delay(1000))
+                        .then(()=>leo.waitAfterBattle());
+                    }
+                    if(mapInfo.indexes.index3 == 11019 && mapInfo.y < 32){
+                        return leo.autoWalkList([[27,16],[27,15]])
+                        .then(()=>console.log(leo.logTime()+'到达位置，开始偷狗粮'))
+                        .then(()=>leo.reject()); //退出循环，进入下一步
+                    }
+                    return leo.delay(2000);
+                });
             }).then(()=>{
                 return leo.loop(    //战斗循环Start
                     ()=>leo.waitAfterBattle()
