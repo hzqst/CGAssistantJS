@@ -879,7 +879,7 @@ module.exports = function(callback){
 
 		var castle_2_camp = ()=>{
 			
-			var shouldWarp = (cga.getItemCount('承认之戒') > 0 && noWarp !== true) ? true : false;
+			var shouldWarp = (cga.getItemCount('承认之戒', true) > 0 && noWarp !== true) ? true : false;
 			
 			var list = shouldWarp ? [
 			[55,47, '辛希亚探索指挥部'],
