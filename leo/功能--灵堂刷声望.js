@@ -1,9 +1,10 @@
 require('./common').then(cga => {
 	//leo.baseInfoPrint();
 
-	var money = 10000;
+	var money = 5000;
 	var isMoveGold = true; //是否要去取钱，true-按设定的money取钱，false-直接去刷
 	var protect = {
+		minHp: 100,
         minMp: 20
     };
     
@@ -44,7 +45,7 @@ require('./common').then(cga => {
 		    const sets = [];
 			sets.push({
 				user: 1,
-				check: context => context.playerUnit.curmp < protect.minMp,
+				check: context => context.playerUnit.curmp < protect.minMp || context.playerUnit.curhp < protect.minHp,
 				type: '逃跑',
 				targets: context => [context.player_pos]
 			});

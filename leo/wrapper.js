@@ -434,7 +434,7 @@ module.exports = new Promise(resolve => {
 					console.log('被卡住');
 				}
 			}
-			console.log('自动寻路失败', target, r);
+			//console.log('自动寻路失败', target, r);
 			return Promise.reject(r);
 		}
 	);
@@ -2082,6 +2082,7 @@ module.exports = new Promise(resolve => {
 			} else {
 				const skillInfo = context.getAvaliablePetSkillInfo(strategy);
 				if (skillInfo) {
+					//console.log(skillInfo);
 					let target = context.getSkillTarget(strategy.targets(context), skillInfo.flags, context.petUnit.pos);
 					if (typeof target == 'number') {
 						if (SkillFlags.MULTI & skillInfo.flags) {
@@ -2295,6 +2296,7 @@ module.exports = new Promise(resolve => {
 						if (delay > 0) setTimeout(() => battle(state, context), delay);
 						else battle(state, context);
 						lastRound = context.round_count;
+						//console.log(context);
 					}
 					isFirstBattleAction = false;
 				}

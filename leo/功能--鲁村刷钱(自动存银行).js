@@ -68,7 +68,7 @@ require('./common').then(cga => {
                 }else{
                     //登回城买、换水晶
                     return leo.buyCrystal(prepareOptions.crystalName,1)
-                    .then(()=>leo.autoWalk([16,13]))
+                    //.then(()=>leo.autoWalk([16,13]))
                     .then(()=>leo.useItems(prepareOptions.crystalName))
                     .then(()=>leo.dropItem(prepareOptions.crystalName));
                 }

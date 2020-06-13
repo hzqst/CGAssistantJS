@@ -2,7 +2,7 @@ require('./common').then(cga => {
     leo.baseInfoPrint();
     leo.monitor.config.keepAlive = false;   //关闭防掉线
     leo.monitor.config.logStatus = false;
-    var teamLeader = '队长名称'; //队长名称
+    var teamLeader = '绿茵之殇'; //队长名称
     var teamPlayerCount = 5; //队伍人数
     var protect = {
         minHp: 150,
@@ -75,8 +75,8 @@ require('./common').then(cga => {
                     .then(() => leo.autoWalk([165,153]))
                     .then(()=>leo.talkNpc(2,leo.talkNpcSelectorYes,'利夏岛'))
                     .then(()=>leo.autoWalk([90,99,'国民会馆']))
-                    .then(()=>leo.autoWalk([108,51]))
-                    .then(()=>leo.supplyDir(2))
+                    //.then(()=>leo.autoWalk([108,51]))
+                    //.then(()=>leo.supplyDir(2))
                     .then(() => {
                         if (isTeamLeader) {
                             cga.EnableFlags(cga.ENABLE_FLAG_JOINTEAM, true); //开启组队
@@ -134,7 +134,7 @@ require('./common').then(cga => {
                 } else {
                     var mapInfo = leo.getMapInfo();
                     if (mapInfo.name == '国民会馆' && mapInfo.y == 43 && (mapInfo.x == 109 || mapInfo.x == 110)) {
-                        return leo.sell(110, 42).then(() => leo.delay(2000));
+                        //return leo.sell(110, 42).then(() => leo.delay(2000));
                     }
                     if (mapInfo.name == '国民会馆' && mapInfo.x == 107 && (mapInfo.y == 51 || mapInfo.y == 52)) {
                         return leo.supply(108, 52)

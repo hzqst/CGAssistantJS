@@ -403,6 +403,9 @@ module.exports = require('./wrapper').then(cga => {
         });
     }
     leo.checkCrystal = (crystalName, equipsProtectValue = 100) => {
+        if (!crystalName) {
+            crystalName = '水火的水晶（5：5）';
+        }
         //检查水晶的耐久
         var crystal = cga.GetItemsInfo().find(i => i.pos == 7);
         if(crystal && crystal.name == crystalName && cga.getEquipEndurance(crystal)[0] > equipsProtectValue){
@@ -536,6 +539,27 @@ module.exports = require('./wrapper').then(cga => {
         // }
         return leo.getFromBank(filter);
     }
+    leo.getOneFromBank = (filter) => {
+        const bankList = cga.GetBankItemsInfo().filter(e => {
+            if (typeof filter == 'string') return e.name == filter || e.itemid == filter;
+            else if (typeof filter == 'function') return filter(e);
+            else return !filter;
+        });
+        if(bankList && bankList.length>0){
+            var emptyIndexes = leo.getEmptyBagIndexes();
+            if(emptyIndexes && emptyIndexes.length > 0){
+                cga.MoveItem(bankList[0].pos, emptyIndexes[0], -1);
+                console.log('已从银行获取到物品');
+                return leo.delay(500); 
+            }else{
+                console.log('身上没有空位，无法获取');
+                return leo.delay(500);
+            }
+        }else{
+            console.log('银行里没有对应的物品，无法获取');
+            return leo.delay(500);
+        }
+    }
     //购买封印卡(只买1~4级卡)
     leo.buySealCard = (sealCardName, count = 20, level = 1) => {
         if (level <= 1 || level > 4) {
@@ -566,7 +590,47 @@ module.exports = require('./wrapper').then(cga => {
                                 buyCount++;
                             }
                         });
-                        if (!buyitem.length) return leo.reject('商店没有封印卡出售，可能已被买完或者背包没空间');
+                        if(emptySlotCount==0){
+                            return leo.reject('背包没空间');
+                        }
+                        if (!buyitem.length){
+                            return leo.log('法兰城的封印卡已被买完了，去新城买')
+                            .then(()=>leo.logBack())
+                            .then(()=>leo.autoWalk([157, 93]))
+                            .then(()=>leo.turnDir(0))
+                            .then(()=>leo.delay(500))
+                            .then(()=>leo.autoWalk([150,125,'克罗利的店']))
+                            .then(()=>leo.autoWalk([40,23]))
+                            .then(()=>{
+                                return leo.talkNpc(0, dialog => {
+                                    if (dialog.type == 5) {
+                                        cga.ClickNPCDialog(-1, 0);
+                                        return true;
+                                    }
+                                    if (dialog.type == 6) {
+                                        var store = cga.parseBuyStoreMsg(dialog);
+                                        if (!store) return leo.reject('商店内容解析失败');
+                                        var buyitem = [];
+                                        var buyCount = 0;
+                                        var emptySlotCount = cga.getInventoryEmptySlotCount();
+                                        store.items.forEach((it) => {
+                                            if (it.name.indexOf(sealCardName) >= 0 && buyCount < emptySlotCount) {
+                                                buyitem.push({
+                                                    index: it.index,
+                                                    count: count
+                                                });
+                                                buyCount++;
+                                            }
+                                        });
+                                        if(emptySlotCount==0){
+                                            return leo.reject('背包没空间');
+                                        }
+                                        if (!buyitem.length) return leo.reject('商店没有封印卡出售，可能已被买完或者背包没空间');
+                                        cga.BuyNPCStore(buyitem);
+                                    }
+                                }).then(() => leo.pile(true)).then(()=>leo.delay(1000)).then(()=>leo.logBack());
+                            });
+                        } 
                         cga.BuyNPCStore(buyitem);
                     }
                 }).then(() => leo.pile(true)).then(()=>leo.delay(1000));
@@ -693,7 +757,47 @@ module.exports = require('./wrapper').then(cga => {
                             buyCount++;
                         }
                     });
-                    if (!buyitem.length) return leo.reject('商店没有水晶出售，可能已被买完或者背包没空间');
+                    if(emptySlotCount==0){
+                        return leo.reject('背包没空间');
+                    }
+                    if (!buyitem.length){
+                        return leo.log('法兰城的水晶已被买完了，去新城买')
+                        .then(()=>leo.logBack())
+                        .then(()=>leo.autoWalk([157, 93]))
+                        .then(()=>leo.turnDir(0))
+                        .then(()=>leo.delay(500))
+                        .then(()=>leo.autoWalk([150,125,'克罗利的店']))
+                        .then(()=>leo.autoWalk([40,23]))
+                        .then(()=>{
+                            return leo.talkNpc(0, dialog => {
+                                if (dialog.type == 5) {
+                                    cga.ClickNPCDialog(-1, 0);
+                                    return true;
+                                }
+                                if (dialog.type == 6) {
+                                    var store = cga.parseBuyStoreMsg(dialog);
+                                    if (!store) return leo.reject('商店内容解析失败');
+                                    var buyitem = [];
+                                    var buyCount = 0;
+                                    var emptySlotCount = cga.getInventoryEmptySlotCount();
+                                    store.items.forEach((it) => {
+                                        if (it.name.indexOf(crystalName) >= 0 && buyCount < emptySlotCount) {
+                                            buyitem.push({
+                                                index: it.index,
+                                                count: count
+                                            });
+                                            buyCount++;
+                                        }
+                                    });
+                                    if(emptySlotCount==0){
+                                        return leo.reject('背包没空间');
+                                    }
+                                    if (!buyitem.length) return leo.reject('商店没有水晶出售，可能已被买完或者背包没空间');
+                                    cga.BuyNPCStore(buyitem);
+                                }
+                            }).then(() => leo.pile(true)).then(()=>leo.delay(1000)).then(()=>leo.logBack());
+                        });
+                    } 
                     cga.BuyNPCStore(buyitem);
                 }
             }).then(() => leo.pile(true)).then(()=>leo.delay(1000));
