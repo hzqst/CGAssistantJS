@@ -2,6 +2,7 @@ require('./common').then(cga=>{
 	//leo.baseInfoPrint();
 	var teamLeader = '队长名称'; //队长名称
     var teamPlayerCount = 5; //队伍人数
+    var autoOpen = true; //自动开壶
 
     var isLogBackFirst = false; //启动登出
     var protect = {
@@ -167,6 +168,7 @@ require('./common').then(cga=>{
     var itemOwner = {};
     var itemNamePrev = '目标遗留品No';
     var current = 0;
+    var getCount = [0,0,0,0,0];//希特拉、萨普地雷、泰坦巨人、托罗帝鸟、岩地跑者
 
     var getNewLeader = ()=>{
     	var target = targetList[current];
@@ -214,10 +216,15 @@ require('./common').then(cga=>{
 					leo.dropItem(itemName);
 				}else{
 					leo.say('触发战斗保护');
+					leo.say('获得物品');
 					setTimeout(() => {
 						leo.say('触发战斗保护');
+						leo.say('获得物品');
 					}, 3000);
-					leo.say('获得物品');
+					setTimeout(() => {
+						leo.say('触发战斗保护');
+						leo.say('获得物品');
+					}, 6000);
 					ret = true;
 				}
     		}
@@ -228,6 +235,72 @@ require('./common').then(cga=>{
     	return ret;
     }
     protect.checker = itemCheck;
+
+    var openPrize = ()=>{
+    	return leo.todo()
+    	.then(()=>{
+			console.log();
+			console.log('==========刮奖区==========');
+			if(cga.getItemCount('不可思议的壶')>0){
+				if(autoOpen){
+					console.log('获得了【不可思议的壶】，自动开奖');
+					var oldPetIndexs = cga.GetPetsInfo().map(pet=>pet.index);
+					if(oldPetIndexs.length>=5){
+						console.log('开奖失败，宠物已满，请至少留一个空位');
+						return leo.next();
+					}else{
+						return leo.useItemEx('不可思议的壶')
+						.then(()=>leo.waitNPCDialog(dialog => {
+							cga.ClickNPCDialog(4, -1);
+							return leo.delay(1000);
+						}))
+						.then(()=>{
+							var newPets = cga.GetPetsInfo();
+							var pet = newPets.find(p=>{
+								return !is_array_contain(oldPetIndexs, p.index);
+							})
+							if(pet.realname == '希特拉'){
+								leo.log('恭喜，得到了'+leo.getPetCalcInfo(pet));
+								getCount[0]++;
+							}
+							if(pet.realname == '萨普地雷'){
+								//leo.log('恭喜，得到了'+leo.getPetCalcInfo(pet));
+								leo.log('可惜，得到了'+leo.getPetCalcInfo(pet)+'，扔');
+								cga.DropPet(pet.index);
+								getCount[1]++;
+							}
+							if(pet.realname == '泰坦巨人'){
+								leo.log('可惜，得到了'+leo.getPetCalcInfo(pet)+'，扔');
+								cga.DropPet(pet.index);
+								getCount[2]++;
+							}
+							if(pet.realname == '托罗帝鸟'){
+								leo.log('可惜，得到了'+leo.getPetCalcInfo(pet)+'，扔');
+								cga.DropPet(pet.index);
+								getCount[3]++;
+							}
+							if(pet.realname == '岩地跑者'){
+								console.log('可惜，得到了'+leo.getPetCalcInfo(pet)+'，扔');
+								cga.DropPet(pet.index);
+								getCount[4]++;
+							}
+							return console.log('战利品：【'+getCount+'】 【希特拉、萨普地雷、泰坦巨人、托罗帝鸟、岩地跑者】');
+						});
+					}
+				}else{
+					console.log('获得了【不可思议的壶】，请手动开奖');
+					return leo.next();
+				}
+			}else{
+				console.log('没有获得【不可思议的壶】');
+				return leo.next();
+			}
+		})
+		.then(()=>{
+			console.log('==========刮奖区==========');
+			console.log();
+		});
+    }
 
     leo.todo()
     .then(() => {
@@ -362,7 +435,7 @@ require('./common').then(cga=>{
 				    var mapInfo = cga.getMapInfo();
 	    			leaderPosX = mapInfo.x;
 	    			leaderPosY = mapInfo.y;
-	    			return leo.delay(3000)
+	    			return leo.delay(5000)
 	    			.then(()=>leo.log('更换队长：'+leader+'=>坐标：'+mapInfo.x+' '+mapInfo.y));
 	    		}else{
 	    			return leo.waitMessageUntil((chat) => {
@@ -484,6 +557,7 @@ require('./common').then(cga=>{
     	})
     	.then(()=>leo.autoWalk([118,249]))
     	.then(()=>leo.talkNpc(0,leo.talkNpcSelectorYes))
-    	.then(()=>leo.log('任务完成，大家辛苦了，有没有拿到壶呢？希特拉在等你哟~！'));
+    	.then(()=>leo.log('任务完成，大家辛苦了，有没有拿到壶呢？希特拉在等你哟~！'))
+    	.then(()=>openPrize());
     });
 });
