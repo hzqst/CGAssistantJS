@@ -54,12 +54,12 @@ require('./common').then(cga => {
                 },false)
             }catch(e){
                 await leo.log('迷宫刷新');
-                await leo.waitUntil(()=>{
+                await leo.waitUntil(async ()=>{
                     var mapInfo = cga.getMapInfo();
                     if (mapInfo.name.indexOf('B1')!=-1) {
                         return true;
                     }
-                    await leo.autoWalk([mapInfo.x,mapInfo.y,'*']);
+                    await leo.autoWalk([mapInfo.x,mapInfo.y,'*'])
                     await leo.delay(2000)
                     return false;
                 })
@@ -106,7 +106,7 @@ require('./common').then(cga => {
         await leo.log('探险专家(贝爷)，完成第' + count + '次')
     }
 
-    while(true){
+    leo.loop(()=>{
         try{
             leo.log('身上已有【签名】数量为【'+cga.getItemCount('签名')+'】');
             task();
@@ -114,6 +114,6 @@ require('./common').then(cga => {
             console.log(leo.logTime()+'任务出错:'+e);
             console.log(leo.logTime()+'重新开始');
         }
-    }
+    })
     
 });
