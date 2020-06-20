@@ -222,7 +222,7 @@ module.exports = new Promise(resolve => {
 		else cga.LogBack();
 		return cga.emogua.delay(2000).then(() => cga.emogua.waitAfterBattle());
 	}).then(() => {
-		if (['法兰城','艾尔莎岛'].indexOf(cga.GetMapName()) < 0) {
+		if (['法兰城','艾尔莎岛','阿凯鲁法村','哥拉尔镇'].indexOf(cga.GetMapName()) < 0) {
 			return cga.emogua.logBack(times + 1);
 		}
 	}).catch(e => {
@@ -2286,7 +2286,7 @@ module.exports = new Promise(resolve => {
 								console.log('BOSS战斗');
 							}
 							if (context.round_count == 1) { // 被偷袭
-								console.log('被偷袭');
+								//console.log('被偷袭');
 								//delay += AutoBattleFirstRoundDelay;
 							}
 						} else if (lastRound === context.round_count) {

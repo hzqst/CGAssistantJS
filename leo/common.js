@@ -1243,6 +1243,13 @@ module.exports = require('./wrapper').then(cga => {
             ]);
         }
     }
+    //从阿凯鲁法村去砍村
+    leo.gotoKan = ()=>{
+        if(cga.GetMapName() == '阿凯鲁法村'){
+            return leo.autoWalk([166,107])
+            .then(()=>leo.talkNpc(0,leo.talkNpcSelectorYes,'坎那贝拉村'));
+        }
+    }
     //切图，带战斗检测
     leo.forceMoveEx = (orientation, times = 1) => {
         if  (times > 0) {
