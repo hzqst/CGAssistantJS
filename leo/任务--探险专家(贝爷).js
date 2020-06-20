@@ -1,5 +1,5 @@
 require('./common').then(cga => {
-    leo.baseInfoPrint();
+    //leo.baseInfoPrint();
     leo.monitor.config.keepAlive = false;   //关闭防掉线
 
     var teamLeader = '队长名称'; //队长名称
@@ -108,6 +108,7 @@ require('./common').then(cga => {
 
     while(true){
         try{
+            leo.log('身上已有【签名】数量为【'+cga.getItemCount('签名')+'】');
             task();
         }catch(e){
             console.log(leo.logTime()+'任务出错:'+e);
