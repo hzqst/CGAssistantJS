@@ -44,33 +44,41 @@ require('./common').then(cga => {
             ])
             await leo.talkNpc(13, 9, leo.talkNpcSelectorYes, '隐秘山道上层')
             await leo.autoWalk([17,9,'隐秘山道上层B1'])
-            try{
-                await leo.walkRandomMazeUntil(() => {
-                        const mn = cga.GetMapName();
-                        if (mn == '山道尽头') {
+            await leo.loop(async ()=>{
+                const mn = cga.GetMapName();
+                if (mn == '山道尽头') {
+                    return leo.reject();
+                }
+                try{
+                    await leo.walkRandomMazeUntil(() => {
+                            const mn = cga.GetMapName();
+                            if (mn == '山道尽头') {
+                                return true;
+                            }
+                            return false;
+                    },false)
+                }catch(e){
+                    await leo.log('迷宫刷新');
+                    await leo.waitUntil(async ()=>{
+                        var mapInfo = cga.getMapInfo();
+                        if (mapInfo.name.indexOf('B1')!=-1) {
                             return true;
                         }
+                        await leo.autoWalk([mapInfo.x,mapInfo.y,'*'])
+                        await leo.delay(2000)
                         return false;
-                },false)
-            }catch(e){
-                await leo.log('迷宫刷新');
-                await leo.waitUntil(async ()=>{
-                    var mapInfo = cga.getMapInfo();
-                    if (mapInfo.name.indexOf('B1')!=-1) {
-                        return true;
-                    }
-                    await leo.autoWalk([mapInfo.x,mapInfo.y,'*'])
-                    await leo.delay(2000)
-                    return false;
-                })
-                await leo.walkRandomMazeUntil(() => {
-                        const mn = cga.GetMapName();
-                        if (mn == '山道尽头') {
-                            return true;
-                        }
-                        return false;
-                },false)
-            }
+                    })
+                    await leo.walkRandomMazeUntil(() => {
+                            const mn = cga.GetMapName();
+                            if (mn == '山道尽头') {
+                                return true;
+                            }
+                            return false;
+                    },false)
+                }
+                await leo.delay(2000)
+            })
+            
             await leo.autoWalk([13,6])
             await leo.talkNpc(13,5,leo.talkNpcSelectorYes)
         }
@@ -101,15 +109,18 @@ require('./common').then(cga => {
                 return false;
             })
         }
+        await leo.delay(1000)
+        await leo.waitAfterBattle()
+        await leo.delay(1000)
         await leo.talkNpc(20,16,leo.talkNpcSelectorYes)
         //await leo.log('探险专家(贝爷)，任务完成')
         await leo.log('探险专家(贝爷)，完成第' + count + '次')
     }
 
-    leo.loop(()=>{
+    leo.loop(async ()=>{
         try{
             leo.log('身上已有【签名】数量为【'+cga.getItemCount('签名')+'】');
-            task();
+            await task();
         }catch(e){
             console.log(leo.logTime()+'任务出错:'+e);
             console.log(leo.logTime()+'重新开始');
