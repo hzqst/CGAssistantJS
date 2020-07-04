@@ -28,7 +28,7 @@ require('./common').then(cga => {
 
     leo.log('红叶の探险专家(贝爷)任务脚本，启动~');
 
-    var count = 0;
+    var count = 1;
     var task = async () => {
         await leo.waitAfterBattle()
         if(cga.GetPlayerInfo().gold < 5000){
@@ -133,11 +133,10 @@ require('./common').then(cga => {
             }
         }else{
             await leo.enterTeamBlock(teamLeader)
-            await leo.waitUntil( async ()=>{
-                await leo.waitAfterBattle()
+            await leo.waitUntil(()=>{
                 var mapInfo = cga.getMapInfo();
                 if (mapInfo.name == '贝尔的隐居地' && mapInfo.indexes.index3 == 57200 && !leo.isInTeam()) {
-                    await leo.talkNpc(20,16,leo.talkNpcSelectorYes)
+                    leo.talkNpc(20,16,leo.talkNpcSelectorYes)
                 }
                 if (mapInfo.name == '法兰城' || mapInfo.name == '艾尔莎岛'){
                     return true;
