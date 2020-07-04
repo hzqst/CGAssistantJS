@@ -14,6 +14,7 @@ require('./common').then(cga => {
         minAttack: 29,
         minDefensive: 38,
         minAgility: 33,
+        index: 1,
         petChecker: () => {
             var pets = cga.GetPetsInfo();
             //console.log(leo.logTime()+'宠物数量：'+pets.length);
@@ -66,7 +67,16 @@ require('./common').then(cga => {
     const sets = [];
     sets.push({
         user: 1, //1-人 2-宠 3-人宠 4-人二动 5-人一动和二动
-        check: context => context.enemies.find(e => e.level == 1 && e.name == petOptions.name && e.maxhp >= petOptions.minHp && e.maxmp >= petOptions.minMp ) && cga.getInventoryItems().find(i => i.name == petOptions.sealCardName),
+        check: context => {
+            if (context.isFirstBattleAction && context.enemies.lv1 && context.enemies.lv1.length > 0){
+                leo.isCatchPet(context.enemies.lv1,petOptions);
+            }
+            return context.enemies.find(e => e.level == 1 
+                && e.name == petOptions.name 
+                && e.maxhp >= petOptions.minHp 
+                && e.maxmp >= petOptions.minMp ) 
+            && cga.getInventoryItems().find(i => i.name == petOptions.sealCardName);
+        },
         type: '物品',
         item: context => cga.getInventoryItems().find(i => i.name == petOptions.sealCardName).pos,
         targets: context => [context.enemies.find(e => e.level == 1 && e.name == petOptions.name).pos]
@@ -79,7 +89,7 @@ require('./common').then(cga => {
     });
     sets.push({
         user: 2,
-        check: context => context.enemies.find(e => e.level == 1 && e.name == petOptions.name) && cga.getInventoryItems().find(i => i.name == petOptions.sealCardName),
+        check: context => context.enemies.find(e => e.level == 1 && e.name == petOptions.name && e.curhp == e.maxhp) && cga.getInventoryItems().find(i => i.name == petOptions.sealCardName),
         skillName: '陨石魔法-Ⅰ',
         targets: context => [context.enemies.find(e => e.level == 1 && e.name == petOptions.name).pos]
     });

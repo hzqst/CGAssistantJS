@@ -1,0 +1,103 @@
+{
+    "battle": {
+        "autobattle": true,
+        "bossprot": false,
+        "delayfrom": 4000,
+        "delayto": 4500,
+        "highspeed": true,
+        "list": [
+            {
+                "condition": 0,
+                "condition2": 12,
+                "condition2rel": 0,
+                "condition2val": "饥饿的贝尔",
+                "conditionrel": 0,
+                "conditionval": "",
+                "index": 0,
+                "petaction": 100,
+                "petskillname": "攻击",
+                "pettarget": 0,
+                "pettargetsel": 4,
+                "playeraction": 1,
+                "playertarget": 0,
+                "playertargetsel": 4
+            },
+            {
+                "condition": 0,
+                "condition2": 0,
+                "condition2rel": 0,
+                "condition2val": "",
+                "conditionrel": 0,
+                "conditionval": "",
+                "index": 1,
+                "petaction": 100,
+                "petskillname": "防御",
+                "pettarget": 0,
+                "pettargetsel": 4,
+                "playeraction": 3,
+                "playertarget": -1,
+                "playertargetsel": -1
+            }
+        ],
+        "lockcd": false,
+        "lv1prot": false,
+        "pet2action": true,
+        "playerforceaction": false,
+        "r1nodelay": true,
+        "showhpmp": false
+    },
+    "chat": {
+        "displayname": false,
+        "displaytime": false,
+        "mychat": false,
+        "npcmsg": false,
+        "playerchat": false,
+        "sysmsg": false,
+        "todayonly": true
+    },
+    "itemdroplist": [
+        "地的水晶碎片",
+        "水的水晶碎片",
+        "火的水晶碎片",
+        "风的水晶碎片",
+        "卡片？",
+        "巨石",
+        "绿头盔",
+        "星之砂",
+        "秘文之皮",
+        "奇香木",
+        "坚硬的鳞片",
+        "龙角",
+        "魔石"
+    ],
+    "itemidmap": {
+    },
+    "itemtweaklist": [
+        "地的水晶碎片|999",
+        "水的水晶碎片|999",
+        "火的水晶碎片|999",
+        "风的水晶碎片|999",
+        "神之金|20",
+        "龙角|20",
+        "隐秘的徽记（地）|20",
+        "隐秘的徽记（水）|20",
+        "隐秘的徽记（火）|20",
+        "隐秘的徽记（风）|20",
+        "阿尔卡迪亚古钱|999",
+        "魔族的水晶|5",
+        "钢骑之矿|5",
+        "德特家的布|5",
+        "誓言之证|5",
+        "能量结晶|99",
+        "巨石|20",
+        "长老之证|7",
+        "签名|999"
+    ],
+    "player": {
+        "autosupply": true,
+        "movespd": 300,
+        "noswitchanim": false,
+        "workacc": 100,
+        "workdelay": 6500
+    }
+}

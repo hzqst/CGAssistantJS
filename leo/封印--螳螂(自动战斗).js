@@ -5,15 +5,15 @@ require('./common').then(cga => {
     var petIndexMap = {};
     //宠物目标属性值：血、魔、攻、防、敏
     var petOptions = {
-        name: '大地鼠',
-        sealCardName: '封印卡（野兽系)',
+        name: '螳螂',
+        sealCardName: '封印卡（昆虫系）',
         sealCardLevel: 1,
         autoDropPet: true, //是否自动扔宠，true扔/false不扔
-        minHp: 76 - 3,
-        minMp: 121 - 3,
-        minAttack: 32,
-        minDefensive: 37,
-        minAgility: 33,
+        minHp: 101 - 3,
+        minMp: 89 - 3,
+        minAttack: 49,
+        minDefensive: 40,
+        minAgility: 35,
         index: 1,
         petChecker: () => {
             var pets = cga.GetPetsInfo();
@@ -52,26 +52,6 @@ require('./common').then(cga => {
         checker: petOptions.petChecker
     };
 
-    //技能设置
-    //参数check 如果
-    //context.round_count === 0 第一回合
-    //context.enemies.length 敌人数量
-    //context.enemies.front.length 敌人前排数量
-    //context.enemies.back.length 敌人后排数量
-    //context.enemies.find(e => e.curhp > 0 && e.maxhp >= 15000) 还活着的血上限大于15000
-    //e.name 怪物种类名称
-    //e.pos 怪物的位置
-// { name: '迷你蝙蝠',
-//   level: 3,
-//   modelid: 101242,
-//   curhp: 107,
-//   maxhp: 107,
-//   curmp: 116,
-//   maxmp: 116,
-//   pos: 15,
-//   flags: 201326592,
-//   hpRatio: 1 }
-
     //参数targets 对象
     //targets: context => context.enemies.sort((a, b) => b.curhp - a.curhp).map(u => u.pos) 当前血多优先
     const sets = [];
@@ -100,7 +80,7 @@ require('./common').then(cga => {
     sets.push({
         user: 2,
         check: context => context.enemies.find(e => e.level == 1 && e.name == petOptions.name && e.curhp == e.maxhp) && cga.getInventoryItems().find(i => i.name == petOptions.sealCardName),
-        skillName: '陨石魔法-Ⅰ',
+        skillName: '火焰魔法-Ⅰ',
         targets: context => [context.enemies.find(e => e.level == 1 && e.name == petOptions.name).pos]
     });
     sets.push({
@@ -155,7 +135,7 @@ require('./common').then(cga => {
     }).then(() => {
         //招魂、治疗、补血、卖石
         if (isPrepare) {
-            return leo.logBack().then(() => leo.prepare(prepareOptions));
+           return leo.logBack().then(() => leo.prepare(prepareOptions));
         } else {
             return leo.next();
         }
@@ -201,24 +181,24 @@ require('./common').then(cga => {
                 //判断是否要购买封印卡
                 var sealCardCount = cga.getItemCount(petOptions.sealCardName);
                 if (sealCardCount < 2) {
-                    return leo.buySealCard(petOptions.sealCardName, 10, petOptions.sealCardLevel);
+                    return leo.buySealCard(petOptions.sealCardName, 20, petOptions.sealCardLevel);
                 }
             }).then(() => {
                 //地图判断，如果已经在1级宠捕捉点，则继续捕捉
                 var currentMap = cga.GetMapName();
-                if (currentMap == '芙蕾雅') {
+                if (currentMap == '索奇亚') {
                     return leo.autoWalkList([
-                        [237,203],
-                        [235,203]
+                        [290, 216],
+                        [292, 214]
                     ]);
                 } else {
                     return leo.todo()
                     .then(()=>leo.sellCastle())
                     .then(() => leo.checkHealth(prepareOptions.doctorName))
                     .then(() => leo.checkCrystal(prepareOptions.crystalName))
-                    .then(() => leo.goto(n => n.falan.wout))
-                    .then(() => leo.autoWalkList([
-                        [235,203]
+                    .then(() => leo.goto(n => n.teleport.kili)).then(() => leo.autoWalkList([
+                        [60, 45, '索奇亚'],
+                        [292, 214]
                     ]));
                 }
             }).then(() => {

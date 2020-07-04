@@ -5,15 +5,15 @@ require('./common').then(cga => {
     var petIndexMap = {};
     //宠物目标属性值：血、魔、攻、防、敏
     var petOptions = {
-        name: '大地鼠',
-        sealCardName: '封印卡（野兽系)',
+        name: '水龙蜥',
+        sealCardName: '封印卡（龙系）',
         sealCardLevel: 1,
         autoDropPet: true, //是否自动扔宠，true扔/false不扔
-        minHp: 76 - 3,
-        minMp: 121 - 3,
-        minAttack: 32,
-        minDefensive: 37,
-        minAgility: 33,
+        minHp: 128 - 3,
+        minMp: 76 - 3,
+        minAttack: 46,
+        minDefensive: 46,
+        minAgility: 29,
         index: 1,
         petChecker: () => {
             var pets = cga.GetPetsInfo();
@@ -51,26 +51,6 @@ require('./common').then(cga => {
         maxPetNumber: 4, //超过4只宠物
         checker: petOptions.petChecker
     };
-
-    //技能设置
-    //参数check 如果
-    //context.round_count === 0 第一回合
-    //context.enemies.length 敌人数量
-    //context.enemies.front.length 敌人前排数量
-    //context.enemies.back.length 敌人后排数量
-    //context.enemies.find(e => e.curhp > 0 && e.maxhp >= 15000) 还活着的血上限大于15000
-    //e.name 怪物种类名称
-    //e.pos 怪物的位置
-// { name: '迷你蝙蝠',
-//   level: 3,
-//   modelid: 101242,
-//   curhp: 107,
-//   maxhp: 107,
-//   curmp: 116,
-//   maxmp: 116,
-//   pos: 15,
-//   flags: 201326592,
-//   hpRatio: 1 }
 
     //参数targets 对象
     //targets: context => context.enemies.sort((a, b) => b.curhp - a.curhp).map(u => u.pos) 当前血多优先
@@ -121,7 +101,7 @@ require('./common').then(cga => {
     var prepareOptions = {
         rechargeFlag: 1,
         repairFlag: -1,
-        crystalName: '火风的水晶（5：5）',
+        crystalName: '风地的水晶（5：5）',
         doctorName: '医道之殇'
     };
     leo.log('红叶の自动抓【' + petOptions.name + '】存银行脚本，启动~');
@@ -155,7 +135,7 @@ require('./common').then(cga => {
     }).then(() => {
         //招魂、治疗、补血、卖石
         if (isPrepare) {
-            return leo.logBack().then(() => leo.prepare(prepareOptions));
+           return leo.logBack().then(() => leo.prepare(prepareOptions));
         } else {
             return leo.next();
         }
@@ -197,33 +177,42 @@ require('./common').then(cga => {
                         });
                     }
                 }
-            }).then(() => {
+            })
+            .then(() => {
                 //判断是否要购买封印卡
                 var sealCardCount = cga.getItemCount(petOptions.sealCardName);
                 if (sealCardCount < 2) {
-                    return leo.buySealCard(petOptions.sealCardName, 10, petOptions.sealCardLevel);
+                    return leo.buySealCard(petOptions.sealCardName, 20, petOptions.sealCardLevel);
                 }
-            }).then(() => {
+            })
+            .then(() => {
                 //地图判断，如果已经在1级宠捕捉点，则继续捕捉
                 var currentMap = cga.GetMapName();
-                if (currentMap == '芙蕾雅') {
+                if (currentMap == '索奇亚海底洞窟 地下2楼') {
                     return leo.autoWalkList([
-                        [237,203],
-                        [235,203]
+                        [49, 6],
+                        [49, 8]
                     ]);
                 } else {
                     return leo.todo()
                     .then(()=>leo.sellCastle())
                     .then(() => leo.checkHealth(prepareOptions.doctorName))
                     .then(() => leo.checkCrystal(prepareOptions.crystalName))
-                    .then(() => leo.goto(n => n.falan.wout))
-                    .then(() => leo.autoWalkList([
-                        [235,203]
+                    .then(() => leo.goto(n => n.teleport.vinoy)).then(() => leo.autoWalkList([
+                        [67, 46, '芙蕾雅'],
+                        [343, 497, '索奇亚海底洞窟 地下1楼'],
+                        [18, 34, '索奇亚海底洞窟 地下2楼'],
+                        [49, 8]
                     ]));
                 }
             }).then(() => {
                 leo.log('到达位置，开始抓宠，请注意是否开启了自动扔宠物。');
-                return leo.encounterTeamLeader(protect).then(() => {
+                return leo.encounterTeamLeader(protect)
+                .then(() => {
+                    petOptions.petChecker();
+                    return leo.next();
+                })
+                .then(() => {
                     console.log(leo.logTime() + "触发回补");
                     return leo.logBack().then(() => leo.prepare(prepareOptions));
                 });

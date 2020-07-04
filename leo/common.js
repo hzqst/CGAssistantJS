@@ -1,6 +1,6 @@
 module.exports = require('./wrapper').then(cga => {
     global.leo = cga.emogua;
-    leo.version = '2.3';
+    leo.version = '2.5';
     leo.qq = '158583461'
     leo.copyright = '红叶散落';
     leo.FORMAT_DATE = 'yyyy-MM-dd';
@@ -921,6 +921,17 @@ module.exports = require('./wrapper').then(cga => {
     leo.getPetCalcInfo = (pet, split = 'x') => {
         return '【LV' + pet.level + '】【' + pet.realname + '】【 ' + pet.maxhp + split + pet.maxmp + split + pet.detail.value_attack + split + pet.detail.value_defensive + split + pet.detail.value_agility + ' 】';
     }
+    //是否要抓宠，用于自动战斗抓宠过滤
+    leo.isCatchPet = (enemies, petOptions) => {
+        var flag = false;
+        enemies.forEach(e => {
+            flag = (e.maxhp >= petOptions.minHp && e.maxmp >= petOptions.minMp);
+            var flagStr = flag?'，抓！':'';
+            console.log(leo.logTime()+'第【'+(petOptions.index++)+'】只1级怪:【' + e.name + '】【' + e.maxhp + '('+petOptions.minHp+')/' + e.maxmp + '('+petOptions.minMp+')】'+flagStr);
+        });
+        return flag;
+    }
+
     //随机遇敌(队长用)
     leo.encounterTeamLeader = leo.encounter;
     //随机遇敌(队员用)
@@ -957,7 +968,7 @@ module.exports = require('./wrapper').then(cga => {
     }
     //获取人物的声望称号
     leo.getPlayerSysTitle = (titles) => {
-		var sysTitles = ['无名的旅人','树旁的落叶','水面上的小草','呢喃的歌声','地上的月影','奔跑的春风','苍之风云','摇曳的金星','欢喜的慈雨','蕴含的太阳','敬畏的寂静','无尽星空'];
+		var sysTitles = ['恶人','受忌讳的人','受挫折的人','无名的旅人','树旁的落叶','水面上的小草','呢喃的歌声','地上的月影','奔跑的春风','苍之风云','摇曳的金星','欢喜的慈雨','蕴含的太阳','敬畏的寂静','无尽星空','迈步前进者','追求技巧的人','刻于新月之铭','掌上的明珠','敬虔的技巧','踏入神的领域','贤者','神匠','摘星的技巧','万物创造者','持石之贤者'];
 		for(var i in titles){
 			for(var j in sysTitles){
 				if(titles[i] == sysTitles[j]){
@@ -1409,6 +1420,6 @@ module.exports = require('./wrapper').then(cga => {
         }
     };
     leo.monitor.keepAlive();    //启动防掉线循环
-    leo.monitor.config.monitorLoop(); //启动监控
+    setTimeout(leo.monitor.config.monitorLoop, 5000);//启动监控
     return cga;
 });

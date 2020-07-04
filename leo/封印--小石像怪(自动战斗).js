@@ -5,15 +5,15 @@ require('./common').then(cga => {
     var petIndexMap = {};
     //宠物目标属性值：血、魔、攻、防、敏
     var petOptions = {
-        name: '大地鼠',
-        sealCardName: '封印卡（野兽系)',
+        name: '小石像怪',
+        sealCardName: '封印卡（飞行系）',
         sealCardLevel: 1,
         autoDropPet: true, //是否自动扔宠，true扔/false不扔
-        minHp: 76 - 3,
-        minMp: 121 - 3,
-        minAttack: 32,
-        minDefensive: 37,
-        minAgility: 33,
+        minHp: 91 - 3,
+        minMp: 107 - 3,
+        minAttack: 37,
+        minDefensive: 33,
+        minAgility: 35,
         index: 1,
         petChecker: () => {
             var pets = cga.GetPetsInfo();
@@ -100,7 +100,7 @@ require('./common').then(cga => {
     sets.push({
         user: 2,
         check: context => context.enemies.find(e => e.level == 1 && e.name == petOptions.name && e.curhp == e.maxhp) && cga.getInventoryItems().find(i => i.name == petOptions.sealCardName),
-        skillName: '陨石魔法-Ⅰ',
+        skillName: '火焰魔法-Ⅰ',
         targets: context => [context.enemies.find(e => e.level == 1 && e.name == petOptions.name).pos]
     });
     sets.push({
@@ -206,19 +206,15 @@ require('./common').then(cga => {
             }).then(() => {
                 //地图判断，如果已经在1级宠捕捉点，则继续捕捉
                 var currentMap = cga.GetMapName();
-                if (currentMap == '芙蕾雅') {
+                if (currentMap == '灵堂') {
                     return leo.autoWalkList([
-                        [237,203],
-                        [235,203]
+                        [30,51],
+                        [30,49]
                     ]);
                 } else {
-                    return leo.todo()
-                    .then(()=>leo.sellCastle())
-                    .then(() => leo.checkHealth(prepareOptions.doctorName))
-                    .then(() => leo.checkCrystal(prepareOptions.crystalName))
-                    .then(() => leo.goto(n => n.falan.wout))
-                    .then(() => leo.autoWalkList([
-                        [235,203]
+                    return leo.goto(n => n.castle.x)
+                    .then(()=>leo.autoWalkList([
+                        [47,85,'召唤之间'],[27,8,'回廊'],[23,19,'灵堂'],[30,49]
                     ]));
                 }
             }).then(() => {

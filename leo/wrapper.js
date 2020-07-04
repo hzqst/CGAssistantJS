@@ -2176,6 +2176,8 @@ module.exports = new Promise(resolve => {
 		);
 		context.enemies.front = context.enemies.filter(e => context.isFront(e.pos));
 		context.enemies.back = context.enemies.filter(e => !context.isFront(e.pos));
+		//1级宠信息
+		context.enemies.lv1 = context.enemies.filter(e => e.level == 1);
 		context.teammates = context.units.filter(e =>
 			(context.player_pos > 9 && e.pos > 9) ||
 			(context.player_pos <= 9 && e.pos <= 9)
@@ -2283,7 +2285,7 @@ module.exports = new Promise(resolve => {
 							isBossBattle = (cga.GetBGMIndex() == 14);
 							delay = AutoBattleFirstRoundDelay;
 							if (isBossBattle) {
-								console.log('BOSS战斗');
+								//console.log('BOSS战斗');
 							}
 							if (context.round_count == 1) { // 被偷袭
 								//console.log('被偷袭');
@@ -2296,6 +2298,7 @@ module.exports = new Promise(resolve => {
 						if (delay > 0) setTimeout(() => battle(state, context), delay);
 						else battle(state, context);
 						lastRound = context.round_count;
+						context.isFirstBattleAction = isFirstBattleAction;
 						//console.log(context);
 					}
 					isFirstBattleAction = false;

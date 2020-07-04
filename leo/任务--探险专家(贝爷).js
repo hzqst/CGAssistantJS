@@ -6,6 +6,10 @@ require('./common').then(cga => {
     var teamPlayerCount = 5; //队伍人数
     var teammates = [];
 
+    var isSaveBank = true; //签名存银行
+    var isEquipLv1 = true; //买平民装
+    var weaponName = '';//武器(不填则不买)
+
     cga.EnableFlags(cga.ENABLE_FLAG_TEAMCHAT, true); //开启队聊
     cga.EnableFlags(cga.ENABLE_FLAG_JOINTEAM, true); //开启组队
     var prepareOptions = {
@@ -27,10 +31,33 @@ require('./common').then(cga => {
     var count = 0;
     var task = async () => {
         await leo.waitAfterBattle()
+        if(cga.GetPlayerInfo().gold < 5000){
+            await leo.goto(n=>n.falan.bank)
+            await leo.turnDir(0)
+            await leo.moveGold(100000,cga.MOVE_GOLD_FROMBANK)
+            if(cga.GetPlayerInfo().gold < 5000){
+                await leo.log('钱到用时方恨少！请补充足够银子后重新执行脚本！')
+                await leo.delay(10000000);
+                return;
+            }
+        }
+        if(cga.getItemCount('签名')>=999 && isSaveBank){
+            await leo.goto(n=>n.falan.bank)
+            await leo.turnDir(0)
+            await leo.saveToBankAll('签名')
+            if(cga.getItemCount('签名')>=999){
+                await leo.log('银行的空间不足，请清理银行后重新执行脚本！')
+                await leo.delay(10000000);
+                return;
+            }
+        }
         if(cga.getItemCount('贝尔的军刀')==0){
             await leo.logBack()
             await leo.checkHealth(prepareOptions.doctorName)
             await leo.checkCrystal(prepareOptions.crystalName)
+            if(isEquipLv1){
+                await leo.autoEquipLv1(weaponName);
+            }
             await leo.goto(n=>n.castle.x)
             await leo.autoWalk([52,22])
             await leo.talkNpc(53, 22, leo.talkNpcSelectorYes)
@@ -64,6 +91,7 @@ require('./common').then(cga => {
                         if (mapInfo.name.indexOf('B1')!=-1) {
                             return true;
                         }
+                        await leo.delay(2000)
                         await leo.autoWalk([mapInfo.x,mapInfo.y,'*'])
                         await leo.delay(2000)
                         return false;
@@ -83,6 +111,7 @@ require('./common').then(cga => {
             await leo.talkNpc(13,5,leo.talkNpcSelectorYes)
         }
         await leo.logBack()
+        await leo.checkHealth(prepareOptions.doctorName)
         await leo.supplyCastle()
         await leo.goto(n=>n.castle.x)
         await leo.autoWalk([52,22])
@@ -114,7 +143,7 @@ require('./common').then(cga => {
         await leo.delay(1000)
         await leo.talkNpc(20,16,leo.talkNpcSelectorYes)
         //await leo.log('探险专家(贝爷)，任务完成')
-        await leo.log('探险专家(贝爷)，完成第' + count + '次')
+        await leo.log('探险专家(贝爷)，完成第' + (count++) + '次')
     }
 
     leo.loop(async ()=>{
