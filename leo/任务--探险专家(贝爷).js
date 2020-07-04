@@ -127,21 +127,24 @@ require('./common').then(cga => {
             var mapInfo = cga.getMapInfo();
             if (mapInfo.name == '贝尔的隐居地' && mapInfo.indexes.index3 == 57199) {
                 console.log(leo.logTime()+'翻车，没有打过贝爷！');
+                return;
+            }else{
+                await leo.talkNpc(20,16,leo.talkNpcSelectorYes)
             }
         }else{
             await leo.enterTeamBlock(teamLeader)
-            await leo.waitUntil(()=>{
+            await leo.waitUntil( async ()=>{
+                await leo.waitAfterBattle()
                 var mapInfo = cga.getMapInfo();
-                if (mapInfo.name == '贝尔的隐居地' && mapInfo.indexes.index3 == 57200) {
+                if (mapInfo.name == '贝尔的隐居地' && mapInfo.indexes.index3 == 57200 && !leo.isInTeam()) {
+                    await leo.talkNpc(20,16,leo.talkNpcSelectorYes)
+                }
+                if (mapInfo.name == '法兰城' || mapInfo.name == '艾尔莎岛'){
                     return true;
                 }
                 return false;
             })
         }
-        await leo.delay(1000)
-        await leo.waitAfterBattle()
-        await leo.delay(1000)
-        await leo.talkNpc(20,16,leo.talkNpcSelectorYes)
         //await leo.log('探险专家(贝爷)，任务完成')
         await leo.log('探险专家(贝爷)，完成第' + (count++) + '次')
     }
