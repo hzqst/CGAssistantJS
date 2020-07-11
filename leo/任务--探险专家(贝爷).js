@@ -35,6 +35,10 @@ require('./common').then(cga => {
             await leo.goto(n=>n.falan.bank)
             await leo.turnDir(0)
             await leo.moveGold(100000,cga.MOVE_GOLD_FROMBANK)
+            await leo.moveGold(100000,cga.MOVE_GOLD_FROMBANK)
+            await leo.moveGold(100000,cga.MOVE_GOLD_FROMBANK)
+            await leo.moveGold(100000,cga.MOVE_GOLD_FROMBANK)
+            await leo.moveGold(100000,cga.MOVE_GOLD_FROMBANK)
             if(cga.GetPlayerInfo().gold < 5000){
                 await leo.log('钱到用时方恨少！请补充足够银子后重新执行脚本！')
                 await leo.delay(10000000);
@@ -70,43 +74,33 @@ require('./common').then(cga => {
                 [14, 68, 14000],[13, 11]
             ])
             await leo.talkNpc(13, 9, leo.talkNpcSelectorYes, '隐秘山道上层')
-            await leo.autoWalk([17,9,'隐秘山道上层B1'])
             await leo.loop(async ()=>{
-                const mn = cga.GetMapName();
-                if (mn == '山道尽头') {
-                    return leo.reject();
-                }
                 try{
+                    await leo.waitAfterBattle()
+                    var mapInfo = cga.getMapInfo();
+                    if(mapInfo.name == '山道尽头'){
+                        return leo.reject();
+                    }
+                    if(mapInfo.name == '隐秘山道上层'){
+                        await leo.autoWalk([17,9,'隐秘山道上层B1'])
+                    }else if(mapInfo.name == '隐秘山道中层'){
+                        await leo.autoWalk([8,4,'隐秘山道中层B1'])
+                    }else if(mapInfo.name == '隐秘山道下层'){
+                        await leo.autoWalk([15,10,'隐秘山道下层B1'])
+                    }
                     await leo.walkRandomMazeUntil(() => {
-                            const mn = cga.GetMapName();
-                            if (mn == '山道尽头') {
+                            const name = cga.GetMapName();
+                            if (name.indexOf('B')==-1) {
                                 return true;
                             }
                             return false;
                     },false)
+
                 }catch(e){
                     await leo.log('迷宫刷新');
-                    await leo.waitUntil(async ()=>{
-                        var mapInfo = cga.getMapInfo();
-                        if (mapInfo.name.indexOf('B1')!=-1) {
-                            return true;
-                        }
-                        await leo.delay(2000)
-                        await leo.autoWalk([mapInfo.x,mapInfo.y,'*'])
-                        await leo.delay(2000)
-                        return false;
-                    })
-                    await leo.walkRandomMazeUntil(() => {
-                            const mn = cga.GetMapName();
-                            if (mn == '山道尽头') {
-                                return true;
-                            }
-                            return false;
-                    },false)
+                    await leo.delay(10000);
                 }
-                await leo.delay(2000)
             })
-            
             await leo.autoWalk([13,6])
             await leo.talkNpc(13,5,leo.talkNpcSelectorYes)
         }
@@ -129,7 +123,8 @@ require('./common').then(cga => {
                 console.log(leo.logTime()+'翻车，没有打过贝爷！');
                 return;
             }else{
-                await leo.talkNpc(20,16,leo.talkNpcSelectorYes)
+                await leo.delay(1000)
+                await leo.talkNpc(20,16,leo.talkNpcSelectorYes,'法兰城')
             }
         }else{
             await leo.enterTeamBlock(teamLeader)
