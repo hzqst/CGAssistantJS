@@ -3,14 +3,15 @@ require('./common').then(cga => {
     leo.monitor.config.keepAlive = false;   //关闭防掉线
     leo.monitor.config.keepAlive = false;   //关闭防掉线
     leo.monitor.config.logStatus = false;
-    var teamLeader = '队长名称'; //队长名称
+    var teamLeader = '红花落雨映山空℡'; //队长名称
     var teamPlayerCount = 5; //队伍人数
-    var level = 1;  //指定楼层
+    var level = 9;  //指定楼层
+    var usingpunchclock = false; //是否打卡
     var protect = {
         minHp: 500,
         minMp: 100,
         minPetHp: 150,
-        minPetMp: 0,
+        minPetMp: 100,
         //maxItemNumber: 19,
         minTeamNumber: 5,
         normalNurse: false
@@ -80,7 +81,7 @@ require('./common').then(cga => {
             .then(() => {
                 //检查是否满魔币
                 var playerinfo = cga.GetPlayerInfo();
-                if (playerinfo.gold >= 1000000) {
+                if (playerinfo.gold >= 990000) {
                     leo.log('钱包快满了：' + playerinfo.gold + '去银行存钱');
                     return leo.goto(n => n.falan.bank)
                     .then(()=>leo.turnDir(0))
@@ -113,7 +114,15 @@ require('./common').then(cga => {
                     return leo.next();
                 } else {
                     console.log(leo.logTime() + '寻找队伍');
-                    return leo.goto(n => n.camp.x).then(() => {
+                    return leo.todo()
+                    .then(()=>{
+                        if(usingpunchclock){
+                            return leo.goto(n => n.castle.clock)
+                            .then(()=>leo.talkNpc(2,leo.talkNpcSelectorYes));
+                        }
+                    })
+                    .then(()=>leo.goto(n => n.camp.x))
+                    .then(() => {
                         if (isTeamLeader) {
                             cga.EnableFlags(cga.ENABLE_FLAG_JOINTEAM, true); //开启组队
                             return leo.autoWalk(meetingPointTeamLeader[meetingPoint - 1]).then(() => leo.buildTeam(teamPlayerCount)).then(() => {

@@ -897,12 +897,15 @@ module.exports = new Promise(resolve => {
 	 * 返回
 	 *     true 银行已没有指定物品
 	 */
-	cga.emogua.getFromBank = (filter) => {
-		const bankList = cga.GetBankItemsInfo().filter(e => {
+	cga.emogua.getFromBank = (filter,count = 100) => {
+		let bankList = cga.GetBankItemsInfo().filter(e => {
 			if (typeof filter == 'string') return e.name == filter || e.itemid == filter;
 			else if (typeof filter == 'function') return filter(e);
 			else return !filter;
 		});
+		if(bankList.length>count){
+			bankList = bankList.slice(0,count);
+		}
 		const items = cga.getInventoryItems();
 		let bankListIndex = 0;
 		let result = Promise.resolve();

@@ -2,13 +2,14 @@ require('./common').then(cga => {
     leo.baseInfoPrint();
     leo.monitor.config.keepAlive = false;   //关闭防掉线
     leo.logStatus = false;
-    var teamLeader = '队长名称'; //队长名称
+    var teamLeader = '红花落雨映山空℡'; //队长名称
     var teamPlayerCount = 5; //队伍人数
+    var usingpunchclock = false; //是否打卡
     var protect = {
         minHp: 500,
         minMp: 100,
         minPetHp: 150,
-        minPetMp: 0,
+        minPetMp: 100,
         maxItemNumber: 19,
         minTeamNumber: 5,
         normalNurse: false
@@ -74,6 +75,33 @@ require('./common').then(cga => {
             .then(() => leo.checkHealth(prepareOptions.doctorName))
             .then(() => leo.checkCrystal(prepareOptions.crystalName))
             .then(() => {
+                //检查是否满魔币
+                var playerinfo = cga.GetPlayerInfo();
+                if (playerinfo.gold >= 990000) {
+                    leo.log('钱包快满了：' + playerinfo.gold + '去银行存钱');
+                    return leo.goto(n => n.falan.bank)
+                    .then(()=>leo.turnDir(0))
+                    .then(()=>leo.moveGold(100000,cga.MOVE_GOLD_TOBANK))
+                    .then(()=>leo.moveGold(100000,cga.MOVE_GOLD_TOBANK))
+                    .then(()=>leo.moveGold(100000,cga.MOVE_GOLD_TOBANK))
+                    .then(()=>leo.moveGold(100000,cga.MOVE_GOLD_TOBANK))
+                    .then(()=>leo.moveGold(100000,cga.MOVE_GOLD_TOBANK))
+                    .then(()=>leo.moveGold(100000,cga.MOVE_GOLD_TOBANK))
+                    .then(()=>leo.moveGold(100000,cga.MOVE_GOLD_TOBANK))
+                    .then(()=>leo.moveGold(100000,cga.MOVE_GOLD_TOBANK))
+                    .then(()=>leo.moveGold(100000,cga.MOVE_GOLD_TOBANK))
+                    .then(()=>{
+                        playerinfo = cga.GetPlayerInfo();
+                        if(playerinfo.gold >= 900000){
+                            leo.log('钱包满了，银行也放不下了，脚本结束');
+                            return leo.reject();
+                        }else{
+                            return leo.next();
+                        }
+                    });
+                }
+            })
+            .then(() => {
                 //完成组队
                 var teamplayers = cga.getTeamPlayers();
                 if ((isTeamLeader && teamplayers.length >= protect.minTeamNumber)
@@ -82,7 +110,15 @@ require('./common').then(cga => {
                     return leo.next();
                 } else {
                     console.log(leo.logTime() + '寻找队伍');
-                    return leo.goto(n => n.camp.x).then(() => {
+                    return leo.todo()
+                    .then(()=>{
+                        if(usingpunchclock){
+                            return leo.goto(n => n.castle.clock)
+                            .then(()=>leo.talkNpc(2,leo.talkNpcSelectorYes));
+                        }
+                    })
+                    .then(()=>leo.goto(n => n.camp.x))
+                    .then(() => {
                         if (isTeamLeader) {
                             cga.EnableFlags(cga.ENABLE_FLAG_JOINTEAM, true); //开启组队
                             return leo.autoWalk(meetingPointTeamLeader[meetingPoint - 1]).then(() => leo.buildTeam(teamPlayerCount)).then(() => {

@@ -13,7 +13,7 @@ require('./common').then(cga=>{
 		return;
 	}
 	if(skill.lv<skillLevel){
-		console.error('提示：挖矿技能等级不足，至少要8级技能！');
+		console.error('提示：挖矿技能等级不足，至少要'+skillLevel+'级技能！');
 		return;
 	}
 
@@ -63,9 +63,9 @@ require('./common').then(cga=>{
 		});
 	}
 
-    leo.loop(()=>{
+    leo.loop(async ()=>{
         try{
-            main();
+           await main();
         }catch(e){
             console.log(leo.logTime()+'出错，重新开始：', e);
         }

@@ -81,7 +81,10 @@ module.exports = require('./wrapper').then(cga => {
         console.log('健康： ' + petinfo.health);
         //宠物信息
         console.log('宠物信息： ');
-        var pets = cga.GetPetsInfo();
+        leo.petInfoPrint();
+    }
+    //打印宠物信息
+    leo.petInfoPrint = (pets = cga.GetPetsInfo()) => {
         for (var i in pets) {
             var pet = pets[i];
             var index = parseInt(pet.index) + 1;
@@ -325,7 +328,7 @@ module.exports = require('./wrapper').then(cga => {
                 cga.ClickNPCDialog(-1, 6);
                 return false;
             }))
-            .then(() => leo.done());
+            .then(() => leo.logBack());
         }else{
             return leo.done();
         }
@@ -921,15 +924,19 @@ module.exports = require('./wrapper').then(cga => {
     leo.getPetCalcInfo = (pet, split = 'x') => {
         return '【LV' + pet.level + '】【' + pet.realname + '】【 ' + pet.maxhp + split + pet.maxmp + split + pet.detail.value_attack + split + pet.detail.value_defensive + split + pet.detail.value_agility + ' 】';
     }
-    //是否要抓宠，用于自动战斗抓宠过滤
-    leo.isCatchPet = (enemies, petOptions) => {
-        var flag = false;
+    //打印遇敌的1级宠信息，用于自动战斗抓宠过滤
+    leo.isCatchPet = (enemies, petOptions,isNameOnly = false) => {
         enemies.forEach(e => {
-            flag = (e.maxhp >= petOptions.minHp && e.maxmp >= petOptions.minMp);
-            var flagStr = flag?'，抓！':'';
-            console.log(leo.logTime()+'第【'+(petOptions.index++)+'】只1级怪:【' + e.name + '】【' + e.maxhp + '('+petOptions.minHp+')/' + e.maxmp + '('+petOptions.minMp+')】'+flagStr);
+            var isPrint = true;
+            if(isNameOnly){
+                isPrint = e.name == petOptions.name;
+            }
+            if(isPrint){
+                var flag = (e.maxhp >= petOptions.minHp && e.maxmp >= petOptions.minMp)
+                var flagStr = flag?'，抓！':'';
+                console.log(leo.logTime()+'第【'+(petOptions.index++)+'】只1级怪:【' + e.name + '】【' + e.maxhp + '('+petOptions.minHp+')/' + e.maxmp + '('+petOptions.minMp+')】'+flagStr);
+            }
         });
-        return flag;
     }
 
     //随机遇敌(队长用)
@@ -996,11 +1003,17 @@ module.exports = require('./wrapper').then(cga => {
         }
         return leo.delay(1000);
     }
-    leo.dropItem = (itemName) => {
+    leo.dropItem = (itemName,minCount) => {
         var items = leo.getItems(itemName);
         if(items && items.length >0 ){
             for(var i in items){
-                cga.DropItem(items[i].pos);
+                var isDrop = true;
+                if(minCount && items[i].count >= minCount){
+                    isDrop = false;
+                }
+                if(isDrop){
+                    cga.DropItem(items[i].pos);
+                }
             }
         }
         return leo.delay(1000);
