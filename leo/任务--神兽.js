@@ -41,7 +41,7 @@ var cga = require('../cgaapi')(function(){
 		
 		var result = null;
 		
-		cga.cleanInventory(1);
+		cga.cleanInventory(1, ()=>{});
 		
 		var hasItem = cga.getItemCount('地龙的麟片') > 0;
 		
