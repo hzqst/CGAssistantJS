@@ -33,6 +33,7 @@ require('./common').then(cga=>{
 
     var getCount = [0,0,0,0];//依格罗斯、翼龙、麒麟、罗修
     var openPrize = ()=>{
+    	leo.log('红叶の天界1脚本，队长【'+teamLeader+'】');
     	return leo.todo()
     	.then(()=>{
 			console.log();
@@ -539,12 +540,17 @@ require('./common').then(cga=>{
 
     leo.loop(()=>{
         try{
-           return task1()
+           return leo.todo()
+           .then(()=>{
+           		if(cga.getItemCount('托尔丘的记忆')==0){
+			    	//leo.log('身上没有【托尔丘的记忆】，先做天界1任务');
+			    	return task1();
+			    }
+           })
            .then(()=>task3())
            .then(()=>openPrize())
-           .then(()=>{
-           		return leo.log('红叶の天界刷宠，完成第' + (count++) + '次');
-           })
+           .then(()=>leo.log('红叶の天界刷宠，完成第' + (count++) + '次'))
+           .then(()=>leo.checkHealth(prepareOptions.doctorName));
         }catch(e){
             console.log(leo.logTime()+'出错，重新开始：', e);
         }
