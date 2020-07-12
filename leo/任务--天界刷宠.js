@@ -5,8 +5,14 @@ require('./common').then(cga=>{
 
     var autoBoss = true; //自动打BOSS
     var autoOpen = true; //自动开奖
-	var isLogBackFirst = false; //启动登出
+    var prizeSetting = {
+    	'依格罗斯' : true,
+    	'翼龙' : true,
+    	'麒麟' : true,
+    	'罗修' : false
+    }
 
+	var isLogBackFirst = false; //启动登出
 	var prepareOptions = {
         rechargeFlag: 1,
         repairFlag: -1,
@@ -57,24 +63,39 @@ require('./common').then(cga=>{
 								return !is_array_contain(oldPetIndexs, p.index);
 							})
 							if(pet.realname == '依格罗斯'){
-								leo.log('恭喜，得到了'+leo.getPetCalcInfo(pet));
+								if(prizeSetting[pet.realname]){
+									leo.log('恭喜，得到了'+leo.getPetCalcInfo(pet));
+								}else{
+									leo.log('可惜，得到了'+leo.getPetCalcInfo(pet)+'，扔');
+									cga.DropPet(pet.index);
+								}
 								getCount[0]++;
 							}
 							if(pet.realname == '翼龙'){
-								leo.log('恭喜，得到了'+leo.getPetCalcInfo(pet));
-								//leo.log('可惜，得到了'+leo.getPetCalcInfo(pet)+'，扔');
-								//cga.DropPet(pet.index);
+								if(prizeSetting[pet.realname]){
+									leo.log('恭喜，得到了'+leo.getPetCalcInfo(pet));
+								}else{
+									leo.log('可惜，得到了'+leo.getPetCalcInfo(pet)+'，扔');
+									cga.DropPet(pet.index);
+								}
 								getCount[1]++;
 							}
 							if(pet.realname == '麒麟'){
-								leo.log('恭喜，得到了'+leo.getPetCalcInfo(pet));
-								//leo.log('可惜，得到了'+leo.getPetCalcInfo(pet)+'，扔');
-								//cga.DropPet(pet.index);
+								if(prizeSetting[pet.realname]){
+									leo.log('恭喜，得到了'+leo.getPetCalcInfo(pet));
+								}else{
+									leo.log('可惜，得到了'+leo.getPetCalcInfo(pet)+'，扔');
+									cga.DropPet(pet.index);
+								}
 								getCount[2]++;
 							}
 							if(pet.realname == '罗修'){
-								leo.log('可惜，得到了'+leo.getPetCalcInfo(pet)+'，扔');
-								cga.DropPet(pet.index);
+								if(prizeSetting[pet.realname]){
+									leo.log('恭喜，得到了'+leo.getPetCalcInfo(pet));
+								}else{
+									leo.log('可惜，得到了'+leo.getPetCalcInfo(pet)+'，扔');
+									cga.DropPet(pet.index);
+								}
 								getCount[3]++;
 							}
 							return console.log('战利品：【'+getCount+'】 【依格罗斯、翼龙、麒麟、罗修】');
@@ -123,6 +144,7 @@ require('./common').then(cga=>{
 				.then(()=>leo.prepare(prepareOptions));
 			}
 		})
+		.then(()=>leo.checkHealth(prepareOptions.doctorName))
 		.then(()=>{
 			return leo.loop(()=>{
 				var mapInfo = cga.getMapInfo();
@@ -348,6 +370,7 @@ require('./common').then(cga=>{
 				.then(()=>leo.prepare(prepareOptions));
 			}
 		})
+		.then(()=>leo.checkHealth(prepareOptions.doctorName))
 		.then(()=>{
 			return leo.loop(()=>{
 				var mapInfo = cga.getMapInfo();
