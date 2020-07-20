@@ -1,6 +1,6 @@
 module.exports = require('./wrapper').then(cga => {
     global.leo = cga.emogua;
-    leo.version = '2.5';
+    leo.version = '2.6';
     leo.qq = '158583461'
     leo.copyright = '红叶散落';
     leo.FORMAT_DATE = 'yyyy-MM-dd';
@@ -126,8 +126,7 @@ module.exports = require('./wrapper').then(cga => {
     //人物说话和控制台都打印内容
     leo.log = (words = '') => {
         console.log(leo.logTime() + words);
-        leo.say(leo.logTime() + words);
-        return leo.resolve();
+        return leo.say(leo.logTime() + words);;
     }
     //流程控制辅助函数，无实际功能
     leo.todo = leo.next = leo.done = (result) => {
@@ -223,8 +222,7 @@ module.exports = require('./wrapper').then(cga => {
                     teammates[i] = teamplayers[i].name;
                 }
             }
-            leo.log('组队完成，队员[' + teammates.toString() + ']');
-            return leo.done();
+            return leo.log('组队完成，队员[' + teammates.toString() + ']');
         });
     }
     //队员进入队伍，参数为队长名字
@@ -256,8 +254,7 @@ module.exports = require('./wrapper').then(cga => {
     leo.enterTeamBlock = (teamLeader)=>{
         return leo.enterTeam(teamLeader)
         .then(() => {
-            leo.log('已进入队伍，队长[' + cga.getTeamPlayers()[0].name + ']');
-            return leo.next();
+            return leo.log('已进入队伍，队长[' + cga.getTeamPlayers()[0].name + ']');
         });
     }
 
@@ -1283,6 +1280,13 @@ module.exports = require('./wrapper').then(cga => {
             .then(() => leo.forceMoveEx(orientation, times - 1));
         }
         return leo.done();
+    }
+
+    //退出脚本
+    leo.exit = () => {
+        return leo.log('脚本即将结束')
+        .then(()=>leo.delay(2000))
+        .then(()=>process.abort());
     }
 
     ///////////////////////脚本默认执行内容///////////////////////////////
