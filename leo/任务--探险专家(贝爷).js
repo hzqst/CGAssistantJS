@@ -31,6 +31,7 @@ require('./common').then(cga => {
     var count = 1;
     var task = async () => {
         await leo.waitAfterBattle()
+        await leo.log('身上已有【签名】数量为【'+cga.getItemCount('签名')+'】');
         if(cga.GetPlayerInfo().gold < 5000){
             await leo.goto(n=>n.falan.bank)
             await leo.turnDir(0)
@@ -114,6 +115,7 @@ require('./common').then(cga => {
         if(isTeamLeader){
             await leo.autoWalk([23,18])
             await leo.buildTeamBlock(teamPlayerCount)
+            await leo.delay(3000)
             await leo.autoWalk([20,18])
             await leo.talkNpc(6,leo.talkNpcSelectorYes)
             await leo.delay(2000)
@@ -145,7 +147,6 @@ require('./common').then(cga => {
 
     leo.loop(async ()=>{
         try{
-            leo.log('身上已有【签名】数量为【'+cga.getItemCount('签名')+'】');
             await task();
         }catch(e){
             console.log(leo.logTime()+'任务出错:'+e);
