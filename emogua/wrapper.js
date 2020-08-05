@@ -1182,7 +1182,7 @@ module.exports = new Promise(resolve => {
 						if (stopEncounter) resolve();
 						else if (cga.isInNormalState()) {
 							cga.ForceMove(direction, false);
-							setTimeout(() => move((direction + 4) % 8), 150);
+							setTimeout(() => move((direction + 4) % 8), 300);
 						} else afterBattle();
 					} catch(e) {
 						console.log('遇敌错误', e);
