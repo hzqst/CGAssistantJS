@@ -59,6 +59,7 @@ module.exports = new Promise(resolve => {
 	const cga = require('../cgaapi')(() => setTimeout(() => resolve(cga), 0));
 }).then(cga => {
 	cga.emogua = {};
+	cga.emogua.moveTimeout = 300;
 	cga.emogua.UnitFlags = {
 		NpcEntry: 4096, // npc 或者 随机入口
 		Item: 1024,
@@ -1185,7 +1186,7 @@ module.exports = new Promise(resolve => {
 						if (stopEncounter) resolve();
 						else if (cga.isInNormalState()) {
 							cga.ForceMove(direction, false);
-							setTimeout(() => move((direction + 4) % 8), 100);
+							setTimeout(() => move((direction + 4) % 8), cga.emogua.moveTimeout||300);
 						} else afterBattle();
 					} catch(e) {
 						console.log('遇敌错误', e);
