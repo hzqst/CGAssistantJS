@@ -28,7 +28,7 @@ require('./common').then(cga=>{
     }
     var move = (direction)=>{
         cga.ForceMove(direction, false);
-        return leo.delay(100);
+        return leo.delay(leo.moveTimeout||300);
     }
     
     if(!cga.findPlayerSkill('骑乘')){
