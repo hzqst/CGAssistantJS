@@ -303,7 +303,7 @@ module.exports = function(callback){
 	//制造物品，参数：物品名，添加的宝石的名字(或物品位置)
 	cga.craftNamedItem = function(craftItemName, extraItemName){
 
-		throw new Error('this api is deprecated.')
+		throw new Error('该API已经弃用，请用cga.craftItemEx')
 	}
 
 	cga.craftItemEx = function(options, cb){
@@ -422,18 +422,7 @@ module.exports = function(callback){
 				return [parseInt(regex[1]), parseInt(regex[2])];
 			}
 		}
-		if(item.info){
-			regex = item.info.match(/\$4耐久 (\d+)\/(\d+)/);
-			if(regex && regex.length >= 3){
-				return [parseInt(regex[1]), parseInt(regex[2])];
-			}
-		}
-		if(item.info2){
-			regex = item.info2.match(/\$4耐久 (\d+)\/(\d+)/);
-			if(regex && regex.length >= 3){
-				return [parseInt(regex[1]), parseInt(regex[2])];
-			}
-		}
+
 		return null;
 	}
 	
