@@ -165,6 +165,11 @@ var mineArray = [
 					[32, 167],
 				], cb);
 			});
+		},
+		extra_selling : (item)=>{ 
+			if(item.name == '苹果薄荷')
+				return true;
+			return false;
 		}
 	},
 	{
