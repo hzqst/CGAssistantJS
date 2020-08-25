@@ -4474,7 +4474,76 @@ module.exports = function(callback){
 		waitTradeMsg();
 	};
 
-	//等待name玩家向自己进行交易，期望得到stuff里指定的东西，成功或失败时回调resolve
+	//主动向名字为name的玩家发起交易，给他stuff里指定的东西，成功或失败时回调resolve，在checkParty里可以根据对方名字和收到的东西判断同意还是拒绝交易
+	/*
+	给名字为hzqst的玩家交易3组鹿皮:
+		var count = 0;
+		cga.positiveTrade('hzqst', {
+			itemFilter : (item)=>{
+				if(item.name == '鹿皮' && item.count == 40 && count < 3){
+					count ++;
+					return true;
+				}
+				return false;
+			}		
+		},
+		null, (arg)=>{
+			if(arg.success){
+				console.log('交易成功!');
+			} else {
+				console.log('交易失败! 原因：'+arg.reason);
+			}
+		});
+
+	给名字为hzqst的玩家交易包里所有的鹿皮，并且对方必须给自己1000金币否则拒绝交易:
+		cga.positiveTrade('hzqst', {
+			itemFilter : (item)=>{
+				return item.name == '鹿皮' && item.count == 40;
+			}
+		},
+		(playerName, receivedStuffs)={
+			if(receivedStuffs.gold != 1000){
+				console.log('对方没有给自己1000金币!');
+				return false;
+			}
+			return true;
+		}, 
+		(arg)=>{
+			if(arg.success){
+				console.log('交易成功!');
+			} else {
+				console.log('交易失败! 原因：'+arg.reason);
+			}
+		});
+
+	给名字为hzqst的玩家交易3只哥布林，并且对方必须给自己一只红帽哥布林否则拒绝交易:
+		var count = 0;
+		cga.positiveTrade('hzqst', {
+			petFilter : (pet)=>{
+				if(pet.realname == '哥布林' && count < 3){
+					count ++;
+					return true;
+				}
+				return false;
+			}
+		},
+		(playerName, receivedStuffs)={
+			if(receivedStuffs.pets.find((pet)=>{
+				return pet.realname == '红帽哥布林';
+			}) == null){
+				console.log('对方没有给自己红帽哥布林!');
+				return false;
+			}
+			return true;
+		}, 
+		(arg)=>{
+			if(arg.success){
+				console.log('交易成功!');
+			} else {
+				console.log('交易失败! 原因：'+arg.reason);
+			}
+		});
+	*/
 	cga.positiveTrade = (name, stuff, checkParty, resolve, timeout) => {
 		cga.AsyncWaitPlayerMenu((err, players) => {
 			if(err){
@@ -4520,13 +4589,53 @@ module.exports = function(callback){
 		cga.DoRequest(cga.REQUEST_TYPE_TRADE);
 	}
 
-	//等待name玩家向自己发起交易，成功或失败时回调resolve
+	//等待其他玩家向自己发起交易，成功或失败时回调resolve，在checkParty里可以根据对方名字和收到的东西判断同意还是拒绝交易
+	/*
+	等待任意玩家给自己交易3组鹿皮:		
+		cga.waitTrade({},
+		(playerName, receivedStuffs)=>{
+			if( receivedStuffs.items.filter((item)=>{
+				return item.name == '鹿皮' && item.count == 40;
+			}).length == 3 )
+			{
+				return true;
+			}
+			return false;
+		},
+		(arg)=>{
+			if(arg.success){
+				console.log('交易成功!');
+			} else {
+				console.log('交易失败! 原因：'+arg.reason);
+			}
+		});
+	等待名为hzqst的玩家给自己交易3组鹿皮，并给他1000金币:		
+		cga.waitTrade({
+			gold : 1000
+		},
+		(playerName, receivedStuffs)=>{
+			if( playerName == 'hzqst' && receivedStuffs.items.filter((item)=>{
+				return item.name == '鹿皮' && item.count == 40;
+			}).length == 3 )
+			{
+				return true;
+			}
+			return false;
+		},
+		(arg)=>{
+			if(arg.success){
+				console.log('交易成功!');
+			} else {
+				console.log('交易失败! 原因：'+arg.reason);
+			}
+		});
+	*/
 	cga.waitTrade = (stuff, checkParty, resolve, timeout) => {
 		cga.EnableFlags(cga.ENABLE_FLAG_TRADE, true)
 		cga.tradeInternal(stuff, checkParty, resolve, timeout);
 	}
 	
-	//主动向name玩家发起交易，并给他stuff指定的东西（到开启交易成功或交易失败为止），成功或失败时回调resolve
+	//主动向名为name的玩家发起交易并同时等待名为name的玩家向自己发起交易，成功或失败时回调resolve
 	cga.trade = (name, stuff, checkParty, resolve, timeout) => {
 		
 		cga.EnableFlags(cga.ENABLE_FLAG_TRADE, true);
