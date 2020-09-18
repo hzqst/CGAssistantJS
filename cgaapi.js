@@ -503,7 +503,7 @@ module.exports = function(callback){
 				], cb);
 				return;
 			}
-			if(stone == 'B1'){
+			if(stone == 'B2'){
 				cga.walkList([
 				[155, 122]
 				], cb);
