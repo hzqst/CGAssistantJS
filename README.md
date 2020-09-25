@@ -1,6 +1,6 @@
 # CGAssistant (Release)
 
-Wiki: https://github.com/hzqst/CGAssistantJS/wiki or https://gitee.com/hzqst/CGAssistantJS/wiki
+Wiki: https://github.com/hzqst/CGAssistantJS/wiki or https://gitee.com/hzqst/CGAssistantJS/wikis
 
 Release: https://github.com/hzqst/CGAssistantJS or https://gitee.com/hzqst/CGAssistantJS
 
