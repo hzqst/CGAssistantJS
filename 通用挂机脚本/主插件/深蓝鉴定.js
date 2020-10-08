@@ -100,7 +100,7 @@ var exchangeItem = (name, cb)=>{
 		} else {
 			exchangeItem(name, cb);
 		}
-	});++
+	});
 	
 	
 }
