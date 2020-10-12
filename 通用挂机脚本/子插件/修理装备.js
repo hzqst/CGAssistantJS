@@ -12,7 +12,7 @@ var repairLocArray = [
 		});
 	},
 	//武修和防修的面向方向
-	dir : [6, 2];
+	dir : [6, 2]
 },
 {
 	name : '新城登入点',
@@ -24,7 +24,7 @@ var repairLocArray = [
 		});
 	},
 	//武修和防修的面向方向
-	dir : [0, 0];
+	dir : [0, 0]
 }
 ]
 
