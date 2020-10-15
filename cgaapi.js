@@ -2,6 +2,7 @@ var cga = require('bindings')('node_cga');
 var moment = require('moment');
 var PF = require('pathfinding');
 var Async = require('async');
+var request = require('request');
 
 global.is_array_contain = function(arr, val)
 {
@@ -17,9 +18,14 @@ global.is_array_contain = function(arr, val)
 }
 
 module.exports = function(callback){
-	var port = 4396;
-	if(process.argv.length >= 3)
-		port = process.argv[2];
+	var port = null;
+	if(process.argv.length >= 3 && parseInt(process.argv[2]) > 0)
+		port = parseInt(process.argv[2]);
+	else if(process.env.CGA_GAME_PORT && parseInt(process.env.CGA_GAME_PORT) > 0)
+		port = parseInt(process.env.CGA_GAME_PORT);
+	if(typeof port != 'number')
+		throw new Error('获取游戏本地服务端口失败!');
+
 	cga.AsyncConnect(port, function(err){
 		if(err)
 			throw err;
@@ -84,7 +90,6 @@ module.exports = function(callback){
 	
 	cga.UI_DIALOG_TRADE = 1;
 	cga.UI_DIALOG_BATTLE_SKILL = 2;
-
 
 	//延迟x毫秒
 	cga.delay = (millis) => new Promise((resolve, reject) => {
@@ -4713,6 +4718,235 @@ module.exports = function(callback){
 				cga.waitForBattleEnd(cb, timeout);
 			}
 		}, timeout);
+	}
+
+	cga.gui = {};
+
+	cga.gui.port = null;
+
+	cga.gui.init = ()=>{
+		if(!cga.gui.port){
+			var p = process.env.CGA_GUI_PORT;
+
+			if(!p || !parseInt(p))
+				throw new Error('获取CGA主进程本地服务端口失败!');
+			
+			cga.gui.port = parseInt(p);
+		}
+	}
+
+	/*
+		获取玩家设置、自动战斗设置
+		cga.gui.GetSettings((err, result)=>{
+			console.log(result);
+		})
+	*/
+	cga.gui.GetSettings = (cb)=>{
+
+		cga.gui.init();
+
+		request.get({
+			url : "http://127.0.0.1:"+cga.gui.port+'/cga/GetSettings', 
+			json : true,
+		},
+		function (error, response, body) {
+			if(error)
+			{
+				cb(error);
+				return;
+			}
+			if(response.statusCode && response.statusCode == 200){
+				try{
+					cb(null, body);
+					return;
+				}catch(e){
+					cb(e);
+					return;
+				}
+			} else {
+				cb(new Error('HTTP 请求失败'));
+				return;
+			}
+		});
+	}
+
+	/*
+		获取当前附加的进程的信息
+		cga.gui.GetGameProcInfo((err, result)=>{
+			console.log(result);
+		})
+	*/
+	cga.gui.GetGameProcInfo = (cb)=>{
+
+		cga.gui.init();
+
+		request.get({
+			url : "http://127.0.0.1:"+cga.gui.port+'/cga/GetGameProcInfo', 
+			json : true,
+		},
+		function (error, response, body) {
+			if(error)
+			{
+				cb(error);
+				return;
+			}
+			if(response.statusCode && response.statusCode == 200){
+				try{
+					cb(null, body);
+					return;
+				}catch(e){
+					cb(e);
+					return;
+				}
+			} else {
+				cb(new Error('HTTP 请求失败'));
+				return;
+			}
+		});
+	}
+
+	/*
+		加载玩家设置
+
+		开启自动战斗：
+		cga.gui.LoadSettings({
+			battle : {
+				autobattle : true
+			}
+		}, (err, result)=>{
+			console.log(result);
+		})
+
+		参数settings的格式见CGA保存出来的玩家设置json文件
+	*/
+	cga.gui.LoadSettings = (settings, cb)=>{
+
+		cga.gui.init();
+
+		request.post({
+			url : "http://127.0.0.1:"+cga.gui.port+'/cga/LoadSettings', 
+			json : true,
+			method: 'POST',
+			body: settings
+		},
+		function (error, response, body) {
+			if(error)
+			{
+				cb(error);
+				return;
+			}
+			if(response.statusCode && response.statusCode == 200){
+				try{
+					cb(null, body);
+					return;
+				}catch(e){
+					cb(e);
+					return;
+				}
+			} else {
+				cb(new Error('HTTP 请求失败'));
+				return;
+			}
+		});
+	}
+
+	/*
+		加载脚本
+
+		cga.gui.LoadScript({
+			path : "路径",
+			autorestart : true, //自动重启脚本开启
+			injuryprot : true, //受伤保护开启
+			soulprot : true, //掉魂受伤保护开启
+		}, (err, result)=>{
+			console.log(result);
+		})
+	*/
+	cga.gui.LoadScript = (arg, cb)=>{
+
+		cga.gui.init();
+
+		request.post({
+			url : "http://127.0.0.1:"+cga.gui.port+'/cga/LoadScript', 
+			json : true,
+			method: 'POST',
+			body: arg
+		},
+		function (error, response, body) {
+			if(error)
+			{
+				cb(error);
+				return;
+			}
+			if(response.statusCode && response.statusCode == 200){
+				try{
+					cb(null, body);
+					return;
+				}catch(e){
+					cb(e);
+					return;
+				}
+			} else {
+				cb(new Error('HTTP 请求失败'));
+				return;
+			}
+		});
+	}
+
+	/*
+		加载自动登录设置
+
+		cga.gui.LoadAccount({
+			user : "通行证",
+			pwd : "密码",
+			gid : "子账号",
+			game : 4, //区服
+			bigserver : 1, //电信or网通
+			server : 8, //线路
+			character : 1, //左边or右边
+			autologin : true, //自动登录开启
+			skipupdate : false, //禁用登录器更新开启
+		}, (err, result)=>{
+			console.log(result);
+		})
+
+
+		调整自动登录到10线
+		cga.gui.LoadAccount({
+			server : 10,
+		}, (err, result)=>{
+			console.log(result);
+		})
+	*/
+	cga.gui.LoadScript = (arg, cb)=>{
+
+		cga.gui.init();
+
+		request.post({
+			url : "http://127.0.0.1:"+cga.gui.port+'/cga/LoadScript', 
+			json : true,
+			method: 'POST',
+			body: arg
+		},
+		function (error, response, body) {
+			if(error)
+			{
+				cb(error);
+				return;
+			}
+			if(response.statusCode && response.statusCode == 200){
+				try{
+					cb(null, body);
+					return;
+				}catch(e){
+					cb(e);
+					return;
+				}
+			} else {
+				cb(new Error('HTTP 请求失败'));
+				return;
+			}
+		});
 	}
 
 	return cga;
