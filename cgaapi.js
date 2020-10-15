@@ -19,10 +19,12 @@ global.is_array_contain = function(arr, val)
 
 module.exports = function(callback){
 	var port = null;
+
 	if(process.argv.length >= 3 && parseInt(process.argv[2]) > 0)
 		port = parseInt(process.argv[2]);
 	else if(process.env.CGA_GAME_PORT && parseInt(process.env.CGA_GAME_PORT) > 0)
 		port = parseInt(process.env.CGA_GAME_PORT);
+
 	if(typeof port != 'number')
 		throw new Error('获取游戏本地服务端口失败!');
 
