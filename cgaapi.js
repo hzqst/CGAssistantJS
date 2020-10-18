@@ -4920,12 +4920,12 @@ module.exports = function(callback){
 			console.log(result);
 		})
 	*/
-	cga.gui.LoadScript = (arg, cb)=>{
+	cga.gui.LoadAccount = (arg, cb)=>{
 
 		cga.gui.init();
 
 		request.post({
-			url : "http://127.0.0.1:"+cga.gui.port+'/cga/LoadScript', 
+			url : "http://127.0.0.1:"+cga.gui.port+'/cga/LoadAccount', 
 			json : true,
 			method: 'POST',
 			body: arg
