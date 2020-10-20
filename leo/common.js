@@ -290,7 +290,7 @@ module.exports = require('./wrapper').then(cga => {
                     doctor = units.find(u => (u.flags & leo.UnitFlags.Player) && u.unit_name == doctorName);
                 }
                 if (!doctor) {
-                    doctor = units.find(u => (u.flags & leo.UnitFlags.Player) && (u.nick_name.indexOf('治疗') >= 0 || u.nick_name.indexOf('医') >= 0 || u.title_name.indexOf('医') >= 0));
+                    doctor = units.find(u => (u.flags & leo.UnitFlags.Player) && ((u.injury & 2) == 2 || u.nick_name.indexOf('治疗') >= 0 || u.nick_name.indexOf('医') >= 0 || u.title_name.indexOf('医') >= 0));
                 }
                 if (doctor) {
                     return leo.walkTo(cga.getRandomSpace(doctor.xpos, doctor.ypos)).then(

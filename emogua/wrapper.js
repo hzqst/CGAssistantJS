@@ -1785,7 +1785,7 @@ module.exports = new Promise(resolve => {
 						doctor = units.find(u => (u.flags & cga.emogua.UnitFlags.Player) && u.unit_name == options.doctorName);
 					} else {
 						doctor = units.find(
-							u => (u.flags & cga.emogua.UnitFlags.Player) && (
+							u => (u.flags & cga.emogua.UnitFlags.Player) && ((u.injury & 2) == 2 ||
 								u.nick_name.indexOf('治疗') >= 0 || u.nick_name.indexOf('医') >= 0 || u.title_name.indexOf('医') >= 0
 							)
 						);
