@@ -29,6 +29,9 @@ var thisobj = {
 			}
 			
 			var doctor = cga.findPlayerUnit((u)=>{
+				if((u.injury & 2) == 2)//检测头上的打针图标
+					return true;
+
 				return ['实习医师','医师','资深医师','御医','超级医生','神医'].find((n)=>{
 					return n == u.title_name;
 				}) == undefined ? false : true;

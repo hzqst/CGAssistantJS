@@ -4003,7 +4003,7 @@ module.exports = function(callback){
 	//搜索玩家单位
 	cga.findPlayerUnit = (filter)=>{
 		var found = cga.GetMapUnits().find((u)=>{
-			return u.valid == 2 && u.type == 8 && (u.flags & 256) != 0 && ((typeof filter == 'function' && filter(u)) || (typeof filter == 'string' && filter == u.unit_name)) ;
+			return u.valid == 2 && u.type == 8 && (u.flags & 256) == 256 && ((typeof filter == 'function' && filter(u)) || (typeof filter == 'string' && filter == u.unit_name)) ;
 		});
 		return found != undefined ? found : null;
 	}
@@ -4738,41 +4738,6 @@ module.exports = function(callback){
 	}
 
 	/*
-		获取玩家设置、自动战斗设置
-		cga.gui.GetSettings((err, result)=>{
-			console.log(result);
-		})
-	*/
-	cga.gui.GetSettings = (cb)=>{
-
-		cga.gui.init();
-
-		request.get({
-			url : "http://127.0.0.1:"+cga.gui.port+'/cga/GetSettings', 
-			json : true,
-		},
-		function (error, response, body) {
-			if(error)
-			{
-				cb(error);
-				return;
-			}
-			if(response.statusCode && response.statusCode == 200){
-				try{
-					cb(null, body);
-					return;
-				}catch(e){
-					cb(e);
-					return;
-				}
-			} else {
-				cb(new Error('HTTP 请求失败'));
-				return;
-			}
-		});
-	}
-
-	/*
 		获取当前附加的进程的信息
 		cga.gui.GetGameProcInfo((err, result)=>{
 			console.log(result);
@@ -4808,7 +4773,42 @@ module.exports = function(callback){
 	}
 
 	/*
-		加载玩家设置
+		获取玩家设置、物品设置、自动战斗设置
+		cga.gui.GetSettings((err, result)=>{
+			console.log(result);
+		})
+	*/
+	cga.gui.GetSettings = (cb)=>{
+
+		cga.gui.init();
+
+		request.get({
+			url : "http://127.0.0.1:"+cga.gui.port+'/cga/GetSettings', 
+			json : true,
+		},
+		function (error, response, body) {
+			if(error)
+			{
+				cb(error);
+				return;
+			}
+			if(response.statusCode && response.statusCode == 200){
+				try{
+					cb(null, body);
+					return;
+				}catch(e){
+					cb(e);
+					return;
+				}
+			} else {
+				cb(new Error('HTTP 请求失败'));
+				return;
+			}
+		});
+	}
+
+	/*
+		加载玩家设置、物品设置、自动战斗设置
 
 		开启自动战斗：
 		cga.gui.LoadSettings({
@@ -4819,7 +4819,7 @@ module.exports = function(callback){
 			console.log(result);
 		})
 
-		参数settings的格式见CGA保存出来的玩家设置json文件
+		参数settings的格式见CGA保存出来的玩家设置json文件，不填的选项代表保持不变
 	*/
 	cga.gui.LoadSettings = (settings, cb)=>{
 
@@ -4854,10 +4854,10 @@ module.exports = function(callback){
 
 	/*
 		加载脚本
-
 		cga.gui.LoadScript({
 			path : "路径",
 			autorestart : true, //自动重启脚本开启
+			autoterm : true, //自动关闭脚本开启
 			injuryprot : true, //受伤保护开启
 			soulprot : true, //掉魂受伤保护开启
 		}, (err, result)=>{
@@ -4897,7 +4897,6 @@ module.exports = function(callback){
 
 	/*
 		加载自动登录设置
-
 		cga.gui.LoadAccount({
 			user : "通行证",
 			pwd : "密码",
