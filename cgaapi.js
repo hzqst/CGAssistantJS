@@ -3,6 +3,7 @@ var moment = require('moment');
 var PF = require('pathfinding');
 var Async = require('async');
 var request = require('request');
+const { createVerify } = require('crypto');
 
 global.is_array_contain = function(arr, val)
 {
@@ -29,8 +30,9 @@ module.exports = function(callback){
 		throw new Error('获取游戏本地服务端口失败!');
 
 	cga.AsyncConnect(port, function(err){
-		if(err)
-			throw err;
+		if(err){
+			throw new Error('无法连接到本地服务端口，可能未附加到游戏或者游戏已经闪退！');
+		}
 		
 		callback();
 	});
@@ -329,15 +331,20 @@ module.exports = function(callback){
 	*/
 	cga.craftItemEx = function(options, cb){
 
+		var err = null;
+
 		var info = cga.getItemCraftInfo(options.craftitem);
 		if(info === null)
-			throw new Error('你没有制造 '+options.craftitem+' 的技能');
+			err = new Error('你没有制造 '+options.craftitem+' 的技能');
+
+		if(err){
+			cb(err);
+			return;
+		}
 
 		var inventory = cga.getInventoryItems();
 			var itemArray = [];
 	
-		var err = null;
-		
 		info.craft.materials.forEach((mat)=>{
 			var findRequired = inventory.find((inv)=>{
 				return (inv.itemid == mat.itemid && inv.count >= mat.count);
@@ -1658,7 +1665,7 @@ module.exports = function(callback){
 				});
 				break;
 			default:
-				throw new Error('未知的村子名称');
+				throw new Error('未知的村子名称:'+villageName);
 		}
 	}
 	
@@ -1679,7 +1686,7 @@ module.exports = function(callback){
 				cga.travel.falan.toGelaer(cb);
 				return;
 		}
-		cb(new Error('未知的城市名'));
+		throw new Error('未知的城市名:'+city);
 	}
 	
 	cga.travel.newisland = {};
@@ -1697,6 +1704,7 @@ module.exports = function(callback){
 			return 'C';
 		if(x == 151 && y == 97 && mapname == '艾夏岛')
 			return 'D';
+
 		return null;
 	}
 	
@@ -1797,7 +1805,7 @@ module.exports = function(callback){
 	//参数2：回调函数function(result), result 为true或false
 	cga.travel.newisland.toStone = (stone, cb)=>{
 		if(!cga.travel.newisland.isvalid(stone)){
-			cb(new Error('无效的目的地名称'));
+			throw new Error('无效的目的地名称');
 			return;
 		}
 
@@ -1933,7 +1941,7 @@ module.exports = function(callback){
 	//参数1：传送石名称，有效参数：N S
 	cga.travel.gelaer.toStone = (stone, cb)=>{
 		if(!cga.travel.gelaer.isvalid(stone)){
-			cb(new Error('无效的目的地名称'));
+			throw new Error('无效的目的地名称');
 			return;
 		}
 		
@@ -1955,7 +1963,7 @@ module.exports = function(callback){
 					cga.turnTo(28, 24);
 				else
 					cga.turnTo(30, 26);
-				cb(true);
+				cb(null);
 			});
 		});
 	}
@@ -2148,8 +2156,8 @@ module.exports = function(callback){
 
 		var frompos = [curX - walls.x_bottom, curY - walls.y_bottom];
 		var topos = [targetX - walls.x_bottom, targetY - walls.y_bottom];
-		console.log('寻路起始坐标 ('  + (frompos[0]) + ', '+ (frompos[1]) + ')');
-		console.log('寻路目的坐标 ('  + (topos[0]) +', '+(topos[1]) + ')');
+		//console.log('寻路起始坐标 ('  + (frompos[0]) + ', '+ (frompos[1]) + ')');
+		//console.log('寻路目的坐标 ('  + (topos[0]) +', '+(topos[1]) + ')');
 		
 		if(frompos[0] >= 0 && frompos[0] < walls.x_size && 
 		frompos[1] >= 0 && frompos[1] < walls.y_size &&
@@ -2174,21 +2182,20 @@ module.exports = function(callback){
 					joint[i][5] = true;
 				}
 
-				//console.log('result joints');
-					
+				//console.log('result joints');					
 				//console.log(joint);
 
 				newList = joint.concat(newList);
 				
-				console.log('新寻路列表:');			
-				console.log(newList);
+				//console.log('新寻路列表:');			
+				//console.log(newList);
 				
 				return newList;
 			}
 		}
 		
-		console.error(new Error('错误：寻路失败！'));
-		return [];
+		throw new Error('发现严重错误：寻路失败！');
+		//return [];
 	}
 	
 	cga.getMapXY = ()=>{
@@ -2263,8 +2270,7 @@ module.exports = function(callback){
 		//console.log(list);
 		
 		if(cga.isMoveThinking){
-			console.log('警告:已有walkList在运行中');
-			console.trace();
+			throw new Error('发现严重错误：已有walkList在运行中');
 		}
 
 		cga.isMoveThinking = true;
@@ -2301,10 +2307,8 @@ module.exports = function(callback){
 			var curpos = cga.GetMapXY();
 			var curmapindex = cga.GetMapIndex().index3;
 
-			console.log('当前地图: ' + curmap);
-			console.log('当前地图序号: ' + curmapindex);
-			console.log('当前坐标: (%d, %d)', curpos.x, curpos.y);
-			console.log('目标坐标: (%d, %d)', targetX, targetY);
+			console.log('当前地图: ' + curmap + ', 序号=' + curmapindex);
+			console.log('当前:(%d, %d) -> 目标:(%d, %d)', curpos.x, curpos.y, targetX, targetY);
 			if(targetMap)
 			{
 				console.log('目标地图');
@@ -2321,78 +2325,7 @@ module.exports = function(callback){
 					cb(null);
 					return;
 				}
-				
-				/*var faceDir = cga.GetPlayerInfo().direction;
-				var facedPos = cga.getOrientationPosition(faceDir, 1);
-				var npc = cga.findNPCEx((u)=>{
-					return u.xpos == facedPos[0] && u.ypos == facedPos[1];
-				});
-				
-				if(npc)
-				{
-					console.log('方向'+faceDir+'发现NPC，为防止说话触发NPC对话，转向一次');
-					console.log(npc);
-					cga.turnDir((faceDir + 1) % 7);
-					setTimeout(end, 500, arg);
-					return;
-				}
-				
-				var facedPos2 = cga.getOrientationPosition(faceDir, 2);
-				var npc2 = cga.findNPCEx((u)=>{
-					return u.xpos == facedPos2[0] && u.ypos == facedPos2[1];
-				});
-				
-				if(npc2)
-				{
-					console.log('方向'+faceDir+'发现NPC，为防止说话触发NPC对话，转向一次');
-					console.log(npc2);
-					cga.turnDir((faceDir + 1) % 7);
-					setTimeout(end, 500, arg);
-					return;
-				}
-				
-				cga.waitForChatInput((msg, val)=>{
-					if(msg.indexOf('遇敌防卡住') >= 0)
-					{
-						if(cga.isInNormalState())
-						{
-							if(arg.map)
-							{
-								var curmap = cga.GetMapName();
-								var curmapindex = cga.GetMapIndex().index3;
-								if(curmap == arg.map || curmapindex == arg.map)
-								{
-									cga.isMoveThinking = false;
-									cb(null);
-									return false;
-								}
-							} else if(arg.pos)
-							{
-								var curpos = cga.GetMapXY();
-								if(curpos.x == arg.pos[0] && curpos.y == arg.pos[1])
-								{
-									cga.isMoveThinking = false;
-									cb(null);
-									return false;
-								}
-							}
-							console.log('坐标错误，回滚到最后一个路径点');
-							var curpos = cga.GetMapXY();
-							var endpos = walkedList.pop();
-							newList = cga.calculatePath(curpos.x, curpos.y, endpos[0], endpos[1], endpos[2], null, null, newList);
-							walkCb();
-							return false;
-						}
-						//battle?
-						setTimeout(end, 1000, arg);
-						return false;
-					}
-					
-					return true;
-				});
-				
-				cga.SayWords('遇敌防卡住', 0, 3, 1);*/
-				
+
 				var waitBattle2 = ()=>{
 					if(!cga.isInNormalState()){
 						setTimeout(waitBattle2, 1500);
@@ -2411,9 +2344,11 @@ module.exports = function(callback){
 						(curpos.x != walkedList[walkedList.length-1][0] || 
 						curpos.y != walkedList[walkedList.length-1][1])
 						){
-						console.log(curpos);
-						console.log(walkedList);
+						
+						//console.log(curpos);
+						//console.log(walkedList);
 						console.log('坐标错误，回滚到最后一个路径点');
+						
 						var endpos = walkedList.pop();
 						newList = cga.calculatePath(curpos.x, curpos.y, endpos[0], endpos[1], endpos[2], null, null, newList);
 						walkCb();
@@ -2437,16 +2372,18 @@ module.exports = function(callback){
 
 				//console.log(result);
 				//console.log(reason);
+
 				if(err){
 					
 					if(reason == 4){
-						console.log('地图发生非预期的切换！');
+						//console.log('地图发生非预期的切换！');
 						var curmap = cga.GetMapName();
 						var curmapindex = cga.GetMapIndex().index3;
 						
 						console.log('当前地图: ' + curmap);
 						console.log('当前地图序号: ' + curmapindex);
 					}
+				
 					//we are in battle status, wait a second then try again until battle is end
 					//or we are forcely moved back to an position by server
 					if(reason == 2 || reason == 5){
@@ -2469,7 +2406,7 @@ module.exports = function(callback){
 							if(typeof targetMap == 'string' && curmap == targetMap){
 								
 								if(newList.length == 0){
-									console.log('寻路结束1');
+									console.log('寻路正常结束1');
 									end({ map : targetMap });
 									return;
 								}
@@ -2480,7 +2417,7 @@ module.exports = function(callback){
 							else if(typeof targetMap == 'number' && curmapindex == targetMap){
 								
 								if(newList.length == 0){
-									console.log('寻路结束2');
+									console.log('寻路正常结束2');
 									end({ map : targetMap });
 									return;
 								}
@@ -2523,8 +2460,8 @@ module.exports = function(callback){
 						return;
 					} else if(reason == 3){
 						
-						console.log('当前寻路卡住，抛出错误！');
-
+						//console.log('当前寻路卡住，抛出错误！');
+						throw new Error('发现严重错误：当前寻路卡住！');
 					}
 
 					cga.isMoveThinking = false;
@@ -2533,7 +2470,7 @@ module.exports = function(callback){
 				}
 
 				if(newList.length == 0){
-					console.log('寻路结束3');
+					console.log('寻路正常结束3');
 					end( {pos : [targetX, targetY], map : targetMap} );
 					return;
 				}
