@@ -28,7 +28,7 @@ var thisobj = {
 						cga.ClickNPCDialog(4, 0);
 						cga.AsyncWaitNPCDialog((err, dlg)=>{
 							if(dlg.message && dlg.message.indexOf('不够') >= 0){
-								throw '招魂钱不够！';
+								throw new Error('招魂钱不够！');
 							}
 							
 							cb(null);

@@ -2307,8 +2307,8 @@ module.exports = function(callback){
 			var curpos = cga.GetMapXY();
 			var curmapindex = cga.GetMapIndex().index3;
 
-			console.log('当前地图: ' + curmap + ', 序号=' + curmapindex);
-			console.log('当前:(%d, %d) -> 目标:(%d, %d)', curpos.x, curpos.y, targetX, targetY);
+			console.log('当前地图: ' + curmap + ', 序号 ' + curmapindex);
+			console.log('当前 (%d, %d) -> 目标 (%d, %d)', curpos.x, curpos.y, targetX, targetY);
 			if(targetMap)
 			{
 				console.log('目标地图');
@@ -3656,6 +3656,19 @@ module.exports = function(callback){
 		
 	}
 	
+	//监听登录状态
+	cga.waitConnState = (cb)=>{
+		cga.AsyncWaitConnectionState((err, r)=>{
+			if(err){
+				cga.waitConnState(cb);
+				return;
+			}
+
+			if(cb(r) == true)
+				cga.waitSysMsg(cb);
+		}, 10000);
+	}
+
 	/*等待到达某位置，无超时时间限制
 
 		等待到达民家(14,10)，如果解散了队伍则自动走到(13,10)处：
@@ -4765,7 +4778,6 @@ module.exports = function(callback){
 		request.post({
 			url : "http://127.0.0.1:"+cga.gui.port+'/cga/LoadSettings', 
 			json : true,
-			method: 'POST',
 			body: settings
 		},
 		function (error, response, body) {
@@ -4808,7 +4820,6 @@ module.exports = function(callback){
 		request.post({
 			url : "http://127.0.0.1:"+cga.gui.port+'/cga/LoadScript', 
 			json : true,
-			method: 'POST',
 			body: arg
 		},
 		function (error, response, body) {
@@ -4863,7 +4874,6 @@ module.exports = function(callback){
 		request.post({
 			url : "http://127.0.0.1:"+cga.gui.port+'/cga/LoadAccount', 
 			json : true,
-			method: 'POST',
 			body: arg
 		},
 		function (error, response, body) {
