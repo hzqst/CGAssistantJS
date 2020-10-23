@@ -1434,6 +1434,23 @@ module.exports = require('./wrapper').then(cga => {
                 }
             }
 
+            //自动换线
+            if(cga.IsInGame() && leo.monitor.config.serverIndex != undefined
+                && leo.monitor.config.serverIndex != cga.GetMapIndex().index2){
+                 
+                    console.log('当前线路与设定不一致，修改线路!');
+                    console.log('当前线路：'+cga.GetMapIndex().index2+'线');
+                    console.log('预期线路：'+leo.monitor.config.serverIndex+'线');
+                    
+                    cga.gui.LoadAccount({
+                        server : leo.monitor.config.serverIndex,
+                    }, (err, result)=>{
+                        //登出并换线
+                        console.log('登出!');
+                        cga.LogOut();
+                    })
+            }
+
             setTimeout(leo.monitor.config.monitorLoop, 2000);//每秒循环调用
         }
     };
