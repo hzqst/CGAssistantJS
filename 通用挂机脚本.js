@@ -6,17 +6,17 @@ var cga = require('./cgaapi')(function(){
 	
 	global.cga = cga;
 		
-	var configPath = __dirname+'/脚本设置';
-	var configName = configPath+'/通用挂机脚本_'+cga.FileNameEscape(cga.GetPlayerInfo().name)+'.json';
+	var configPath = __dirname+'\\脚本设置';
+	var configName = configPath+'\\通用挂机脚本_'+cga.FileNameEscape(cga.GetPlayerInfo().name)+'.json';
 	
-	var pluginPath = __dirname+'/通用挂机脚本/主插件';
+	var pluginPath = __dirname+'\\通用挂机脚本\\主插件';
 	var pluginEnumList = fs.readdirSync(pluginPath);
 	
 	pluginEnumList = pluginEnumList.map((item)=>{
 		return path.basename(item, '.js');
 	})
 	
-	var subPluginPath = __dirname+'/通用挂机脚本/子插件';
+	var subPluginPath = __dirname+'\\通用挂机脚本\\子插件';
 	var subPluginEnumList = fs.readdirSync(subPluginPath);
 
 	subPluginEnumList = subPluginEnumList.map((item)=>{
@@ -69,6 +69,7 @@ var cga = require('./cgaapi')(function(){
 	var clearConfig = ()=>{
 		try {
 			fs.unlinkSync(configName);
+			console.log('脚本配置已清除。');
 			cga.SayWords('脚本配置已清除。', 0, 3, 1);
 		}catch(e)
 		{
@@ -159,11 +160,12 @@ var cga = require('./cgaapi')(function(){
 	}
 		
 	var start = ()=>{
+		console.log('脚本开始执行，在游戏中输入del可以删除配置文件。');
+		console.log('或者也可手动删除"'+configName+'"处的配置文件。');
 		cga.SayWords('脚本开始执行，输入del可以停止当前脚本+删除配置文件。', 0, 3, 1);
 		cga.waitForChatInput((msg)=>{
 			if(msg == 'del'){
 				clearConfig();
-				process.exit(1);
 			}
 		});
 
@@ -172,7 +174,7 @@ var cga = require('./cgaapi')(function(){
 		
 	if(readConfig()){
 
-		var configString = '已从文件中恢复配置。';
+		var configString = '已从文件"'+configName+'"中恢复配置。';
 		var counter = 0;
 		for(var i in configTable){
 			if(counter != 0)
@@ -226,6 +228,7 @@ var cga = require('./cgaapi')(function(){
 				sayString += '('+ (parseInt(i)+1) + ')' + pluginEnumList[i];
 			}
 			sayString += ']';
+
 			cga.sayLongWords(sayString, 0, 3, 1);
 			cga.waitForChatInput((msg, index)=>{
 
@@ -252,6 +255,7 @@ var cga = require('./cgaapi')(function(){
 				sayString += '('+ (parseInt(i)+1) + ')' + subPluginEnumList[i];
 			}
 			sayString += ']，选择完成请输入ok。';
+
 			cga.sayLongWords(sayString, 0, 3, 1);
 			cga.waitForChatInput((msg, index)=>{
 				if(index !== null && index >= 1 && subPluginEnumList[index - 1] ){

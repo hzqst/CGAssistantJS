@@ -116,13 +116,13 @@ var battleAreaArray = [
 			cga.walkList([
 				[28, 52, '艾夏岛'],
 				[190, 116, '盖雷布伦森林'],
-				[210, 116],
+				[210, 216],
 			], cb);
 		} else {
 			cga.travel.newisland.toStone('D', ()=>{
 				cga.walkList([
 					[190, 116, '盖雷布伦森林'],
-					[210, 116],
+					[210, 216],
 				], cb);
 			});
 		}

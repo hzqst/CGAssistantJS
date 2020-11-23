@@ -54,7 +54,7 @@ var task = cga.task.Task('十周年戒指', [
 						cga.ClickNPCDialog(4, 0);
 						cga.AsyncWaitNPCDialog(()=>{
 							cga.ClickNPCDialog(1, 0);
-							cga.AsyncWaitMovement({map:'追忆之路', delay:1000, timeout:5000}, ()=>{
+							cga.AsyncWaitMovement({map:'追忆之路', delay:1000, timeout:5000}, (err)=>{
 								if(err){//不知道什么原因没进去，重试一次
 									cb2('restart stage');
 									return;

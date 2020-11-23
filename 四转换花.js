@@ -33,7 +33,7 @@ var cga = require('./cgaapi')(function(){
 		
 		cga.TurnTo(waitForPos[0], waitForPos[1]);
 
-		cga.SayWords('CGA四转脚本等待换花，['+myItem+']交换'+'['+waitForItem+']', 0, 3, 1);
+		var isLeft = waitForPos[1] > cga.GetMapXY().y ? true : false;
 		
 		var stuffs = 
 		{
@@ -44,19 +44,23 @@ var cga = require('./cgaapi')(function(){
 				return false;
 			}
 		}
+
+		cga.SayWords('CGA四转脚本等待换花，['+myItem+']交换'+'['+waitForItem+']', 0, 3, 1);
 		
 		var flowerOk = false;
 		
 		var waitChat = ()=>{
 			if(flowerOk)
 				return;
-			
+
 			cga.AsyncWaitChatMsg((err, r)=>{
 				if(flowerOk)
 					return;
 				
 				if(err || !r){
-					cga.SayWords('CGA四转脚本等待换花，['+myItem+']交换'+'['+waitForItem+']。', 0, 3, 1);
+
+					cga.SayWords('CGA四转脚本等待换花，['+myItem+']交换'+'['+waitForItem+']', 0, 3, 1);
+			
 					waitChat();
 					return;
 				}
@@ -91,7 +95,7 @@ var cga = require('./cgaapi')(function(){
 		var waitTrade = ()=>{
 			if(flowerOk)
 				return;
-			
+	
 			cga.waitTrade(stuffs, null, (results)=>{
 				if(results.success == true)
 				{
@@ -100,13 +104,16 @@ var cga = require('./cgaapi')(function(){
 				}
 				else
 				{
+					cga.SayWords('CGA四转脚本等待换花，['+myItem+']交换'+'['+waitForItem+']', 0, 3, 1);
 					waitTrade();
 				}
 			}, 5000);
 		}
 
-		waitChat();
-		waitTrade();
+		if(isLeft)
+			waitChat();
+		else
+			waitTrade();
 	}
 	
 	var mineArray = [
