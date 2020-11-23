@@ -22,10 +22,6 @@ var cga = require('./cgaapi')(function(){
 	subPluginEnumList = subPluginEnumList.map((item)=>{
 		return path.basename(item, '.js');
 	})
-
-	var checkSettlePath = __dirname+'\\通用挂机脚本\\公共模块\\登出检查定居地'
-
-	var checkSettle = require(checkSettlePath);
 		
 	var fieldNameTable = {
 		mainPlugin : '主插件',
@@ -173,12 +169,7 @@ var cga = require('./cgaapi')(function(){
 			}
 		});
 
-		checkSettle.func((err, map)=>{
-			if(err)
-				throw err;
-			
-			mainPlugin.execute();
-		});
+		mainPlugin.execute();
 	}
 
 	if(readConfig()){

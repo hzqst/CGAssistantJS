@@ -6,6 +6,7 @@ var craft_count = 0;
 var craft_target = null;
 
 var healObject = require('./../公共模块/治疗自己');
+var checkSettle = require('./../公共模块/登出检查定居地');
 
 const io = require('socket.io')();
 
@@ -280,10 +281,12 @@ var thisobj = {
 		
 		callSubPlugins('init');
 		
-		if(!cga.travel.gelaer.isSettled)
-			throw new Error('必须定居哥拉尔镇!');
-
-		loop();
+		checkSettle.func((err, map)=>{
+			if(map != '哥拉尔镇')
+				throw new Error('必须定居哥拉尔镇!');
+			
+			loop();
+		});
 	},
 };
 
