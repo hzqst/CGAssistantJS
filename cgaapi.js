@@ -457,6 +457,8 @@ module.exports = function(callback){
 	cga.travel = {};
 		
 	cga.travel.falan = {};
+
+	cga.travel.falan.isSettled = false;
 	
 	cga.travel.falan.xy2name = (x, y, mapname)=>{
 		if(x == 242 && y == 100 && mapname == '法兰城')
@@ -1951,7 +1953,14 @@ module.exports = function(callback){
 	//前往到哥拉尔医院
 	cga.travel.gelaer.toHospital = (cb, isPro)=>{
 		if(cga.GetMapName() != '哥拉尔镇'){
-			cb(new Error('必须从哥拉尔镇启动'));
+
+			if(cga.travel.gelaer.isSettled){
+				cga.LogBack();
+				setTimeout(cga.travel.gelaer.toHospital, 1000, cb, isPro);
+				return;
+			}
+
+			cb(new Error('"前往哥拉尔医院"功能必须从哥拉尔镇启动'));
 			return;
 		}
 		cga.travel.gelaer.toStone('N', ()=>{
@@ -1971,7 +1980,14 @@ module.exports = function(callback){
 	//前往到哥拉尔银行
 	cga.travel.gelaer.toBank = (cb)=>{
 		if(cga.GetMapName() != '哥拉尔镇'){
-			cb(new Error('必须从哥拉尔镇启动'));
+
+			if(cga.travel.gelaer.isSettled){
+				cga.LogBack();
+				setTimeout(cga.travel.gelaer.toBank, 1000, cb);
+				return;
+			}
+
+			cb(new Error('"前往哥拉尔银行"功能必须从哥拉尔镇启动'));
 			return;
 		}
 		cga.travel.gelaer.toStone('N', ()=>{
@@ -1988,7 +2004,14 @@ module.exports = function(callback){
 	//前往鲁米那斯村
 	cga.travel.gelaer.toLumi = (cb)=>{
 		if(cga.GetMapName() != '哥拉尔镇'){
-			cb(new Error('必须从哥拉尔镇启动'));
+
+			if(cga.travel.gelaer.isSettled){
+				cga.LogBack();
+				setTimeout(cga.travel.gelaer.toLumi, 1000, cb);
+				return;
+			}
+
+			cb(new Error('"前往鲁米那斯村"功能必须从哥拉尔镇启动'));
 			return;
 		}
 		cga.travel.gelaer.toStone('N', ()=>{
@@ -3646,14 +3669,15 @@ module.exports = function(callback){
 	//发送超长聊天信息
 	cga.sayLongWords = (words, color, range, size)=>{
 
+		console.log(words);
+
 		var splitCount = words.length / 100;
 		if(splitCount == 0)
 			splitCount = 1;
 		
 		for(var i = 0;i < splitCount; ++i){
 			cga.SayWords(words.substring(i * 100, i * 100 + 100), color, range, size);
-		}
-		
+		}		
 	}
 	
 	//监听登录状态

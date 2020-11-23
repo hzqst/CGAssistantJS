@@ -35,21 +35,16 @@ var cga = require('./cgaapi')(function(){
 			//进入追忆之路
 			cga.travel.falan.toStone('C', ()=>{
 				cga.walkList([
-				[30, 81]
+				[30, 81, null]
 				], ()=>{
-					cga.turnTo(30, 80);
+					cga.TurnTo(30, 79);
 					cga.AsyncWaitNPCDialog(()=>{
 						cga.ClickNPCDialog(32, 0);
 						cga.AsyncWaitNPCDialog(()=>{
 							cga.ClickNPCDialog(4, 0);
 							cga.AsyncWaitNPCDialog(()=>{
 								cga.ClickNPCDialog(1, 0);
-								cga.AsyncWaitMovement({map:'追忆之路', delay:1000, timeout:5000}, (err)=>{
-									if(err){//不知道什么原因没进去，重试一次
-										cb2('restart stage');
-										return;
-									}
-									
+								cga.AsyncWaitMovement({map:'追忆之路', delay:1000, timeout:5000}, ()=>{
 									cb2(true);
 								});
 							});

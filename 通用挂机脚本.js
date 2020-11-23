@@ -22,6 +22,10 @@ var cga = require('./cgaapi')(function(){
 	subPluginEnumList = subPluginEnumList.map((item)=>{
 		return path.basename(item, '.js');
 	})
+
+	var checkSettlePath = __dirname+'\\通用挂机脚本\\公共模块\\登出检查定居地'
+
+	var checkSettle = require(checkSettlePath);
 		
 	var fieldNameTable = {
 		mainPlugin : '主插件',
@@ -162,19 +166,24 @@ var cga = require('./cgaapi')(function(){
 	var start = ()=>{
 		console.log('脚本开始执行，在游戏中输入del可以删除配置文件。');
 		console.log('或者也可手动删除"'+configName+'"处的配置文件。');
-		cga.SayWords('脚本开始执行，输入del可以停止当前脚本+删除配置文件。', 0, 3, 1);
+		cga.SayWords('CGA通用挂机脚本开始执行，输入del可以删除配置文件。', 0, 3, 1);
 		cga.waitForChatInput((msg)=>{
 			if(msg == 'del'){
 				clearConfig();
 			}
 		});
 
-		mainPlugin.execute();
+		checkSettle.func((err, map)=>{
+			if(err)
+				throw err;
+			
+			mainPlugin.execute();
+		});
 	}
-		
+
 	if(readConfig()){
 
-		var configString = '已从文件"'+configName+'"中恢复配置。';
+		var configString = "CGA通用挂机脚本已从文件中恢复配置。\n";
 		var counter = 0;
 		for(var i in configTable){
 			if(counter != 0)

@@ -32,7 +32,7 @@ var thisobj = {
 					cga.travel.AKLF.isSettled = false;
 					cga.travel.falan.isSettled = true;
 					break;
-				default: cb(new Error('登出回到未知的定居地: '+mapname));
+				default: cb(new Error('检测到未知的定居地: '+mapname));
 			}
 			console.log('登出检查定居地:'+mapname);
 			cb(null, mapname);

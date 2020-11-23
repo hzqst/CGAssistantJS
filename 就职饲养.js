@@ -135,7 +135,7 @@ var cga = require('./cgaapi')(function(){
 									[22, 12],
 									[23, 12],
 									], (r)=>{
-										cga.SayWords('驯兽师', 0, 0, 0);
+										cga.SayWords('饲养师', 0, 0, 0);
 										cga.AsyncWaitNPCDialog((err, dlg)=>{
 											if(dlg && dlg.message.indexOf('那就拿去吧') >= 0){
 												cga.ClickNPCDialog(1, 0);

@@ -1,5 +1,5 @@
 var cga = require('./cgaapi')(function(){
-	console.log('刷王冠/公主头冠/小猫帽通用脚本 起始地点：艾尔莎岛')
+
 	console.log('重要提示：途经的每一层塔地图档都要下载，否则自动寻路会失败！')
 	console.log('BUG期间建议移动速度不超过300%否则容易掉线')
 	
@@ -58,22 +58,51 @@ var cga = require('./cgaapi')(function(){
 				if(cga.getItemCount('王冠') >= 1)
 				{
 					cga.travel.falan.toBank(()=>{
-						cga.AsyncWaitNPCDialog(function(dlg){
-							cga.saveToBankAll('王冠', 0, (r)=>{
-								cb2('restart stage');
-							});
-						}, 1000);
+						cga.walkList([
+						[11, 8],
+						], ()=>{
+							cga.turnDir(0);
+							cga.AsyncWaitNPCDialog(()=>{
+								cga.saveToBankAll('王冠', 0, (r)=>{
+									cb2('restart stage');
+								});
+							}, 1000);
+						});
 					});
 					return;
 				}
 				if(cga.getItemCount('公主头冠') >= 1)
 				{
 					cga.travel.falan.toBank(()=>{
-						cga.AsyncWaitNPCDialog(function(dlg){
-							cga.saveToBankAll('公主头冠', 0, (r)=>{
-								cb2('restart stage');
-							});
-						}, 1000);
+						cga.walkList([
+						[11, 8],
+						], ()=>{
+							cga.turnDir(0);
+							cga.AsyncWaitNPCDialog(()=>{
+								cga.saveToBankAll('公主头冠', 0, (r)=>{
+									cb2('restart stage');
+								});
+							}, 1000);
+						});
+					});
+					return;
+				}
+			}
+			else
+			{
+				if(cga.getItemCount('小猫帽') >= 1)
+				{
+					cga.travel.falan.toBank(()=>{
+						cga.walkList([
+						[11, 8],
+						], ()=>{
+							cga.turnDir(0);
+							cga.AsyncWaitNPCDialog(()=>{
+								cga.saveToBankAll('小猫帽', 0, (r)=>{
+									cb2('restart stage');
+								});
+							}, 1000);
+						});
 					});
 					return;
 				}
@@ -383,24 +412,21 @@ var cga = require('./cgaapi')(function(){
 							setTimeout(cb2, 3000, true);
 						});
 					} else {
-						if(typeof dlg.message == 'string' &&
-						dlg.message.indexOf('给你这个') >= 0){
+						if(dlg && dlg.message.indexOf('给你这个') >= 0){
 							cga.ClickNPCDialog(32, 0);
 							cga.AsyncWaitNPCDialog((dlg)=>{
 								cga.ClickNPCDialog(1, 0);
 								setTimeout(cb2, 3000, true);
 							});
 						}
-						else if(typeof dlg.message == 'string' &&
-						dlg.message.indexOf('还给我吗') >= 0){
+						else if(dlg && dlg.message.indexOf('还给我吗') >= 0){
 							cga.ClickNPCDialog(4, 0);
 							cga.AsyncWaitNPCDialog((dlg)=>{
 								cga.ClickNPCDialog(1, 0);
 								setTimeout(cb2, 3000, true);
 							});
 						}
-						else if(typeof dlg.message == 'string' &&
-						dlg.message.indexOf('我是管理') >= 0){
+						else if(dlg && dlg.message.indexOf('我是管理') >= 0){
 							cga.SayWords('男', 0, 3, 1);
 							cga.AsyncWaitNPCDialog((dlg)=>{
 								cga.ClickNPCDialog(1, 0);
