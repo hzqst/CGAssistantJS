@@ -348,9 +348,6 @@ var thisobj = {
 		callSubPlugins('init');
 		mineObject.init();
 		checkSettle.func((err, map)=>{
-			if(map != '哥拉尔镇')
-				throw new Error('必须定居哥拉尔镇!');
-			
 			loop();
 		});
 	},
