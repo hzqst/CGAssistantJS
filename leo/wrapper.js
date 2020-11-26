@@ -1369,7 +1369,7 @@ module.exports = new Promise(resolve => {
 
 		const sellList = cga.getInventoryItems().filter(filter).map(e => {
 			let sellCount = (e.count < 1) ? 1 : e.count;
-			if ([30, 34, 35].indexOf(e.type) >= 0) {
+			if ([29, 30, 34, 35].indexOf(e.type) >= 0) {
 				sellCount = parseInt(e.count / 20);
 			} else if ([43, 23].indexOf(e.type) >= 0) {
 				sellCount = parseInt(e.count / 3);
@@ -1408,9 +1408,15 @@ module.exports = new Promise(resolve => {
 	let craftedOnce = false;
 	cga.emogua.craft = (name) => {
 		const requireInfo = cga.getItemCraftInfo(name);
+		//console.log(requireInfo);
 		if (requireInfo) {
 			const findJewel = ['制药', '料理'].indexOf(requireInfo.skill.name) < 0;
 			const materials = requireInfo.craft.materials;
+			const skillIndex = requireInfo.craft.level;
+			const level = requireInfo.skill.index;
+			const subSkillInfo = cga.GetSubSkillInfo(skillIndex, level);
+			//const needMp = level * 11;
+			const needMp = subSkillInfo.cost;
 			return cga.emogua.recursion(() => {
 				const items = cga.getInventoryItems();
 				materials.forEach(material => {
@@ -1421,6 +1427,9 @@ module.exports = new Promise(resolve => {
 				if (findJewel) {
 					const jewel = items.find(i => i.type == 38 && i.assessed);
 					if (jewel) jewelPosition = jewel.pos;
+				}
+				if(cga.GetPlayerInfo.mp < needMp){
+					return Promise.reject();
 				}
 				if (materials.filter(m => !m.position).length == 0) {
 					const positions = [0,0,0,0,0,0];
@@ -2341,6 +2350,7 @@ module.exports = new Promise(resolve => {
 		return Promise.resolve();
 	};
 	const getPileMax = (item) => {
+		if (item.name.indexOf('谜语箱') >= 0) return 0;
 		if (item.name.endsWith('的水晶碎片')) return 999;
 		if (['长老之证'].indexOf(item.name) >= 0) return 3;
 		if (['黄蜂的蜜'].indexOf(item.name) >= 0) return 6;
