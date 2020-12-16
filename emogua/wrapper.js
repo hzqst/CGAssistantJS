@@ -64,6 +64,7 @@ module.exports = new Promise(resolve => {
 		Item: 1024,
 		Player: 256
 	};
+
 	cga.emogua.shuffle = (arr) => {
 		let i = arr.length;
 		while (i) {
@@ -1785,7 +1786,7 @@ module.exports = new Promise(resolve => {
 						doctor = units.find(u => (u.flags & cga.emogua.UnitFlags.Player) && u.unit_name == options.doctorName);
 					} else {
 						doctor = units.find(
-							u => (u.flags & cga.emogua.UnitFlags.Player) && ((u.injury & 2) == 2 ||
+							u => (u.flags & cga.emogua.UnitFlags.Player) && ( ((u.injury & 2) == 2 && u.icon == 13) ||
 								u.nick_name.indexOf('治疗') >= 0 || u.nick_name.indexOf('医') >= 0 || u.title_name.indexOf('医') >= 0
 							)
 						);
