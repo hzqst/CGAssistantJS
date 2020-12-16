@@ -2,18 +2,20 @@ require('./common').then(cga => {
     leo.baseInfoPrint();
     leo.monitor.config.keepAlive = false;   //关闭防掉线
     leo.monitor.config.logStatus = false;
-    var teamLeader = '绿茵之殇'; //队长名称
+    leo.monitor.config.equipsProtect = false;
+    var teamLeader = '此处填队长名称'; //队长名称
     var teamPlayerCount = 5; //队伍人数
     var protect = {
         minHp: 150,
         minMp: 100,
         minPetHp: 100,
-        minPetMp: 60,
+        minPetMp: 100,
         minTeamNumber: 5
     };
     var teammates = [];
     var isPrepare = false; //招魂、治疗、补血、卖石
     var isLogBackFirst = false; //启动登出
+    var sellStone = true; //卖魔石
     var meetingPoint = 3; //集合点1~3
     var prepareOptions = {
         rechargeFlag: 1,
@@ -41,6 +43,9 @@ require('./common').then(cga => {
     var isTeamLeader = false;
     if (playerName == teamLeader) {
         isTeamLeader = true;
+        leo.log('我是队长，预设队伍人数【'+teamPlayerCount+'】');
+    }else{
+        leo.log('我是队员，队长是【'+teamLeader+'】');
     }
 
     leo.todo().then(() => {
@@ -61,7 +66,7 @@ require('./common').then(cga => {
         return leo.loop(
             () => leo.waitAfterBattle()
             .then(() => leo.checkHealth(prepareOptions.doctorName))
-            .then(() => leo.checkCrystal(prepareOptions.crystalName))
+            //.then(() => leo.checkCrystal(prepareOptions.crystalName))
             .then(() => {
                 //完成组队
                 var teamplayers = cga.getTeamPlayers();
@@ -77,6 +82,15 @@ require('./common').then(cga => {
                     .then(()=>leo.autoWalk([90,99,'国民会馆']))
                     //.then(()=>leo.autoWalk([108,51]))
                     //.then(()=>leo.supplyDir(2))
+                    .then(()=>{
+                        if(sellStone){
+                            return leo.autoWalkList([
+                                [110, 43]
+                            ])
+                            .then(() => leo.sell(110, 42))
+                            //.then(() => leo.delay(10000));
+                        }
+                    })
                     .then(() => {
                         if (isTeamLeader) {
                             cga.EnableFlags(cga.ENABLE_FLAG_JOINTEAM, true); //开启组队
@@ -93,17 +107,7 @@ require('./common').then(cga => {
                 if (isTeamLeader) {
                     var currentMap = cga.GetMapName();
                     if (currentMap == '国民会馆') {
-                        return leo.autoWalkList([
-                            [110, 43]
-                        ])
-                        .then(() => leo.walkList([
-                            [109, 43],
-                            [110, 43],
-                            [109, 43],
-                            [110, 43]
-                        ]))
-                        .then(() => leo.sell(110, 42))
-                        .then(() => leo.delay(5000))
+                        return leo.todo()
                         .then(() => leo.autoWalk([107,52]))
                         .then(() => leo.walkList([
                             [107, 51],

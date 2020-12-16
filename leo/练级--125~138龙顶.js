@@ -2,13 +2,14 @@ require('./common').then(cga => {
     leo.baseInfoPrint();
     leo.monitor.config.keepAlive = false;   //关闭防掉线
     leo.monitor.config.logStatus = false;
-    var teamLeader = '队长名称'; //队长名称
+    var teamLeader = '此处填队长名称'; //队长名称
     var teamPlayerCount = 5; //队伍人数
+    var usingpunchclock = false; //是否打卡
     var protect = {
         minHp: 500,
         minMp: 100,
         minPetHp: 150,
-        minPetMp: 0,
+        minPetMp: 100,
         //maxItemNumber: 19,
         minTeamNumber: 5,
         normalNurse: false
@@ -54,6 +55,9 @@ require('./common').then(cga => {
     if (playerName == teamLeader) {
         isTeamLeader = true;
         protect.minMp = 350; //队长是传教，回城魔值至少要大于等于一次祈祷的魔
+        leo.log('我是队长，预设队伍人数【'+teamPlayerCount+'】');
+    }else{
+        leo.log('我是队员，队长是【'+teamLeader+'】');
     }
 
     leo.todo().then(() => {
@@ -111,7 +115,15 @@ require('./common').then(cga => {
                     return leo.next();
                 } else {
                     console.log(leo.logTime() + '寻找队伍');
-                    return leo.goto(n => n.camp.x).then(() => {
+                    return leo.todo()
+                    .then(()=>{
+                        if(usingpunchclock){
+                            return leo.goto(n => n.castle.clock)
+                            .then(()=>leo.talkNpc(2,leo.talkNpcSelectorYes));
+                        }
+                    })
+                    .then(()=>leo.goto(n => n.camp.x))
+                    .then(() => {
                         if (isTeamLeader) {
                             cga.EnableFlags(cga.ENABLE_FLAG_JOINTEAM, true); //开启组队
                             return leo.autoWalk(meetingPointTeamLeader[meetingPoint - 1]).then(() => leo.buildTeam(teamPlayerCount)).then(() => {

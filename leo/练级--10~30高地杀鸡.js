@@ -2,18 +2,20 @@ require('./common').then(cga => {
     leo.baseInfoPrint();
     leo.monitor.config.keepAlive = false;   //关闭防掉线
     leo.monitor.config.logStatus = false;
-    var teamLeader = '队长名称'; //队长名称
+    leo.monitor.config.equipsProtect = false;
+    var teamLeader = '此处填队长名称'; //队长名称
     var teamPlayerCount = 5; //队伍人数
     var protect = {
         minHp: 150,
         minMp: 100,
-        minPetHp: 100,
-        minPetMp: 60,
+        minPetHp: 0,
+        minPetMp: 0,
         minTeamNumber: 5
     };
     var teammates = [];
     var isPrepare = false; //招魂、治疗、补血、卖石
     var isLogBackFirst = false; //启动登出
+    var sellStone = false; //卖魔石
     var meetingPoint = 1; //集合点1~3
     var prepareOptions = {
         rechargeFlag: 1,
@@ -32,6 +34,10 @@ require('./common').then(cga => {
     var isTeamLeader = false;
     if (playerName == teamLeader) {
         isTeamLeader = true;
+        protect.minPetMp = 100;
+        leo.log('我是队长，预设队伍人数【'+teamPlayerCount+'】');
+    }else{
+        leo.log('我是队员，队长是【'+teamLeader+'】');
     }
 
     leo.todo().then(() => {
@@ -84,19 +90,28 @@ require('./common').then(cga => {
                         .then(() => leo.delay(500));
                     }
                     if (currentMap == '艾夏岛') {
-                        return leo.autoWalk([102,115,'冒险者旅馆'])
-                        .then(() => leo.autoWalk([37,30]))
-                        .then(() => leo.walkList([
-                            [38,30],
-                            [37,30],
-                            [38,30],
-                            [37,30]
-                        ]))
-                        .then(()=>leo.sell(37, 29))
-                        .then(()=>leo.delay(3000))
-                        .then(()=>leo.autoWalkList([
-                            [38,48,'艾夏岛'],[112,81,'医院'],[35,46]
-                        ]))
+                        return leo.todo()
+                        .then(()=>{
+                            if(sellStone){
+                                return leo.autoWalk([102,115,'冒险者旅馆'])
+                                .then(() => leo.autoWalk([37,30]))
+                                .then(() => leo.walkList([
+                                    [38,30],
+                                    [37,30],
+                                    [38,30],
+                                    [37,30]
+                                ]))
+                                .then(()=>leo.sell(37, 29))
+                                .then(()=>leo.delay(3000))
+                                .then(()=>leo.autoWalkList([
+                                    [38,48,'艾夏岛'],[112,81,'医院'],[35,46]
+                                ]));
+                            }else{
+                                return leo.autoWalkList([
+                                    [112,81,'医院'],[35,46]
+                                ]);
+                            }
+                        })
                         .then(() => leo.walkList([
                             [35,45],
                             [35,46],

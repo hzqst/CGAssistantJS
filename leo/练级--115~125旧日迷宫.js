@@ -2,9 +2,10 @@ require('./common').then(cga => {
     leo.baseInfoPrint();
     leo.monitor.config.keepAlive = false;   //关闭防掉线
     leo.monitor.config.logStatus = false;
-    var teamLeader = '队长名称'; //队长名称
+    var teamLeader = '此处填队长名称'; //队长名称
     var teamPlayerCount = 5; //队伍人数
     var level = 1;  //指定楼层
+    var usingpunchclock = false; //是否打卡
     var protect = {
         minHp: 500,
         minMp: 100,
@@ -35,6 +36,9 @@ require('./common').then(cga => {
     if (playerName == teamLeader) {
         isTeamLeader = true;
         protect.minMp = 350; //队长是传教，回城魔值至少要大于等于一次祈祷的魔
+        leo.log('我是队长，预设队伍人数【'+teamPlayerCount+'】');
+    }else{
+        leo.log('我是队员，队长是【'+teamLeader+'】');
     }
 
     var haojiao = () => {
@@ -78,7 +82,14 @@ require('./common').then(cga => {
                     return leo.next();
                 } else {
                     console.log(leo.logTime() + '寻找队伍');
-                    return leo.goto(n => n.camp.x)
+                    return leo.todo()
+                    .then(()=>{
+                        if(usingpunchclock){
+                            return leo.goto(n => n.castle.clock)
+                            .then(()=>leo.talkNpc(2,leo.talkNpcSelectorYes));
+                        }
+                    })
+                    .then(()=>leo.goto(n => n.camp.x))
                     .then(() => haojiao())
                     .then(() => {
                         return leo.autoWalkList([

@@ -2,7 +2,7 @@ require('./common').then(cga => {
     leo.baseInfoPrint();
     leo.monitor.config.keepAlive = false;   //关闭防掉线
     leo.monitor.config.logStatus = false;
-    var teamLeader = '队长名称'; //队长名称
+    var teamLeader = '此处填队长名称'; //队长名称
     var teamPlayerCount = 5; //队伍人数
     var protect = {
         minHp: 150,
@@ -32,6 +32,9 @@ require('./common').then(cga => {
     var isTeamLeader = false;
     if (playerName == teamLeader) {
         isTeamLeader = true;
+        leo.log('我是队长，预设队伍人数【'+teamPlayerCount+'】');
+    }else{
+        leo.log('我是队员，队长是【'+teamLeader+'】');
     }
 
     leo.todo().then(() => {

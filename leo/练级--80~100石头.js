@@ -2,13 +2,14 @@ require('./common').then(cga => {
     leo.baseInfoPrint();
     leo.monitor.config.keepAlive = false;   //关闭防掉线
     leo.logStatus = false;
-    var teamLeader = '队长名称'; //队长名称
+    var teamLeader = '此处填队长名称'; //队长名称
     var teamPlayerCount = 5; //队伍人数
+    var usingpunchclock = false; //是否打卡
     var protect = {
         minHp: 500,
         minMp: 100,
         minPetHp: 150,
-        minPetMp: 0,
+        minPetMp: 100,
         maxItemNumber: 21,
         minTeamNumber: 5,
         normalNurse: false
@@ -58,6 +59,11 @@ require('./common').then(cga => {
         isTeamLeader = true;
         protect.minTeamNumber = 1;
     }
+    if(isTeamLeader){
+        leo.log('我是队长，预设队伍人数【'+teamPlayerCount+'】');
+    }else{
+        leo.log('我是队员，队长是【'+teamLeader+'】');
+    }
 
     var huizhang = () => {
         var huizhang = leo.getItems('矮人徽章');
@@ -102,7 +108,14 @@ require('./common').then(cga => {
                     return leo.next();
                 } else {
                     console.log(leo.logTime() + '寻找队伍');
-                    return leo.goto(n => n.camp.x)
+                    return leo.todo()
+                    .then(()=>{
+                        if(usingpunchclock){
+                            return leo.goto(n => n.castle.clock)
+                            .then(()=>leo.talkNpc(2,leo.talkNpcSelectorYes));
+                        }
+                    })
+                    .then(()=>leo.goto(n => n.camp.x))
                     .then(() => huizhang())
                     .then(() => {
                         if (isTeamLeader) {

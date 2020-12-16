@@ -2,7 +2,7 @@ require('./common').then(cga => {
     leo.baseInfoPrint();
     leo.monitor.config.keepAlive = false;   //关闭防掉线
     leo.logStatus = false;
-    var teamLeader = '小不点传'; //队长名称
+    var teamLeader = '此处填队长名称'; //队长名称
     var teamPlayerCount = 5; //队伍人数
     var protect = {
         minHp: 500,
@@ -43,7 +43,7 @@ require('./common').then(cga => {
         [99, 84],
         [100, 84]
     ];
-    leo.log('红叶の黑一脚本，位置点【' + meetingPoint + '】，推荐100~125级使用，启动~');
+    leo.log('红叶の蜥蜴脚本，位置点【' + meetingPoint + '】，推荐94~105级使用，启动~');
     cga.EnableFlags(cga.ENABLE_FLAG_TEAMCHAT, true); //开启队聊
     cga.EnableFlags(cga.ENABLE_FLAG_JOINTEAM, true); //开启组队
     cga.EnableFlags(cga.ENABLE_FLAG_CARD, false); //关闭名片
@@ -54,6 +54,9 @@ require('./common').then(cga => {
     if (playerName == teamLeader) {
         isTeamLeader = true;
         protect.minMp = 350; //队长是传教，回城魔值至少要大于等于一次祈祷的魔
+        leo.log('我是队长，预设队伍人数【'+teamPlayerCount+'】');
+    }else{
+        leo.log('我是队员，队长是【'+teamLeader+'】');
     }
 
     leo.todo().then(() => {

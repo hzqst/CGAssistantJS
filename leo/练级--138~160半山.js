@@ -2,13 +2,13 @@ require('./common').then(cga => {
     leo.baseInfoPrint();
     leo.monitor.config.keepAlive = false;   //关闭防掉线
     leo.monitor.config.logStatus = false;
-    var teamLeader = '队长名称'; //队长名称
+    var teamLeader = '此处填队长名称'; //队长名称
     var teamPlayerCount = 5; //队伍人数
     var protect = {
         minHp: 500,
         minMp: 100,
         minPetHp: 150,
-        minPetMp: 0,
+        minPetMp: 100,
         maxItemNumber: 21,
         minTeamNumber: 5
     };
@@ -33,6 +33,9 @@ require('./common').then(cga => {
     if (playerName == teamLeader) {
         isTeamLeader = true;
         protect.minMp = 350; //队长是传教，回城魔值至少要大于等于一次祈祷的魔
+        leo.log('我是队长，预设队伍人数【'+teamPlayerCount+'】');
+    }else{
+        leo.log('我是队员，队长是【'+teamLeader+'】');
     }
 
     leo.todo().then(() => {
@@ -55,6 +58,22 @@ require('./common').then(cga => {
             .then(() => leo.checkHealth(prepareOptions.doctorName))
             .then(() => leo.checkCrystal(prepareOptions.crystalName))
             .then(() => {
+                if(cga.GetPlayerInfo().gold < 5000){
+                    return leo.goto(n=>n.falan.bank)
+                    .then(()=>leo.turnDir(0))
+                    .then(()=>leo.moveGold(100000,cga.MOVE_GOLD_FROMBANK))
+                    .then(()=>leo.moveGold(100000,cga.MOVE_GOLD_FROMBANK))
+                    .then(()=>leo.moveGold(100000,cga.MOVE_GOLD_FROMBANK))
+                    .then(()=>{
+                        if(cga.GetPlayerInfo().gold < 5000){
+                            leo.log('钱到用时方恨少！请补充足够银子后重新执行脚本！')
+                            return leo.delay(10000000)
+                            .then(()=>leo.reject());
+                        }
+                    })
+                }
+            })
+            .then(() => {
                 //完成组队
                 var teamplayers = cga.getTeamPlayers();
                 if ((isTeamLeader && teamplayers.length >= protect.minTeamNumber)
@@ -65,7 +84,9 @@ require('./common').then(cga => {
                     console.log(leo.logTime() + '寻找队伍');
                     return leo.logBack()
                     .then(() => leo.statistics(leo.beginTime, leo.oldXp))   //打印统计信息
-                    .then(()=>leo.prepare(prepareOptions))
+                    .then(()=>leo.sellCastle())
+                    .then(()=>leo.checkHealth(prepareOptions.doctorName))
+                    .then(()=>leo.checkCrystal(prepareOptions.crystalName))
                     .then(()=>leo.goto(n => n.falan.wout))
                     .then(()=>leo.autoWalk([397,168]))
                     .then(()=>leo.talkNpc(398, 168, leo.talkNpcSelectorYes,'小岛'))
