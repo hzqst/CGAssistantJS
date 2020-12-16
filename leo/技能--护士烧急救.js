@@ -8,7 +8,7 @@ require('./common').then(cga=>{
 	var minMp = 100;
 
 	var skillName = '急救';
-	var skillLevel = 6;
+	var skillLevel = 11;
 	var skill = cga.findPlayerSkill(skillName);
 
 	var takeOff = ()=>{
@@ -81,7 +81,9 @@ require('./common').then(cga=>{
 					const requireMp = 50;
 					playerinfo = cga.GetPlayerInfo();
 					if (playerinfo.hp < playerinfo.maxhp && skill && playerinfo.mp >= requireMp) {
-						cga.StartWork(skill.index, skill.lv-1);
+						var lv = skill.lv - 1;
+						//lv = 0;	//始终用1级技能
+						cga.StartWork(skill.index, lv);
 						cga.AsyncWaitPlayerMenu((error, players) => setTimeout(() => {
 	                        if (players && players.length > 0) {
 	                            const index = players.findIndex(p => p.name == playerinfo.name);
@@ -89,13 +91,13 @@ require('./common').then(cga=>{
 	                                cga.PlayerMenuSelect(index);
 	                                cga.AsyncWaitUnitMenu((error, units) => setTimeout(() => {
 	                                    if (error) {
-	                                        resolve();
+	                                        leo.next();
 	                                    } else {
 	                                        cga.UnitMenuSelect(0);
 	                                    }
 	                                }, 0));
-	                            } else resolve();
-	                        } else resolve();
+	                            } else leo.next();
+	                        } else leo.next();
 	                    }, 0), 2000);
 					} else{
 						return leo.next();
