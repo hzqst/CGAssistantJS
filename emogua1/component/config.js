@@ -1,12 +1,20 @@
 const fs = require('fs');
 
+const getSamePrefixIndex = (a,b) => {
+	const length = Math.min(a.length, b.length);
+	for (let i = 0; i < length; i++) {
+		if (a.charAt(i) != b.charAt(i)) return i;
+	}
+	return length;
+}
 const splitter = '\\';
 const rootPath = __dirname.substring(0, __dirname.lastIndexOf(splitter));
-const configPath = rootPath + '\\config';
+const configPath = rootPath + splitter + 'config';
 if (!fs.existsSync(configPath)) {
 	fs.mkdirSync(configPath);
 }
-const getFileFullPath = () => configPath + require.main.filename.replace(rootPath, '').split('.')[0] + '.json';
+const pathPrefixIndex = getSamePrefixIndex(rootPath, require.main.filename);
+const getFileFullPath = () => configPath + (rootPath.length == pathPrefixIndex ? '' : splitter + '_outer_' + splitter) + require.main.filename.substring(pathPrefixIndex).split('.')[0] + '.json';
 const Config = {};
 Config.read = (defaults = {}) => {
 	const filePath = getFileFullPath();
@@ -19,7 +27,7 @@ Config.read = (defaults = {}) => {
 };
 Config.readFromConfigPath = (relativeFile) => {
 	try {
-		return JSON.parse(fs.readFileSync(configPath + '\\' + relativeFile));
+		return JSON.parse(fs.readFileSync(configPath + splitter + relativeFile));
 	} catch (e) {
 		return {};
 	}
@@ -44,7 +52,7 @@ Config.save = (config) => {
 	return config;
 };
 Config.saveToConfigPath = (relativeFile, config) => {
-	save(configPath + '\\' + relativeFile, config);
+	save(configPath + splitter + relativeFile, config);
 	return config;
 };
 
