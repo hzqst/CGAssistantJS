@@ -37,6 +37,7 @@ module.exports = new Promise(resolve => {
 	const cga = require('../../cgaapi')(() => setTimeout(() => resolve(cga)));
 }).then(cga => {
 	console.log('cga连接成功', new Date().toLocaleString());
+	cga.AsyncConnect = (port,callback) => setTimeout(() => callback());
 	cga.emogua = {};
 	cga.emogua.UnitFlags = {
 		NpcEntry: 4096, // npc 或者 随机入口
