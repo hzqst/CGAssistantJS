@@ -48,7 +48,7 @@ const save = (filePath, config) => {
 	fs.writeFileSync(filePath, JSON.stringify(config));
 };
 Config.save = (config) => {
-	save(getFileFullPath());
+	save(getFileFullPath(), config);
 	return config;
 };
 Config.saveToConfigPath = (relativeFile, config) => {
