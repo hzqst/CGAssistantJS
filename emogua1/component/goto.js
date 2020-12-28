@@ -52,7 +52,7 @@ module.exports = (async () => {
 			sout: new Station([424,259,{map:'芙蕾雅'}]),
 			wout: new Station([374,195,{map:'芙蕾雅'}]),
 			mbank: new Station([83,12,{map:'市场三楼 - 修理专区'}]),
-			mrepair: new Station([82,8,{map:'市场三楼 - 修理专区'}]),
+			mnurse: new Station([83,8,{map:'市场三楼 - 修理专区'}]),
 			bank: new Station([11, 8, {map:'银行'}]),
 			ehospital: new Station([12, 42, {map:1112}]),
 			whospital: new Station([12, 42, {map:1111}]),
@@ -330,13 +330,13 @@ module.exports = (async () => {
 		))
 	];
 	Network.falan.m1.links = [
-		new Link(Network.falan.mbank), new Link(Network.falan.mrepair),
+		new Link(Network.falan.mbank), new Link(Network.falan.mnurse),
 		new Link(Network.falan.s1, () => cga.emogua.turnOrientation(6, Network.falan.s1.id[2]))
 	];
 	Network.falan.mbank.links = [
-		new Link(Network.falan.m1), new Link(Network.falan.mrepair)
+		new Link(Network.falan.m1), new Link(Network.falan.mnurse)
 	];
-	Network.falan.mrepair.links = [
+	Network.falan.mnurse.links = [
 		new Link(Network.falan.m1), new Link(Network.falan.mbank)
 	];
 	Network.falan.m2.links = [
