@@ -640,10 +640,17 @@ module.exports = new Promise(resolve => {
 		let timer = Date.now();
 		const max = team ? team.length : 5;
 		const startPosition = cga.GetMapXY();
-		while (cga.emogua.getTeamNumber() < max) {
-			const strangers = cga.emogua.getTeammates().filter(t => team && !team.includes(t.name)).map(t => t.name);
-			for (let s of strangers) {
-				await cga.emogua.kickStranger(s);
+		for (;;) {
+			let teammates = cga.emogua.getTeammates();
+			const strangers = teammates.filter(t => team && !team.includes(t.name)).map(t => t.name);
+			if (strangers.length > 0) {
+				for (let s of strangers) {
+					await cga.emogua.kickStranger(s);
+				}
+				teammates = cga.emogua.getTeammates();
+			}
+			if (teammates.length + 1 >= max) {
+				break;
 			}
 			if (typeof interruptor == 'function' && interruptor()) {
 				console.log('中断组队', new Date().toLocaleString());

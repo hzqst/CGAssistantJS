@@ -16,6 +16,7 @@
 			minMp: 20,
 			minPetHp: 400,
 			minPetMp: 0,
+			minTeamNumber: team.length,
 			maxItemNumber: 19
 		};
 		if (team) {
