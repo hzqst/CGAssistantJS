@@ -631,7 +631,7 @@ module.exports = new Promise(resolve => {
 			const kick = splits.slice(2, splits.length - 1).findIndex(n => n.startsWith(name));
 			if (kick >= 0) {
 				cga.ClickNPCDialog(-1, kick);
-				await com.emogua.delay(500);
+				await cga.emogua.delay(500);
 			}
 		}
 	};
