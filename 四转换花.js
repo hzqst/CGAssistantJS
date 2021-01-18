@@ -45,27 +45,9 @@ var cga = require('./cgaapi')(function(){
 			}
 		}
 
-		cga.SayWords('CGA四转脚本等待换花，['+myItem+']交换'+'['+waitForItem+']', 0, 3, 1);
-		
-		var flowerOk = false;
-		
 		var waitChat = ()=>{
-			if(flowerOk)
-				return;
-
 			cga.AsyncWaitChatMsg((err, r)=>{
-				if(flowerOk)
-					return;
-				
-				if(err || !r){
-
-					cga.SayWords('CGA四转脚本等待换花，['+myItem+']交换'+'['+waitForItem+']', 0, 3, 1);
-			
-					waitChat();
-					return;
-				}
-				
-				if(r.unitid != -1)
+				if(r && r.unitid != -1)
 				{
 					var findpos = r.msg.indexOf(': CGA四转脚本等待换花');
 					if(findpos > 0)
@@ -77,9 +59,11 @@ var cga = require('./cgaapi')(function(){
 							var playerunit = cga.findPlayerUnit(playername);
 							if(playerunit != null && playerunit.xpos == waitForPos[0] && playerunit.ypos ==waitForPos[1])
 							{
-								cga.requestTrade(playername, (result)=>{
-									if (result.success == true){
-										
+								cga.positiveTrade(playername, stuffs, undefined, result => {
+									if (result && result.success == true){
+										cb(true);
+									} else {
+										waitChat();
 									}
 								});
 								return;
@@ -93,13 +77,9 @@ var cga = require('./cgaapi')(function(){
 		}
 		
 		var waitTrade = ()=>{
-			if(flowerOk)
-				return;
-	
 			cga.waitTrade(stuffs, null, (results)=>{
-				if(results.success == true)
+				if(results && results.success == true)
 				{
-					flowerOk = true;
 					cb(true);
 				}
 				else
