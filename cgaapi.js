@@ -3994,27 +3994,23 @@ module.exports = function(callback){
 				x  = 0;
 			}
 			if(y > ysize){
-				
-				var waitDownloadEnd = (err, msg)=>{
-					if(err){
-						cb(err);
+				var waitDownloadEnd = (timeout = 3000) => cga.AsyncWaitDownloadMap((err, msg) => {
+					if (err) {
+						if(last_index3 != cga.GetMapIndex().index3){
+							cb(new Error('地图发生变化，下载失败'));
+							return;
+						}
+						cb(null);
 						return;
 					}
-					
-					if(last_index3 != msg.index3){
-						cb(new Error('地图发生变化，下载失败'));
-						return
-					}
-					
-					if(msg.xtop >= xsize && msg.ytop >= ysize){
-						cb(null);
-						return
-					}
 
-					cga.AsyncWaitDownloadMap(waitDownloadEnd, 5000);
-				}
-				
-				cga.AsyncWaitDownloadMap(waitDownloadEnd, 5000);
+					if ((msg.xtop >= xsize && msg.ytop >= ysize) || (msg.xbase == 0 && msg.ybase == 0)) {
+						waitDownloadEnd(500);
+					} else {
+						waitDownloadEnd(timeout);
+					}
+				}, timeout);
+				waitDownloadEnd();
 				return;
 			}
 			setTimeout(recursiveDownload, 500);
