@@ -3991,9 +3991,9 @@ module.exports = function(callback){
 			x += 24;
 			if(x > xsize){
 				y += 24;
-				x  = 0;
+				x = xfrom;
 			}
-			if(y > ysize){
+			if(y - ysize >= 24){
 				var waitDownloadEnd = (timeout = 3000) => cga.AsyncWaitDownloadMap((err, msg) => {
 					if (err) {
 						if(last_index3 != cga.GetMapIndex().index3){
