@@ -3,7 +3,8 @@
 		teams:[
 			{
 				names: [],
-				"forceTeamLevel": undefined
+				"forceTeamLevel": undefined,
+				line: 8
 			}
 		]
 	});
@@ -13,6 +14,9 @@
 		if (line) {
 			const account = await require('../../component/account');
 			await account.keepLine(line);
+		}
+		if (!cga.IsPlayerFlagEnabled(cga.ENABLE_FLAG_TEAMCHAT)) {
+			cga.SetPlayerFlagEnabled(cga.ENABLE_FLAG_TEAMCHAT, true);
 		}
 		const prepare = require('../../component/prepare');
 		const battle = await require('../../component/battle');

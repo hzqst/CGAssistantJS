@@ -145,65 +145,56 @@ module.exports = (async () => {
 						}
 					});
 				}
-				if (['见习传教士','传教士'].includes(playerInfo.job) && playerInfo.maxhp >= playerInfo.maxmp) {
-					sets.push({
-						user: 1,
-						check: context => [context.playerUnit, context.petUnit].filter(needHealChecker).length > 0,
-						type: '技能', skillName: '补血魔法', skillLevel: 6,
-						targets: context => [context.playerUnit, context.petUnit].filter(needHealChecker).sort((a, b) => a.hpRatio - b.hpRatio).map(t => t.pos)
-					});
-				} else {
-					sets.push({
-						user: 1,
-						check: context => {
-							if (!context.isBoss) {
-								return false;
-							}
-							const needHealUnits = context.teammates.filter(needHealChecker).map(u => u.pos);
-							return needHealUnits.length >= 3 && BattlePositionMatrix.getMaxTPosition(needHealUnits).count >= 3;
-						}, type: '技能', skillName: '强力补血魔法', skillLevel: 10,
-						targets: context => {
-							const t = BattlePositionMatrix.getMaxTPosition(
-								context.teammates.filter(needHealChecker).map(u => u.pos)
-							);
-							return [t.position];
+				sets.push({
+					user: 1,
+					check: context => {
+						if (!context.isBoss) {
+							return false;
 						}
-					});
-					sets.push({
-						user: 1,
-						check: context => {
-							if (context.isBoss) {
-								return false;
-							}
-							const needHealUnits = context.teammates.filter(needHealChecker).map(u => u.pos);
-							return needHealUnits.length >= 3 && BattlePositionMatrix.getMaxTPosition(needHealUnits).count >= 3;
-						}, type: '技能', skillName: '强力补血魔法', skillLevel: 6,
-						targets: context => {
-							const t = BattlePositionMatrix.getMaxTPosition(
-								context.teammates.filter(needHealChecker).map(u => u.pos)
-							);
-							return [t.position];
+						const needHealUnits = context.teammates.filter(needHealChecker).map(u => u.pos);
+						return needHealUnits.length >= 3 && BattlePositionMatrix.getMaxTPosition(needHealUnits).count >= 3;
+					}, type: '技能', skillName: '强力补血魔法', skillLevel: 10,
+					targets: context => {
+						const t = BattlePositionMatrix.getMaxTPosition(
+							context.teammates.filter(needHealChecker).map(u => u.pos)
+						);
+						return [t.position];
+					}
+				});
+				sets.push({
+					user: 1,
+					check: context => {
+						if (context.isBoss) {
+							return false;
 						}
-					});
-					sets.push({
-						user: 1,
-						check: context => context.isBoss && context.teammates.filter(needHealChecker).length >= 2,
-						type: '技能', skillName: '超强补血魔法',
-						targets: context => [context.player_pos]
-					});
-					sets.push({
-						user: 1,
-						check: context => context.isBoss && context.teammates.filter(needHealChecker).length > 0,
-						type: '技能', skillName: '补血魔法',
-						targets: context => context.teammates.filter(needHealChecker).sort((a, b) => a.hpRatio - b.hpRatio).map(t => t.pos)
-					});
-					sets.push({
-						user: 1,
-						check: context => !context.isBoss && context.teammates.filter(needHealChecker).length > 0,
-						type: '技能', skillName: '补血魔法', skillLevel: 6,
-						targets: context => context.teammates.filter(needHealChecker).sort((a, b) => a.hpRatio - b.hpRatio).map(t => t.pos)
-					});
-				}
+						const needHealUnits = context.teammates.filter(needHealChecker).map(u => u.pos);
+						return needHealUnits.length >= 3 && BattlePositionMatrix.getMaxTPosition(needHealUnits).count >= 3;
+					}, type: '技能', skillName: '强力补血魔法', skillLevel: 6,
+					targets: context => {
+						const t = BattlePositionMatrix.getMaxTPosition(
+							context.teammates.filter(needHealChecker).map(u => u.pos)
+						);
+						return [t.position];
+					}
+				});
+				sets.push({
+					user: 1,
+					check: context => context.isBoss && context.teammates.filter(needHealChecker).length >= 2,
+					type: '技能', skillName: '超强补血魔法',
+					targets: context => [context.player_pos]
+				});
+				sets.push({
+					user: 1,
+					check: context => context.isBoss && context.teammates.filter(needHealChecker).length > 0,
+					type: '技能', skillName: '补血魔法',
+					targets: context => context.teammates.filter(needHealChecker).sort((a, b) => a.hpRatio - b.hpRatio).map(t => t.pos)
+				});
+				sets.push({
+					user: 1,
+					check: context => !context.isBoss && context.teammates.filter(needHealChecker).length > 0,
+					type: '技能', skillName: '补血魔法', skillLevel: 6,
+					targets: context => context.teammates.filter(needHealChecker).sort((a, b) => a.hpRatio - b.hpRatio).map(t => t.pos)
+				});
 				sets.push({
 					user: 1,
 					check: context => context.playerUnit.curmp >= 100 && context.teammates.find(u => u.curhp == 0),
@@ -290,13 +281,13 @@ module.exports = (async () => {
 	};
 	/**
 	 * preset: Battle.Presets
-	 * restoreMinHp: 200
+	 * restoreMinHp: 300
 	 * restorePet: false
 	 * custom: (sets) => {}
-	 * comboBossNames: ['']
+	 * killFirstNames: ['']
 	 */
 	Battle.getBattleStrategies = async ({
-		preset = Battle.Presets.attack, restoreMinHp = 200, restorePet = false, custom, killFirstNames
+		preset = Battle.Presets.attack, restoreMinHp = 300, restorePet = false, custom, killFirstNames
 	} = {}) => {
 		const sets = [];
 		if (preset == Battle.Presets.attack) {
@@ -737,7 +728,7 @@ module.exports = (async () => {
 							).then(
 								() => cga.emogua.dropItems()
 							);
-							initBattleState()
+							initBattleState();
 						} else if (BattleActionFlags.BEGIN & state) {
 							initBattleState();
 						} else {
@@ -883,6 +874,8 @@ module.exports = (async () => {
 			}
 			const currentDate = new Date();
 			console.log('已停止遇敌', counter, parseInt((currentDate.getTime() - startTime.getTime()) / 1000), currentDate.toLocaleString());
+			await cga.emogua.delay(1000);
+			await cga.emogua.waitForNormal();
 		}
 	};
 	Battle.teammateCheckRencounterBlock = async () => {

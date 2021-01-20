@@ -4,7 +4,7 @@
 			{
 				names: [],
 				"forceTeamLevel": undefined,
-				line: 9
+				line: 8
 			}
 		]
 	});
@@ -23,6 +23,9 @@
 			if (line) {
 				const account = await require('../../component/account');
 				await account.keepLine(line);
+			}
+			if (!cga.IsPlayerFlagEnabled(cga.ENABLE_FLAG_TEAMCHAT)) {
+				cga.SetPlayerFlagEnabled(cga.ENABLE_FLAG_TEAMCHAT, true);
 			}
 			const prepare = require('../../component/prepare');
 			const battle = await require('../../component/battle');
@@ -159,6 +162,10 @@
 							await cga.emogua.autoWalk([424,345,{map:'黑龙沼泽1区'}]);
 							if (teamLevel < 120) {
 								const entry = cga.GetMapXY();
+								const entries = await cga.emogua.getMazeEntries();
+								if (entries.length > 0) {
+									await cga.emogua.autoWalk([entries[0].x, entries[0].y]);
+								}
 								await battle.rencounter(protect);
 								if (cga.GetMapName() == '黑龙沼泽1区') {
 									await cga.emogua.autoWalk([entry.x,entry.y,{map:'肯吉罗岛'}]);

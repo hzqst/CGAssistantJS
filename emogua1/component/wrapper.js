@@ -9,7 +9,7 @@
  * cga.getMapObjects()
  *     [ { x: 199, y: 209, mapx: 199, mapy: 209, cell: 10 }] cell 10(地图出入口) 3(迷宫出入口)
  * dialog options:
- *     0  : 列表选择 cga.ClickNPCDialog(0, 6) 第一个参数应该是被忽略的，第二个参数选择列表序号，从0开始
+ *     0  : 列表选择 cga.ClickNPCDialog(-1, 6) 第一个参数应该是被忽略的，第二个参数选择列表序号，从0开始
  *     1  : 确定按钮 cga.ClickNPCDialog(1, -1)
  *     2  : 取消按钮 cga.ClickNPCDialog(2, -1)
  *     3  : 确定取消 cga.ClickNPCDialog(1, -1) 1确定 2取消
@@ -67,8 +67,8 @@ module.exports = new Promise(resolve => {
 		}
 		return cga.isMapDownloaded();
 	};
-	cga.emogua.downloadPartialMap = ({xfrom, yfrom, xsize, ysize}) => new Promise(
-		(resolve, reject) => cga.downloadMapEx(xfrom, yfrom, xsize, ysize, error => setTimeout(() => error ? reject(error) : resolve()))
+	cga.emogua.downloadPartialMap = ({xfrom, yfrom, xend, yend}) => new Promise(
+		(resolve, reject) => cga.downloadMapEx(xfrom, yfrom, xend, yend, error => setTimeout(() => error ? reject(error) : resolve()))
 	);
 	cga.emogua.downloadMap = () => {
 		if(!cga.emogua.isMapDownloaded()) {
@@ -307,6 +307,18 @@ module.exports = new Promise(resolve => {
 				cga.ClickNPCDialog(1, -1);
 			}
 			return dialog;
+		},
+		giveMaterials: dialog => {
+			if (dialog.type == 30) {
+				cga.ClickNPCDialog(-1,0);
+			} else if (dialog.type == 31) {
+				if (dialog.message.includes('|银|')) { // 坎村
+					cga.SellNPCStore([{itempos:1,count:(cga.getItemCount('银') - parseInt(dialog.message.split('|').pop()))}]);
+				} else if (dialog.message.includes('|黄月木|')) {
+					cga.SellNPCStore([{itempos:1,count:(cga.getItemCount('黄月木') - parseInt(dialog.message.split('|').pop()))}]);
+				}
+			}
+			return dialog;
 		}
 	};
 	talkNpcSelectors.yes = talkNpcSelectors.yesGenerator(32);
@@ -346,8 +358,10 @@ module.exports = new Promise(resolve => {
 	cga.emogua.stopDropItems = () => {
 		DropItemNames.splice(0, DropItemNames.length);;
 	};
+	let droppingItems = false;
 	cga.emogua.dropItems = async (positions) => {
-		if (cga.isInNormalState()) { // && cga.GetMoveSpeed() 高速走路不能仍物品
+		if (cga.isInNormalState() && !droppingItems) { // && cga.GetMoveSpeed() 高速走路不能仍物品
+			droppingItems = true;
 			if (positions instanceof Array) {
 				positions.forEach(position => cga.DropItem(position));
 			} else if (typeof positions == 'function') {
@@ -355,6 +369,7 @@ module.exports = new Promise(resolve => {
 			} else {
 				cga.getInventoryItems().filter(i => DropItemNames.find(n => i.name.indexOf(n) >= 0)).forEach(i => cga.DropItem(i.pos));
 			}
+			droppingItems = false;
 		}
 	};
 	cga.emogua.getEmptyBagIndexes = (items = cga.getInventoryItems()) => {
@@ -389,33 +404,15 @@ module.exports = new Promise(resolve => {
 			rate: 0
 		};
 	};
-	cga.emogua.getPileMax = (item) => {
-		if (item.name.endsWith('的水晶碎片')) return 999;
-		if (['长老之证'].indexOf(item.name) >= 0) return 3;
-		if (['黄蜂的蜜'].indexOf(item.name) >= 0) return 6;
-		if (['魔族的水晶'].indexOf(item.name) >= 0) return 5;
-		if (['巨石','龙角','坚硬的鳞片','竹子','孟宗竹'].indexOf(item.name) >= 0) return 20;
-		if (item.type == 29) {// 矿
-			if (item.name.endsWith('条')) return 20;
-			return 40;
-		}
-		if (item.type == 30) return 40; // 木
-		if (item.type == 23 || item.type == 43) { // 料理 血瓶
-			if (item.name == '小护士家庭号' || item.name == '魔力之泉') return 10;
-			return 3;
-		}
-		if (item.type == 31) return 20; // 布
-		if ([26,32,34,35].indexOf(item.type) >= 0) { // 狩猎材料
-			if (item.name.endsWith('元素碎片')) return 4;
-			if (item.name.startsWith('隐秘的徽记')) return 20;
-			return 40;
-		}
-	};
+	const piles = require('./pile');
+	cga.emogua.getPileMax = (item) => piles[item.name] || piles[item.type];
 	cga.emogua.equipmentMinDurability = 30;
 	let autoEquip = false;
 	cga.emogua.setAutoEquip = (value = true) => autoEquip = value;
+	let sortingItems = false;
 	cga.emogua.sortItems = async (force = false) => {
-		if (force || cga.isInNormalState()) {
+		if ((force || cga.isInNormalState()) && !sortingItems) {
+			sortingItems = true;
 			const items = cga.GetItemsInfo();
 			const pileCache = {};
 			for (let i = items.length - 1; i >= 0; i--) {
@@ -511,6 +508,7 @@ module.exports = new Promise(resolve => {
 					}
 				}
 			}
+			sortingItems = false;
 		}
 	};
 	cga.emogua.getGuiSetting = () => new Promise((resolve, reject) => cga.gui.GetSettings((error, setting) => error ? reject(error) : resolve(setting)));
@@ -612,8 +610,39 @@ module.exports = new Promise(resolve => {
 		}
 		throw '未等到message';
 	});
+	cga.emogua.waitTeamDialog = async ({ask, reply, timeout = 30000}) => {
+		if (ask) await cga.emogua.sayWords(ask);
+		const timer = Date.now();
+		do {
+			const chat = await cga.emogua.waitMessage(true, timeout).catch(() => {});
+			if (chat && chat.msg.includes(reply)) {
+				return true;
+			}
+		} while (Date.now() - timer < timeout);
+		return false;
+	};
+	cga.emogua.getNameFromChat = (chat) => {
+		if (chat && chat.unitid != -1)  {
+			const namePart = chat.msg.split(': ')[0];
+			return namePart.substring(namePart.indexOf(']') + 1);
+		}
+		return '';
+	};
+	const countRegex = /#(\d+)#/;
+	cga.emogua.getCountFromChat = (chat) => {
+		if (chat && chat.msg) {
+			try {
+				const matcher = countRegex.exec(chat.msg);
+				if (matcher) {
+					return parseInt(matcher[1]);
+				}
+			} catch (e) {}
+		}
+		return 0;
+	};
 	cga.emogua.turnOrientation = async (orientation, destination) => {
 		const lastMapIndex = orientation && orientation.map == '*' && cga.GetMapIndex().index3;
+		await cga.emogua.delay(500);
 		cga.turnOrientation(orientation);
 		if (destination) {
 			await cga.emogua.waitForDestination(destination, lastMapIndex);
@@ -621,7 +650,7 @@ module.exports = new Promise(resolve => {
 	};
 	cga.emogua.leaveTeam = () => {
 		cga.DoRequest(cga.REQUEST_TYPE_LEAVETEAM);
-		return cga.emogua.delay(300);
+		return cga.emogua.delay(500);
 	};
 	cga.emogua.kickStranger = async (name) => {
 		cga.DoRequest(cga.REQUEST_TYPE_KICKTEAM);
@@ -638,8 +667,12 @@ module.exports = new Promise(resolve => {
 	// coordinate 确保组队位置，以防止意外走开
 	cga.emogua.waitTeamBlock = async ({team, coordinate, interruptor}) => {
 		let timer = Date.now();
+		const totalTimer = timer;
 		const max = team ? team.length : 5;
 		const startPosition = cga.GetMapXY();
+		if (!cga.IsPlayerFlagEnabled(cga.ENABLE_FLAG_JOINTEAM)) {
+			cga.SetPlayerFlagEnabled(cga.ENABLE_FLAG_JOINTEAM, true);
+		}
 		for (;;) {
 			let teammates = cga.emogua.getTeammates();
 			const strangers = teammates.filter(t => team && !team.includes(t.name)).map(t => t.name);
@@ -652,7 +685,7 @@ module.exports = new Promise(resolve => {
 			if (teammates.length + 1 >= max) {
 				break;
 			}
-			if (typeof interruptor == 'function' && interruptor()) {
+			if (typeof interruptor == 'function' && interruptor({totalTimer})) {
 				console.log('中断组队', new Date().toLocaleString());
 				return true;
 			}
@@ -669,59 +702,74 @@ module.exports = new Promise(resolve => {
 			}
 			await cga.emogua.delay(2000);
 		}
-		await cga.emogua.autoWalk([startPosition.x, startPosition.y]);
+		if (coordinate) await cga.emogua.autoWalk([startPosition.x, startPosition.y]);
 	};
-	cga.emogua.joinTeam = async ({captainName}) => {
-		const captain = cga.GetMapUnits().find(u => (u.flags & cga.emogua.UnitFlags.Player) && u.unit_name === captainName);
+	cga.emogua.joinTeam = async ({captainName, currentCoordinate}) => {
+		const captain = cga.GetMapUnits().find(u => (u.flags & cga.emogua.UnitFlags.Player) && u.unit_name === captainName && (!currentCoordinate || u.xpos != currentCoordinate.x || u.ypos != currentCoordinate.y));
 		if (captain) {
 			await cga.emogua.turnTo([captain.xpos, captain.ypos]).then(
-				() => cga.emogua.delay(300)
+				() => cga.emogua.delay(500)
 			).then(
 				() => cga.DoRequest(cga.REQUEST_TYPE_JOINTEAM)
 			).then(
 				() => cga.emogua.waitNPCDialog().then(
 					dialog => {
 						if (dialog.type === 2) {
-							return cga.ClickNPCDialog(-1, dialog.message.split('\n').findIndex(e => e === captainName) - 2);
+							cga.ClickNPCDialog(-1, dialog.message.split('\n').findIndex(e => e === captainName) - 2);
+							return cga.emogua.delay(500);
 						}
-						return Promise.reject('无法加入队伍-' + captainName);
-					}
+					},
+					() => {}
 				)
+			).then(
+				() => {
+					if (cga.emogua.getTeamNumber() == 1) {
+						throw '无法加入队伍-' + captainName;
+					} else if (cga.emogua.getTeammates()[0].name != captainName) {
+						return cga.emogua.leaveTeam().then(() => {
+							throw '无法加入队伍-' + captainName;
+						});
+					}
+				}
 			);
+		} else {
+			throw '无法加入队伍-' + captainName;
 		}
-		throw '无法加入队伍-' + captainName;
 	};
 	cga.emogua.joinTeamBlock = async ({captainName, coordinate, interruptor}) => {
+		const totalTimer = Date.now();
 		while(cga.emogua.getTeamNumber() <= 1) {
-			if (typeof interruptor == 'function' && interruptor()) {
+			if (typeof interruptor == 'function' && interruptor({totalTimer})) {
 				console.log('中断组队', new Date().toLocaleString());
 				return true;
 			}
+			let currentCoordinate = cga.GetMapXY();
 			if (coordinate) {
-				let currentCoordinate = cga.GetMapXY();
 				if (currentCoordinate.x != coordinate[0] || currentCoordinate.y != coordinate[1]) {
 					await cga.emogua.autoWalk(coordinate);
+					currentCoordinate = cga.GetMapXY();
 				}
 			}
-			await cga.emogua.joinTeam({captainName}).catch(() => {});
+			await cga.emogua.joinTeam({captainName, currentCoordinate}).catch(() => {});
 			await cga.emogua.delay(2000);
 		}
 	};
 	cga.emogua.isRegroupingTeam = false;
 	cga.emogua.waitRegroupTeam = async ({team,arrive}) => {
+		if (team.length <= 1) return;
 		const words = '重新组队';
 		const timeout = 30000;
 		if (cga.emogua.cachedPlayer.name == team[0]) {
 			cga.emogua.isRegroupingTeam = true;
 			try {
-				cga.emogua.sayWords(words);
-				await arrive();
+				await cga.emogua.sayWords(words);
+				if (arrive) await arrive();
 				const timer = Date.now();
 				const waitPosition = cga.emogua.getMovablePositionAround(cga.GetMapXY());
 				await cga.emogua.waitTeamBlock({
 					team, coordinate: [waitPosition.x,waitPosition.y],
 					interruptor: () => {
-						if (Date.now() - timer > timeout) throw 'Regroup team fail, timeout';
+						if (Date.now() - timer > timeout) throw 'Regroup team timeout';
 					}
 				});
 			} finally {
@@ -730,18 +778,17 @@ module.exports = new Promise(resolve => {
 		} else {
 			for(;;) {
 				const chat = await cga.emogua.waitMessage(true).catch(() => {});
-				console.log('regroup', chat);
 				if (chat && chat.msg.includes(words)) {
 					cga.emogua.isRegroupingTeam = true;
 					try {
 						while (cga.emogua.getTeamNumber() > 1) {
 							await cga.emogua.delay(2000);
 						}
-						await arrive();
+						if (arrive) await arrive();
 						const timer = Date.now();
 						await cga.emogua.joinTeamBlock({
 							captainName: team[0], interruptor: () => {
-								if (Date.now() - timer > timeout) throw 'Regroup team fail, timeout';
+								if (Date.now() - timer > timeout) throw 'Regroup team timeout';
 							}
 						});
 					} finally {
@@ -749,7 +796,7 @@ module.exports = new Promise(resolve => {
 					}
 					break;
 				} else if (cga.emogua.getTeamNumber() <= 1) {
-					throw 'Regroup team fail, no words said';
+					throw 'Regroup team no words said from captain';
 				}
 			}
 		}
@@ -793,18 +840,23 @@ module.exports = new Promise(resolve => {
 		for(;;) {
 			const state = await waitTradeState(15000).catch(() => {});
 			if (state === cga.TRADE_STATE_READY) {
-				for(;;) {
-					const {type, args} = await waitTradeStuffs().catch(() => ({}));
-					if (type === cga.TRADE_STUFFS_ITEM) {
-						receivedStuffs.items = args;
-					} else if (type === cga.TRADE_STUFFS_GOLD) {
-						receivedStuffs.gold = args;
-					} else if (type === cga.TRADE_STUFFS_PET) {
-						receivedStuffs.pets = args;
-					} else {
-						break;
+				const receiveList = await Promise.all([
+					waitTradeStuffs().catch(() => {}),
+					waitTradeStuffs().catch(() => {}),
+					waitTradeStuffs().catch(() => {})
+				]);
+				receiveList.forEach(receive => {
+					if (receive) {
+						const {type, args} = receive;
+						if (type === cga.TRADE_STUFFS_ITEM) {
+							receivedStuffs.items = args;
+						} else if (type === cga.TRADE_STUFFS_GOLD) {
+							receivedStuffs.gold = args;
+						} else if (type === cga.TRADE_STUFFS_PET) {
+							receivedStuffs.pets = args;
+						}
 					}
-				}
+				});
 				if (!partyStuffsChecker || partyStuffsChecker(receivedStuffs)) {
 					if (!active) {
 						cga.TradeAddStuffs(
@@ -832,12 +884,16 @@ module.exports = new Promise(resolve => {
 		throw '交易失败';
 	};
 	/**
-	 * party: index (0,1,2...) | name
+	 * party: index (0,1,2...) | name | {index,name} => boolean
 	 */
 	cga.emogua.trade = async ({party, itemFilter, petFilter, gold, partyStuffsChecker}) => {
 		cga.DoRequest(cga.REQUEST_TYPE_TRADE);
 		const players = await cga.emogua.waitPlayerMenu();
-		const player = players.find(p => (typeof party == 'number') ? p.index == party : p.name == party);
+		const player = players.find(p => {
+			if (typeof party == 'number') return p.index == party;
+			else if (typeof party == 'function') return party(p);
+			else return p.name == party
+		});
 		if (player) {
 			cga.PlayerMenuSelect(player.index);
 			await waitTradeDialog();
@@ -851,7 +907,7 @@ module.exports = new Promise(resolve => {
 		}
 		const {name} = await waitTradeDialog();
 		cga.EnableFlags(cga.ENABLE_FLAG_TRADE, false);
-		if (!partyName || partyName == name) {
+		if (!partyName || ((typeof partyName == 'function') ? partyName(name) : partyName == name)) {
 			return await tradeInternal({itemFilter, petFilter, gold, partyStuffsChecker, active: false});
 		}
 		throw '没有交易';
@@ -862,6 +918,7 @@ module.exports = new Promise(resolve => {
 	 *   12002 down 12000 up (狗洞)
 	 *   17967 down 17966 up (海底墓场-保证书)
 	 *   13273 down 13272 up (虫洞)
+	 *   17981 down 17980 up (黑色方舟)
 	 *   0 迷宫出入口
 	 * return [最远，最近]
 	 */
@@ -885,11 +942,10 @@ module.exports = new Promise(resolve => {
 	cga.emogua.walkRandomMaze = async (entryFilter) => {
 		const entries = await cga.emogua.getMazeEntries();
 		if (entries.length > 1) {
-			let target = entries[0];
-			if (entryFilter) {
-				target = entryFilter(entries);
+			const target = entryFilter ? entries.find(entryFilter) : entries[0];
+			if (target) {
+				return await cga.emogua.autoWalk([target.x, target.y, {map: '*'}]);
 			}
-			return await cga.emogua.autoWalk([target.x, target.y, {map: '*'}]);
 		}
 		throw 'Fail to walk random maze ' + entries;
 	};
@@ -974,21 +1030,22 @@ module.exports = new Promise(resolve => {
 			await cga.emogua.autoWalk([next.x, next.y]);
 		}
 	};
-	cga.emogua.toRandomEntry = async ({xfrom, yfrom, xsize, ysize, filter}) => {
-		await cga.emogua.downloadPartialMap({xfrom,yfrom,xsize,ysize});
-		const xmax = xfrom + xsize;
-		const ymax = yfrom + ysize;
-		const entries = cga.getMapObjects().filter(o => o.cell == 3 && o.x >= xfrom && o.y >= yfrom && o.x <= xmax && o.y <= ymax);
-		const entry = filter ? filter(entries) : entries[0];
+	cga.emogua.toRandomEntry = async ({xfrom, yfrom, xend, yend, filter}) => {
+		console.log('下载部分地图');
+		await cga.emogua.downloadPartialMap({xfrom,yfrom,xend,yend});
+		console.log('下载部分地图结束');
+		const entries = cga.getMapObjects().filter(o => o.cell == 3 && o.x >= xfrom && o.y >= yfrom && o.x <= xend && o.y <= yend);
+		let entry = filter ? filter(entries) : entries[0];
 		if (entry) {
-			return await cga.emogua.autoWalk([entry.x, entry.y, {map:'*'}]).catch(async () => {
-				const entries = cga.getMapObjects().filter(o => o.cell == 3 && o.x >= xfrom && o.y >= yfrom && o.x <= xmax && o.y <= ymax);
-				const entry = filter ? filter(entries) : entries[0];
+			await cga.emogua.autoWalk([entry.x, entry.y, {map:'*'}]).catch(async () => {
+				const entries = cga.getMapObjects().filter(o => o.cell == 3 && o.x >= xfrom && o.y >= yfrom && o.x <= xend && o.y <= yend);
+				entry = filter ? filter(entries) : entries[0];
 				if (entry) {
 					return await cga.emogua.autoWalk([entry.x, entry.y, {map:'*'}]);
 				}
 				throw '未找到随机入口';
 			});
+			return entry;
 		}
 		throw '未找到随机入口';
 	};

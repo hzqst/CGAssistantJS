@@ -1,3 +1,5 @@
+const goto = require('./goto');
+
 module.exports = (async () => {
 	const cga = await require('./wrapper');
 	const Bank = {};
@@ -51,12 +53,9 @@ module.exports = (async () => {
 					}
 				}
 			}
-			await cga.emogua.delay(500);
+			await cga.emogua.delay(3000);
 		}
 	};
-	/**
-	 * 
-	 */
 	Bank.get = async ({teller, filter, gold = 0, petsFilter}) => {
 		if (teller) {
 			await cga.emogua.turnTo(teller);
@@ -95,6 +94,7 @@ module.exports = (async () => {
 					}
 				}
 			}
+			await cga.emogua.delay(3000);
 		}
 	};
 

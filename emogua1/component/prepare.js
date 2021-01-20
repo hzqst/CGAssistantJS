@@ -39,8 +39,7 @@ const changePoints = (detail, attr) => {
  *   attr：体力=0，力量=1，防御=2，敏捷=3，魔法=4
  */
 module.exports = async ({
-	doctorName, crystalNameFilter, repair = false, sellFilter,
-	upgrades
+	doctorName, crystalNameFilter, repair = false, sellFilter, upgrades
 } = {}) => {
 	const cga = await require('./wrapper');
 	const goto = await require('./goto');
@@ -275,7 +274,7 @@ module.exports = async ({
 			};
 			const weapons = needRepairEquipments.filter(item => item.type >= 0 && item.type <= 6);
 			const armors = needRepairEquipments.filter(item => item.type >= 7 && item.type <= 14);
-			await goto(n => n.castle.x).then(() => cga.emogua.walkTo([27,80]));
+			await goto(n => n.castle.x).then(() => cga.emogua.walkTo([23,82]));
 			if (weapons.length > 0) {
 				await doRepair(weapons, '修理武器');
 			}

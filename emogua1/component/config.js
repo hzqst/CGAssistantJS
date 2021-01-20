@@ -45,7 +45,7 @@ const save = (filePath, config) => {
 	console.log('保存配置文件', filePath);
 	const parent = filePath.substring(0, filePath.lastIndexOf(splitter));
 	if (!fs.existsSync(parent)) createDir(parent.replace(rootPath, '').split(splitter).filter(s => s));
-	fs.writeFileSync(filePath, JSON.stringify(config));
+	fs.writeFileSync(filePath, JSON.stringify(config,null,'\t'));
 };
 Config.save = (config) => {
 	save(getFileFullPath(), config);

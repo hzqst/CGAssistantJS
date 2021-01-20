@@ -52,11 +52,12 @@ module.exports = (async () => {
 			sout: new Station([424,259,{map:'芙蕾雅'}]),
 			wout: new Station([374,195,{map:'芙蕾雅'}]),
 			mbank: new Station([83,12,{map:'市场三楼 - 修理专区'}]),
+			mtrade: new Station([82,8,{map:'市场三楼 - 修理专区'}]),
 			mnurse: new Station([83,8,{map:'市场三楼 - 修理专区'}]),
 			bank: new Station([11, 8, {map:'银行'}]),
 			ehospital: new Station([12, 42, {map:1112}]),
 			whospital: new Station([12, 42, {map:1111}]),
-			fabric: new Station([8, 4, {map:'流行商店'}]),
+			fabric: new Station([8, 7, {map:'流行商店'}]),
 			isle: new Station([65, 98, {map:'小岛'}]),
 			work: new Station([26, 24, {map:'米克尔工房'}])
 		}, castle: {
@@ -78,16 +79,27 @@ module.exports = (async () => {
 		}, aleut: {
 			eout: new Station([596,83,{map:'芙蕾雅'}]),
 			nout: new Station([588,50,{map:'芙蕾雅'}])
+		}, kili: {
+			eout: new Station([295,325,{map:'索奇亚'}]),
+			nout: new Station([274,293,{map:'索奇亚'}])
 		}, grahl: {
 			s: new Station([118, 214, {map:'哥拉尔镇'}]),
 			c: new Station([120, 107, {map:'哥拉尔镇'}]),
+			wout: new Station([226, 437, {map:'库鲁克斯岛'}]),
+			eout: new Station([284, 437, {map:'库鲁克斯岛'}]),
+			nout: new Station([257, 400, {map:'库鲁克斯岛'}]),
 			lumi: new Station([61, 29, {map:'鲁米那斯'}])
+		}, akalufa: {
+			c: new Station([99, 165, {map:'阿凯鲁法村'}]),
+			eout: new Station([235, 314, {map:'米内葛尔岛'}]),
+			sout: new Station([203, 346, {map:'米内葛尔岛'}]),
+			kan: new Station([167, 108, {map:'阿凯鲁法村'}]) // [167,10]传送坎那贝拉
 		}, lumi: {
 			sell: new Station([11, 12, {map:'杂货店'}]),
 			hospital: new Station([4, 14, {map:'医院'}]),
 			nurse: new Station([17, 16, {map:'医院'}]),
 			hnurse: new Station([17, 5, {map:'医院'}]),
-			door: new Station([321, 883, {map:'鲁米那斯'}])
+			wout: new Station([321, 883, {map:'鲁米那斯'}])
 		}, camp: {
 			x: new Station([90, 86, {map:'圣骑士营地'}]),
 			sell: new Station([20, 23, {map:'工房'}]),
@@ -237,22 +249,29 @@ module.exports = (async () => {
 	];
 	Network.teleport.aleut.links = [
 		new Link(Network.aleut.eout, () => cga.emogua.autoWalkList([
-			[51,65],[67,64,{map:'芙蕾雅'}]
+			[67,64,{map:'芙蕾雅'}]
 		])),
 		new Link(Network.aleut.nout, () => cga.emogua.autoWalkList([
 			[58,31,{map:'芙蕾雅'}]
 		]))
 	];
-	// correct here
+	Network.teleport.kili.links = [
+		new Link(Network.kili.eout, () => cga.emogua.autoWalkList([
+			[79,76,{map:'索奇亚'}]
+		])),
+		new Link(Network.kili.nout, () => cga.emogua.autoWalkList([
+			[59,45,{map:'索奇亚'}]
+		]))
+	];
 	Network.teleport.yer.links = [
 		new Link(Network.grahl.s, () => cga.emogua.autoWalk([58,71]).then(
 			() => cga.emogua.talkNpc([59,71,{map:'伊尔'}])(s => s.yesGenerator(1))
 		).then(
 			() => cga.emogua.autoWalkList([
-				[30,21,{map:'港湾管理处'}], [25,25] // 23,35 阿凯鲁法
+				[30,21,{map:'港湾管理处'}], [25,25]
 			])
 		).then(
-			() => cga.emogua.talkNpc([25,24,{map:'往哥拉尔栈桥'}])(s => s.yes)
+			() => cga.emogua.talkNpc([25,23,{map:'往哥拉尔栈桥'}])(s => s.yes)
 		).then(
 			() => cga.emogua.autoWalk([51,50])
 		).then(async () => {
@@ -261,9 +280,7 @@ module.exports = (async () => {
 				await cga.emogua.delay(10000);
 			}
 		}).then(
-			() => cga.emogua.autoWalk([70,26])
-		).then(
-			() => cga.emogua.delay(400000)
+			() => cga.emogua.delay(300000)
 		).then(async () => {
 			while (cga.GetMapName() != '往伊尔栈桥') {
 				await cga.emogua.talkNpc([71,26])(s => s.yes);
@@ -277,6 +294,41 @@ module.exports = (async () => {
 			() => cga.emogua.autoWalkList([
 				[14,15,{map:'哥拉尔镇'}], [118,214]
 			])
+		)),
+		new Link(Network.akalufa.c, () => cga.emogua.autoWalk([58,71]).then(
+			() => cga.emogua.talkNpc([59,71,{map:'伊尔'}])(s => s.yesGenerator(1))
+		).then(
+			() => cga.emogua.autoWalkList([
+				[30,21,{map:'港湾管理处'}], [23,25]
+			])
+		).then(
+			() => cga.emogua.talkNpc([23,23,{map:'往阿凯鲁法栈桥'}])(s => s.yes)
+		).then(
+			() => cga.emogua.autoWalk([51,50])
+		).then(async () => {
+			while (cga.GetMapName() != '艾欧奇亚号') {
+				await cga.emogua.talkNpc([52,50])(s => s.yes);
+				await cga.emogua.delay(10000);
+			}
+		}).then(
+			() => cga.emogua.delay(300000)
+		).then(async () => {
+			while (cga.GetMapName() != '往伊尔栈桥') {
+				await cga.emogua.talkNpc([71,26])(s => s.yes);
+				await cga.emogua.delay(10000);
+			}
+		}).then(
+			() => cga.emogua.autoWalk([20,53])
+		).then(
+			() => cga.emogua.talkNpc([19,53,{map:'港湾管理处'}])(s => s.yes)
+		).then(
+			() => cga.emogua.autoWalkList([
+				[22,31,{map:'阿凯鲁法'}], [28,30]
+			])
+		).then(
+			() => cga.emogua.talkNpc([29,30,{map:'阿凯鲁法村'}])(s => s.yes)
+		).then(
+			() => cga.emogua.autoWalk(Network.akalufa.c.id)
 		))
 	];
 	Network.falan.s1.links = [
@@ -330,14 +382,17 @@ module.exports = (async () => {
 		))
 	];
 	Network.falan.m1.links = [
-		new Link(Network.falan.mbank), new Link(Network.falan.mnurse),
+		new Link(Network.falan.mbank), new Link(Network.falan.mtrade),
 		new Link(Network.falan.s1, () => cga.emogua.turnOrientation(6, Network.falan.s1.id[2]))
 	];
 	Network.falan.mbank.links = [
-		new Link(Network.falan.m1), new Link(Network.falan.mnurse)
+		new Link(Network.falan.m1), new Link(Network.falan.mtrade)
+	];
+	Network.falan.mtrade.links = [
+		new Link(Network.falan.m1), new Link(Network.falan.mbank), new Link(Network.falan.mnurse)
 	];
 	Network.falan.mnurse.links = [
-		new Link(Network.falan.m1), new Link(Network.falan.mbank)
+		new Link(Network.falan.mtrade)
 	];
 	Network.falan.m2.links = [
 		new Link(Network.falan.s2, () => cga.emogua.turnOrientation(6, Network.falan.s2.id[2]))
@@ -347,8 +402,19 @@ module.exports = (async () => {
 	];
 	Network.grahl.c.links = [
 		new Link(Network.grahl.s, () => cga.emogua.turnOrientation(6, Network.grahl.s.id[2])),
+		new Link(Network.grahl.eout, () => cga.emogua.autoWalkList([
+			[176,105,{map:'库鲁克斯岛'}]
+		])),
+		new Link(Network.grahl.wout, () => cga.emogua.autoWalkList([
+			[62,104,{map:'库鲁克斯岛'}]
+		])),
+		new Link(Network.grahl.nout, () => cga.emogua.autoWalkList([
+			[119,38,{map:'库鲁克斯岛'}]
+		]))
+	];
+	Network.grahl.eout.links = [
 		new Link(Network.grahl.lumi, () => cga.emogua.autoWalkList([
-			[176,105,{map:'库鲁克斯岛'}],[477,525]
+			[477,525]
 		]).then(
 			() => cga.emogua.talkNpc([477,526,{x:476,y:528}])(s => s.yes)
 		).then(
@@ -361,6 +427,11 @@ module.exports = (async () => {
 			[88,51,{map:'杂货店'}],Network.lumi.sell.id
 		]))
 	];
+	Network.akalufa.c.links = [
+		new Link(Network.akalufa.kan),
+		new Link(Network.akalufa.eout, () => cga.emogua.autoWalk([233,171,{map:'米内葛尔岛'}])),
+		new Link(Network.akalufa.sout, () => cga.emogua.autoWalk([178,227,{map:'米内葛尔岛'}]))
+	];
 	Network.lumi.hospital.links = [
 		new Link(Network.lumi.nurse), new Link(Network.lumi.hnurse)
 	];
@@ -368,20 +439,20 @@ module.exports = (async () => {
 		new Link(Network.lumi.sell, () => cga.emogua.autoWalkList([
 			[4,14,{map:'鲁米那斯'}],[88,51,{map:'杂货店'}],Network.lumi.sell.id
 		])),
-		new Link(Network.lumi.door, () => cga.emogua.autoWalkList([
+		new Link(Network.lumi.wout, () => cga.emogua.autoWalkList([
 			[4,14,{map:'鲁米那斯'}],[60,29,{map:'库鲁克斯岛'}]
 		]))
 	];
 	Network.lumi.hnurse.links = Network.lumi.nurse.links;
 	Network.lumi.sell.links = [
-		new Link(Network.lumi.door, () => cga.emogua.autoWalkList([
+		new Link(Network.lumi.wout, () => cga.emogua.autoWalkList([
 			[4,14,{map:'鲁米那斯'}],[60,29,{map:'库鲁克斯岛'}]
 		])),
 		new Link(Network.lumi.hospital, () => cga.emogua.autoWalkList([
 			[4,14,{map:'鲁米那斯'}],[87,35,{map:'医院'}]
 		]))
 	];
-	Network.lumi.door.links = [
+	Network.lumi.wout.links = [
 		new Link(Network.grahl.lumi, () => cga.emogua.autoWalk([322,883,{map:'鲁米那斯'}]))
 	];
 	Network.camp.x.links = [
@@ -457,7 +528,6 @@ module.exports = (async () => {
 		new Link(Network.tower.tower15, () => cga.emogua.autoWalk([76,56,{map:'雪拉威森塔１５层'}])),
 		new Link(Network.tower.tower20, () => cga.emogua.autoWalk([76,54,{map:'雪拉威森塔２０层'}])),
 	];
-	Network.landings = [Network.elsa.x, Network.falan.s1, Network.falan.s2, Network.falan.w1, Network.falan.w2, Network.falan.e1, Network.falan.e2];
 	const reducePaths = (paths) => {
 		const result = [];
 		paths.forEach(p => {
@@ -496,9 +566,7 @@ module.exports = (async () => {
 			cga.LogBack();
 			await cga.emogua.delay(2000);
 		}
-		const errorInfo = 'goto can not get station';
-		console.log(errorInfo);
-		throw new Error(errorInfo);
+		throw 'goto can not get station';
 	};
 	const getLinkPaths = (links, target, preStations = []) => {
 		return reducePaths(
@@ -511,26 +579,22 @@ module.exports = (async () => {
 			})
 		);
 	};
-	const go = (targetFunction) => {
+	const go = async (targetFunction) => {
 		const target = targetFunction(Network);
-		if (target) {
-			return cga.emogua.waitForNormal().then(() => {
-				if (cga.GetMapName() == '艾尔莎岛') {
-					return cga.emogua.autoWalk(Network.elsa.x.id);
-				}
-			}).then(
-				() => getStationOrLogback()
-			).then(current => {
-				if (current.idString != target.idString) {
-					const paths = getLinkPaths(current.links, target);
-					if ((!paths || paths.length == 0)) {
-						if (!Network.landings.find(l => l.idString == current.idString)) {
-							cga.LogBack();
-							return go(targetFunction);
-						}
-						console.log('goto no links to', target.id);
-						return Promise.reject('goto no links to');
-					}
+		let times = 2;
+		await cga.emogua.waitForNormal();
+		if (cga.GetMapName() == '艾尔莎岛') {
+			await cga.emogua.autoWalk(Network.elsa.x.id);
+		}
+		while (target && times > 0) {
+			const current = await getStationOrLogback();
+			if (current.idString != target.idString) {
+				const paths = getLinkPaths(current.links, target);
+				if ((!paths || paths.length == 0)) {
+					cga.LogBack();
+					await cga.emogua.delay(2000);
+					times--;
+				} else {
 					let short;
 					for (let p of paths) {
 						if (!short) {
@@ -539,15 +603,19 @@ module.exports = (async () => {
 							short = p;
 						}
 					}
-					return short.reduce((a,c) => a.then(() => c.arrive()), Promise.resolve()).catch(r => {
-						console.log('goto failed', r);
-						return Promise.reject('goto failed');
-					});
+					try {
+						for (const p of short) {
+							await p.arrive();
+						}
+						return;
+					} catch (e) {
+						console.log('goto fail to arrive', e, current);
+						times--;
+					}
 				}
-			});
+			} else return;
 		}
-		console.log('goto can not get target');
-		return Promise.reject('goto can not get target');
+		throw 'goto fail to ' + target;
 	};
 	return go;
 })();
