@@ -30,6 +30,13 @@ var cga = require('./cgaapi')(function(){
 	]
 	
 	var mineObject = null;
+	const clearDialogs = (cb) => cga.AsyncWaitNPCDialog(error => {
+		if (error) {
+			cb();
+		} else {
+			clearDialogs(cb);
+		}
+	}, 1000);
 	
 	var task = cga.task.Task('圣域守护者', [
 	{//0
@@ -168,15 +175,17 @@ var cga = require('./cgaapi')(function(){
 			if(cga.GetMapName() != '雪拉威森塔９６层'){
 				var useItem = cga.findItem('塞特的护身符');
 				if(useItem != -1){
-					cga.UseItem(useItem);
-					cga.AsyncWaitNPCDialog((dlg)=>{
-						cga.ClickNPCDialog(4, 0);
-						cga.AsyncWaitMovement({map:'雪拉威森塔９５层', delay:1000, timeout:5000}, ()=>{
-							cga.TurnTo(29, 104);
-							cga.AsyncWaitNPCDialog((dlg)=>{
-								cga.ClickNPCDialog(1, 0);
-								cga.AsyncWaitMovement({map:'雪拉威森塔９６层', delay:1000, timeout:5000}, ()=>{
-									cb2('restart stage');
+					clearDialogs(() => {
+						cga.UseItem(useItem);
+						cga.AsyncWaitNPCDialog((dlg)=>{
+							cga.ClickNPCDialog(4, 0);
+							cga.AsyncWaitMovement({map:'雪拉威森塔９５层', delay:1000, timeout:5000}, ()=>{
+								cga.TurnTo(29, 104);
+								cga.AsyncWaitNPCDialog((dlg)=>{
+									cga.ClickNPCDialog(1, 0);
+									cga.AsyncWaitMovement({map:'雪拉威森塔９６层', delay:1000, timeout:5000}, ()=>{
+										cb2('restart stage');
+									});
 								});
 							});
 						});
@@ -223,15 +232,17 @@ var cga = require('./cgaapi')(function(){
 			if(cga.GetMapName() != '雪拉威森塔９７层'){
 				var useItem = cga.findItem('梅雅的护身符');
 				if(useItem != -1){
-					cga.UseItem(useItem);
-					cga.AsyncWaitNPCDialog((dlg)=>{
-						cga.ClickNPCDialog(4, 0);
-						cga.AsyncWaitMovement({map:'雪拉威森塔９６层', delay:1000, timeout:5000}, ()=>{
-							cga.TurnTo(89, 118);
-							cga.AsyncWaitNPCDialog((dlg)=>{
-								cga.ClickNPCDialog(1, 0);
-								cga.AsyncWaitMovement({map:'雪拉威森塔９７层', delay:1000, timeout:5000}, ()=>{
-									cb2('restart stage');
+					clearDialogs(() => {
+						cga.UseItem(useItem);
+						cga.AsyncWaitNPCDialog((dlg)=>{
+							cga.ClickNPCDialog(4, 0);
+							cga.AsyncWaitMovement({map:'雪拉威森塔９６层', delay:1000, timeout:5000}, ()=>{
+								cga.TurnTo(89, 118);
+								cga.AsyncWaitNPCDialog((dlg)=>{
+									cga.ClickNPCDialog(1, 0);
+									cga.AsyncWaitMovement({map:'雪拉威森塔９７层', delay:1000, timeout:5000}, ()=>{
+										cb2('restart stage');
+									});
 								});
 							});
 						});
@@ -281,15 +292,17 @@ var cga = require('./cgaapi')(function(){
 			if(cga.GetMapName() != '雪拉威森塔９８层'){
 				var useItem = cga.findItem('提斯的护身符');
 				if(useItem != -1){
-					cga.UseItem(useItem);
-					cga.AsyncWaitNPCDialog((dlg)=>{
-						cga.ClickNPCDialog(4, 0);
-						cga.AsyncWaitMovement({map:'雪拉威森塔９７层', delay:1000, timeout:5000}, ()=>{
-							cga.TurnTo(118, 125);
-							cga.AsyncWaitNPCDialog((dlg)=>{
-								cga.ClickNPCDialog(1, 0);
-								cga.AsyncWaitMovement({map:'雪拉威森塔９８层', delay:1000, timeout:5000}, ()=>{
-									cb2('restart stage');
+					clearDialogs(() => {
+						cga.UseItem(useItem);
+						cga.AsyncWaitNPCDialog((dlg)=>{
+							cga.ClickNPCDialog(4, 0);
+							cga.AsyncWaitMovement({map:'雪拉威森塔９７层', delay:1000, timeout:5000}, ()=>{
+								cga.TurnTo(118, 125);
+								cga.AsyncWaitNPCDialog((dlg)=>{
+									cga.ClickNPCDialog(1, 0);
+									cga.AsyncWaitMovement({map:'雪拉威森塔９８层', delay:1000, timeout:5000}, ()=>{
+										cb2('restart stage');
+									});
 								});
 							});
 						});
@@ -333,15 +346,17 @@ var cga = require('./cgaapi')(function(){
 			if(cga.GetMapName() != '雪拉威森塔９９层'){
 				var useItem = cga.findItem('伍斯的护身符');
 				if(useItem != -1){
-					cga.UseItem(useItem);
-					cga.AsyncWaitNPCDialog((dlg)=>{
-						cga.ClickNPCDialog(4, 0);
-						cga.AsyncWaitMovement({map:'雪拉威森塔９８层', delay:1000, timeout:5000}, ()=>{
-							cga.TurnTo(120, 119);
-							cga.AsyncWaitNPCDialog((dlg)=>{
-								cga.ClickNPCDialog(1, 0);
-								cga.AsyncWaitMovement({map:'雪拉威森塔９９层', delay:1000, timeout:5000}, ()=>{
-									cb2('restart stage');
+					clearDialogs(() => {
+						cga.UseItem(useItem);
+						cga.AsyncWaitNPCDialog((dlg)=>{
+							cga.ClickNPCDialog(4, 0);
+							cga.AsyncWaitMovement({map:'雪拉威森塔９８层', delay:1000, timeout:5000}, ()=>{
+								cga.TurnTo(120, 119);
+								cga.AsyncWaitNPCDialog((dlg)=>{
+									cga.ClickNPCDialog(1, 0);
+									cga.AsyncWaitMovement({map:'雪拉威森塔９９层', delay:1000, timeout:5000}, ()=>{
+										cb2('restart stage');
+									});
 								});
 							});
 						});
@@ -382,15 +397,17 @@ var cga = require('./cgaapi')(function(){
 			if(cga.GetMapName() != '雪拉威森塔最上层'){
 				var useItem = cga.findItem('尼斯的护身符');
 				if(useItem != -1){
-					cga.UseItem(useItem);
-					cga.AsyncWaitNPCDialog((dlg)=>{
-						cga.ClickNPCDialog(4, 0);
-						cga.AsyncWaitMovement({map:'雪拉威森塔９９层', delay:1000, timeout:5000}, ()=>{
-							cga.TurnTo(103, 54);
-							cga.AsyncWaitNPCDialog((dlg)=>{
-								cga.ClickNPCDialog(1, 0);
-								cga.AsyncWaitMovement({map:'雪拉威森塔最上层', delay:1000, timeout:5000}, ()=>{
-									cb2('restart stage');	
+					clearDialogs(() => {
+						cga.UseItem(useItem);
+						cga.AsyncWaitNPCDialog((dlg)=>{
+							cga.ClickNPCDialog(4, 0);
+							cga.AsyncWaitMovement({map:'雪拉威森塔９９层', delay:1000, timeout:5000}, ()=>{
+								cga.TurnTo(103, 54);
+								cga.AsyncWaitNPCDialog((dlg)=>{
+									cga.ClickNPCDialog(1, 0);
+									cga.AsyncWaitMovement({map:'雪拉威森塔最上层', delay:1000, timeout:5000}, ()=>{
+										cb2('restart stage');
+									});
 								});
 							});
 						});
