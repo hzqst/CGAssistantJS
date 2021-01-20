@@ -736,21 +736,19 @@ module.exports = new Promise(resolve => {
 			throw '无法加入队伍-' + captainName;
 		}
 	};
-	cga.emogua.joinTeamBlock = async ({captainName, coordinate, interruptor}) => {
+	cga.emogua.joinTeamBlock = async ({captainName, interruptor}) => {
 		const totalTimer = Date.now();
+		const startPosition = cga.GetMapXY();
 		while(cga.emogua.getTeamNumber() <= 1) {
 			if (typeof interruptor == 'function' && interruptor({totalTimer})) {
 				console.log('中断组队', new Date().toLocaleString());
 				return true;
 			}
-			let currentCoordinate = cga.GetMapXY();
-			if (coordinate) {
-				if (currentCoordinate.x != coordinate[0] || currentCoordinate.y != coordinate[1]) {
-					await cga.emogua.autoWalk(coordinate);
-					currentCoordinate = cga.GetMapXY();
-				}
+			const currentCoordinate = cga.GetMapXY();
+			if (currentCoordinate.x != startPosition.x || currentCoordinate.y != startPosition.y) {
+				await cga.emogua.autoWalk([startPosition.x, startPosition.y]);
 			}
-			await cga.emogua.joinTeam({captainName, currentCoordinate}).catch(() => {});
+			await cga.emogua.joinTeam({captainName, currentCoordinate: startPosition}).catch(() => {});
 			await cga.emogua.delay(2000);
 		}
 	};
