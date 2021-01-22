@@ -52,7 +52,7 @@
 				protect.minHp = protect.minPetHp = 40;
 				await goto(n => n.elsa.b);
 				await cga.emogua.waitRegroupTeam({team, arrive: arriveRegroup}).catch(leaveTeamAndExit);
-				await goto(n => n.tower.tower10);
+				await goto(n => n.tower.tower11);
 			} else if (teamLevel >= 10 && teamLevel < 15) {
 				protect.minHp = protect.minPetHp = 50;
 				await goto(n => n.elsa.b);

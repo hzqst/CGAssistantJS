@@ -125,7 +125,9 @@ module.exports = (async () => {
 			silverLion: new Station([147,116,{map:'布拉基姆高地'}])
 		}, tower: {
 			tower1: new Station([34,99,{map:'雪拉威森塔１层'}]),
+			tower9: new Station([104,82,{map:'雪拉威森塔９层'}]),
 			tower10: new Station([54,39,{map:'雪拉威森塔１０层'}]),
+			tower11: new Station([140,114,{map:'雪拉威森塔１１层'}]),
 			tower15: new Station([136,69,{map:'雪拉威森塔１５层'}]),
 			tower20: new Station([87,146,{map:'雪拉威森塔２０层'}])
 		}
@@ -527,6 +529,10 @@ module.exports = (async () => {
 		new Link(Network.tower.tower10, () => cga.emogua.autoWalk([76,58,{map:'雪拉威森塔１０层'}])),
 		new Link(Network.tower.tower15, () => cga.emogua.autoWalk([76,56,{map:'雪拉威森塔１５层'}])),
 		new Link(Network.tower.tower20, () => cga.emogua.autoWalk([76,54,{map:'雪拉威森塔２０层'}])),
+	];
+	Network.tower.tower10.links = [
+		new Link(Network.tower.tower9, () => cga.emogua.autoWalk([56,25,{map:'雪拉威森塔９层'}])),
+		new Link(Network.tower.tower11, () => cga.emogua.autoWalk([66,45,{map:'雪拉威森塔１１层'}])),
 	];
 	const reducePaths = (paths) => {
 		const result = [];
