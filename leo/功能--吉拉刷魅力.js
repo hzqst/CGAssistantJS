@@ -96,7 +96,7 @@ require('./common').then(cga => {
 					).then(() => {
 						var value_charisma = cga.GetPlayerInfo().detail.value_charisma;
 						console.log(leo.logTime()+'当前人物魅力【'+value_charisma+'】');
-						if(value_charisma>=100){
+						if(value_charisma>=target){
 							return leo.reject();
 						}
 						const f = cga.getInventoryItems().find(i => i.itemid == 18257 && i.itemid != 18256);

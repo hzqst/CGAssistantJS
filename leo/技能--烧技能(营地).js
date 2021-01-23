@@ -2,15 +2,28 @@ require('./common').then(cga => {
     leo.baseInfoPrint();
     //leo.logStatus = false;
 
-    var skillName = '恢复魔法';
-    var skillLevel = 8;
+    var skillName = '精灵的盟约';
+    var skillLevel = 10;
+    var isBuySealCard = true; //是否买封印卡
+    var sealCardName = '封印卡（昆虫系）';
+    var sealCardLevel = 1;
+    var sealCardMaxCount = 300; 
 
     var protect = {
         minHp: 500,
         minMp: 50,
         minPetHp: 300,
         minPetMp: 120,
-        normalNurse: false
+        normalNurse: false,
+        checker: ()=>{
+            if(isBuySealCard){
+                //判断是否要购买封印卡
+                var sealCardCount = cga.getItemCount(sealCardName);
+                if (sealCardCount < 5) {
+                    return true;
+                }
+            }
+        }
     };
     var isLogBackFirst = false; //启动登出
     var isPrepare = false; //招魂、治疗、补血、卖石
@@ -66,6 +79,15 @@ require('./common').then(cga => {
             .then(() => leo.checkHealth(prepareOptions.doctorName))
             .then(() => leo.checkCrystal(prepareOptions.crystalName))
             .then(() => {
+                if(isBuySealCard){
+                    //判断是否要购买封印卡
+                    var sealCardCount = cga.getItemCount(sealCardName);
+                    if (sealCardCount < 5) {
+                        return leo.buySealCard(sealCardName, sealCardMaxCount, sealCardLevel);
+                    }
+                }
+            })
+            .then(() => {
                 //营地练级
                 if (isTeamLeader) {
                     var currentMap = cga.GetMapName();
@@ -92,7 +114,7 @@ require('./common').then(cga => {
                             var skillNow = cga.findPlayerSkill(skillName);
                             if(skillLevel <= skillNow.lv){
                                 leo.log('提示：技能【'+skillName+'】等级已达到【'+skillNow.lv+'】，达到了预设的目标等级【'+skillLevel+'】，共耗时【'+time+'】分钟，消耗魔币【'+useGold+'】，脚本结束');
-                                return leo.reject();
+                                return leo.exit();
                             }else{
                                 return leo.log('技能【'+skillName+'】，等级【'+skillNow.lv+'/'+skillLevel+'】，已耗时【'+time+'】分钟，消耗魔币【'+useGold+'】');
                             }

@@ -2,12 +2,8 @@ require('./common').then(cga => {
     leo.baseInfoPrint();
     //leo.logStatus = false;
 
-    var skillName = '宠物强化';
-    var skillLevel = 8;
-
-    var teamLeader = '队长名称'; //队长名称
-    var teamPlayerCount = 1; //队伍人数
-    var usingpunchclock = false; //是否打卡
+    var skillName = '精灵的盟约';
+    var skillLevel = 10;
     var isBuySealCard = false; //是否买封印卡
     var sealCardName = '封印卡（昆虫系）';
     var sealCardLevel = 1;
@@ -18,7 +14,6 @@ require('./common').then(cga => {
         minMp: 50,
         minPetHp: 300,
         minPetMp: 120,
-        minTeamNumber: 5,
         normalNurse: false,
         checker: ()=>{
             if(isBuySealCard){
@@ -30,7 +25,6 @@ require('./common').then(cga => {
             }
         }
     };
-    var teammates = [];
     var isLogBackFirst = false; //启动登出
     var isPrepare = false; //招魂、治疗、补血、卖石
     var prepareOptions = {
@@ -39,18 +33,8 @@ require('./common').then(cga => {
         crystalName: '火风的水晶（5：5）',
         doctorName: '医道之殇'
     };
-    var playerinfo = cga.GetPlayerInfo();
-    var playerName = playerinfo.name;
-    var isTeamLeader = false;
-    if (playerName == teamLeader) {
-        isTeamLeader = true;
-    }
-    if (teamPlayerCount <= 1) {
-        isTeamLeader = true;
-        protect.minTeamNumber = 0;
-    }
     
-    leo.log('红叶の半山6后小岛烧技能脚本，启动~');
+    leo.log('红叶の盆地烧技能脚本，启动~');
 
     var skill = cga.findPlayerSkill(skillName);
         
@@ -120,56 +104,24 @@ require('./common').then(cga => {
                 }
             })
             .then(() => {
-                //完成组队
-                var teamplayers = cga.getTeamPlayers();
-                if (!isTeamLeader && teamplayers.length > 0) {
-                    //console.log('组队已就绪');
-                    return leo.next();
-                } else {
-                    //console.log(leo.logTime() + '寻找队伍');
-                    return leo.todo()
-                    .then(()=>{
-                        if(usingpunchclock){
-                            return leo.goto(n => n.castle.clock)
-                            .then(()=>leo.talkNpc(2,leo.talkNpcSelectorYes));
-                        }
-                    })
-                    .then(()=>leo.goto(n => n.castle.x))
-                    .then(()=>leo.autoWalk([41, 50,'里谢里雅堡 1楼']))
-                    .then(()=>leo.autoWalk([74, 19,'里谢里雅堡 2楼']))
-                    .then(()=>leo.autoWalk([0, 74,'图书室']))
-                    .then(()=>leo.autoWalk([27, 16]))
-                    .then(()=>leo.talkNpc(6,leo.talkNpcSelectorYes,'小岛'))
-                    .then(() => {
-                        if (isTeamLeader) {
-                            cga.EnableFlags(cga.ENABLE_FLAG_JOINTEAM, true); //开启组队
-                            return leo.forceMoveEx(3)
-                            .then(() => leo.buildTeam(teamPlayerCount))
-                            .then(() => {
-                                //关闭组队
-                                cga.EnableFlags(cga.ENABLE_FLAG_JOINTEAM, false); 
-                                return leo.next();
-                            });
-                        } else {
-                            return leo.enterTeam(teamLeader);
-                        }
-                    });
-                }
-            })
-            .then(() => {
                 if (isTeamLeader) {
-                    return leo.autoWalk([68,97])
-                    .then(()=>{
-                        console.log(leo.logTime() + '开始战斗');
-                        return leo.encounterTeamLeader(protect) //队长遇敌
+                    var currentMap = cga.GetMapName();
+                    if (currentMap != '方堡盆地') {
+                        return leo.goto(n => n.elsa.x)
+                        .then(() => leo.autoWalkList([
+                            [130, 50, '盖雷布伦森林'],
+                            [215, 43]
+                        ]))
+                        .then(()=>leo.talkNpc(0,leo.talkNpcSelectorNo,'方堡盆地'))
+                    }
+                    if (currentMap == '方堡盆地') {
+                        return leo.autoWalk([156,146])
+                        .then(()=>console.log(leo.logTime() + '开始战斗'))
+                        .then(()=>leo.encounterTeamLeader(protect))
                         .then(() => {
                             console.log(leo.logTime() + "登出回补");
                             return leo.logBack();
                         });
-                    });
-                }else{
-                    if (mapInfo.name.indexOf('小岛')!=-1){
-                        return leo.encounterTeammate(protect, '小岛'); //队员遇敌
                     }
                 }
                 //console.log('延时3秒');

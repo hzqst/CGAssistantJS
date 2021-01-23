@@ -1484,7 +1484,7 @@ module.exports = new Promise(resolve => {
 				result = result.then(() => cga.emogua.recursion(() => {
 					cga.StartWork(skill.index, 0);
 					if (cga.GetPlayerInfo().mp >= (item.level * 10) && cga.AssessItem(skill.index, item.pos)) {
-						return cga.emogua.waitWorkResult(assessedOnce ? 2000 : 900000).then(r => {
+						return cga.emogua.waitWorkResult(assessedOnce ? 1000 : 900000).then(r => {
 							if (r.success) {
 								assessedOnce = true;
 								return Promise.reject();
@@ -1492,10 +1492,10 @@ module.exports = new Promise(resolve => {
 						});
 					}
 					return Promise.reject();
-				})).then(() => cga.emogua.delay(200));
+				})).then(() => cga.emogua.delay(20));
 			});
 		}
-		return result.then(() => cga.emogua.delay(500));
+		return result.then(() => cga.emogua.delay(50));
 	};
 	let repairedOnce = false;
 	cga.emogua.repairAll = () => {
@@ -1544,7 +1544,7 @@ module.exports = new Promise(resolve => {
 	cga.emogua.healTeammate = () => new Promise((resolve, reject) => {
 		const skill = cga.GetSkillsInfo().find(s => s.name == '治疗');
 		const requireMp = 25 + skill.lv * 5;
-		const needHealTeammate = cga.getTeamPlayers().find(p => p.injury > 0);
+		const needHealTeammate = cga.getTeamPlayers().find(p => (p.injury == 1 ||p.injury == 3 ));
 		if (needHealTeammate && skill && cga.GetPlayerInfo().mp >= requireMp) {
 			cga.StartWork(skill.index, skill.lv-1);
 			cga.AsyncWaitPlayerMenu((error, players) => setTimeout(() => {
@@ -2342,7 +2342,7 @@ module.exports = new Promise(resolve => {
 			}
 			BattleStrategyCache.push(strategies);
 		} else {
-			console.log('取消脚本战斗');
+			//console.log('取消脚本战斗');
 			playerStrategies = [];
 			player2Strategies = [];
 			petStrategies = [];
@@ -2366,7 +2366,7 @@ module.exports = new Promise(resolve => {
 			return 3;
 		}
 		if (item.type == 31) return 20; // 布
-		if ([26,32,34,35].indexOf(item.type) >= 0) { // 狩猎材料
+		if ([32,34,35].indexOf(item.type) >= 0) { // 狩猎材料
 			if (item.name.endsWith('元素碎片')) return 4;
 			if (item.name.startsWith('隐秘的徽记')) return 20;
 			return 40;

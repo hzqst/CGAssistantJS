@@ -2,14 +2,27 @@ require('./common').then(cga => {
     leo.baseInfoPrint();
     //leo.logStatus = false;
 
-    var skillName = '恢复魔法';
-    var skillLevel = 8;
+    var skillName = '气绝回复';
+    var skillLevel = 5;
+    var isBuySealCard = false; //是否买封印卡
+    var sealCardName = '封印卡（昆虫系）';
+    var sealCardLevel = 1;
+    var sealCardMaxCount = 300; 
 
     var protect = {
         minHp: 500,
         minMp: 300,
         minPetHp: 150,
-        minPetMp: 0
+        minPetMp: 0,
+        checker: ()=>{
+            if(isBuySealCard){
+                //判断是否要购买封印卡
+                var sealCardCount = cga.getItemCount(sealCardName);
+                if (sealCardCount < 5) {
+                    return true;
+                }
+            }
+        }
     };
     var isLogBackFirst = false; //启动登出
     var isPrepare = false; //招魂、治疗、补血、卖石
@@ -78,6 +91,15 @@ require('./common').then(cga => {
             () => leo.waitAfterBattle()
             .then(() => leo.checkHealth(prepareOptions.doctorName))
             .then(() => leo.checkCrystal(prepareOptions.crystalName))
+            .then(() => {
+                if(isBuySealCard){
+                    //判断是否要购买封印卡
+                    var sealCardCount = cga.getItemCount(sealCardName);
+                    if (sealCardCount < 5) {
+                        return leo.buySealCard(sealCardName, sealCardMaxCount, sealCardLevel);
+                    }
+                }
+            })
             .then(() => {
                 //营地练级
                 if (isTeamLeader) {
