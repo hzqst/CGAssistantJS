@@ -45,28 +45,28 @@
     - 加载指定文件配置  
     `leo.panel.loadFromFile('配置文件名称.json');`
     
-    - 自动战斗面板——自动战斗
+    - 自动战斗面板——自动战斗  
     `leo.panel.autoBattle(true);`
     
     - 自动战斗面板——高速战斗  
     `leo.panel.highspeed(true);`
         
-    - 自动战斗面板——宠物二动
+    - 自动战斗面板——宠物二动  
     `leo.panel.pet2action(true);`
         
-    - 玩家信息面板——自动补给
+    - 玩家信息面板——自动补给  
     `leo.panel.autosupply(true);`
         
-    - 玩家信息面板——屏蔽切图
+    - 玩家信息面板——屏蔽切图  
     `leo.panel.noswitchanim(120);`
         
-    - 玩家信息面板——高速移动
+    - 玩家信息面板——高速移动  
     `leo.panel.movespd(120);`
     
-    - 玩家信息面板——生产加速
+    - 玩家信息面板——生产加速  
     `leo.panel.workacc(100);`
         
-    - 玩家信息面板——高速采集 
+    - 玩家信息面板——高速采集  
     `leo.panel.workdelay(6000);`
         
     - 物品信息面板——添加自动丢弃  
@@ -78,7 +78,7 @@
     - 物品信息面板——添加自动堆叠(注意，需要有符号|)  
     `leo.panel.itemtweaklistAdd('神之金|20');`
 
-    - 物品信息面板——删除自动堆叠(注意，需要跟已配置的项完全相同) 
+    - 物品信息面板——删除自动堆叠(注意，需要跟已配置的项完全相同)  
     `leo.panel.itemtweaklistDel('神之金|20');`
 
 - 常用的函数
@@ -163,13 +163,22 @@
 	
     - 退出脚本  
     `leo.exit();`
+    
+    - 登出回城  
+    `leo.logBack();`
+
+    - 登出游戏  
+    `cga.LogOut();`
 
     - 判断身上是否有指定物品  
     `leo.has('魔力之泉');`
 
-    - 获取游戏里的时间，返回['黎明','白天','黄昏','夜晚']
+    - 获取游戏里的时间，返回['黎明','白天','黄昏','夜晚']  
     `leo.getSysTimeEx();`
 
-    - 与指定坐标的NPC对话，x,y为NPC坐标，select是对话选项(默认选是/确定)，dest是对话后切图判断
+    - 与指定坐标的NPC对话，x,y为NPC坐标，select是对话选项(默认选是/确定)，dest是对话后切图判断  
     `leo.talkNpcAt(x,y,select,dest);`
+
+
+
 
