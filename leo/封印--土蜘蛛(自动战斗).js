@@ -5,15 +5,15 @@ require('./common').then(cga=>{
     var petIndexMap = {};
     //宠物目标属性值：血、魔、攻、防、敏
     var petOptions = {
-        name: '红帽哥布林',
-        sealCardName: '封印卡（人形系）',
+        name: '土蜘蛛',
+        sealCardName: '封印卡（昆虫系）',
         sealCardLevel: 1,
         autoDropPet: true, //是否自动扔宠，true扔/false不扔
-        minHp: 106 - 3,
-        minMp: 73 - 3,
-        minAttack: 41,
-        minDefensive: 43,
-        minAgility: 31,
+        minHp: 103 - 3,
+        minMp: 100 - 3,
+        minAttack: 34,
+        minDefensive: 36,
+        minAgility: 32,
         index: 1,
         petChecker: () => {
             var pets = cga.GetPetsInfo();
@@ -118,7 +118,7 @@ require('./common').then(cga=>{
                 && e.maxmp >= petOptions.minMp ) 
             && cga.getInventoryItems().find(i => i.name == petOptions.sealCardName);
         },
-        skillName: '火焰魔法-Ⅰ',
+        skillName: '强力火焰魔法-Ⅰ',
         targets: context => [context.enemies.find(e => e.level == 1 
                 && e.name == petOptions.name 
                 && e.maxhp >= petOptions.minHp 
@@ -149,7 +149,7 @@ require('./common').then(cga=>{
     var prepareOptions = {
         rechargeFlag: 1,
         repairFlag: -1,
-        crystalName: '水火的水晶（5：5）',
+        crystalName: '风地的水晶（5：5）',
         doctorName: '医道之殇'
     };
     leo.log('红叶の自动抓【' + petOptions.name + '】存银行脚本，启动~');

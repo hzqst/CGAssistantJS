@@ -1,7 +1,8 @@
 require('./common').then(cga => {
 	//leo.baseInfoPrint();
 
-	var target = 650;	//打算刷多少次
+	var target = 200;	//打算刷多少次
+	var full = 4800;	//默认最多刷4800声望
 	var protect = {
         minHp: 200
     };
@@ -11,7 +12,7 @@ require('./common').then(cga => {
 	var count = 0;
 
 	const profession = leo.getPlayerProfession();
-	leo.log('红叶の咬花(李贝留斯逃跑)脚本，启动~');
+	leo.log('红叶の咬花(李贝留斯不逃跑)脚本，启动~');
 	if(cga.getItemCount('咬花')==0){
     	leo.log('身上没有【咬花】，脚本结束');
     	return;
@@ -38,6 +39,7 @@ require('./common').then(cga => {
 	if(playerinfo.level > 152){
 		titleUp = 150;
 	}
+	titleUp = titleUp + 10;//不逃跑，加10声望
 
 	//自动取下水晶
 	var crystal = cga.GetItemsInfo().find(i => i.pos == 7);
@@ -50,12 +52,6 @@ require('./common').then(cga => {
 
     //技能设置
     const sets = [];
-	sets.push({
-		user: 1,
-		check: context => context.enemies.find(e => e.name == '李贝留斯'),
-		type: '逃跑',
-		targets: context => [context.player_pos]
-	});
 	sets.push({
 		user: 4,
 		check: context => true,
@@ -75,7 +71,7 @@ require('./common').then(cga => {
 		targets: context => [context.petUnit.pos]
 	});
 	var firstRoundDelay = 1;	//首回合延迟
-	var roundDelay = 1			//每回合延迟
+	var roundDelay = 4000		//每回合延迟
 	var force = true ;			//是否强制启用战斗配置
 	leo.autoBattle(sets,firstRoundDelay,roundDelay,force);
 
@@ -104,8 +100,9 @@ require('./common').then(cga => {
 		return leo.loop(
 			()=>leo.todo()
 			.then(()=>{
-				if(count >= target){
-					return leo.log('已刷够' + target + '次')
+				var titleGet = titleUp * count;
+				if(titleGet>= full || count >= target){
+					return leo.log('已刷够' + target + '次，获得声望【' + titleGet + '】')
 					.then(()=>{
 						if(petIndex!=-1){
 							//恢复宠物出战状态
@@ -136,7 +133,11 @@ require('./common').then(cga => {
 			        .then(()=>leo.autoWalk([106, 121]))
 			        .then(()=>leo.talkNpc(0,leo.talkNpcSelectorYes,'回忆之间'));
 				}
-				if(mapInfo.name == '回忆之间'){
+
+				if(mapInfo.name == '回忆之间' && mapInfo.indexes.index3 == 44641){
+					return leo.logBack();
+				}
+				if(mapInfo.name == '回忆之间' && mapInfo.indexes.index3 == 44642){
 					return leo.autoWalk([7,7])
 					.then(()=>leo.talkNpc(0,leo.talkNpcSelectorYes))
 					.then(()=>leo.waitAfterBattle())
@@ -146,7 +147,7 @@ require('./common').then(cga => {
 						var time = parseInt((nowTime - leo.beginTime)/1000/60);//已持续练级时间
 						time = time==0?1:time;
 						var titleGet = titleUp * count;
-						var content = '红叶の咬花(李贝留斯逃跑)脚本，已刷次数【' + count + '/' + target + '】，获得声望【' + titleGet + '】，共耗时'+time+'分钟';
+						var content = '红叶の咬花(李贝留斯不逃跑)脚本，已刷次数【' + count + '/' + target + '】，获得声望【' + titleGet + '】，共耗时'+time+'分钟';
 						leo.say(content);
 						if(count%5 == 0){
 							console.log(leo.logTime()+content);

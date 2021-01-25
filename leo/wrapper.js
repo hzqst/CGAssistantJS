@@ -1066,7 +1066,7 @@ module.exports = new Promise(resolve => {
 			} else {
 				resolve({success: false});
 			}
-		}, 0), 15000);
+		}, 0), 10000);
 	}).then(result => cga.emogua.delay(300).then(() => result));
 	cga.emogua.getNearEntry = (target) => {
 		return cga.getMapObjects().filter(e => (e.cell === 3 || e.cell === 10) && !(e.x == target.x && e.y == target.y)).sort((a, b) => {

@@ -8,9 +8,9 @@ require('./common').then(cga => {
         name: '死灵',
         sealCardName: '封印卡（不死系）',
         sealCardLevel: 1,
-        autoDropPet: true, //是否自动扔宠，true扔/false不扔
-        minHp: 89 - 3,
-        minMp: 115 - 3,
+        autoDropPet: false, //是否自动扔宠，true扔/false不扔
+        minHp: 89 - 30,
+        minMp: 115 - 30,
         minAttack: 41,
         minDefensive: 45,
         minAgility: 31,
@@ -91,6 +91,7 @@ require('./common').then(cga => {
     var force = true ;          //是否强制启用战斗配置
     leo.setBattlePet2(false);   //关闭宠物二动
     leo.autoBattle(sets,firstRoundDelay,roundDelay,force);
+    leo.panel.autoBattle(false);//关闭CGA面板的自动战斗
 
     var isLogBackFirst = false; //启动登出
     var isPrepare = false; //招魂、治疗、补血、卖石

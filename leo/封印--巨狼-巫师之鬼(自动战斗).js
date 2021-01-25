@@ -4,28 +4,48 @@ require('./common').then(cga => {
     leo.monitor.config.logStatus = false;
     var petIndexMap = {};
     //宠物目标属性值：血、魔、攻、防、敏
-    var petOptions = {
-        name: '宝石鼠',
+    var petOptions = [{
+        name: '巨狼',
         sealCardName: '封印卡（野兽系)',
-        sealCardLevel: 4,
+        sealCardLevel: 1,
         autoDropPet: true, //是否自动扔宠，true扔/false不扔
-        minHp: 77 - 3,
-        minMp: 124 - 3,
-        minAttack: 29,
-        minDefensive: 38,
-        minAgility: 33,
-        index: 1,
-        petChecker: () => {
-            var pets = cga.GetPetsInfo();
-            //console.log(leo.logTime()+'宠物数量：'+pets.length);
-            for (var i in pets) {
-                var pet = pets[i];
-                if (petIndexMap[pet.index] && petIndexMap[pet.index] == 1) {
-                    //原有的宠，不做处理
-                } else {
-                    //新抓到的宠
-                    var isDrop = leo.isDropPet(pet, petOptions);
-                    if (pet.realname == petOptions.name && pet.level == 1 && isDrop.flag) {
+        minHp: 102 - 3,
+        minMp: 100 - 3,
+        minAttack: 44,
+        minDefensive: 32,
+        minAgility: 32,
+        index:1
+    },{
+        name: '巫师之鬼',
+        sealCardName: '封印卡（不死系）',
+        sealCardLevel: 1,
+        autoDropPet: true, //是否自动扔宠，true扔/false不扔
+        minHp: 102 - 3,
+        minMp: 97 - 3,
+        minAttack: 41,
+        minDefensive: 36,
+        minAgility: 38,
+        index:1
+    }];
+    var petChecker = ()=>{
+        let pets = cga.GetPetsInfo();
+        //console.log(leo.logTime()+'宠物数量：'+pets.length);
+        for (let i in pets) {
+            let pet = pets[i];
+            if (petIndexMap[pet.index] && petIndexMap[pet.index] == 1) {
+                //原有的宠，不做处理
+            } else {
+                //新抓到的宠
+                let option;
+                for (let i = 0; i < petOptions.length; i++) {
+                    if(pet.realname == petOptions[i].name){
+                        option = petOptions[i];
+                        break;
+                    }
+                }
+                if(option){
+                    let isDrop = leo.isDropPet(pet, option);
+                    if (pet.realname == option.name && pet.level == 1 && isDrop.flag) {
                         if (cga.isInNormalState()) {
                             cga.DropPet(pet.index);
                             leo.log('可惜！丢下宠物' + leo.getPetCalcInfo(pet) + '，' + isDrop.info);
@@ -34,22 +54,23 @@ require('./common').then(cga => {
                         leo.log('恭喜！抓到宠物' + leo.getPetCalcInfo(pet));
                         petIndexMap[pet.index] = 1;
                     }
+                    //判断是否要购买封印卡
+                    let sealCardCount = cga.getItemCount(option.sealCardName);
+                    if (sealCardCount < 2) {
+                        return true;
+                    }
                 }
             }
-            //判断是否要购买封印卡
-            var sealCardCount = cga.getItemCount(petOptions.sealCardName);
-            if (sealCardCount < 2) {
-                return true;
-            }
         }
-    };
+    }
+    
     var protect = {
-        minHp: 500,
-        minMp: 200,
-        minPetHp: 500,
-        minPetMp: 200,
+        minHp: 1000,
+        minMp: 50,
+        minPetHp: 1000,
+        minPetMp: 50,
         maxPetNumber: 4, //超过4只宠物
-        checker: petOptions.petChecker
+        checker: petChecker
     };
 
     //技能设置
@@ -65,30 +86,38 @@ require('./common').then(cga => {
     //参数targets 对象
     //targets: context => context.enemies.sort((a, b) => b.curhp - a.curhp).map(u => u.pos) 当前血多优先
     const sets = [];
-    sets.push({
-        user: 1, //1-人 2-宠 3-人宠 4-人二动 5-人一动和二动
-        check: context => {
-            if (context.isFirstBattleAction && context.enemies.lv1 && context.enemies.lv1.length > 0){
-                leo.isCatchPet(context.enemies.lv1,petOptions);
-            }
-            return leo.findCatchPet(context.enemies.lv1,petOptions) && cga.getInventoryItems().find(i => i.name == petOptions.sealCardName);
-        },
-        type: '物品',
-        item: context => cga.getInventoryItems().find(i => i.name == petOptions.sealCardName).pos,
-        targets: context => [leo.findCatchPet(context.enemies.lv1,petOptions).pos]
-    });
+    for (let i = 0; i < petOptions.length; i++) {
+        let option = petOptions[i];
+        let set = {
+            user: 1, //1-人 2-宠 3-人宠 4-人二动 5-人一动和二动
+            check: context => {
+                if (context.isFirstBattleAction && context.enemies.lv1 && context.enemies.lv1.length > 0){
+                    leo.isCatchPet(context.enemies.lv1,option,true);
+                }
+                return leo.findCatchPet(context.enemies.lv1,option) && cga.getInventoryItems().find(i => i.name == option.sealCardName);
+            },
+            type: '物品',
+            item: context => cga.getInventoryItems().find(i => i.name == option.sealCardName).pos,
+            targets: context => [leo.findCatchPet(context.enemies.lv1,option).pos]
+        };
+        sets.push(set);
+    }
     sets.push({
         user: 1,
         check: context => true,
         type: '逃跑',
         targets: context => [context.player_pos]
     });
-    sets.push({
-        user: 2,
-        check: context => leo.findCatchPet(context.enemies.lv1,petOptions,true) && cga.getInventoryItems().find(i => i.name == petOptions.sealCardName),
-        skillName: '陨石魔法-Ⅰ',
-        targets: context => [leo.findCatchPet(context.enemies.lv1,petOptions,true).pos]
-    });
+    for (let i = 0; i < petOptions.length; i++) {
+        let option = petOptions[i];
+        let set = {
+            user: 2,
+            check: context => leo.findCatchPet(context.enemies.lv1,option,true) && cga.getInventoryItems().find(i => i.name == option.sealCardName),
+            skillName: '强力风刃魔法-Ⅰ',
+            targets: context => [leo.findCatchPet(context.enemies.lv1,option,true).pos]
+        };
+        sets.push(set);
+    }
     sets.push({
         user: 2,
         check: context => true,
@@ -108,12 +137,24 @@ require('./common').then(cga => {
     var prepareOptions = {
         rechargeFlag: 1,
         repairFlag: -1,
-        crystalName: '火风的水晶（5：5）',
+        crystalName: '地风的水晶（5：5）',
         doctorName: '医道之殇'
     };
-    leo.log('红叶の自动抓【' + petOptions.name + '】存银行脚本，启动~');
-    var setting = '预设五围是：【' + petOptions.minHp + '/' + petOptions.minMp + '/' + petOptions.minAttack + '/' + petOptions.minDefensive + '/' + petOptions.minAgility + '】，自动扔宠：【' + (petOptions.autoDropPet ? '已启用' : '未启用') + '】';
-    leo.log(setting);
+    var title = '红叶の自动抓【';
+    for (let i = 0; i < petOptions.length; i++) {
+        var option = petOptions[i];
+        title += option.name;
+        if(i<petOptions.length-1){
+            title += '/';
+        }
+    }
+    title += '】存银行脚本，启动~';
+    leo.log(title);
+    for (let i = 0; i < petOptions.length; i++) {
+        var option = petOptions[i];
+        var setting = '预设五围是：【'+option.name+'】=>【' + option.minHp + '/' + option.minMp + '/' + option.minAttack + '/' + option.minDefensive + '/' + option.minAgility + '】，自动扔宠：【' + (option.autoDropPet ? '已启用' : '未启用') + '】';
+        leo.log(setting);
+    }
     cga.EnableFlags(cga.ENABLE_FLAG_TEAMCHAT, false); //关闭队聊
     cga.EnableFlags(cga.ENABLE_FLAG_JOINTEAM, false); //关闭组队
     cga.EnableFlags(cga.ENABLE_FLAG_CARD, false); //关闭名片
@@ -122,14 +163,14 @@ require('./common').then(cga => {
     var playerName = playerinfo.name;
     var isTeamLeader = true;
     var bankPetFull = false;
-    var pets = cga.GetPetsInfo();
+    let pets = cga.GetPetsInfo();
     if (pets.length > 0) {
         console.log('身上已有宠物：');
     }
-    for (var i in pets) {
-        var pet = pets[i];
+    for (let i in pets) {
+        let pet = pets[i];
         petIndexMap[pet.index] = 1;
-        var index = parseInt(pet.index) + 1;
+        let index = parseInt(pet.index) + 1;
 		console.log(index + '： LV' + pet.level + ' ' + pet.realname + '  (' + pet.name + ')');
     }
     leo.todo().then(() => {
@@ -161,7 +202,7 @@ require('./common').then(cga => {
                 }
             }).then(() => {
                 //判断人物身上的宠物数量是否等于5
-                var pets = cga.GetPetsInfo();
+                let pets = cga.GetPetsInfo();
                 if (pets.length == 5) {
                     if (bankPetFull) {
                         return leo.reject('宠物在银行满啦！背包也满啦！是时候倒仓库啦！');
@@ -174,84 +215,52 @@ require('./common').then(cga => {
                         .then(() => leo.movePet(4, 104))
                         .then(() => {
                             //更新人物身上的宠物信息
-                            var pets = cga.GetPetsInfo();
+                            let pets = cga.GetPetsInfo();
                             petIndexMap = {};
-                            for (var i in pets) {
-                                var pet = pets[i];
+                            for (let i in pets) {
+                                let pet = pets[i];
                                 petIndexMap[pet.index] = 1;
                             }
                             return leo.next();
                         });
                     }
                 }
-            }).then(() => {
+            }).then( async () => {
                 //判断是否要购买封印卡
-                var sealCardCount = cga.getItemCount(petOptions.sealCardName);
-                if (sealCardCount < 2) {
-                    return leo.buySealCard(petOptions.sealCardName, 10, petOptions.sealCardLevel);
+                for (let i = 0; i < petOptions.length; i++) {
+                    let option = petOptions[i];
+                    let sealCardCount = cga.getItemCount(option.sealCardName);
+                    if (sealCardCount < 2) {
+                        await leo.buySealCard(option.sealCardName, 20, option.sealCardLevel);
+                    }
                 }
-            })
-            .then(() => {
-                //判断身上是否有【咒器·红念珠】
-                if(cga.getItemCount('咒器·红念珠') == 0){
-                    return leo.log('没有【咒器·红念珠】，先去咒术师的秘密住处拿取')
-                    .then(()=>leo.goto(n => n.falan.w1))
-                    .then(()=>leo.autoWalkList([[22, 88, '芙蕾雅'],[200, 165]]))
-                    .then(()=>leo.talkNpc(201, 165,leo.talkNpcSelectorYes,'莎莲娜海底洞窟 地下1楼'))
-                    .then(()=>leo.autoWalkList([[20, 8 ,'莎莲娜海底洞窟 地下2楼'],[32, 21]]))
-                    .then(()=>leo.turnTo(31, 22))
-                    .then(()=>leo.say('咒术'))
-                    .then(()=>leo.waitNPCDialog(dialog => {
-                        cga.ClickNPCDialog(1, -1);
-                        return leo.delay(2000);
-                    }))
-                    .then(()=>leo.autoWalkList([[38, 37 ,'咒术师的秘密住处'],[12, 7]]))
-                    .then(()=>leo.talkNpc(14,7,leo.talkNpcSelectorYes))
-                    .then(()=>{
-                        if(cga.getItemCount('咒器·红念珠') == 0){
-                            return leo.reject('无法拿到【咒器·红念珠】，请检查');
-                        }
-                    });
-                }
-            })
-            .then(() => {
+                return leo.next();
+            }).then(() => {
                 //地图判断，如果已经在1级宠捕捉点，则继续捕捉
                 var currentMap = cga.GetMapName();
-                if (currentMap == '镜中的豪宅') {
+                if (currentMap == '雪拉威森塔７７层') {
                     return leo.autoWalkList([
-                        [22,8],
-                        [24,8]
+                        [89, 26]
                     ]);
                 } else {
                     return leo.todo()
                     .then(()=>leo.sellCastle())
                     .then(() => leo.checkHealth(prepareOptions.doctorName))
                     .then(() => leo.checkCrystal(prepareOptions.crystalName))
-                    .then(() => leo.goto(n => n.falan.w2))
-                    .then(() => leo.autoWalkList([
-                        [96, 149, '豪宅'],
-                        [33, 22, '豪宅  地下'],
-                        [9, 5, '豪宅'],
-                        [33, 10, '镜中的豪宅'],
-                        [35, 2]
-                    ]))
-                    .then(() => leo.talkNpc(35,1,leo.talkNpcSelectorYes))
-                    .then(() => leo.autoWalkList([[36,9]]))
-                    .then(() => leo.talkNpc(36,10,leo.talkNpcSelectorYes))
-                    .then(() => leo.autoWalkList([
-                        [27, 67, '豪宅'],
-                        [58, 66, '豪宅  地下'],
-                        [41, 23, '豪宅'],
-                        [59, 6, '豪宅  2楼'],
-                        [16, 9, '镜中的豪宅  2楼'],
-                        [40, 10]
-                    ]))
-                    .then(() => leo.talkNpc(41,10,leo.talkNpcSelectorYes))
-                    .then(() => leo.autoWalkList([[40,16]]))
-                    .then(() => leo.talkNpc(40,17,leo.talkNpcSelectorYes))
-                    .then(() => leo.autoWalkList([
-                        [6, 5, '镜中的豪宅'],
-                        [24, 8]
+                    .then(() => leo.logBack())
+                    .then(() => leo.autoWalk([165,153]))
+                    .then(() => leo.talkNpc(2,leo.talkNpcSelectorYes,'利夏岛'))
+                    .then(() => leo.autoWalk([90,99,'国民会馆']))
+                    .then(() => leo.autoWalk([107,52]))
+                    .then(() => leo.supply(108, 52))
+                    .then(()=>leo.autoWalk([108,39,'雪拉威森塔１层']))
+                    .then(()=>leo.autoWalkList([
+                            [75, 50,'雪拉威森塔５０层'],
+                            [22, 44,'雪拉威森塔８０层'],
+							              [159, 123,'雪拉威森塔７９层'],
+							              [99, 16,'雪拉威森塔７８层'],
+							              [68, 52,'雪拉威森塔７７层'],
+							              [89, 26]
                     ]));
                 }
             }).then(() => {

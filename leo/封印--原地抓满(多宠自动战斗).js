@@ -131,6 +131,7 @@ require('./common').then(cga=>{
     var force = true ;          //是否强制启用战斗配置
     leo.setBattlePet2(false);   //关闭宠物二动
     leo.autoBattle(sets,firstRoundDelay,roundDelay,force);
+    leo.panel.autoBattle(false);//关闭CGA面板的自动战斗
 
 	var isLogBackFirst = false;		//启动登出
 	var isPrepare = false;			//招魂、治疗、补血、卖石

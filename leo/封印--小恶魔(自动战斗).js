@@ -5,14 +5,14 @@ require('./common').then(cga => {
     var petIndexMap = {};
     //宠物目标属性值：血、魔、攻、防、敏
     var petOptions = {
-        name: '宝石鼠',
-        sealCardName: '封印卡（野兽系)',
-        sealCardLevel: 4,
+        name: '小恶魔',
+        sealCardName: '封印卡（飞行系）',
+        sealCardLevel: 1,
         autoDropPet: true, //是否自动扔宠，true扔/false不扔
-        minHp: 77 - 3,
-        minMp: 124 - 3,
-        minAttack: 29,
-        minDefensive: 38,
+        minHp: 94 - 3,
+        minMp: 112 - 3,
+        minAttack: 36,
+        minDefensive: 31,
         minAgility: 33,
         index: 1,
         petChecker: () => {
@@ -142,7 +142,7 @@ require('./common').then(cga => {
     }).then(() => {
         //招魂、治疗、补血、卖石
         if (isPrepare) {
-            return leo.logBack().then(() => leo.prepare(prepareOptions));
+           return leo.logBack().then(() => leo.prepare(prepareOptions));
         } else {
             return leo.next();
         }
@@ -188,70 +188,24 @@ require('./common').then(cga => {
                 //判断是否要购买封印卡
                 var sealCardCount = cga.getItemCount(petOptions.sealCardName);
                 if (sealCardCount < 2) {
-                    return leo.buySealCard(petOptions.sealCardName, 10, petOptions.sealCardLevel);
+                    return leo.buySealCard(petOptions.sealCardName, 20, petOptions.sealCardLevel);
                 }
-            })
-            .then(() => {
-                //判断身上是否有【咒器·红念珠】
-                if(cga.getItemCount('咒器·红念珠') == 0){
-                    return leo.log('没有【咒器·红念珠】，先去咒术师的秘密住处拿取')
-                    .then(()=>leo.goto(n => n.falan.w1))
-                    .then(()=>leo.autoWalkList([[22, 88, '芙蕾雅'],[200, 165]]))
-                    .then(()=>leo.talkNpc(201, 165,leo.talkNpcSelectorYes,'莎莲娜海底洞窟 地下1楼'))
-                    .then(()=>leo.autoWalkList([[20, 8 ,'莎莲娜海底洞窟 地下2楼'],[32, 21]]))
-                    .then(()=>leo.turnTo(31, 22))
-                    .then(()=>leo.say('咒术'))
-                    .then(()=>leo.waitNPCDialog(dialog => {
-                        cga.ClickNPCDialog(1, -1);
-                        return leo.delay(2000);
-                    }))
-                    .then(()=>leo.autoWalkList([[38, 37 ,'咒术师的秘密住处'],[12, 7]]))
-                    .then(()=>leo.talkNpc(14,7,leo.talkNpcSelectorYes))
-                    .then(()=>{
-                        if(cga.getItemCount('咒器·红念珠') == 0){
-                            return leo.reject('无法拿到【咒器·红念珠】，请检查');
-                        }
-                    });
-                }
-            })
-            .then(() => {
+            }).then(() => {
                 //地图判断，如果已经在1级宠捕捉点，则继续捕捉
                 var currentMap = cga.GetMapName();
-                if (currentMap == '镜中的豪宅') {
+                if (currentMap == '索奇亚') {
                     return leo.autoWalkList([
-                        [22,8],
-                        [24,8]
+                        [282, 400],
+                        [280, 400]
                     ]);
                 } else {
                     return leo.todo()
                     .then(()=>leo.sellCastle())
                     .then(() => leo.checkHealth(prepareOptions.doctorName))
                     .then(() => leo.checkCrystal(prepareOptions.crystalName))
-                    .then(() => leo.goto(n => n.falan.w2))
-                    .then(() => leo.autoWalkList([
-                        [96, 149, '豪宅'],
-                        [33, 22, '豪宅  地下'],
-                        [9, 5, '豪宅'],
-                        [33, 10, '镜中的豪宅'],
-                        [35, 2]
-                    ]))
-                    .then(() => leo.talkNpc(35,1,leo.talkNpcSelectorYes))
-                    .then(() => leo.autoWalkList([[36,9]]))
-                    .then(() => leo.talkNpc(36,10,leo.talkNpcSelectorYes))
-                    .then(() => leo.autoWalkList([
-                        [27, 67, '豪宅'],
-                        [58, 66, '豪宅  地下'],
-                        [41, 23, '豪宅'],
-                        [59, 6, '豪宅  2楼'],
-                        [16, 9, '镜中的豪宅  2楼'],
-                        [40, 10]
-                    ]))
-                    .then(() => leo.talkNpc(41,10,leo.talkNpcSelectorYes))
-                    .then(() => leo.autoWalkList([[40,16]]))
-                    .then(() => leo.talkNpc(40,17,leo.talkNpcSelectorYes))
-                    .then(() => leo.autoWalkList([
-                        [6, 5, '镜中的豪宅'],
-                        [24, 8]
+                    .then(() => leo.goto(n => n.teleport.kili)).then(() => leo.autoWalkList([
+                        [60, 45, '索奇亚'],
+                        [280, 400]
                     ]));
                 }
             }).then(() => {

@@ -5,15 +5,15 @@ require('./common').then(cga => {
     var petIndexMap = {};
     //宠物目标属性值：血、魔、攻、防、敏
     var petOptions = {
-        name: '宝石鼠',
-        sealCardName: '封印卡（野兽系)',
+        name: '血腥之刃',
+        sealCardName: '封印卡（金属系）',
         sealCardLevel: 4,
         autoDropPet: true, //是否自动扔宠，true扔/false不扔
-        minHp: 77 - 3,
-        minMp: 124 - 3,
-        minAttack: 29,
-        minDefensive: 38,
-        minAgility: 33,
+        minHp: 90 - 3,
+        minMp: 111 - 3,
+        minAttack: 46,
+        minDefensive: 46,
+        minAgility: 30,
         index: 1,
         petChecker: () => {
             var pets = cga.GetPetsInfo();
@@ -52,16 +52,6 @@ require('./common').then(cga => {
         checker: petOptions.petChecker
     };
 
-    //技能设置
-    //参数check 如果
-    //context.round_count === 0 第一回合
-    //context.enemies.length 敌人数量
-    //context.enemies.front.length 敌人前排数量
-    //context.enemies.back.length 敌人后排数量
-    //context.enemies.find(e => e.curhp > 0 && e.maxhp >= 15000) 还活着的血上限大于15000
-    //e.name 怪物种类名称
-    //e.pos 怪物的位置
-
     //参数targets 对象
     //targets: context => context.enemies.sort((a, b) => b.curhp - a.curhp).map(u => u.pos) 当前血多优先
     const sets = [];
@@ -86,7 +76,7 @@ require('./common').then(cga => {
     sets.push({
         user: 2,
         check: context => leo.findCatchPet(context.enemies.lv1,petOptions,true) && cga.getInventoryItems().find(i => i.name == petOptions.sealCardName),
-        skillName: '陨石魔法-Ⅰ',
+        skillName: '火焰魔法-Ⅰ',
         targets: context => [leo.findCatchPet(context.enemies.lv1,petOptions,true).pos]
     });
     sets.push({
@@ -102,7 +92,7 @@ require('./common').then(cga => {
     leo.setBattlePet2(false);   //关闭宠物二动
     leo.autoBattle(sets,firstRoundDelay,roundDelay,force);
     leo.panel.autoBattle(false);//关闭CGA面板的自动战斗
-
+    
     var isLogBackFirst = false; //启动登出
     var isPrepare = false; //招魂、治疗、补血、卖石
     var prepareOptions = {
@@ -142,7 +132,7 @@ require('./common').then(cga => {
     }).then(() => {
         //招魂、治疗、补血、卖石
         if (isPrepare) {
-            return leo.logBack().then(() => leo.prepare(prepareOptions));
+           return leo.logBack().then(() => leo.prepare(prepareOptions));
         } else {
             return leo.next();
         }
@@ -188,71 +178,63 @@ require('./common').then(cga => {
                 //判断是否要购买封印卡
                 var sealCardCount = cga.getItemCount(petOptions.sealCardName);
                 if (sealCardCount < 2) {
-                    return leo.buySealCard(petOptions.sealCardName, 10, petOptions.sealCardLevel);
+                    return leo.buySealCard(petOptions.sealCardName, 20, petOptions.sealCardLevel);
                 }
-            })
-            .then(() => {
-                //判断身上是否有【咒器·红念珠】
-                if(cga.getItemCount('咒器·红念珠') == 0){
-                    return leo.log('没有【咒器·红念珠】，先去咒术师的秘密住处拿取')
-                    .then(()=>leo.goto(n => n.falan.w1))
-                    .then(()=>leo.autoWalkList([[22, 88, '芙蕾雅'],[200, 165]]))
-                    .then(()=>leo.talkNpc(201, 165,leo.talkNpcSelectorYes,'莎莲娜海底洞窟 地下1楼'))
-                    .then(()=>leo.autoWalkList([[20, 8 ,'莎莲娜海底洞窟 地下2楼'],[32, 21]]))
-                    .then(()=>leo.turnTo(31, 22))
-                    .then(()=>leo.say('咒术'))
-                    .then(()=>leo.waitNPCDialog(dialog => {
-                        cga.ClickNPCDialog(1, -1);
-                        return leo.delay(2000);
-                    }))
-                    .then(()=>leo.autoWalkList([[38, 37 ,'咒术师的秘密住处'],[12, 7]]))
-                    .then(()=>leo.talkNpc(14,7,leo.talkNpcSelectorYes))
-                    .then(()=>{
-                        if(cga.getItemCount('咒器·红念珠') == 0){
-                            return leo.reject('无法拿到【咒器·红念珠】，请检查');
-                        }
-                    });
-                }
-            })
-            .then(() => {
+            }).then(() => {
                 //地图判断，如果已经在1级宠捕捉点，则继续捕捉
                 var currentMap = cga.GetMapName();
-                if (currentMap == '镜中的豪宅') {
+                if (currentMap == '诅咒的迷宫 地下18楼') {
                     return leo.autoWalkList([
-                        [22,8],
-                        [24,8]
+                        [23,13],
+                        [21,13]
                     ]);
                 } else {
                     return leo.todo()
                     .then(()=>leo.sellCastle())
                     .then(() => leo.checkHealth(prepareOptions.doctorName))
                     .then(() => leo.checkCrystal(prepareOptions.crystalName))
-                    .then(() => leo.goto(n => n.falan.w2))
+                    .then(() => leo.goto(n => n.castle.teleport))
+                    .then(() => leo.autoWalk([37,4]))
+                    .then(() => leo.talkNpc(0,leo.talkNpcSelectorYes))
                     .then(() => leo.autoWalkList([
-                        [96, 149, '豪宅'],
-                        [33, 22, '豪宅  地下'],
-                        [9, 5, '豪宅'],
-                        [33, 10, '镜中的豪宅'],
-                        [35, 2]
+                        [5, 4, 4313],[6, 13, 4312],[6, 13, '阿巴尼斯村'],
+                        [40, 30,'民家'],[13, 11]
                     ]))
-                    .then(() => leo.talkNpc(35,1,leo.talkNpcSelectorYes))
-                    .then(() => leo.autoWalkList([[36,9]]))
-                    .then(() => leo.talkNpc(36,10,leo.talkNpcSelectorYes))
+                    .then(()=>leo.talkNpc(7,leo.talkNpcSelectorYes))
+                    .then(() => leo.autoWalk([9,5]))
+                    .then(()=>leo.talkNpc(6,leo.talkNpcSelectorYes))
+                    .then(() => leo.autoWalk([14,7]))
+                    .then(()=>leo.talkNpc(0,leo.talkNpcSelectorYes))
+                    .then(() => leo.autoWalk([14,7]))
+                    .then(()=>leo.talkNpc(0,leo.talkNpcSelectorYes))
+                    .then(() => leo.autoWalk([5,3,4333]))
+                    .then(() => leo.autoWalk([9,5]))
+                    .then(() => leo.autoWalk([9,4,4334]))
+                    .then(() => leo.autoWalk([14,10]))
+                    .then(()=>leo.talkNpc(0,leo.talkNpcSelectorYes))
+                    .then(() => leo.autoWalk([7,3,4320]))
                     .then(() => leo.autoWalkList([
-                        [27, 67, '豪宅'],
-                        [58, 66, '豪宅  地下'],
-                        [41, 23, '豪宅'],
-                        [59, 6, '豪宅  2楼'],
-                        [16, 9, '镜中的豪宅  2楼'],
-                        [40, 10]
+                        [11,17,'阿巴尼斯村'],[37,71,'莎莲娜'],[54,162]
                     ]))
-                    .then(() => leo.talkNpc(41,10,leo.talkNpcSelectorYes))
-                    .then(() => leo.autoWalkList([[40,16]]))
-                    .then(() => leo.talkNpc(40,17,leo.talkNpcSelectorYes))
+                    .then(()=>leo.turnDir(6))
                     .then(() => leo.autoWalkList([
-                        [6, 5, '镜中的豪宅'],
-                        [24, 8]
-                    ]));
+                        [35,9,'诅咒的迷宫 地下1楼'],[25,13,'诅咒的迷宫 地下2楼'],
+                        [17,4,'诅咒的迷宫 地下3楼'],[23,20,'诅咒的迷宫 地下4楼'],
+                        [16,10,'诅咒的迷宫 地下5楼'],[6,3,'诅咒的迷宫 地下6楼'],
+                        [15,3,'诅咒的迷宫 地下7楼'],[25,18,'诅咒的迷宫 地下8楼'],
+                        [14,18,'诅咒的迷宫 地下9楼'],[24,4,'第一个难关'],
+                        [22,15]
+                    ]))
+                    .then(()=>leo.talkNpc(6,leo.talkNpcSelectorYes,'诅咒的迷宫 地下11楼'))
+                    .then(() => leo.autoWalkList([
+                        [15,4,'诅咒的迷宫 地下12楼'],[24,15,'诅咒的迷宫 地下13楼'],
+                        [16,3,'诅咒的迷宫 地下14楼'],[25,12,'诅咒的迷宫 地下15楼'],
+                        [22,5,'诅咒的迷宫 地下16楼'],[17,18,'诅咒的迷宫 地下15楼'],
+                        [25,21,'诅咒的迷宫 地下16楼'],[22,18,'诅咒的迷宫 地下17楼'],
+                        [23,4,'诅咒的迷宫 地下18楼'],
+                        [21,13]
+                    ]))
+                    ;
                 }
             }).then(() => {
                 leo.log('到达位置，开始抓宠，请注意是否开启了自动扔宠物。');

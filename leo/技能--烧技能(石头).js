@@ -92,6 +92,24 @@ require('./common').then(cga => {
             .then(() => leo.checkHealth(prepareOptions.doctorName))
             .then(() => leo.checkCrystal(prepareOptions.crystalName))
             .then(() => {
+                //判断是否要去银行取钱
+                playerinfo = cga.GetPlayerInfo();
+                if(playerinfo.gold<5000){
+                    return leo.goto(n=>n.falan.bank)
+                    .then(()=>leo.moveGold(100000,cga.MOVE_GOLD_FROMBANK))
+                    .then(()=>leo.moveGold(100000,cga.MOVE_GOLD_FROMBANK))
+                    .then(()=>leo.moveGold(100000,cga.MOVE_GOLD_FROMBANK))
+                    .then(()=>leo.moveGold(100000,cga.MOVE_GOLD_FROMBANK))
+                    .then(()=>leo.moveGold(100000,cga.MOVE_GOLD_FROMBANK))
+                    .then(()=>{
+                        playerinfo = cga.GetPlayerInfo();
+                        if(playerinfo.gold<5000){
+                            return leo.reject('钱到用时方恨少！请补充足够银子后重新执行脚本！');       //跳出总循环
+                        }
+                    });
+                }
+            })
+            .then(() => {
                 if(isBuySealCard){
                     //判断是否要购买封印卡
                     var sealCardCount = cga.getItemCount(sealCardName);

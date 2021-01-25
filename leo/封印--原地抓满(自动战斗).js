@@ -51,10 +51,15 @@ require('./common').then(cga=>{
 	const sets = [];
     sets.push({
         user: 1, //1-人 2-宠 3-人宠 4-人二动 5-人一动和二动
-        check: context => context.enemies.find(e => e.level == 1 && e.name == petOptions.name && e.maxhp >= petOptions.minHp && e.maxmp >= petOptions.minMp ) && cga.getInventoryItems().find(i => i.name == petOptions.sealCardName),
+        check: context => {
+            if (context.isFirstBattleAction && context.enemies.lv1 && context.enemies.lv1.length > 0){
+                leo.isCatchPet(context.enemies.lv1,petOptions);
+            }
+            return leo.findCatchPet(context.enemies.lv1,petOptions) && cga.getInventoryItems().find(i => i.name == petOptions.sealCardName);
+        },
         type: '物品',
         item: context => cga.getInventoryItems().find(i => i.name == petOptions.sealCardName).pos,
-        targets: context => [context.enemies.find(e => e.level == 1 && e.name == petOptions.name).pos]
+        targets: context => [leo.findCatchPet(context.enemies.lv1,petOptions).pos]
     });
     sets.push({
         user: 1,
@@ -64,9 +69,9 @@ require('./common').then(cga=>{
     });
     sets.push({
         user: 2,
-        check: context => context.enemies.find(e => e.level == 1 && e.name == petOptions.name) && cga.getInventoryItems().find(i => i.name == petOptions.sealCardName),
-        skillName: petOptions.skillName,
-        targets: context => [context.enemies.find(e => e.level == 1 && e.name == petOptions.name).pos]
+        check: context => leo.findCatchPet(context.enemies.lv1,petOptions,true) && cga.getInventoryItems().find(i => i.name == petOptions.sealCardName),
+        skillName: '陨石魔法-Ⅰ',
+        targets: context => [leo.findCatchPet(context.enemies.lv1,petOptions,true).pos]
     });
     sets.push({
         user: 2,
@@ -80,6 +85,7 @@ require('./common').then(cga=>{
     var force = true ;          //是否强制启用战斗配置
     leo.setBattlePet2(false);   //关闭宠物二动
     leo.autoBattle(sets,firstRoundDelay,roundDelay,force);
+    leo.panel.autoBattle(false);//关闭CGA面板的自动战斗
 
 	var isLogBackFirst = false;		//启动登出
 	var isPrepare = false;			//招魂、治疗、补血、卖石
@@ -113,7 +119,7 @@ require('./common').then(cga=>{
 		var pet = pets[i];
 		petIndexMap[pet.index] = 1;
 		var index = parseInt(pet.index) + 1;
-		console.log(index + '  ' + pet.realname + '  LV' + pet.level);
+		console.log(index + '： LV' + pet.level + ' ' + pet.realname + '  (' + pet.name + ')');
 	}
 
 	leo.todo().then(()=>{

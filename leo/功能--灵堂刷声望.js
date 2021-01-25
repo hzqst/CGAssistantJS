@@ -1,7 +1,7 @@
 require('./common').then(cga => {
 	//leo.baseInfoPrint();
 
-	var money = 5000;
+	var money = 76500;
 	var isMoveGold = true; //是否要去取钱，true-按设定的money取钱，false-直接去刷
 	var protect = {
 		minHp: 100,
@@ -17,6 +17,7 @@ require('./common').then(cga => {
 	leo.log('当前人物职业：【'+profession.name+'】，称号：【'+title+'】');
 	leo.log('设置消耗【'+money+'】魔币后停止');
 	leo.log('请不要勾选CGA面板的自动战斗，否则优先级将高于此脚本内的设置');
+	leo.panel.autoBattle(false);//关闭CGA面板的自动战斗
 	var petIndex = playerinfo.petid;
 	if(petIndex!=-1){
 		//leo.log('脚本结束：请先设置不带宠，否则可能导致掉线');

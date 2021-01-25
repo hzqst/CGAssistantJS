@@ -51,8 +51,7 @@
         "星之砂",
         "秘文之皮",
         "奇香木",
-        "坚硬的鳞片",
-        "龙角"
+        "坚硬的鳞片"
     ],
     "itemidmap": {
     },
@@ -78,8 +77,16 @@
     ],
     "player": {
         "autosupply": true,
-        "movespd": 1000,
+        "movespd": 130,
         "noswitchanim": false,
+        "petfood": false,
+        "petfoodat": "",
+        "petmed": false,
+        "petmedat": "",
+        "usefood": false,
+        "usefoodat": "",
+        "usemed": false,
+        "usemedat": "",
         "workacc": 100,
         "workdelay": 6500
     }

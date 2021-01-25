@@ -1,6 +1,6 @@
 module.exports = require('./wrapper').then(cga => {
     global.leo = cga.emogua;
-    leo.version = '4.0';
+    leo.version = '4.1';
     leo.qq = '158583461'
     leo.copyright = '红叶散落';
     leo.FORMAT_DATE = 'yyyy-MM-dd';
@@ -534,9 +534,10 @@ module.exports = require('./wrapper').then(cga => {
     //宠物操作： cga.MovePet(srcPos,dstPos);//0~4人物身上位置，100~104银行位置
     leo.movePet = (srcPos, dstPos) => {
         return leo.turnDir(0).then(() => {
-            cga.MovePet(srcPos, dstPos);
+            var r = cga.MovePet(srcPos, dstPos);
+            //console.log(r)
             return leo.next();
-        }).then(() => leo.delay(1000));
+        }).then(() => leo.delay(300));
     }
     //银行全存
     leo.saveToBankAll = (filter) => {
@@ -1515,17 +1516,6 @@ module.exports = require('./wrapper').then(cga => {
             return {};
         }
     }
-    leo.loadFile = (filePath) => {
-        try{
-            if(filePath.indexOf(leo.splitter)==-1){
-                filePath = leo.rootPath + leo.splitter + filePath;
-            }
-            var configStr = leo.fs.readFileSync(filePath,'utf-8');
-            return JSON.parse(configStr);
-        }catch (e) {
-            return {};
-        }
-    }
     leo.saveConfig = (config) => {
         var prev = '个人配置--';
         var configFileName = prev + cga.GetPlayerInfo().name + '.config';
@@ -1537,6 +1527,32 @@ module.exports = require('./wrapper').then(cga => {
         if(!config.jsCode){
             config.jsCode = {};
         }
+        var configStr = JSON.stringify(config);
+        var option = { encoding: 'utf-8'};
+        leo.fs.writeFileSync(filePath,configStr,option);
+        //console.log(leo.logTime()+'已保存配置，内容：');
+        //console.log(config);
+        return config;
+    }
+    leo.loadFile = (filePath) => {
+        try{
+            if(filePath.indexOf(leo.splitter)==-1){
+                filePath = leo.rootPath + leo.splitter + filePath;
+            }
+            var configStr = leo.fs.readFileSync(filePath,'utf-8');
+            return JSON.parse(configStr);
+        }catch (e) {
+            return {};
+        }
+    }
+    leo.saveFile = (filePath,config) => {
+        if(filePath.indexOf(leo.splitter)==-1){
+            filePath = leo.rootPath + leo.splitter + filePath;
+        }
+        if(!config){
+            config = {};
+        }
+        config.time = leo.formatDate(leo.now(), leo.FORMAT_DATETIME);
         var configStr = JSON.stringify(config);
         var option = { encoding: 'utf-8'};
         leo.fs.writeFileSync(filePath,configStr,option);
@@ -1562,20 +1578,336 @@ module.exports = require('./wrapper').then(cga => {
         '无尽星空' : [0,0,0,0]
     }
 
-    //CGA面板控制
+    //合并属性（深层合并）
+    leo.deepMerge = (target, source) => {
+      for (let key in source) {
+        // 如果target(也就是target[key])存在，且是对象的话再去调用deepMerge，否则就是target[key]里面没这个对象，需要与source[key]合并
+        target[key] = target[key] && target[key].toString() === "[object Object]"
+          ? leo.deepMerge(target[key], source[key])
+          : (target[key] = source[key]);
+      }
+      return target;
+    }
+
+    //获取面板设置
+    leo.getSettings = (attribute) => new Promise((resolve, reject) => {
+        if(cga.gui){
+            cga.gui.GetSettings((err, result)=>{
+                if(attribute){
+                    resolve(result[attribute]);
+                }else{
+                    resolve(result);
+                }
+            })
+        }else{
+            resolve({});
+        }
+    });
+    //更新面板设置
+    leo.loadSettings = (config) => new Promise( async (resolve, reject) => {
+        if(cga.gui){
+            var settings = await leo.getSettings()
+            leo.deepMerge(settings, config);
+            cga.gui.LoadSettings(settings, (err, result)=>{
+                resolve(result);
+            })
+        }else{
+            resolve();
+        }
+    });
+
+    //CGA面板快捷控制
     leo.panel = {
+        default : ()=>{
+            var configFile = '~默认.json';
+            var config = leo.loadFile(configFile);
+            return leo.loadSettings(config);
+        },
+        escape : ()=>{
+            var configFile = '逃跑.json';
+            var config = leo.loadFile(configFile);
+            return leo.loadSettings(config);
+        },
+        loadFromFile : (configFile)=>{
+            if(configFile){
+                var config = leo.loadFile(configFile);
+                return leo.loadSettings(config);
+            }
+        },
+        battle : (setting)=>{
+            /*"battle": {
+                "autobattle": true,
+                "bossprot": false,
+                "delayfrom": 4000,
+                "delayto": 4500,
+                "highspeed": true,
+                "list": [
+                    {
+                        "condition": 0,
+                        "condition2": 0,
+                        "condition2rel": 0,
+                        "condition2val": "",
+                        "conditionrel": 0,
+                        "conditionval": "",
+                        "index": 0,
+                        "petaction": 100,
+                        "petskillname": "攻击",
+                        "pettarget": 0,
+                        "pettargetsel": 4,
+                        "playeraction": 1,
+                        "playertarget": 0,
+                        "playertargetsel": 0
+                    }
+                ],
+                "lockcd": false,
+                "lv1prot": false,
+                "pet2action": true,
+                "playerforceaction": false,
+                "r1nodelay": true,
+                "showhpmp": false
+            }*/
+            if(cga.gui){
+                var config = {
+                    battle : setting
+                };
+                return leo.loadSettings(config);
+            }
+        },
         autoBattle : (enable)=>{
             if(cga.gui){
-                cga.gui.LoadSettings({
+                var config = {
                     battle : {
                         autobattle : enable
                     }
-                }, (err, result)=>{
-                    console.log(result);
-                })
+                };
+                return leo.loadSettings(config);
             }
+        },
+        highspeed : (enable)=>{
+            if(cga.gui){
+                var config = {
+                    battle : {
+                        highspeed : enable
+                    }
+                };
+                return leo.loadSettings(config);
+            }
+        },
+        pet2action : (enable)=>{
+            if(cga.gui){
+                var config = {
+                    battle : {
+                        pet2action : enable
+                    }
+                };
+                return leo.loadSettings(config);
+            }
+        },
+        player : (setting)=>{
+            /*"player": {
+                "autosupply": true,
+                "movespd": 130,
+                "noswitchanim": false,
+                "petfood": false,
+                "petfoodat": "",
+                "petmed": false,
+                "petmedat": "",
+                "usefood": false,
+                "usefoodat": "",
+                "usemed": false,
+                "usemedat": "",
+                "workacc": 100,
+                "workdelay": 6500
+            }*/
+            if(cga.gui){
+                var config = {
+                    player : setting
+                };
+                return leo.loadSettings(config);
+            }
+        },
+        autosupply : (enable)=>{
+            if(cga.gui){
+                var config = {
+                    player : {
+                        autosupply : enable
+                    }
+                };
+                return leo.loadSettings(config);
+            }
+        },
+        movespd : (number)=>{
+            if(cga.gui){
+                var config = {
+                    player : {
+                        movespd : number
+                    }
+                };
+                return leo.loadSettings(config);
+            }
+        },
+        noswitchanim : (enable)=>{
+            if(cga.gui){
+                var config = {
+                    player : {
+                        noswitchanim : enable
+                    }
+                };
+                return leo.loadSettings(config);
+            }
+        },
+        workacc : (number)=>{
+            if(cga.gui){
+                var config = {
+                    player : {
+                        workacc : number
+                    }
+                };
+                return leo.loadSettings(config);
+            }
+        },
+        workdelay : (number)=>{
+            if(cga.gui){
+                var config = {
+                    player : {
+                        workdelay : number
+                    }
+                };
+                return leo.loadSettings(config);
+            }
+        },
+        itemdroplist : (arr)=>{
+            /*"itemdroplist": [
+                "魔石",
+                "地的水晶碎片",
+                "水的水晶碎片",
+                "火的水晶碎片",
+                "风的水晶碎片",
+                "卡片？",
+                "巨石",
+                "绿头盔",
+                "星之砂",
+                "秘文之皮",
+                "奇香木",
+                "坚硬的鳞片"
+            ]*/
+            if(cga.gui){
+                var config = {
+                    itemdroplist : arr
+                };
+                return leo.loadSettings(config);
+            }
+        },
+        itemdroplistAdd : async (obj)=>{
+            var itemdroplist = await leo.getSettings('itemdroplist') || [];
+            if (obj instanceof Array && obj.length>0){
+                for (var i = 0; i < obj.length; i++) {
+                    if(!is_array_contain(itemdroplist,obj[i])){
+                        itemdroplist.push(obj[i]);
+                    }
+                }
+            }else{
+                if(!is_array_contain(itemdroplist,obj)){
+                    itemdroplist.push(obj);
+                }
+            }
+            return leo.panel.itemdroplist(itemdroplist);
+        },
+        itemdroplistDel : async (obj)=>{
+            var itemdroplist = await leo.getSettings('itemdroplist') || [];
+            if (obj instanceof Array && obj.length>0){
+                for (var i = 0; i < obj.length; i++) {
+                    for(index in itemdroplist)
+                    {
+                        if(itemdroplist[index] == obj[i]){
+                            delete itemdroplist[index];
+                            break;
+                        }
+                    }
+                }
+            }else{
+                for(index in itemdroplist)
+                {
+                    if(itemdroplist[index] == obj){
+                        delete itemdroplist[index];
+                        break;
+                    }
+                }
+            }
+            return leo.panel.itemdroplist(itemdroplist);
+        },
+        itemtweaklist : (arr)=>{
+            /*"itemtweaklist": [
+                "地的水晶碎片|999",
+                "水的水晶碎片|999",
+                "火的水晶碎片|999",
+                "风的水晶碎片|999",
+                "神之金|20",
+                "龙角|20",
+                "隐秘的徽记（地）|20",
+                "隐秘的徽记（水）|20",
+                "隐秘的徽记（火）|20",
+                "隐秘的徽记（风）|20",
+                "阿尔卡迪亚古钱|999",
+                "魔族的水晶|5",
+                "钢骑之矿|5",
+                "德特家的布|5",
+                "誓言之证|5",
+                "能量结晶|99",
+                "巨石|20",
+                "长老之证|7"
+            ]*/
+            if(cga.gui){
+                var config = {
+                    itemtweaklist : arr
+                };
+                return leo.loadSettings(config);
+            }
+        },
+        itemtweaklistAdd : async (obj)=>{
+            var itemtweaklist = await leo.getSettings('itemtweaklist') || [];
+            if (obj instanceof Array && obj.length>0){
+                for (var i = 0; i < obj.length; i++) {
+                    if(!is_array_contain(itemtweaklist,obj[i])){
+                        itemtweaklist.push(obj[i]);
+                    }
+                }
+            }else{
+                if(!is_array_contain(itemtweaklist,obj)){
+                    itemtweaklist.push(obj);
+                }
+            }
+            return leo.panel.itemtweaklist(itemtweaklist);
+        },
+        itemtweaklistDel : async (obj)=>{
+            var itemtweaklist = await leo.getSettings('itemtweaklist') || [];
+            if (obj instanceof Array && obj.length>0){
+                for (var i = 0; i < obj.length; i++) {
+                    for(index in itemtweaklist)
+                    {
+                        if(itemtweaklist[index] == obj[i]){
+                            delete itemtweaklist[index];
+                            break;
+                        }
+                    }
+                }
+            }else{
+                for(index in itemtweaklist)
+                {
+                    if(itemtweaklist[index] == obj){
+                        delete itemtweaklist[index];
+                        break;
+                    }
+                }
+            }
+            return leo.panel.itemtweaklist(itemtweaklist);
+        },
+        //修改遇敌速度延时，单位毫秒
+        fightspd : (number)=>{
+            leo.moveTimeout = number;
         }
     }
+
     //自动战斗设置 
     //user: 1-人 2-宠 3-人宠 4-人二动 5-人一动和二动
     //技能设置
@@ -1598,6 +1930,7 @@ module.exports = require('./wrapper').then(cga => {
             var force = false ;          //是否强制启用战斗配置
             leo.autoBattle(sets,firstRoundDelay,roundDelay,force);
             leo.log('已清除自动战斗设置')
+            leo.panel.autoBattle(true);
         },
         escape: ()=>{
             //技能设置
@@ -1625,6 +1958,7 @@ module.exports = require('./wrapper').then(cga => {
             var force = true ;          //是否强制启用战斗配置
             leo.autoBattle(sets,firstRoundDelay,roundDelay,force);
             leo.log('已加载自动战斗：逃跑')
+            leo.panel.autoBattle(false);
         },
         attack: ()=>{
             //技能设置
@@ -1652,6 +1986,7 @@ module.exports = require('./wrapper').then(cga => {
             var force = true ;          //是否强制启用战斗配置
             leo.autoBattle(sets,firstRoundDelay,roundDelay,force);
             leo.log('已加载自动战斗：攻击')
+            leo.panel.autoBattle(false);
         },
         custom: ()=>{
             const needHealChecker = (unit) => unit && unit.curhp > 0 && unit.hpRatio <= 0.6;
@@ -1692,11 +2027,13 @@ module.exports = require('./wrapper').then(cga => {
             var force = true ;          //是否强制启用战斗配置
             leo.autoBattle(sets,firstRoundDelay,roundDelay,force);
             leo.log('已加载自动战斗：custom')
+            leo.panel.autoBattle(false);
         }
     }
 
     ///////////////////////脚本默认执行内容///////////////////////////////
     //leo.keepAlive(true); //启用防掉线功能
+    leo.panel.autosupply(true);//勾选CGA面板的“自动补给”
     leo.beginTime = leo.now(); //脚本启动时间(Date类型，用于时间计算)
     leo.beginTimeStr = leo.formatDate(leo.now(), leo.FORMAT_DATETIME); //脚本启动时间(字符串类型，用于时间显示)
     leo.log('欢迎使用红叶の脚本，版本['+leo.version+']，请注意是否已经开启防掉线功能');

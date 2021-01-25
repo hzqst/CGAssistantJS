@@ -13,23 +13,73 @@
     
     - 装备保护  
     ```
-    leo.monitor.config.equipsProtect = true;
+	leo.monitor.config.equipsProtect = true;
 	leo.monitor.config.equipsProtectValue = 10;
     ```
     
-    - 自动吃血瓶(非战斗状态)  
+    - 自动吃血瓶(非战斗状态)，建议用CGA面板的玩家信息设置
     ```
 	leo.monitor.config.autoHp = true;
 	leo.monitor.config.autoHpValue = 500;
 	leo.monitor.config.autoHpItem = '小护士家庭号';
     ```
     
-    - 自动吃料理(非战斗状态)  
+    - 自动吃料理(非战斗状态)，建议用CGA面板的玩家信息设置
     ```
 	leo.monitor.config.autoMp = true;
 	leo.monitor.config.autoMpValue = 350;
 	leo.monitor.config.autoMpItem = '魔力之泉';
     ```
+
+    - 修改遇敌速度（队长有效）  
+    `leo.panel.fightspd(200);`
+    
+- 修改CGA面板参数
+
+    - 加载默认配置  
+    `leo.panel.default();`
+    
+    - 加载逃跑配置  
+    `leo.panel.escape();`
+    
+    - 加载指定文件配置  
+    `leo.panel.loadFromFile('配置文件名称.json');`
+    
+    - 自动战斗面板——自动战斗
+    `leo.panel.autoBattle(true);`
+    
+    - 自动战斗面板——高速战斗  
+    `leo.panel.highspeed(true);`
+        
+    - 自动战斗面板——宠物二动
+    `leo.panel.pet2action(true);`
+        
+    - 玩家信息面板——自动补给
+    `leo.panel.autosupply(true);`
+        
+    - 玩家信息面板——屏蔽切图
+    `leo.panel.noswitchanim(120);`
+        
+    - 玩家信息面板——高速移动
+    `leo.panel.movespd(120);`
+    
+    - 玩家信息面板——生产加速
+    `leo.panel.workacc(100);`
+        
+    - 玩家信息面板——高速采集 
+    `leo.panel.workdelay(6000);`
+        
+    - 物品信息面板——添加自动丢弃  
+    `leo.panel.itemdroplistAdd('魔石');`
+
+    - 物品信息面板——删除自动丢弃  
+    `leo.panel.itemdroplistDel('魔石');`
+
+    - 物品信息面板——添加自动堆叠(注意，需要有符号|)  
+    `leo.panel.itemtweaklistAdd('神之金|20');`
+
+    - 物品信息面板——删除自动堆叠(注意，需要跟已配置的项完全相同) 
+    `leo.panel.itemtweaklistDel('神之金|20');`
 
 - 常用的函数
     
@@ -110,6 +160,16 @@
     
     - 切图，带战斗检测，方向(0-东，2-南，4-西，6-北)  
     `leo.forceMoveEx(方向,次数);`
-    
+	
+    - 退出脚本  
+    `leo.exit();`
 
+    - 判断身上是否有指定物品  
+    `leo.has('魔力之泉');`
+
+    - 获取游戏里的时间，返回['黎明','白天','黄昏','夜晚']
+    `leo.getSysTimeEx();`
+
+    - 与指定坐标的NPC对话，x,y为NPC坐标，select是对话选项(默认选是/确定)，dest是对话后切图判断
+    `leo.talkNpcAt(x,y,select,dest);`
 
