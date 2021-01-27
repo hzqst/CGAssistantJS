@@ -64,13 +64,15 @@ var cga = require('./cgaapi')(function(){
 			{
 				if(cga.getItemCount('王冠') >= 1)
 				{
-					cga.travel.falan.toBank(()=>{
+					if (typeof global.bridge == 'function') global.bridge();
+					else cga.travel.falan.toBank(()=>{
 						cga.walkList([
 						[11, 8],
 						], ()=>{
 							cga.turnDir(0);
 							cga.AsyncWaitNPCDialog(()=>{
 								cga.saveToBankAll('王冠', 0, (r)=>{
+									if (r) throw 'bank full';
 									cb2('restart stage');
 								});
 							}, 1000);
@@ -80,13 +82,15 @@ var cga = require('./cgaapi')(function(){
 				}
 				if(cga.getItemCount('公主头冠') >= 1)
 				{
-					cga.travel.falan.toBank(()=>{
+					if (typeof global.bridge == 'function') global.bridge();
+					else cga.travel.falan.toBank(()=>{
 						cga.walkList([
 						[11, 8],
 						], ()=>{
 							cga.turnDir(0);
 							cga.AsyncWaitNPCDialog(()=>{
 								cga.saveToBankAll('公主头冠', 0, (r)=>{
+									if (r) throw 'bank full';
 									cb2('restart stage');
 								});
 							}, 1000);
@@ -99,13 +103,15 @@ var cga = require('./cgaapi')(function(){
 			{
 				if(cga.getItemCount('小猫帽') >= 1)
 				{
-					cga.travel.falan.toBank(()=>{
+					if (typeof global.bridge == 'function') global.bridge();
+					else cga.travel.falan.toBank(()=>{
 						cga.walkList([
 						[11, 8],
 						], ()=>{
 							cga.turnDir(0);
 							cga.AsyncWaitNPCDialog(()=>{
 								cga.saveToBankAll('小猫帽', 0, (r)=>{
+									if (r) throw 'bank full';
 									cb2('restart stage');
 								});
 							}, 1000);
