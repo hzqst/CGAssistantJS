@@ -22,6 +22,7 @@ Config.read = (defaults = {}) => {
 	try {
 		return Object.assign(defaults, JSON.parse(fs.readFileSync(filePath)));
 	} catch (e) {
+		console.log('配置文件错误', e);
 		return Config.save(defaults);
 	}
 };
