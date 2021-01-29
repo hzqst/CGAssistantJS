@@ -1686,7 +1686,7 @@ module.exports = new Promise(resolve => {
 			} else return Promise.resolve();
 		};
 		const repair = () => {
-			const repairFlag = (options && typeof options.repairFlag == 'number') ? options.repairFlag : 1;
+			const repairFlag = (options && typeof options.repairFlag == 'number') ? options.repairFlag : 0;
 			const needRepairChecker = (eq) => {
 				if (eq.type >= 0 && eq.type <= 14 && eq.level <= 10) {
 					const durability = cga.emogua.getDurability(eq);
