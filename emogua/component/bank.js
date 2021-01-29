@@ -9,15 +9,11 @@ module.exports = function(cga, options = {role: 1, position: 1, itemFilter: () =
 	if (options.position == 2) {
 		position = [82, 9];
 	}
-	if (options.role & Roles.store) {
-		console.log('暂不支持仓库');
-	} else if (options.role & Roles.worker) {
-		console.log('暂不支持仓库');
-	}
-	console.log('存银行');
 	if (isBankFull) {
+		console.log('银行已满');
 		return Promise.reject();
 	}
+	console.log('存银行');
 	return cga.emogua.goto(n => n.falan.mbank).then(
 		() => cga.emogua.turnOrientation(0)
 	).then(

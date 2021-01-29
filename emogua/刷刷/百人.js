@@ -1,19 +1,17 @@
 /**
  * 百人，最高层数100，使用时一般设置maxFloor=10或者20，30等
- * teamNumber=1，为单刷模式，此时队长可以不用设置
+ * 请尽可能清空背包，以免重复去银行
  */
 const teams = [
-	['队长名','队员名1','队员名2','队员名3','队员名4'],
-	['队长名','队员名1','队员名2','队员名3','队员名4']
+	['队长名','队员1','队员2','队员3','队员4']
 ];
-let maxFloor = 50;
-let mode = 'H'; // 目前支持 'H' 'CH'
+let maxFloor = 10;
+let mode = 'CH'; // 目前支持 'H' 'CH'
 require('../wrapper').then(cga => {
 	const {team, captain, isCaptain, teamNumber} = cga.emogua.parseTeams(teams);
 	console.log('百人', '模式: ' + mode, '队伍: ' + team);
-	cga.emogua.autoBattle(cga.emogua.getBattleSets(cga, {
-		flag: 2
-	}));
+	// cga.emogua.autoBattle(cga.emogua.getBattleSets(cga, {flag: 1}), 4000, 4000, true);
+	cga.emogua.autoBattle(cga.emogua.getBattleSets(cga, {flag: 1}));
 	const getCurrentFloor = (map) => {
 		if (map.indexOf('道场') > 0) {
 			if (map.startsWith('第十')) return 20;
@@ -73,7 +71,7 @@ require('../wrapper').then(cga => {
 		return Promise.resolve();
 	};
 	const exchangeCH = () => {
-		const elements = ['地','水','风'];
+		const elements = ['地','水','风','火'];
 		const getNeedSJ = () => elements.filter(e => !cga.getInventoryItems().find(i => (e + '元素水晶') == i.name));
 		const exchangeC = () => cga.emogua.autoWalk([23,24]).then(
 			() => cga.emogua.talkNpc(0, cga.emogua.talkNpcSelectorYes)
@@ -82,12 +80,12 @@ require('../wrapper').then(cga => {
 			return cga.emogua.talkNpc(cga.emogua.talkNpcSelectorYes);
 		});
 		const needSJ = getNeedSJ();
-		if (needSJ.length == 0) {
+		if (needSJ.length <= 1) {
 			return exchangeC();
 		}
 		return exchangeShuiJing(needSJ).then(() => {
 			const sj = getNeedSJ();
-			if (sj.length == 0) {
+			if (sj.length <= 1) {
 				return exchangeC();
 			}
 			if (!sj.find(e => e == '地')) {
@@ -118,11 +116,15 @@ require('../wrapper').then(cga => {
 	const battle = (map = cga.GetMapName()) => {
 		if ((isCaptain && map.indexOf('一') > 0) || teamNumber == 1) {
 			return Promise.resolve().then(() => {
-				if (teamNumber > 1)
+				if (teamNumber > 1) {
 					return cga.emogua.autoWalk([5,11]).then(
-						() => cga.emogua.waitTeamBlock(teamNumber)
+						() => cga.emogua.waitTeamBlock(teamNumber, team, (timer) => Date.now() - timer > 180000)
 					);
+				}
 			}).then(() => cga.emogua.recursion(() => {
+				if (teamNumber > 1 && cga.emogua.getTeamNumber() < teamNumber) {
+					return cga.emogua.logBack().then(() => Promise.reject());
+				}
 				const oldMap = cga.GetMapName();
 				return cga.emogua.autoWalk([15,10]).then(() => {
 					if (cga.GetMapUnits().find(u => u.type == 1 && u.xpos == 16 && u.ypos == 10))
@@ -149,46 +151,57 @@ require('../wrapper').then(cga => {
 				});
 			}));
 		}
-		if (map.indexOf('一') > 0) return cga.emogua.joinTeamBlock(5,11,captain).then(() => cga.emogua.recursion(() => {
-			if (cga.isInNormalState()) {
-				const currentMap = cga.GetMapName();
-				if (currentMap.indexOf('组通过') > 0) {
-					return cga.emogua.waitUntil(() => cga.emogua.getTeamNumber() == 1).then(
-						() => cga.emogua.autoWalk([20,12])
-					).then(
-						() => cga.emogua.talkNpc(21,12,cga.emogua.talkNpcSelectorYes)
-					).then(
-						() => Promise.reject()
-					);
-				} else if (cga.emogua.getTeamNumber() == 1) {
-					return Promise.reject();
+		if (map.indexOf('一') > 0) {
+			const timer = Date.now();
+			return cga.emogua.joinTeamBlock(5,11,captain,() => Date.now() - timer > 180000).then(() => cga.emogua.recursion(() => {
+				if (cga.isInNormalState()) {
+					const currentMap = cga.GetMapName();
+					if (currentMap.indexOf('组通过') > 0) {
+						return cga.emogua.waitUntil(() => cga.emogua.getTeamNumber() == 1).then(
+							() => cga.emogua.autoWalk([20,12])
+						).then(
+							() => cga.emogua.talkNpc(21,12,cga.emogua.talkNpcSelectorYes)
+						).then(
+							() => Promise.reject()
+						);
+					} else if (cga.emogua.getTeamNumber() == 1) {
+						return Promise.reject();
+					}
 				}
-			}
-			return cga.emogua.delay(3000);
-		}));
+				return cga.emogua.delay(3000);
+			}));
+		}
 		return cga.emogua.logBack();
 	};
 	cga.emogua.recursion(
-		() => cga.emogua.prepare({repairFlag: 1}).then(() => {
+		() => Promise.resolve().then(() => {
+			const currentInfo = cga.GetPlayerInfo();
+			const minHpRate = teamNumber == 1 ? 0.4 : 0.9;
+			if (currentInfo.hp / currentInfo.maxhp < minHpRate) return cga.emogua.prepare({repairFlag: 0});
+		}).then(() => {
 			const ticket = cga.getInventoryItems().find(i => i.name == '道场记忆');
 			if (ticket) {
+				if (teamNumber == 1) {
+					return cga.emogua.dropItems([ticket.pos]);
+				}
 				return cga.emogua.useItem(ticket.pos).then(
 					() => cga.emogua.talkNpc(cga.emogua.talkNpcSelectorYes,'*')
 				);
 			}
 		}).then(() => {
 			const map = cga.GetMapName();
-			if (map.indexOf('道场') > 0) {
+			if (map != '百人道场大厅' && map.indexOf('道场') > 0) {
 				if (getCurrentFloor(map) <= maxFloor) {
 					return battle(map);
 				}
 				return cga.emogua.logBack();
 			}
 			return Promise.resolve().then(() => {
-				const itemFilter = (i) => i.name.indexOf('碎片') < 0 && i.name.indexOf('元素水晶') < 0 && i.name.indexOf('承认') < 0 && i.name.indexOf('十周年') < 0;
+				const itemFilter = (i) => i.name.indexOf('碎片') < 0 && i.name.indexOf('元素水晶') < 0 && i.name.indexOf('承认') < 0 && i.name.indexOf('十周年') < 0 && i.name.indexOf('欧兹尼克') < 0 && i.name != '道场记忆' && i.name.indexOf('推荐信') < 0;
+				console.log(cga.getInventoryItems().filter(itemFilter));
 				if (cga.getInventoryItems().filter(itemFilter).length > 0) {
 					return require('../component/bank')(cga, {
-						itemFilter: itemFilter
+						role: 2, itemFilter: itemFilter
 					});
 				}
 			}).then(

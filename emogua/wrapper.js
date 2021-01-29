@@ -1301,11 +1301,15 @@ module.exports = new Promise(resolve => {
 			);
 		});
 	};
-	cga.emogua.joinTeamBlock = (x, y, name) => Promise.resolve().then(() => {
+	cga.emogua.joinTeamBlock = (x, y, name, interruptor) => Promise.resolve().then(() => {
 		console.log(`尝试加入(${name})的队伍...`);
+		if (typeof interruptor == 'function' && interruptor()) {
+			console.log(`组队中断`);
+			return;
+		}
 		return cga.emogua.joinTeam(x, y, name).catch(
 			() => cga.emogua.delay(3000).then(
-				() => cga.emogua.joinTeamBlock(x, y, name)
+				() => cga.emogua.joinTeamBlock(x, y, name, interruptor)
 			)
 		);
 	});
