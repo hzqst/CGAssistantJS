@@ -84,6 +84,7 @@ const initBattleState = () => {
 	lastRound = -1;
 	isBossBattle = false;
 };
+const KillFirstEnemyNames = ['帕布提斯马','被唤醒的亡魂','暗黑龙','土之斗神','水之斗神','炎之斗神','风之斗神','土之守卫的影子','水之守卫的影子','炎之守卫的影子','风之守卫的影子','守护怪'];
 module.exports = (async () => {
 	const cga = await require('./wrapper');
 	const pushProtectSkills = (sets, profession, playerInfo) => {
@@ -298,6 +299,7 @@ module.exports = (async () => {
 			if (custom) {
 				custom(sets);
 			}
+			killFirstNames = killFirstNames ? killFirstNames.concat(KillFirstEnemyNames) : KillFirstEnemyNames;
 			let targetsFunction = context => {
 				if (context.isBoss) {
 					return context.targetFunctions.getSortedEnemies(killFirstNames);
@@ -306,7 +308,7 @@ module.exports = (async () => {
 			}
 			let multiChecker = context => {
 				if (context.isBoss) {
-					return context.enemies.length >= 3 && (!killFirstNames || !context.enemies.find(e => killFirstNames.includes(e.name)));
+					return context.enemies.length >= 3 && !context.enemies.find(e => killFirstNames.includes(e.name));
 				}
 				return context.enemies.length >= 3;
 			}
@@ -337,12 +339,14 @@ module.exports = (async () => {
 				type: '攻击',
 				targets: targetsFunction
 			});
-			// sets.push({
-			// 	user: 2,
-			// 	check: context => context.isBoss && context.enemies.length > 5,
-			// 	skillName: '飓风吐息',
-			// 	targets: targetsFunction
-			// });
+			if (playerInfo.job == '兽王') {
+				sets.push({
+					user: 2,
+					check: context => context.isBoss && context.enemies.length > 7,
+					skillName: '飓风吐息',
+					targets: targetsFunction
+				});
+			}
 			sets.push({
 				user: 2,
 				check: multiChecker,
@@ -622,7 +626,6 @@ module.exports = (async () => {
 	Battle.setPet2Action = (value = true) => {
 		pet2 = value;
 	};
-	const KillFirstEnemyNames = ['帕布提斯马','被唤醒的亡魂','暗黑龙','土之斗神','水之斗神','炎之斗神','风之斗神','混乱的土之守卫','混乱的水之守卫','混乱的炎之守卫','混乱的风之守卫','守护怪'];
 	const battle = (state, context) => {
 		context.BattlePositionMatrix = BattlePositionMatrix;
 		context.DebuffFlags = DebuffFlags;
@@ -631,8 +634,8 @@ module.exports = (async () => {
 			return u;
 		});
 		context.enemies = context.units.filter(e =>
-			(context.player_pos > 9 && e.pos <= 9) ||
-			(context.player_pos <= 9 && e.pos > 9)
+			(context.player_pos > 9 && e.pos <= 9 && e.curhp > 0) ||
+			(context.player_pos <= 9 && e.pos > 9 && e.curhp > 0)
 		);
 		context.enemies.front = context.enemies.filter(e => context.BattlePositionMatrix.isFront(e.pos));
 		context.enemies.back = context.enemies.filter(e => !context.BattlePositionMatrix.isFront(e.pos));
@@ -683,10 +686,14 @@ module.exports = (async () => {
 		};
 		context.targetFunctions = {
 			getMaxHorizontalEnemies: () => context.enemies.back.length > context.enemies.front.length ? context.enemies.back.map(u => u.pos) : context.enemies.front.map(u => u.pos),
-			getSortedEnemies: (names) => context.enemies.sort((a, b) => {
-				if (KillFirstEnemyNames.includes(a.name) || (names && names.includes(a.name))) return -1;
-				else if (KillFirstEnemyNames.includes(b.name) || (names && names.includes(b.name))) return 1;
-				return b.maxhp - a.maxhp;
+			getSortedEnemies: (names = KillFirstEnemyNames) => context.enemies.sort((a, b) => {
+				const aindex = names.findIndex(n => n == a.name);
+				const bindex = names.findIndex(n => n == b.name);
+				if (aindex >= 0) {
+					if (bindex >= 0) return aindex - bindex;
+					else return -1;
+				} else if (bindex >= 0) return 1;
+				return a.curhp - b.curhp;
 			}).map(u => u.pos),
 			getSortedMinHpEnemies: () => context.enemies.sort((a, b) => a.curhp - b.curhp).map(u => u.pos)
 		};
@@ -856,7 +863,7 @@ module.exports = (async () => {
 					const chat = await cga.emogua.waitMessage(true, 3000).catch(() => {});
 					if (
 						(battleTimes && counter >= battleTimes) ||
-						(chat && chat.msg.includes(stopRencounterWords)) ||
+						(chat && chat.content.includes(stopRencounterWords)) ||
 						Battle.checkStopRencounter(protect, false, true) ||
 						mapName != cga.GetMapName()
 					) {
@@ -882,9 +889,9 @@ module.exports = (async () => {
 		let lastBagItems = 0;
 		while (cga.emogua.getTeamNumber() > 1 || cga.emogua.isRegroupingTeam) {
 			const chat = await cga.emogua.waitMessage(true).catch(() => {});
-			if (chat && chat.msg.includes('营地卖魔石')) {
+			if (chat && chat.content.includes('营地卖魔石')) {
 				await cga.emogua.sell([21,23]);
-			} else if (chat && chat.msg.includes('矮人卖魔石')) {
+			} else if (chat && chat.content.includes('矮人卖魔石')) {
 				await cga.emogua.sell([122,110]);
 			} else {
 				const currentBagItems = cga.getInventoryItems().length

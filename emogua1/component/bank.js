@@ -1,5 +1,3 @@
-const goto = require('./goto');
-
 module.exports = (async () => {
 	const cga = await require('./wrapper');
 	const Bank = {};
@@ -56,7 +54,7 @@ module.exports = (async () => {
 			await cga.emogua.delay(3000);
 		}
 	};
-	Bank.get = async ({teller, filter, gold = 0, petsFilter}) => {
+	Bank.get = async ({teller, filter, gold = 0, petsFilter, exchange = false}) => {
 		if (teller) {
 			await cga.emogua.turnTo(teller);
 			await cga.emogua.waitNPCDialog();
@@ -65,7 +63,7 @@ module.exports = (async () => {
 			let bankListIndex = 0;
 			if (bankList.length > 0) {
 				for (let bagIndex = 8; bagIndex < 28; bagIndex++) {
-					if (!items.find(e => e.pos == bagIndex)) {
+					if (exchange || !items.find(e => e.pos == bagIndex)) {
 						if (bankListIndex < bankList.length) {
 							const bankPos = bankList[bankListIndex].pos;
 							cga.MoveItem(bankPos, bagIndex, -1);

@@ -21,7 +21,6 @@
 		const prepare = require('../../component/prepare');
 		const battle = await require('../../component/battle');
 		await battle.setBattleStrategies(await battle.getBattleStrategies());
-
 		const {goto} = await prepare({crystalNameFilter: name => name.includes("火风"),upgrades: config.upgrades});
 		await goto(n => n.elsa.x);
 		const arriveRegroup = async () => {
@@ -50,9 +49,10 @@
 			};
 			if (teamLevel < 10) {
 				protect.minHp = protect.minPetHp = 40;
-				await goto(n => n.elsa.b);
-				await cga.emogua.waitRegroupTeam({team, arrive: arriveRegroup}).catch(leaveTeamAndExit);
-				await goto(n => n.tower.tower11);
+				await goto(n => n.falan.eout);
+				await cga.emogua.autoWalkList([
+					[281,88,{map:'芙蕾雅'}],[672,223,{map:'哈巴鲁东边洞穴 地下1楼'}]
+				]);
 			} else if (teamLevel >= 10 && teamLevel < 15) {
 				protect.minHp = protect.minPetHp = 50;
 				await goto(n => n.elsa.b);
@@ -89,4 +89,7 @@
 	} else {
 		console.log('请检查配置');
 	}
-})().catch(console.log);
+})().catch(e => {
+	console.log(e);
+	process.exit();
+});

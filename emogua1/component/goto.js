@@ -75,7 +75,8 @@ module.exports = (async () => {
 			kili: new Station([50, 63, {map:'奇利村'}]),
 			jenova: new Station([58, 43, {map:'杰诺瓦镇'}]),
 			vinoy: new Station([40,36, {map:'维诺亚村'}]),
-			ghana: new Station([36,40, {map:'加纳村'}])
+			ghana: new Station([36,40, {map:'加纳村'}]),
+			albanese: new Station([36,54, {map:'阿巴尼斯村'}]),
 		}, aleut: {
 			eout: new Station([596,83,{map:'芙蕾雅'}]),
 			nout: new Station([588,50,{map:'芙蕾雅'}])
@@ -246,6 +247,15 @@ module.exports = (async () => {
 		).then(
 			() => cga.emogua.autoWalkList([
 				[5,12,{map:'村长的家'}],[1,9,{map:'加纳村'}]
+			])
+		)),
+		new Link(Network.teleport.albanese, () => cga.emogua.autoWalk([37, 4]).then(
+			() => cga.emogua.talkNpc([38,4,{map:'阿巴尼斯村的传送点'}])(s => s.yesGenerator(1))
+		).then(
+			() => cga.emogua.autoWalkList([
+				[5,4,{map:4313}],
+				[6,13,{map:4312}],
+				[6,13,{map:'阿巴尼斯村'}]
 			])
 		))
 	];

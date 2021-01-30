@@ -236,7 +236,7 @@ module.exports = async ({
 		});
 		if (needRepairEquipments.length > 0) {
 			const emptyIndexes = cga.emogua.getEmptyBagIndexes(allItems);
-			const tryWaitRepair = async (words, position) => {
+			const tryWaitRepair = async (words, position, itemId) => {
 				for (let i = 3; i > 0; i--) {
 					cga.emogua.sayWords(words);
 					await cga.emogua.waitTrade({itemFilter: i => i.pos == position}).then(
@@ -244,7 +244,16 @@ module.exports = async ({
 							let timer = Date.now();
 							do {
 								await cga.emogua.waitTrade().then(
-									() => timer = 0,
+									async () => {
+										timer = 0;
+										if (itemId) {
+											const equipItem = cga.getInventoryItems().find(i => i.itemid == itemId && cga.emogua.getDurability(i).current >= cga.emogua.equipmentMinDurability);
+											if (equipItem) {
+												cga.UseItem(equipItem.pos);
+												await cga.emogua.delay(1000);
+											}
+										}
+									},
 									() => {}
 								);
 							} while (Date.now() - timer < 120000);
@@ -260,14 +269,15 @@ module.exports = async ({
 						const emptyIndex = emptyIndexes[0];
 						if (emptyIndex) {
 							if (cga.MoveItem(item.pos, emptyIndex, -1)) {
-								await tryWaitRepair(words, emptyIndex);
+								await cga.emogua.delay(500);
+								await tryWaitRepair(words, emptyIndex, item.itemid);
 								if (!cga.MoveItem(emptyIndex, item.pos, -1)) {
 									emptyIndexes.shift();
 								}
 							}
 						}
 					} else {
-						await tryWaitRepair(words, emptyIndex);
+						await tryWaitRepair(words, item.pos);
 					}
 					
 				}

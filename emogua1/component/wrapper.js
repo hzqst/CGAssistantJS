@@ -70,11 +70,11 @@ module.exports = new Promise(resolve => {
 	cga.emogua.downloadPartialMap = ({xfrom, yfrom, xend, yend}) => new Promise(
 		(resolve, reject) => cga.downloadMapEx(xfrom, yfrom, xend, yend, error => setTimeout(() => error ? reject(error) : resolve()))
 	);
-	cga.emogua.downloadMap = () => {
-		if(!cga.emogua.isMapDownloaded()) {
-			console.log('开始下载地图');
+	cga.emogua.downloadMap = (force = false) => {
+		if(force || !cga.emogua.isMapDownloaded()) {
+			console.log('下载地图');
 			return new Promise((resolve, reject) => cga.downloadMap(error => setTimeout(() => error ? reject(error) : resolve()))).then(
-				() => console.log('完成下载地图')
+				() => console.log('下载地图完成')
 			);
 		}
 		return Promise.resolve();
@@ -418,7 +418,7 @@ module.exports = new Promise(resolve => {
 			for (let i = items.length - 1; i >= 0; i--) {
 				const item = items[i];
 				if (item.type >= 0 && item.type <= 14) {
-					if (autoEquip && item.name != '狐皮披风') {
+					if (item.name != '狐皮披风') {
 						item.durability = cga.emogua.getDurability(item);
 					}
 				} else if (item.pos >= 8) {
@@ -447,65 +447,65 @@ module.exports = new Promise(resolve => {
 					}
 				}
 			}
-			if (autoEquip) {
-				// 0 头 1 衣服 2 左手 3 右手 4 鞋 5 左饰品 6 右饰品 7 水晶
-				// 0-6 武器 0剑 1斧 2枪 3杖 4弓 5小刀 6回力
-				// 7-14 防具 7盾 8盔 9帽 10铠 11衣 12袍 13靴 14鞋
-				// 盾过于复杂，不自动装备
-				const emptyIndexes = cga.emogua.getEmptyBagIndexes(items);
-				[0,1,2,3,4].forEach(position => {
-					const item = items.find(i => i.pos == position);
-					if (item && item.durability.current < cga.emogua.equipmentMinDurability) {
-						const moveTo = items.find(i => i.pos >= 8 && i.type == item.type);
-						if (moveTo) {
-							if (cga.MoveItem(item.pos, moveTo.pos, -1)) {
-								const moveToPos = moveTo.pos;
-								moveTo.pos = item.pos;
+			// 0 头 1 衣服 2 左手 3 右手 4 鞋 5 左饰品 6 右饰品 7 水晶
+			// 0-6 武器 0剑 1斧 2枪 3杖 4弓 5小刀 6回力
+			// 7-14 防具 7盾 8盔 9帽 10铠 11衣 12袍 13靴 14鞋
+			// 盾过于复杂，不自动装备
+			const emptyIndexes = cga.emogua.getEmptyBagIndexes(items);
+			[0,1,2,3,4].forEach(position => {
+				const item = items.find(i => i.pos == position);
+				if (item && item.durability && item.durability.current < cga.emogua.equipmentMinDurability) {
+					const moveTo = items.find(i => i.pos >= 8 && i.type == item.type);
+					if (autoEquip && moveTo) {
+						if (cga.MoveItem(item.pos, moveTo.pos, 1)) {
+							const moveToPos = moveTo.pos;
+							moveTo.pos = item.pos;
+							item.pos = moveToPos;
+						}
+					} else {
+						if (emptyIndexes.length > 0) {
+							const moveToPos = emptyIndexes.shift();
+							if (cga.MoveItem(item.pos, moveToPos, 1)) {
 								item.pos = moveToPos;
 							}
 						} else {
-							if (emptyIndexes.length > 0) {
-								const moveToPos = emptyIndexes.shift();
-								if (cga.MoveItem(item.pos, moveToPos, -1)) {
-									item.pos = moveToPos;
-								}
-							}
-						}
-					} else {
-						let tryTypes;
-						if (position === 0) {
-							tryTypes = [8,9];
-						} else if (position === 1) {
-							tryTypes = [10,11,12];
-						} else if (position === 2) {
-							tryTypes = [0,1,2,3,4,5,6];
-						} else if (position === 4) {
-							tryTypes = [13,14];
-						}
-						if (tryTypes) {
-							const moveFrom = items.find(i => i.pos >= 8 && tryTypes.includes(i.type));
-							if (moveFrom) {
-								if (cga.MoveItem(moveFrom.pos, position, -1)) {
-									moveFrom.pos = position;
-								}
-							}
+							console.log('背包满了无法替换装备', item);
 						}
 					}
-				});
-				// 换戒指
-				const accessory = items.find(i => i.pos == 5);
-				if (accessory && [491322,491323].includes(accessory.itemid)) {
-					const accessoryDurability = cga.emogua.getDurability(item);
-					if (accessoryDurability.current < 100) {
-						cga.DropItem(5);
-						accessory = undefined;
+				} else if (autoEquip) {
+					let tryTypes;
+					if (position === 0) {
+						tryTypes = [8,9];
+					} else if (position === 1) {
+						tryTypes = [10,11,12];
+					} else if (position === 2) {
+						tryTypes = [0,1,2,3,4,5,6];
+					} else if (position === 4) {
+						tryTypes = [13,14];
+					}
+					if (tryTypes) {
+						const moveFrom = items.find(i => i.pos >= 8 && tryTypes.includes(i.type));
+						if (moveFrom) {
+							if (cga.MoveItem(moveFrom.pos, position, -1)) {
+								moveFrom.pos = position;
+							}
+						}
 					}
 				}
-				if (!accessory) {
-					const moveFrom = items.find(i => i.pos >= 8 && [491322,491323].includes(i.itemid));
-					if (cga.MoveItem(moveFrom.pos, 5, -1)) {
-						moveFrom.pos = 5;
-					}
+			});
+			// 换戒指
+			const accessory = items.find(i => i.pos == 5);
+			if (accessory && (accessory.itemid == 491322 || accessory.itemid == 491323)) {
+				const accessoryDurability = cga.emogua.getDurability(accessory);
+				if (accessoryDurability.current < 100) {
+					cga.DropItem(5);
+					accessory = undefined;
+				}
+			}
+			if (!accessory) {
+				const moveFrom = items.find(i => i.pos >= 8 && (i.itemid == 491322 || i.itemid == 491323));
+				if (moveFrom && cga.MoveItem(moveFrom.pos, 5, -1)) {
+					moveFrom.pos = 5;
 				}
 			}
 			sortingItems = false;
@@ -606,6 +606,15 @@ module.exports = new Promise(resolve => {
 		(resolve, reject) => cga.AsyncWaitChatMsg((error, chat) => setTimeout(() => error ? reject(error) : resolve(chat)), timeout)
 	).then(chat => {
 		if (!teamOnly || cga.emogua.getTeammates().find(t => t.unit_id == chat.unitid) || cga.emogua.cachedPlayer.unitid == chat.unitid) {
+			if (chat.unitid == -1) {
+				chat.player = '';
+				chat.content = chat.msg;
+			} else {
+				const splitter = ': ';
+				const [namePart, ...rest] = chat.msg.split(splitter);
+				chat.player = namePart.substring(namePart.indexOf(']') + 1);
+				chat.content = rest.length == 1 ? rest[0] : rest.join(splitter);
+			}
 			return chat;
 		}
 		throw '未等到message';
@@ -615,24 +624,17 @@ module.exports = new Promise(resolve => {
 		const timer = Date.now();
 		do {
 			const chat = await cga.emogua.waitMessage(true, timeout).catch(() => {});
-			if (chat && chat.msg.includes(reply)) {
+			if (chat && chat.content.includes(reply)) {
 				return true;
 			}
 		} while (Date.now() - timer < timeout);
 		return false;
 	};
-	cga.emogua.getNameFromChat = (chat) => {
-		if (chat && chat.unitid != -1)  {
-			const namePart = chat.msg.split(': ')[0];
-			return namePart.substring(namePart.indexOf(']') + 1);
-		}
-		return '';
-	};
 	const countRegex = /#(\d+)#/;
 	cga.emogua.getCountFromChat = (chat) => {
-		if (chat && chat.msg) {
+		if (chat && chat.content) {
 			try {
-				const matcher = countRegex.exec(chat.msg);
+				const matcher = countRegex.exec(chat.content);
 				if (matcher) {
 					return parseInt(matcher[1]);
 				}
@@ -761,6 +763,7 @@ module.exports = new Promise(resolve => {
 			cga.emogua.isRegroupingTeam = true;
 			try {
 				await cga.emogua.sayWords(words);
+				await cga.emogua.delay(2000).then(() => cga.emogua.leaveTeam());
 				if (arrive) await arrive();
 				const timer = Date.now();
 				const waitPosition = cga.emogua.getMovablePositionAround(cga.GetMapXY());
@@ -776,7 +779,7 @@ module.exports = new Promise(resolve => {
 		} else {
 			for(;;) {
 				const chat = await cga.emogua.waitMessage(true).catch(() => {});
-				if (chat && chat.msg.includes(words)) {
+				if (chat && chat.content.includes(words)) {
 					cga.emogua.isRegroupingTeam = true;
 					try {
 						while (cga.emogua.getTeamNumber() > 1) {
@@ -799,7 +802,7 @@ module.exports = new Promise(resolve => {
 			}
 		}
 	};
-	const waitTradeDialog = () => new Promise((resolve, reject) => cga.AsyncWaitTradeDialog((error, name, level) => setTimeout(() => error ? reject(error) : resolve({name, level}))));
+	const waitTradeDialog = (timeout = 3000) => new Promise((resolve, reject) => cga.AsyncWaitTradeDialog((error, name, level) => setTimeout(() => error ? reject(error) : resolve({name, level})), timeout));
 	const waitTradeStuffs = () => new Promise((resolve, reject) => cga.AsyncWaitTradeStuffs((error, type, args) => setTimeout(() => error ? reject(error) : resolve({type, args})), 300));
 	const waitTradeState = (timeout = 3000) => new Promise((resolve, reject) => cga.AsyncWaitTradeState((error, state) => setTimeout(() => error ? reject(error) : resolve(state)), timeout));
 	const getTradeItems = (filter = (item, addedItems) => false) => {
@@ -874,6 +877,7 @@ module.exports = new Promise(resolve => {
 			} else if (state === cga.TRADE_STATE_SUCCEED) {
 				return receivedStuffs;
 			} else if (state === cga.TRADE_STATE_CANCEL) {
+				break;
 			} else {
 				cga.DoRequest(cga.REQUEST_TYPE_TRADE_REFUSE);
 				break;
@@ -894,18 +898,17 @@ module.exports = new Promise(resolve => {
 		});
 		if (player) {
 			cga.PlayerMenuSelect(player.index);
-			await waitTradeDialog();
-			return await tradeInternal({itemFilter, petFilter, gold, partyStuffsChecker, active: true});
+			return await waitTradeDialog().then(
+				() => tradeInternal({itemFilter, petFilter, gold, partyStuffsChecker, active: true})
+			);
 		}
 		throw '找不到交易人 ' + party;
 	};
 	cga.emogua.waitTrade = async ({partyName, itemFilter, petFilter, gold, partyStuffsChecker} = {}) => {
-		if (!cga.IsPlayerFlagEnabled(cga.ENABLE_FLAG_TRADE)) {
-			cga.EnableFlags(cga.ENABLE_FLAG_TRADE, true);
-		}
-		const {name} = await waitTradeDialog();
+		cga.EnableFlags(cga.ENABLE_FLAG_TRADE, true);
+		const {name} = await waitTradeDialog(15000).catch(() => {});
 		cga.EnableFlags(cga.ENABLE_FLAG_TRADE, false);
-		if (!partyName || ((typeof partyName == 'function') ? partyName(name) : partyName == name)) {
+		if (name && (!partyName || ((typeof partyName == 'function') ? partyName(name) : partyName == name))) {
 			return await tradeInternal({itemFilter, petFilter, gold, partyStuffsChecker, active: false});
 		}
 		throw '没有交易';
@@ -917,6 +920,7 @@ module.exports = new Promise(resolve => {
 	 *   17967 down 17966 up (海底墓场-保证书)
 	 *   13273 down 13272 up (虫洞)
 	 *   17981 down 17980 up (黑色方舟)
+	 *   17975 down 17974 up (黑色的祈祷)
 	 *   0 迷宫出入口
 	 * return [最远，最近]
 	 */
