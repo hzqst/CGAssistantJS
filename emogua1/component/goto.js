@@ -381,7 +381,7 @@ module.exports = (async () => {
 	];
 	Network.falan.sout.links = [
 		new Link(Network.camp.x, () => cga.emogua.autoWalkList([
-			[513,282,{map:'曙光骑士团营地'}],[55,47,{map:'辛希亚探索指挥部'}],[7,4,{map:'辛希亚探索指挥部',x:91,y:6}],[95,9,{map:27101}],[8,21]
+			[513,282,{map:'曙光骑士团营地'}],[55,47,{map:'辛希亚探索指挥部'}],[7,4,{map:'*',x:91,y:6}],[95,9,{map:27101}],[8,21]
 		]).then(() => cga.emogua.turnTo([7,21,{map:'圣骑士营地'}])).then(
 			() => cga.emogua.autoWalk(Network.camp.x.id)
 		))

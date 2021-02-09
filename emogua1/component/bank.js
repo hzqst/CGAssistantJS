@@ -6,7 +6,7 @@ module.exports = (async () => {
 	 * teller 柜员target
 	 * filter name | matcher | 不传存全部
 	 */
-	Bank.save = async ({teller, filter, gold = 0, pets = [], size = 20, maxGold = 1000000}) => {
+	Bank.save = async ({teller = undefined, filter = undefined, gold = 0, pets = [], size = 20, maxGold = 1000000}) => {
 		if (teller) {
 			await cga.emogua.turnTo(teller);
 			await cga.emogua.waitNPCDialog();
@@ -36,7 +36,8 @@ module.exports = (async () => {
 			if (gold > 0) {
 				const capacity = maxGold - cga.GetBankGold();
 				if (capacity > 0) {
-					cga.MoveGold(Math.min(capacity, gold), cga.MOVE_GOLD_TOBANK);
+					const playerInfo = cga.GetPlayerInfo();
+					cga.MoveGold(Math.min(capacity, gold, (playerInfo.gold > 1000 ? playerInfo.gold - 1000 : 0)), cga.MOVE_GOLD_TOBANK);
 				}
 			}
 			if (pets.length > 0) {
@@ -54,7 +55,7 @@ module.exports = (async () => {
 			await cga.emogua.delay(3000);
 		}
 	};
-	Bank.get = async ({teller, filter, gold = 0, petsFilter, exchange = false}) => {
+	Bank.get = async ({teller = undefined, filter = undefined, gold = 0, petsFilter = undefined, exchange = false}) => {
 		if (teller) {
 			await cga.emogua.turnTo(teller);
 			await cga.emogua.waitNPCDialog();
@@ -63,13 +64,14 @@ module.exports = (async () => {
 			let bankListIndex = 0;
 			if (bankList.length > 0) {
 				for (let bagIndex = 8; bagIndex < 28; bagIndex++) {
-					if (exchange || !items.find(e => e.pos == bagIndex)) {
-						if (bankListIndex < bankList.length) {
-							const bankPos = bankList[bankListIndex].pos;
-							cga.MoveItem(bankPos, bagIndex, -1);
+					if (bankListIndex < bankList.length) {
+						const item = items.find(e => e.pos == bagIndex);
+						const bankItem = bankList[bankListIndex];
+						if (!item || (exchange && item.itemid != bankItem.itemid)) {
+							cga.MoveItem(bankItem.pos, bagIndex, -1);
 							bankListIndex++;
-						} else break;
-					}
+						}
+					} else break;
 				}
 			}
 

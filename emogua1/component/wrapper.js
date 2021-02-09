@@ -450,9 +450,8 @@ module.exports = new Promise(resolve => {
 			// 0 头 1 衣服 2 左手 3 右手 4 鞋 5 左饰品 6 右饰品 7 水晶
 			// 0-6 武器 0剑 1斧 2枪 3杖 4弓 5小刀 6回力
 			// 7-14 防具 7盾 8盔 9帽 10铠 11衣 12袍 13靴 14鞋
-			// 盾过于复杂，不自动装备
 			const emptyIndexes = cga.emogua.getEmptyBagIndexes(items);
-			[0,1,2,3,4].forEach(position => {
+			[0,1,3,2,4].forEach(position => {
 				const item = items.find(i => i.pos == position);
 				if (item && item.durability && item.durability.current < cga.emogua.equipmentMinDurability) {
 					const moveTo = items.find(i => i.pos >= 8 && i.type == item.type);
@@ -478,13 +477,15 @@ module.exports = new Promise(resolve => {
 						tryTypes = [8,9];
 					} else if (position === 1) {
 						tryTypes = [10,11,12];
+					} else if (position === 3) {
+						tryTypes = [7];
 					} else if (position === 2) {
 						tryTypes = [0,1,2,3,4,5,6];
 					} else if (position === 4) {
 						tryTypes = [13,14];
 					}
 					if (tryTypes) {
-						const moveFrom = items.find(i => i.pos >= 8 && tryTypes.includes(i.type));
+						const moveFrom = items.find(i => i.pos >= 8 && i.durability && i.durability.rate == 1 && tryTypes.includes(i.type));
 						if (moveFrom) {
 							if (cga.MoveItem(moveFrom.pos, position, -1)) {
 								moveFrom.pos = position;
@@ -494,7 +495,7 @@ module.exports = new Promise(resolve => {
 				}
 			});
 			// 换戒指
-			const accessory = items.find(i => i.pos == 5);
+			let accessory = items.find(i => i.pos == 5);
 			if (accessory && (accessory.itemid == 491322 || accessory.itemid == 491323)) {
 				const accessoryDurability = cga.emogua.getDurability(accessory);
 				if (accessoryDurability.current < 100) {
@@ -904,7 +905,7 @@ module.exports = new Promise(resolve => {
 		}
 		throw '找不到交易人 ' + party;
 	};
-	cga.emogua.waitTrade = async ({partyName, itemFilter, petFilter, gold, partyStuffsChecker} = {}) => {
+	cga.emogua.waitTrade = async ({partyName = undefined, itemFilter = undefined, petFilter = undefined, gold = 0, partyStuffsChecker = undefined} = {}) => {
 		cga.EnableFlags(cga.ENABLE_FLAG_TRADE, true);
 		const {name} = await waitTradeDialog(15000).catch(() => {});
 		cga.EnableFlags(cga.ENABLE_FLAG_TRADE, false);
@@ -1063,9 +1064,9 @@ module.exports = new Promise(resolve => {
 	cga.emogua.getSellList = (items = cga.getInventoryItems().filter(cga.emogua.defaultSellItemFilter)) => items.map(e => {
 		let sellCount = (e.count < 1) ? 1 : e.count;
 		if ([29, 30, 34, 35].indexOf(e.type) >= 0 || (e.type == 26 && e.name.charAt(e.name.length-1) == '条')) {
-			sellCount = parseInt(e.count / 20);
+			sellCount = parseInt((e.count / 20).toString());
 		} else if ([43, 23].indexOf(e.type) >= 0) {
-			sellCount = parseInt(e.count / 3);
+			sellCount = parseInt((e.count / 3).toString());
 		}
 		return {itempos: e.pos, itemid: e.itemid, count: sellCount};
 	});
