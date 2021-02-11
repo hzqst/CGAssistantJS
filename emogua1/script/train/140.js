@@ -113,7 +113,7 @@
 								await cga.emogua.autoWalkList([[116,55,{map:'酒吧'}],[14,4]]).then(
 									() => cga.emogua.talkNpc([14,5])(s => s.yes)
 								).then(
-									() => cga.emogua.autoWalkList([[0,23,'圣骑士营地'],[90,86]])
+									() => cga.emogua.autoWalkList([[0,23,{map:'圣骑士营地'}],[90,86]])
 								).then(
 									() => goto(n => n.dwarf.elom)
 								).then(
