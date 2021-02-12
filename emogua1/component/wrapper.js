@@ -50,7 +50,7 @@ module.exports = new Promise(resolve => {
 		let battled = false;
 		while (cga.GetWorldStatus() != 9 || cga.GetGameStatus() != 3) {
 			battled = true;
-			await cga.emogua.delay(1000);
+			await cga.emogua.delay(500);
 		}
 		return battled;
 	};
@@ -161,9 +161,9 @@ module.exports = new Promise(resolve => {
 				code = undefined;
 			}
 			if (code == 3) {
-				console.log('自动寻路卡住', mapInfo);
+				console.log('自动寻路卡住', mapInfo, target);
 			}
-		} while(code == 2 || code == 5 || code == 3);
+		} while(code == 2 || code == 5);
 		if (code) {
 			if (code === 4 && target[2]) {
 				if (typeof target[2].map == 'string' && (target[2].map == '*' || target[2].map == cga.GetMapName())) {

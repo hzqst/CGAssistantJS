@@ -108,53 +108,14 @@ module.exports = (async () => {
 						skillName: '生命祈福',
 						targets: context => [context.player_pos]
 					});
-					// sets.push({
-					// 	user: 1,
-					// 	check: function(context) {
-					// 		if (!context.isBoss) {
-					// 			return false;
-					// 		}
-					// 		const subSkillInfo = context.getAvaliableSubSkillInfo(this);
-					// 		return subSkillInfo && subSkillInfo.level == 8 && context.teammates.filter(u => u.curhp > 0 && (u.flags & DebuffFlags.ANY)).length >= 4;
-					// 	},
-					// 	type: '技能', skillName: '洁净魔法', skillLevel: 8,
-					// 	targets: context => {
-					// 		console.log('释放洁净8');
-					// 		return [context.player_pos];
-					// 	}
-					// });
-					sets.push({
-						user: 1,
-						check: function(context) {
-							if (!context.isBoss) {
-								return false;
-							}
-							const subSkillInfo = context.getAvaliableSubSkillInfo(this);
-							if (subSkillInfo && subSkillInfo.level == 6) {
-								const needCleanPositions = context.teammates.filter(u => u.curhp > 0 && (u.flags & DebuffFlags.ANY)).map(u => u.pos);
-								if (needCleanPositions.length >= 3) {
-									return BattlePositionMatrix.getMaxTPosition(needCleanPositions).count >= 3;
-								}
-							}
-							return false;
-						},
-						type: '技能', skillName: '洁净魔法', skillLevel: 6,
-						targets: context => {
-							console.log('释放洁净魔法6');
-							const needCleanPositions = context.teammates.filter(u => u.curhp > 0 && (u.flags & DebuffFlags.ANY)).map(u => u.pos);
-							return [BattlePositionMatrix.getMaxTPosition(needCleanPositions).position];
-						}
-					});
 				}
 				sets.push({
 					user: 1,
 					check: context => {
-						if (!context.isBoss) {
-							return false;
-						}
+						if (!context.isBoss) return false;
 						const needHealUnits = context.teammates.filter(needHealChecker).map(u => u.pos);
 						return needHealUnits.length >= 3 && BattlePositionMatrix.getMaxTPosition(needHealUnits).count >= 3;
-					}, type: '技能', skillName: '强力补血魔法', skillLevel: 10,
+					}, type: '技能', skillName: '强力补血魔法',
 					targets: context => {
 						const t = BattlePositionMatrix.getMaxTPosition(
 							context.teammates.filter(needHealChecker).map(u => u.pos)
@@ -165,9 +126,7 @@ module.exports = (async () => {
 				sets.push({
 					user: 1,
 					check: context => {
-						if (context.isBoss) {
-							return false;
-						}
+						if (context.isBoss) return false;
 						const needHealUnits = context.teammates.filter(needHealChecker).map(u => u.pos);
 						return needHealUnits.length >= 3 && BattlePositionMatrix.getMaxTPosition(needHealUnits).count >= 3;
 					}, type: '技能', skillName: '强力补血魔法', skillLevel: 6,
@@ -184,6 +143,29 @@ module.exports = (async () => {
 					type: '技能', skillName: '超强补血魔法',
 					targets: context => [context.player_pos]
 				});
+				if (playerInfo.job == '圣使') {
+					sets.push({
+						user: 1,
+						check: (context, strategy) => {
+							if (context.isBoss) {
+								const subSkillInfo = context.getAvaliableSubSkillInfo(strategy);
+								if (subSkillInfo && subSkillInfo.level >= 6) {
+									const needCleanPositions = context.teammates.filter(u => u.curhp > 0 && (u.flags & DebuffFlags.ANY)).map(u => u.pos);
+									if (needCleanPositions.length >= 3) {
+										return BattlePositionMatrix.getMaxTPosition(needCleanPositions).count >= 3;
+									}
+								}
+							}
+							return false;
+						},
+						type: '技能', skillName: '洁净魔法', skillLevel: 6,
+						targets: context => {
+							console.log('释放洁净魔法6');
+							const needCleanPositions = context.teammates.filter(u => u.curhp > 0 && (u.flags & DebuffFlags.ANY)).map(u => u.pos);
+							return [BattlePositionMatrix.getMaxTPosition(needCleanPositions).position];
+						}
+					});
+				}
 				sets.push({
 					user: 1,
 					check: context => context.isBoss && context.teammates.filter(needHealChecker).length > 0,
@@ -205,18 +187,16 @@ module.exports = (async () => {
 			} else if (playerInfo.job == '幻之巫王') {
 				sets.push({
 					user: 1,
-					check: context => context.isBoss && context.enemies.find(e => e.curhp > 0 && e.maxhp >= 15000) && context.round_count === 0,
+					check: context => context.isBoss && context.round_count == 0 && context.enemies.length >= 3 && context.enemies.find(e => e.curhp > 0 && e.maxhp >= 12000),
 					type: '技能', skillName: '超强恢复魔法',
 					targets: context => [context.player_pos]
 				});
 				sets.push({
 					user: 1,
-					check: function(context) {
-						if (!context.isBoss) {
-							return false;
-						}
-						const subSkillInfo = context.getAvaliableSubSkillInfo(this);
-						return subSkillInfo && subSkillInfo.level == 10 && context.teammates.filter(u => u.curhp > 0 && (u.flags & DebuffFlags.ANY)).length >= 4;
+					check: function(context, strategy) {
+						if (!context.isBoss) return false;
+						const subSkillInfo = context.getAvaliableSubSkillInfo(strategy);
+						return subSkillInfo && subSkillInfo.level >= 10 && context.teammates.filter(u => u.curhp > 0 && (u.flags & DebuffFlags.ANY)).length >= 4;
 					},
 					type: '技能', skillName: '洁净魔法', skillLevel: 10,
 					targets: context => {
@@ -226,15 +206,14 @@ module.exports = (async () => {
 				});
 				sets.push({
 					user: 1,
-					check: function(context) {
-						if (!context.isBoss) {
-							return false;
-						}
-						const subSkillInfo = context.getAvaliableSubSkillInfo(this);
-						if (subSkillInfo && subSkillInfo.level == 6) {
-							const needCleanPositions = context.teammates.filter(u => u.curhp > 0 && (u.flags & DebuffFlags.ANY)).map(u => u.pos);
-							if (needCleanPositions.length >= 3) {
-								return BattlePositionMatrix.getMaxTPosition(needCleanPositions).count >= 3;
+					check: function(context, strategy) {
+						if (context.isBoss) {
+							const subSkillInfo = context.getAvaliableSubSkillInfo(strategy);
+							if (subSkillInfo && subSkillInfo.level >= 6) {
+								const needCleanPositions = context.teammates.filter(u => u.curhp > 0 && (u.flags & DebuffFlags.ANY)).map(u => u.pos);
+								if (needCleanPositions.length >= 3) {
+									return BattlePositionMatrix.getMaxTPosition(needCleanPositions).count >= 3;
+								}
 							}
 						}
 						return false;
@@ -288,7 +267,7 @@ module.exports = (async () => {
 	 * killFirstNames: ['']
 	 */
 	Battle.getBattleStrategies = async ({
-		preset = Battle.Presets.attack, restoreMinHp = 300, restorePet = false, custom, killFirstNames
+		preset = Battle.Presets.attack, restoreMinHp = 300, restorePet = false, custom = undefined, killFirstNames = undefined
 	} = {}) => {
 		const sets = [];
 		if (preset == Battle.Presets.attack) {
@@ -300,17 +279,11 @@ module.exports = (async () => {
 				custom(sets);
 			}
 			killFirstNames = killFirstNames ? killFirstNames.concat(KillFirstEnemyNames) : KillFirstEnemyNames;
-			let targetsFunction = context => {
+			const targetsFunction = context => {
 				if (context.isBoss) {
 					return context.targetFunctions.getSortedEnemies(killFirstNames);
 				}
 				return cga.emogua.shuffle(context.enemies.map(e => e.pos));
-			}
-			let multiChecker = context => {
-				if (context.isBoss) {
-					return context.enemies.length >= 3 && !context.enemies.find(e => killFirstNames.includes(e.name));
-				}
-				return context.enemies.length >= 3;
 			}
 			if (profession && profession.name == '魔术师') {
 				// sets.push({
@@ -320,15 +293,35 @@ module.exports = (async () => {
 				// 	targets: targetsFunction
 				// });
 			} else {
-				// sets.push({
-				// 	user: 1,
-				// 	check: context => context.enemies.front.length >= 3 || context.enemies.back.length >= 3,
-				// 	type: '技能', skillName: '因果报应', skillLevel: 3,
-				// 	targets: context => context.targetFunctions.getMaxHorizontalTargets()
-				// });
+				if (profession && profession.name == '暗黑骑士') {
+					const getBoss = (context) => context.enemies.find(e => e.curhp > 5000 && e.maxhp > 11000);
+					sets.push({
+						user: 1,
+						check: (context, strategy) => {
+							if (context.isBoss) {
+								const boss = getBoss(context);
+								if (boss) {
+									const subSkillInfo = context.getAvaliableSubSkillInfo(strategy);
+									if (subSkillInfo) {
+										return typeof context.getSkillTarget([boss.pos], subSkillInfo.flags, context.player_pos) == 'number';
+									}
+								}
+							}
+							return false;
+						},
+						type: '技能', skillName: '诸刃·碎玉',
+						targets: context => [getBoss(context).pos]
+					});
+				}
 				sets.push({
 					user: 1,
-					check: multiChecker,
+					check: context => context.isBoss && context.enemies.length >= 3 && context.playerSkills.find(s => s.name == '气功弹') && !context.enemies.find(e => killFirstNames.includes(e.name)),
+					type: '技能', skillName: '气功弹',
+					targets: targetsFunction
+				});
+				sets.push({
+					user: 1,
+					check: context => !context.isBoss && context.enemies.length >= 3 && context.playerSkills.find(s => s.name == '气功弹'),
 					type: '技能', skillName: '气功弹', skillLevel: 3,
 					targets: targetsFunction
 				});
@@ -342,14 +335,18 @@ module.exports = (async () => {
 			if (playerInfo.job == '兽王') {
 				sets.push({
 					user: 2,
-					check: context => context.isBoss && context.enemies.length > 7,
+					check: context => context.petSkills && context.petSkills.find(s => s.name == '飓风吐息') && context.enemies.length > 7 && (!context.isBoss || !context.enemies.find(e => killFirstNames.includes(e.name))),
 					skillName: '飓风吐息',
 					targets: targetsFunction
 				});
 			}
 			sets.push({
 				user: 2,
-				check: multiChecker,
+				check: context => context.petSkills && context.petSkills.find(s => s.name.startsWith('气功弹')) &&
+					(
+						(!context.isBoss && context.enemies.length >= 3) ||
+						(context.isBoss && context.enemies.length >= 2 && !context.enemies.find(e => killFirstNames.includes(e.name)))
+					),
 				skillName: '气功弹',
 				targets: targetsFunction
 			});
@@ -358,12 +355,6 @@ module.exports = (async () => {
 				check: context => true,
 				skillName: '攻击',
 				targets: targetsFunction
-			});
-			sets.push({
-				user: 2,
-				check: context => true,
-				skillName: '防御',
-				targets: context => [context.petUnit.pos]
 			});
 			sets.push({
 				user: 2,
@@ -443,7 +434,7 @@ module.exports = (async () => {
 	 * strategies: [
 	 *     {
 	 *         user: 1 (人物) 2 (宠物) 4 (无宠二动)
-	 *         check: context => boolean
+	 *         check: (context, strategy) => boolean
 	 *
 	 *         type: '技能 攻击 防御 逃跑 位置 宠物 物品 什么都不做',
 	 *
@@ -451,7 +442,7 @@ module.exports = (async () => {
 	 *         skillLevel: 1,
 	 *         force: false, //强制释放
 	 *         targets: context => [position],
-	 *         rollback: '不能释放回退: 攻击 | 防御 | 什么都不做',
+	 *         rollback: '攻击 | 防御 | 什么都不做', // 技能不能释放回退到基础动作,不设置默认是 '攻击'
 	 *         item: context => position,
 	 *     }
 	 * ]
@@ -478,7 +469,7 @@ module.exports = (async () => {
 	const applyPlayerRollbackAction = (context, type = '攻击') => {
 		if (type == '防御') {
 			context.cga.BattleGuard();
-		} else if (strategy.type == '什么都不做') {
+		} else if (type == '什么都不做') {
 			context.cga.BattleDoNothing();
 			console.log('player rollabck 什么都不做');
 		} else {
@@ -531,7 +522,13 @@ module.exports = (async () => {
 							target = 42;
 						}
 						cga.BattleSkillAttack(subSkillInfo.skillIndex, subSkillInfo.level - 1, target, strategy.force === true);
+					} else {
+						console.log('人物技能目标不可用，将使用rollback设置', strategy);
+						applyPlayerRollbackAction(context, strategy.rollback);
 					}
+				} else {
+					console.log('人物技能不可用，将使用rollback设置', strategy);
+					applyPlayerRollbackAction(context, strategy.rollback);
 				}
 			} else {
 				console.log('未识别的战斗配置 => ', JSON.stringify(strategy));
@@ -580,8 +577,8 @@ module.exports = (async () => {
 		}
 	};
 	const petAction = (context, twice = true) => {
-		const matchedStrategy = petStrategies.find(strategy =>
-			strategy.type == '什么都不做' || (strategy.check(context) && typeof context.getAvaliablePetSkillInfo(strategy) == 'object')
+		const matchedStrategy = petStrategies.find(
+			strategy => strategy.check(context, strategy) && (strategy.type == '什么都不做' || typeof context.getAvaliablePetSkillInfo(strategy) == 'object')
 		);
 		if (matchedStrategy) applyPetStrategy(context, matchedStrategy, twice);
 		else {
@@ -700,7 +697,7 @@ module.exports = (async () => {
 	
 		if (state & BattleActionFlags.ISPLAYER) {
 			const matchedStrategy = (state & BattleActionFlags.ISDOUBLE ? player2Strategies : playerStrategies).find(strategy => {
-				if (strategy.check(context)) {
+				if (strategy.check(context, strategy)) {
 					if (strategy.type == '技能') {
 						return typeof context.getAvaliableSubSkillInfo(strategy) == 'object';
 					}
@@ -807,28 +804,53 @@ module.exports = (async () => {
 
 	const stopRencounterWords = '触发战斗保护';
 	Battle.tryStopRencounter = () => cga.emogua.sayWords(stopRencounterWords);
-	Battle.checkStopRencounter = (protect, talk = false, checkTeam = false) => {
-		if (!cga.isInNormalState()) {
-			return false;
+	Battle.protectWithDefaults = (protect) => {
+		const defaults = {
+			minHp: 50, minMp: 10, minPetHp: 50, minPetMp: 0, maxPetNumber: 5, maxItemNumber: 20, maxGold: 1000001, minTeamNumber: 1, checker: undefined
+		};
+		if (protect) {
+			if (typeof protect.minHp == 'number') {
+				defaults.minHp = protect.minHp;
+			}
+			if (typeof protect.minMp == 'number') {
+				defaults.minMp = protect.minMp;
+			}
+			if (typeof protect.minPetHp == 'number') {
+				defaults.minPetHp = protect.minPetHp;
+			}
+			if (typeof protect.minPetMp == 'number') {
+				defaults.minPetMp = protect.minPetMp;
+			}
+			if (typeof protect.maxPetNumber == 'number') {
+				defaults.maxPetNumber = protect.maxPetNumber;
+			}
+			if (typeof protect.maxItemNumber == 'number') {
+				defaults.maxItemNumber = protect.maxItemNumber;
+			}
+			if (typeof protect.minTeamNumber == 'number') {
+				defaults.minTeamNumber = protect.minTeamNumber;
+			}
+			if (typeof protect.maxGold == 'number') {
+				defaults.maxGold = protect.maxGold;
+			}
+			if (typeof protect.checker == 'function') {
+				defaults.checker = protect.checker;
+			}
 		}
+		console.log(defaults);
+		return defaults;
+	}
+	Battle.checkStopRencounter = (protect, talk = false, checkTeam = false) => {
 		const playerInfo = cga.GetPlayerInfo();
 		const pets = cga.GetPetsInfo();
-		const minHp = (protect && protect.minHp) ? protect.minHp : 100;
-		const minMp = (protect && protect.minMp) ? protect.minMp : 60;
-		const minPetHp = (protect && protect.minPetHp) ? protect.minPetHp : 100;
-		const minPetMp = (protect && protect.minPetMp) ? protect.minPetMp : 0;
-		const maxPetNumber = (protect && protect.maxPetNumber) ? protect.maxPetNumber : 5;
-		const maxItemNumber = (protect && protect.maxItemNumber) ? protect.maxItemNumber : 20;
-		const checker = (protect && typeof protect.checker == 'function') ? protect.checker : null;
-		const minTeamNumber = (protect && protect.minTeamNumber) ? protect.minTeamNumber : 1;
 		if (
-			playerInfo.hp < minHp || playerInfo.mp < minMp || cga.getInventoryItems().length > maxItemNumber ||
-			pets.length > maxPetNumber || pets.filter(e => e.battle_flags == 2).find(p => p.hp < minPetHp || p.mp < minPetMp) ||
+			playerInfo.hp < protect.minHp || playerInfo.mp < protect.minMp || playerInfo.gold > protect.maxGold || cga.getInventoryItems().length > protect.maxItemNumber ||
+			pets.length > protect.maxPetNumber || pets.filter(e => e.battle_flags == 2).find(p => p.hp < protect.minPetHp || p.mp < protect.minPetMp) ||
 			(
 				checkTeam &&
-				(cga.emogua.getTeamNumber() < minTeamNumber || cga.emogua.getTeammates().find(t => t.hp > 0 && t.mp > 0 && (t.hp < minHp || t.mp < minMp)))
+				(cga.emogua.getTeamNumber() < protect.minTeamNumber || cga.emogua.getTeammates().find(t => t.hp > 0 && t.mp > 0 && (t.hp < protect.minHp || t.mp < protect.minMp)))
 			) ||
-			(checker && checker())
+			(protect.checker && protect.checker())
 		) {
 			if (talk) {
 				Battle.tryStopRencounter();
@@ -842,23 +864,27 @@ module.exports = (async () => {
 		minHp: 200,
 		minMp: 10,
 		minPetHp: 200,
-		minPetMp: 0
+		minPetMp: 0,
+		minTeamNumber: 5,
+		maxItemNumber: 19,
+		maxGold: 1000001,
+		checker: () => false
 	}
 	 */
 	let rencountering = false;
 	Battle.rencounter = async (protect, battleTimes) => {
 		if (!rencountering) {
 			rencountering = true;
+			protect = Battle.protectWithDefaults(protect);
 			await cga.emogua.downloadMap();
 			const mapName = cga.GetMapName();
 			const startTime = new Date();
-			console.log('开始遇敌', startTime.toLocaleString(), mapName);
 			const startPosition = cga.emogua.getMovablePositionAround(cga.GetMapXY());
 			const movePosition = cga.emogua.getMovablePositionAround(startPosition);
 			const points = [startPosition, movePosition];
-			let pointer = 0;
+
 			let counter = 0;
-			setTimeout(async () => {
+			(async () => {
 				while(rencountering) {
 					const chat = await cga.emogua.waitMessage(true, 3000).catch(() => {});
 					if (
@@ -870,22 +896,35 @@ module.exports = (async () => {
 						rencountering = false;
 					}
 				}
-			});
-			while(rencountering) {
-				pointer = (pointer + 1) % 2;
-				cga.WalkTo(points[pointer].x, points[pointer].y);
-				await cga.emogua.delay(300);
-				if (await cga.emogua.waitForNormal()) {
-					counter++;
+			})();
+			console.log('开始遇敌', startTime.toLocaleString(), mapName);
+			let pointer = 0;
+			let normal = true;
+			(async () => {
+				while (rencountering) {
+					normal = cga.GetWorldStatus() == 9 && cga.GetGameStatus() == 3;
+					if (normal) {
+						await cga.emogua.delay(1000);
+					} else {
+						await cga.emogua.waitForNormal();
+						counter++;
+					}
 				}
+			})();
+			while(rencountering) {
+				if (normal) {
+					pointer = (pointer + 1) % 2;
+					cga.WalkTo(points[pointer].x, points[pointer].y);
+				}
+				await cga.emogua.delay(300);
 			}
 			const currentDate = new Date();
-			console.log('已停止遇敌', counter, parseInt((currentDate.getTime() - startTime.getTime()) / 1000), currentDate.toLocaleString());
+			console.log('已停止遇敌', counter, parseInt(((currentDate.getTime() - startTime.getTime()) / 1000).toString()), currentDate.toLocaleString());
 			await cga.emogua.delay(1000);
 			await cga.emogua.waitForNormal();
 		}
 	};
-	Battle.teammateCheckRencounterBlock = async () => {
+	Battle.teammateCheckRencounterBlock = async ({maxGold = 1000001} = {}) => {
 		let lastBagItems = 0;
 		while (cga.emogua.getTeamNumber() > 1 || cga.emogua.isRegroupingTeam) {
 			const chat = await cga.emogua.waitMessage(true).catch(() => {});
@@ -900,7 +939,8 @@ module.exports = (async () => {
 				}
 				lastBagItems = currentBagItems;
 				const info = cga.GetPlayerInfo();
-				if (info.health > 0 || info.souls > 0) {
+				if (info.health > 0 || info.souls > 0 || info.gold > maxGold) {
+					await Battle.tryStopRencounter();
 					await cga.emogua.waitForNormal();
 					await cga.emogua.leaveTeam();
 					break;

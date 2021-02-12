@@ -7,6 +7,7 @@ module.exports = (async () => {
 				console.log('掉线自动换线，将切换至指定线路', line);
 				await cga.emogua.loadGuiScript({autorestart: true});
 				await cga.emogua.loadGuiAccount({server: line});
+				await cga.emogua.delay(5000);
 				cga.LogOut();
 			}
 		}
