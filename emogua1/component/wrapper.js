@@ -405,7 +405,7 @@ module.exports = new Promise(resolve => {
 		};
 	};
 	const piles = require('./pile');
-	cga.emogua.getPileMax = (item) => piles[item.name] || piles[item.type];
+	cga.emogua.getPileMax = (item) => typeof piles[item.name] == 'number' ? piles[item.name] : piles[item.type];
 	cga.emogua.equipmentMinDurability = 30;
 	let autoEquip = false;
 	cga.emogua.setAutoEquip = (value = true) => autoEquip = value;
@@ -757,7 +757,10 @@ module.exports = new Promise(resolve => {
 	};
 	cga.emogua.isRegroupingTeam = false;
 	cga.emogua.waitRegroupTeam = async ({team,arrive}) => {
-		if (team.length <= 1) return;
+		if (team.length <= 1) {
+			if (arrive) await arrive();
+			return;
+		}
 		const words = '重新组队';
 		const timeout = 30000;
 		if (cga.emogua.cachedPlayer.name == team[0]) {
