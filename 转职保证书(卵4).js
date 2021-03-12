@@ -93,10 +93,12 @@ var cga = require('./cgaapi')(function(){
 				return;
 			}
 			
-			if(cga.isTeamLeader)
-				cga.ClickNPCDialog(1, 1);
-			
-			setTimeout(battleAgain, 5000);
+			cga.cleanInventory(1, ()=>{
+				if(cga.isTeamLeader)
+					cga.ClickNPCDialog(1, 1);
+				
+				setTimeout(battleAgain, 5000);
+			});			
 		};
 		
 		var retryNpc = (result)=>{
