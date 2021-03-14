@@ -443,10 +443,12 @@ require('./common').then(cga => {
 	]
 	);
 
-	var loop = ()=>{
+	var loop = async ()=>{
 		loop_count ++;
 		leo.say('已刷' + loop_count + '遍！');
-		task.doTask(loop);
+		await leo.checkHealth('医道之殇')
+		await leo.checkCrystal('火风的水晶（5：5）')
+		await task.doTask(loop);
 	}
 
 	leo.log('欢迎使用CGA通用王冠/小猫脚本');

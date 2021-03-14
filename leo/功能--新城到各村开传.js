@@ -14,7 +14,7 @@ require('./common').then(cga=>{
     //阿巴尼斯村
     var abanis = true;
     //加纳村
-    var ghana = true;
+    var ghana = false;
 
 	var prepareOptions = {
         rechargeFlag: 1,
@@ -119,7 +119,7 @@ require('./common').then(cga=>{
             .then(()=>leo.autoWalkList([
                 [20,59,'维诺亚洞穴 地下2楼'],[24,81,'维诺亚洞穴 地下3楼'],[26,64,'芙蕾雅'],[330,480,'维诺亚村'],[40,36,'村长的家'],[18,10,'村长家的小房间'],[8,2,'维诺亚村的传送点'],[5,3]
             ]))
-            .then(()=>leo.talkNpc(6,leo.talkNpcSelectorYes))
+            .then(()=>leo.talkNpc(2,leo.talkNpcSelectorYes))
             .then(()=>leo.log('维诺亚村开启传送完成了哦!'))
             .then(()=>leo.logBack());
         }

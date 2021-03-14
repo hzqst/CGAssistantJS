@@ -41,7 +41,7 @@ require('./common').then(cga => {
 		targets: context => context.enemies.map(e => e.pos)
 	});
 	var firstRoundDelay = 1;	//首回合延迟
-	var roundDelay = 1			//每回合延迟
+	var roundDelay = 4000		//每回合延迟
 	var force = true ;			//是否强制启用战斗配置
 	leo.autoBattle(sets,firstRoundDelay,roundDelay,force);
 	leo.loop(

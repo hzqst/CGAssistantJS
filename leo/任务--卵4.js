@@ -8,8 +8,8 @@ require('./common').then(cga => {
     //输入‘4’从打完BOSS换保证书开始任务（必须有文言抄本）
     var taskIndex = 0;
 
-    var teamLeader = '队长名称'; //队长名称
-    var teamPlayerCount = 5; //队伍人数
+    var teamLeader = '此处填队长名称'; //队长名称
+    var teamPlayerCount = 1; //队伍人数
     var teammates = [];
 
     var taskInfo = {
@@ -182,6 +182,13 @@ require('./common').then(cga => {
                     await leo.delay(10000);
                 }
             })
+            if(cga.GetMapName()!='？？？'){
+                await leo.walkRandomMazeUntil(() => {
+                    if (cga.GetMapName() == '？？？') {
+                        return true;
+                    }
+                },false)
+            }
             if(cga.GetMapName()=='？？？' && zhanglaozheng.flag){
                 await leo.autoWalk([131,61])
                 await leo.walkList([
