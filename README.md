@@ -1,9 +1,17 @@
-# CGAssistant (Release)
+# CGAssistant (Pre-built Binary and Scripts)
 
-Wiki: https://github.com/hzqst/CGAssistantJS/wiki or https://gitee.com/hzqst/CGAssistantJS/wikis
+CGAssistant is a helper for you to play CrossGate with highly automated game experience.
 
-Release: https://github.com/hzqst/CGAssistantJS or https://gitee.com/hzqst/CGAssistantJS
+Only cg_item_6000.exe is supported for now.
 
 Source Code: https://github.com/hzqst/CGAssistant
+
+Wiki: https://github.com/hzqst/CGAssistantJS/wiki
+
+(Repositiy mirror in CN: https://gitee.com/hzqst/CGAssistantJS/wikis)
+
+Pre-built Binary and Scripts : https://github.com/hzqst/CGAssistantJS
+
+(Repositiy mirror in CN: https://gitee.com/hzqst/CGAssistantJS)
 
 QQGroup: 300303705
