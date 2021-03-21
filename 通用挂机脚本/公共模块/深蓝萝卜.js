@@ -1,5 +1,6 @@
 var cga = global.cga;
 var configTable = global.configTable;
+var supplyObject = require('./通用登出回补');
 
 var socket = null;
 
@@ -20,11 +21,13 @@ var thisobj = {
 		func : (cb) =>{
 			
 			if(thisobj.object.gatherCount === null){
+
 				setTimeout(thisobj.object.func, 1500, cb);
 				return;
 			}
 			
 			if(thisobj.check_done()){
+				console.log('done')
 				cb(null);
 				return
 			}
@@ -60,7 +63,7 @@ var thisobj = {
 		gatherCount : null,
 		doneManager : (cb)=>{
 			thisobj.object.state = 'done';
-			
+						
 			var repeat = ()=>{
 
 				if(!thisobj.check_done()){
@@ -119,6 +122,10 @@ var thisobj = {
 					cga.TurnTo(35, 46);
 					setTimeout(cb, 3000);
 				});
+			}
+			else
+			{
+				supplyObject.func(cb);
 			}
 		},
 		state : 'gathering',
