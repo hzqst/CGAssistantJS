@@ -450,43 +450,50 @@ module.exports = new Promise(resolve => {
 		}).shift();
 	};
 	/**
-	 * icon 大 down, 小 up; 12002 down 12000 up, 13997 down 13996 up
-	 * return [前进，后退]
+	 * icon
+	 *   大 down, 小 up (不全是)
+	 *   12002 down 12000 up (狗洞)
+	 *   17967 down 17966 up (海底墓场-保证书)
+	 *   13273 down 13272 up (虫洞)
+	 *   17981 down 17980 up (黑色方舟)
+	 *   17975 down 17974 up (黑色的祈祷)
+	 *   0 迷宫出入口
+	 * return [最远，最近]
 	 */
-	const getMazeEntries = (up = true, mapObjects = cga.getMapObjects(), current = cga.GetMapXY()) => {
+	cga.emogua.getMazeEntries = async () => {
+		await cga.emogua.downloadMap();
+		const mapObjects = cga.getMapObjects();
+		const current = cga.GetMapXY();
 		const entryIcons = cga.buildMapCollisionRawMatrix().matrix;
 		return mapObjects.filter(o => {
-			const match = o.cell == 3;
-			if (match) {
+			if (o.cell == 3) {
 				o.icon = entryIcons[o.y][o.x];
-				if (o.icon == 0 && up) {
-					o.icon = Number.MAX_VALUE;
-				}
+				return true;
 			}
-			return match;
+			return false;
 		}).sort((a,b) => {
-			if (a.x == current.x && a.y == current.y) return 1;
-			if (b.x == current.x && b.y == current.y) return 0;
-			return up ? (a.icon - b.icon) : (b.icon - a.icon);
+			const aDistance = Math.abs(a.x - current.x) + Math.abs(a.y - current.y);
+			const bDistance = Math.abs(b.x - current.x) + Math.abs(b.y - current.y);
+			return bDistance - aDistance;
 		});
 	};
-	cga.emogua.getMazeEntries = (up = true) => cga.emogua.downloadMap().then(walls => getMazeEntries(up));
-	cga.emogua.walkRandomMaze = (up = true, back = false) => cga.emogua.downloadMap().then(walls => {
-		const mapInfo = cga.emogua.getMapInfo();
-		const entries = getMazeEntries(up, cga.getMapObjects(), mapInfo);
+	cga.emogua.walkRandomMaze = async (entryFilter) => {
+		const entries = await cga.emogua.getMazeEntries();
 		if (entries.length > 1) {
-			const target = back ? entries[1] : entries[0];
-			return cga.emogua.autoWalk([target.x, target.y, '*'], walls, mapInfo);
+			const target = entryFilter ? entries[1] : entries[0];
+			if (target) {
+				return await cga.emogua.autoWalk([target.x, target.y, '*']);
+			}
 		}
-		console.log('Fail to walk random maze', entries);
-		return Promise.reject();
-	});
-	cga.emogua.walkRandomMazeUntil = (check, up = true, back = false) => cga.emogua.walkRandomMaze(up, back).then(() => {
-		const checkResult = check();
-		if (checkResult instanceof Promise) return checkResult;
-		else if (checkResult) return Promise.resolve();
-		return cga.emogua.walkRandomMazeUntil(check, up, back);
-	});
+		throw 'Fail to walk random maze ' + entries;
+	};
+	cga.emogua.walkRandomMazeUntil = async (check, entryFilter) => {
+		let times = 0;
+		while (times <= 101 && !check()) {
+			times++;
+			await cga.emogua.walkRandomMaze(entryFilter);
+		}
+	};
 	const getMovablePoints = (map, start) => {
 		const foundedPoints = {};
 		foundedPoints[start.x + '-' + start.y] = start;
@@ -521,8 +528,8 @@ module.exports = new Promise(resolve => {
 	 * parameters
 	 *     diagonal: [[558,20], [526,40]] 限定寻找的矩形范围(对角线两个顶点,注意起点需要在范围内)
 	 */
-	cga.emogua.searchMap = (targetFinder, recursion = true, up = true, parameters = {}) => cga.emogua.downloadMap().then(walls => {
-		const entries = getMazeEntries(up);
+	cga.emogua.searchMap = (targetFinder, recursion = true, up = true, parameters = {}) => cga.emogua.downloadMap().then(async walls => {
+		const entries = await cga.emogua.getMazeEntries();
 		const getTarget = () => {
 			const target = targetFinder(cga.GetMapUnits().filter(u => (u.flags & cga.emogua.UnitFlags.NpcEntry) && u.model_id > 0));
 			if (typeof target == 'object') {
@@ -1004,20 +1011,23 @@ module.exports = new Promise(resolve => {
 		}, 0), timeout);
 		const waitTradeStateRecursively = (timeout = 15000, lastState) => cga.AsyncWaitTradeState((error, state) => setTimeout(() => {
 			if (typeof state == 'number' && state == cga.TRADE_STATE_READY) {
-				if (!params.partyStuffsChecker || (typeof params.partyStuffsChecker == 'function' && params.partyStuffsChecker(receivedStuffs))) {
-					if (!initiative) {
-						cga.TradeAddStuffs(
-							getTradeItems(params.itemFilter),
-							getTradePets(params.petFilter),
-							(typeof params.gold == 'number') ? params.gold : 0
-						);
+				setTimeout(()=>{
+					//console.log(4,receivedStuffs)
+					if (!params.partyStuffsChecker || (typeof params.partyStuffsChecker == 'function' && params.partyStuffsChecker(receivedStuffs))) {
+						if (!initiative) {
+							cga.TradeAddStuffs(
+								getTradeItems(params.itemFilter),
+								getTradePets(params.petFilter),
+								(typeof params.gold == 'number') ? params.gold : 0
+							);
+						}
+						cga.DoRequest(cga.REQUEST_TYPE_TRADE_CONFIRM);
+						waitTradeStateRecursively(timeout, state);
+					} else {
+						cga.DoRequest(cga.REQUEST_TYPE_TRADE_REFUSE);
+						callback({success: false});
 					}
-					cga.DoRequest(cga.REQUEST_TYPE_TRADE_CONFIRM);
-					waitTradeStateRecursively(timeout, state);
-				} else {
-					cga.DoRequest(cga.REQUEST_TYPE_TRADE_REFUSE);
-					callback({success: false});
-				}
+				},500);
 			} else if (typeof state == 'number' && state == cga.TRADE_STATE_SUCCEED) {
 				callback({success: true, received: receivedStuffs});
 			} else if (typeof state == 'number' && state == cga.TRADE_STATE_CANCEL) {

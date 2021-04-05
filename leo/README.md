@@ -58,7 +58,7 @@
     `leo.panel.autosupply(true);`
         
     - 玩家信息面板——屏蔽切图  
-    `leo.panel.noswitchanim(120);`
+    `leo.panel.noswitchanim(true);`
         
     - 玩家信息面板——高速移动  
     `leo.panel.movespd(120);`

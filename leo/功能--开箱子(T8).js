@@ -1,4 +1,4 @@
-require('./common').then(cga=>{
+require('./common').then(async cga=>{
 	//leo.baseInfoPrint();
 	leo.log('红叶の开箱子(T8)脚本，启动~');
 
@@ -10,7 +10,7 @@ require('./common').then(cga=>{
         ]
     }
 
-    leo.todo()
+    await leo.todo()
     .then(()=>{
         return leo.loop(()=>{
             var mapInfo = cga.getMapInfo();
@@ -36,7 +36,7 @@ require('./common').then(cga=>{
                 return leo.autoWalk([56,25,'雪拉威森塔９层']);
             }
             if(mapInfo.name == '雪拉威森塔９层'){
-                return leo.autoWalkList([[129,61],[130,61],[130,63],[132,63],[132,67,'雪拉威森塔８层']]);
+                return leo.autoWalkList([[106,40],[106,43],[107,43],[129,61],[132,61],[132,63],[132,67,'雪拉威森塔８层']]);
             }
             if(mapInfo.name == '雪拉威森塔８层'){
                 return leo.reject();
@@ -46,7 +46,7 @@ require('./common').then(cga=>{
     })
     .then(()=>{
         var index = 0;
-        return leo.loop(()=>{
+        return leo.loop(async ()=>{
             if(cga.getItemCount(type)<=0){
                 leo.log('身上已经没有【'+type+'】，脚本结束');
                 return leo.reject();
@@ -54,27 +54,33 @@ require('./common').then(cga=>{
 
             if(index<keyPosition[type].length){
                 var pos = keyPosition[type][index];
-                index++;
                 var keyCount = cga.getItemCount(type);
-                return leo.autoWalk([pos[0],pos[1]])
-                .then(()=>leo.moveAround())
-                .then(()=>leo.turnTo(pos[0],pos[1]))
-                .then(()=>leo.delay(2000))
-                .then(()=>leo.useItemEx(type))
-                .then(()=>leo.waitAfterBattle())
-                .then(()=>{
-                    if(cga.getItemCount(type)<keyCount){
-                        count++;
-                        return leo.log('红叶の开箱子(T8)脚本：找到箱子('+pos[0]+','+pos[1]+')，已开箱子数：【'+count+'】');
-                    }else{
-                        return leo.log('红叶の开箱子(T8)脚本：没有找到箱子('+pos[0]+','+pos[1]+')');
-                    }
-                });
+
+                if(pos[0] == 121 && pos[1] == 129){
+                    await leo.autoWalk([120,130])
+                    await leo.turnTo(pos[0],pos[1])
+                }else{
+                    await leo.autoWalk([pos[0],pos[1]])
+                    await leo.moveAround()
+                    await leo.turnTo(pos[0],pos[1])
+                } 
+                await leo.delay(1000)
+                await leo.useItemEx(type)
+                await leo.delay(1000)
+                await leo.waitAfterBattle()
+                if(cga.getItemCount(type)<keyCount){
+                    count++;
+                    await leo.log('红叶の开箱子(T8)脚本：找到箱子('+pos[0]+','+pos[1]+')，已开箱子数：【'+count+'】');
+                }else{
+                    await leo.log('红叶の开箱子(T8)脚本：没有找到箱子('+pos[0]+','+pos[1]+')');
+                }
+                index++;
             }else{
                 index = 0;
                 return leo.next();
             }
         });
     })
-    .catch(()=>leo.log('脚本结束'));
+    .catch(()=>leo.log('脚本结束'))
+    await leo.exit()
 });
