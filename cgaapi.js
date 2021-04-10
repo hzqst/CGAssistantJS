@@ -4507,11 +4507,14 @@ module.exports = function(callback){
 			}
 		},
 		(playerName, receivedStuffs)={
-			if(receivedStuffs.pets.find((pet)=>{
-				return pet.realname == '红帽哥布林';
-			}) == null){
-				console.log('对方没有给自己红帽哥布林!');
-				return false;
+			
+			if(receivedStuffs && receivedStuffs.pets){
+				if(receivedStuffs.pets.find((pet)=>{
+					return pet.realname == '红帽哥布林';
+				}) == null){
+					console.log('对方没有给自己红帽哥布林!');
+					return false;
+				}
 			}
 			return true;
 		}, 
@@ -4569,15 +4572,18 @@ module.exports = function(callback){
 	}
 
 	//等待其他玩家向自己发起交易，成功或失败时回调resolve，在checkParty里可以根据对方名字和收到的东西判断同意还是拒绝交易
+	//提示：receivedStuffs可能为空数组，所以访问receivedStuffs.items或其他成员之前必须先检查有效性！
 	/*
 	等待任意玩家给自己交易3组鹿皮:		
 		cga.waitTrade({},
 		(playerName, receivedStuffs)=>{
-			if( receivedStuffs.items.filter((item)=>{
-				return item.name == '鹿皮' && item.count == 40;
-			}).length == 3 )
-			{
-				return true;
+			if(receivedStuffs && receivedStuffs.items){
+				if( receivedStuffs.items.filter((item)=>{
+					return item.name == '鹿皮' && item.count == 40;
+				}).length == 3 )
+				{
+					return true;
+				}
 			}
 			return false;
 		},
@@ -4588,16 +4594,18 @@ module.exports = function(callback){
 				console.log('交易失败! 原因：'+arg.reason);
 			}
 		});
-	等待名为hzqst的玩家给自己交易3组鹿皮，并给他1000金币:		
+	等待名为hzqst的玩家给自己交易3组鹿皮，并给他1000金币:
 		cga.waitTrade({
 			gold : 1000
 		},
 		(playerName, receivedStuffs)=>{
-			if( playerName == 'hzqst' && receivedStuffs.items.filter((item)=>{
-				return item.name == '鹿皮' && item.count == 40;
-			}).length == 3 )
-			{
-				return true;
+			if(receivedStuffs && receivedStuffs.items){
+				if( playerName == 'hzqst' && receivedStuffs.items.filter((item)=>{
+					return item.name == '鹿皮' && item.count == 40;
+				}).length == 3 )
+				{
+					return true;
+				}
 			}
 			return false;
 		},
