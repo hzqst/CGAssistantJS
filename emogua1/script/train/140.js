@@ -212,7 +212,7 @@
 				}
 			} else {
 				await cga.emogua.joinTeamBlock({captainName: captain});
-				await battle.teammateCheckRencounterBlock();
+				await battle.teammateCheckRencounterBlock({protect});
 				process.exit();
 			}
 		} else {

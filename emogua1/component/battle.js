@@ -84,7 +84,7 @@ const initBattleState = () => {
 	lastRound = -1;
 	isBossBattle = false;
 };
-const KillFirstEnemyNames = ['帕布提斯马','被唤醒的亡魂','暗黑龙','土之斗神','水之斗神','炎之斗神','风之斗神','土之守卫的影子','水之守卫的影子','炎之守卫的影子','风之守卫的影子','守护怪'];
+const KillFirstEnemyNames = ['帕布提斯马','暗黑龙','亡魂？','深海领主','阿鲁卡那斯之子','土之斗神','水之斗神','炎之斗神','风之斗神','土之守卫的影子','水之守卫的影子','炎之守卫的影子','风之守卫的影子','守护怪'];
 module.exports = (async () => {
 	const cga = await require('./wrapper');
 	const pushProtectSkills = (sets, profession, playerInfo) => {
@@ -885,7 +885,7 @@ module.exports = (async () => {
 
 			let counter = 0;
 			(async () => {
-				while(rencountering) {
+				while (rencountering) {
 					const chat = await cga.emogua.waitMessage(true, 3000).catch(() => {});
 					if (
 						(battleTimes && counter >= battleTimes) ||
@@ -911,7 +911,7 @@ module.exports = (async () => {
 					}
 				}
 			})();
-			while(rencountering) {
+			while (rencountering) {
 				if (normal) {
 					pointer = (pointer + 1) % 2;
 					cga.WalkTo(points[pointer].x, points[pointer].y);
@@ -919,12 +919,12 @@ module.exports = (async () => {
 				await cga.emogua.delay(300);
 			}
 			const currentDate = new Date();
-			console.log('已停止遇敌', counter, parseInt(((currentDate.getTime() - startTime.getTime()) / 1000).toString()), currentDate.toLocaleString());
+			console.log('已停止遇敌', counter, parseInt(((currentDate.getTime() - startTime.getTime()) / 60000).toString()), currentDate.toLocaleString());
 			await cga.emogua.delay(1000);
 			await cga.emogua.waitForNormal();
 		}
 	};
-	Battle.teammateCheckRencounterBlock = async ({maxGold = 1000001} = {}) => {
+	Battle.teammateCheckRencounterBlock = async ({maxGold = 1000001, protect = undefined} = {}) => {
 		let lastBagItems = 0;
 		while (cga.emogua.getTeamNumber() > 1 || cga.emogua.isRegroupingTeam) {
 			const chat = await cga.emogua.waitMessage(true).catch(() => {});
@@ -944,6 +944,9 @@ module.exports = (async () => {
 					await cga.emogua.waitForNormal();
 					await cga.emogua.leaveTeam();
 					break;
+				}
+				if (protect) {
+					Battle.checkStopRencounter(protect, true, false);
 				}
 			}
 		}
