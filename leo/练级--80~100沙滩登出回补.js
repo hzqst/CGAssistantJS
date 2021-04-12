@@ -2,7 +2,7 @@ require('./common').then(cga => {
     //leo.baseInfoPrint();
     leo.monitor.config.keepAlive = false;   //关闭防掉线的话改false
 
-    var teamLeader = '此处填队长名称'; //队长名称
+    var teamLeader = '此处填写队长名称'; //队长名称
     var teamPlayerCount = 5; //队伍人数
     var teammates = [];
 
@@ -69,7 +69,7 @@ require('./common').then(cga => {
        // 完成组队
         await leo.autoWalk([92,86])
         if(isTeamLeader){
-           await leo.buildTeamBlock(teamPlayerCount)
+           await leo.buildTeamBlock(teamPlayerCount,teammates)
         }else{
               await leo.autoWalk([93,86])
               await leo.enterTeamBlock(teamLeader)

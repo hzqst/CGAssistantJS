@@ -1,8 +1,9 @@
 require('./common').then(cga => {
     leo.baseInfoPrint();
+    leo.moveTimeout = 220;
     leo.monitor.config.keepAlive = false;   //关闭防掉线
     leo.logStatus = false;
-    var teamLeader = '此处填队长名称'; //队长名称
+    var teamLeader = '此处填写队长名称'; //队长名称
     var teamPlayerCount = 5; //队伍人数
     var usingpunchclock = false; //是否打卡
     var protect = {
@@ -126,7 +127,7 @@ require('./common').then(cga => {
                     .then(() => {
                         if (isTeamLeader) {
                             cga.EnableFlags(cga.ENABLE_FLAG_JOINTEAM, true); //开启组队
-                            return leo.autoWalk(meetingPointTeamLeader[meetingPoint - 1]).then(() => leo.buildTeam(teamPlayerCount)).then(() => {
+                            return leo.autoWalk(meetingPointTeamLeader[meetingPoint - 1]).then(() => leo.buildTeam(teamPlayerCount,teammates)).then(() => {
                                 var teamplayers = cga.getTeamPlayers();
                                 //console.log(teamplayers);
                                 if (teamplayers && teamplayers.length == teamPlayerCount) {
@@ -207,6 +208,7 @@ require('./common').then(cga => {
                         //console.log(entryPos);
                         console.log(leo.logTime() + '开始战斗');
                         return leo.encounterTeamLeader(protect) //队长遇敌
+                        .then(() => leo.delay(2000))
                         .then(() => {
                             console.log(leo.logTime() + "触发回补");
                             if (cga.GetMapName() == '肯吉罗岛') {

@@ -2,7 +2,7 @@ require('./common').then(cga => {
     leo.baseInfoPrint();
     leo.monitor.config.keepAlive = false;   //关闭防掉线
     leo.monitor.config.logStatus = false;
-    var teamLeader = '此处填队长名称'; //队长名称
+    var teamLeader = '此处填写队长名称'; //队长名称
     var teamPlayerCount = 5; //队伍人数
     var protect = {
         minHp: 500,
@@ -12,7 +12,7 @@ require('./common').then(cga => {
         maxItemNumber: 21,
         minTeamNumber: 5
     };
-    var teammates = [];
+    var teammates = ['蓝倾之殇','楚城之殇','蓝绝之殇','华丽之殇'];
     var isPrepare = false; //招魂、治疗、补血、卖石
     var isLogBackFirst = false; //启动登出
     var prepareOptions = {
@@ -64,6 +64,8 @@ require('./common').then(cga => {
                     .then(()=>leo.moveGold(100000,cga.MOVE_GOLD_FROMBANK))
                     .then(()=>leo.moveGold(100000,cga.MOVE_GOLD_FROMBANK))
                     .then(()=>leo.moveGold(100000,cga.MOVE_GOLD_FROMBANK))
+                    .then(()=>leo.moveGold(100000,cga.MOVE_GOLD_FROMBANK))
+                    .then(()=>leo.moveGold(100000,cga.MOVE_GOLD_FROMBANK))
                     .then(()=>{
                         if(cga.GetPlayerInfo().gold < 5000){
                             leo.log('钱到用时方恨少！请补充足够银子后重新执行脚本！')
@@ -93,7 +95,7 @@ require('./common').then(cga => {
                     .then(() => {
                         if (isTeamLeader) {
                             return leo.moveAround()
-                            .then(()=>leo.buildTeamBlock(teamPlayerCount));
+                            .then(()=>leo.buildTeamBlock(teamPlayerCount,teammates));
                         } else {
                             return leo.enterTeamBlock(teamLeader);
                         }
@@ -102,36 +104,39 @@ require('./common').then(cga => {
             }).then(() => {
                 //爬山
                 if (isTeamLeader) {
-                    var mapInfo = leo.getMapInfo();
-                    if (mapInfo.name == '半山腰'){
-                        return leo.autoWalk([60,61])
-                        .then(()=>{
-                            console.log(leo.logTime() + '开始战斗');
-                            return leo.encounterTeamLeader(protect) //队长遇敌
-                            .then(() => {
-                                console.log(leo.logTime() + "登出回补");
-                                return leo.leaveTeam();
-                            });
-                        });
-                    }else{
-                        return leo.autoWalk([64, 45, '通往山顶的路100M'])
-                        .then(()=>leo.walkRandomMazeUntil(() => {
+                    return leo.todo()
+                    .then(()=>{
+                        var mapInfo = leo.getMapInfo();
+                        if (mapInfo.name == '小岛'){
+                            return leo.autoWalk([64, 45, '通往山顶的路100M']);
+                        }
+                    })
+                    .then(()=>{
+                        var mapInfo = leo.getMapInfo();
+                        if (mapInfo.name.indexOf('通往山顶的路')!=-1){
+                            return leo.walkRandomMazeUntil(() => {
                                 const mn = cga.GetMapName();
                                 if (mn == '半山腰') {
                                     return true;
                                 }
                                 return false;
-                        },false))
-                        .then(()=>leo.autoWalk([60,61]))
-                        .then(()=>{
-                            console.log(leo.logTime() + '开始战斗');
-                            return leo.encounterTeamLeader(protect) //队长遇敌
-                            .then(() => {
-                                console.log(leo.logTime() + "登出回补");
-                                return leo.leaveTeam();
+                            },false);
+                        }
+                    })
+                    .then(()=>{
+                        var mapInfo = leo.getMapInfo();
+                        if (mapInfo.name == '半山腰'){
+                            return leo.autoWalk([60,61])
+                            .then(()=>{
+                                console.log(leo.logTime() + '开始战斗');
+                                return leo.encounterTeamLeader(protect) //队长遇敌
+                                .then(() => {
+                                    console.log(leo.logTime() + "登出回补");
+                                    return leo.leaveTeam();
+                                });
                             });
-                        });
-                    }
+                        }
+                    })
                 } else {
                     var mapInfo = leo.getMapInfo();
                     if (mapInfo.name == '半山腰'){

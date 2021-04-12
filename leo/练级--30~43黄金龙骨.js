@@ -3,11 +3,11 @@ require('./common').then(cga => {
     leo.monitor.config.keepAlive = false;   //关闭防掉线
     leo.monitor.config.logStatus = false;
     leo.monitor.config.equipsProtect = false;
-    var teamLeader = '此处填队长名称'; //队长名称
+    var teamLeader = '此处填写队长名称'; //队长名称
     var teamPlayerCount = 5; //队伍人数
     var protect = {
         minHp: 150,
-        minMp: 100,
+        minMp: 0,
         minPetHp: 100,
         minPetMp: 200,
         minTeamNumber: 5
@@ -72,7 +72,7 @@ require('./common').then(cga => {
                         if (isTeamLeader) {
                             cga.EnableFlags(cga.ENABLE_FLAG_JOINTEAM, true); //开启组队
                             return leo.autoWalk([155,100])
-                            .then(() => leo.buildTeamBlock(teamPlayerCount));
+                            .then(() => leo.buildTeamBlock(teamPlayerCount,teammates));
                         } else {
                             return leo.autoWalk([154,100])
                             .then(() => leo.enterTeamBlock(teamLeader));

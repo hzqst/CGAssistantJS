@@ -1,6 +1,6 @@
 module.exports = require('./wrapper').then( async (cga) => {
     global.leo = cga.emogua;
-    leo.version = '6.1';
+    leo.version = '6.2';
     leo.qq = '158583461'
     leo.copyright = '红叶散落';
     leo.FORMAT_DATE = 'yyyy-MM-dd';
@@ -171,7 +171,10 @@ module.exports = require('./wrapper').then( async (cga) => {
     //队长创建队伍
     leo.buildTeam = (teamPlayerCount, teammates) => {
         if (teammates && teammates.length > 0) {
-            teamPlayerCount = teammates.length;
+            if(!is_array_contain(teammates, cga.GetPlayerInfo().name)){
+                teammates.push(cga.GetPlayerInfo().name);
+            }
+            //teamPlayerCount = teammates.length;
         }
         cga.EnableFlags(cga.ENABLE_FLAG_JOINTEAM, true); //开启组队
         if (teamPlayerCount <= 1) {
@@ -183,7 +186,7 @@ module.exports = require('./wrapper').then( async (cga) => {
                 //检查是否是预设的队员
                 if (teammates && teammates.length > 0) {
                     for (var i = 0; i < teamplayers.length; ++i) {
-                        if (!is_array_contain(teammates, teamplayers[i].name)) {
+                        if (!is_array_contain(teammates, teamplayers[i].name)  ) {
                             //踢出不在预设队伍成员的未知队员
                             return leo.todo().then(() => cga.DoRequest(cga.REQUEST_TYPE_KICKTEAM)).then(
                                 () => leo.waitNPCDialog(dlg => {
@@ -216,7 +219,7 @@ module.exports = require('./wrapper').then( async (cga) => {
         });
     }
     leo.buildTeamBlock = (teamPlayerCount,teammates = [])=>{
-        return leo.buildTeam(teamPlayerCount)
+        return leo.buildTeam(teamPlayerCount,teammates)
         .then(() => {
             var teamplayers = cga.getTeamPlayers();
             //console.log(teamplayers);
@@ -359,8 +362,14 @@ module.exports = require('./wrapper').then( async (cga) => {
         }
         if(needSupply){
             var currentMap = cga.GetMapName();
-            if(currentMap=='艾尔莎岛' || currentMap=='里谢里雅堡' || currentMap=='法兰城'){
+            if(currentMap=='艾尔莎岛' || currentMap=='里谢里雅堡'){
                 return leo.goto(n => n.castle.nurse)
+                .then(()=>leo.supply(35,88))
+                .then(()=>leo.logBack());
+            }
+            if(currentMap=='法兰城'){
+                return leo.logBack()
+                .then(()=>leo.goto(n => n.castle.nurse))
                 .then(()=>leo.supply(35,88))
                 .then(()=>leo.logBack());
             }
@@ -2402,7 +2411,7 @@ module.exports = require('./wrapper').then( async (cga) => {
                     var attr = -1;
                     if(typeof setting == 'number'){
                         attr = setting;
-                    }else if(setting.attr){
+                    }else if(setting.attr !== undefined){
                         attr = setting.attr;
                     }
                     if(attr>=0 && attr<=4){
@@ -2907,6 +2916,7 @@ module.exports = require('./wrapper').then( async (cga) => {
                 if(leo.monitor.config.autoShenLan){
                     if(leo.monitor.config.autoShenLanListener === null){
                         leo.monitor.config.autoShenLanListener = () => {
+                            console.log(leo.logTime()+'【开启】深蓝监听');
                             leo.loop( async ()=>{
                                 if(!leo.monitor.config.autoShenLan){
                                     return leo.reject();
@@ -2915,11 +2925,23 @@ module.exports = require('./wrapper').then( async (cga) => {
                                     if(!leo.monitor.config.autoShenLan){
                                         return true;
                                     }
-                                    if (chat.unitid == -1 && chat.msg && chat.msg.indexOf('道具的效果已消失') >= 0 ) {
-                                        leo.useItemEx(18526);//开光深蓝18526
+                                    if (chat.unitid == -1 && chat.msg && chat.msg.indexOf('道具的效果消失了') >= 0 ) {
+                                        console.log(leo.logTime()+'【深蓝监听】道具的效果消失了');
+                                        if(leo.has(18526)){
+                                            leo.useItemEx(18526);//开光深蓝18526
+                                            console.log(leo.logTime()+'【深蓝监听】使用了【香水·深蓝九号】');
+                                        }else{
+                                            console.log(leo.logTime()+'【深蓝监听】已没有道具【香水·深蓝九号】');
+                                        }
                                     }
-                                    if (chat.unitid == cga.GetPlayerInfo().unitid && chat.msg && chat.msg.indexOf('道具的效果已消失') >= 0 ) {
-                                        leo.useItemEx(18526);//开光深蓝18526
+                                    if (chat.unitid == cga.GetPlayerInfo().unitid && chat.msg && chat.msg.indexOf('道具的效果消失了') >= 0 ) {
+                                        console.log(leo.logTime()+'【深蓝监听】道具的效果消失了');
+                                        if(leo.has(18526)){
+                                            leo.useItemEx(18526);//开光深蓝18526
+                                            console.log(leo.logTime()+'【深蓝监听】使用了【香水·深蓝九号】');
+                                        }else{
+                                            console.log(leo.logTime()+'【深蓝监听】已没有道具【香水·深蓝九号】');
+                                        }
                                     }
                                 });
                             });
@@ -2927,7 +2949,10 @@ module.exports = require('./wrapper').then( async (cga) => {
                         leo.monitor.config.autoShenLanListener();
                     }
                 }else{
-                    leo.monitor.config.autoShenLanListener = null;
+                    if(leo.monitor.config.autoShenLanListener !== null){
+                        console.log(leo.logTime()+'【关闭】深蓝监听');
+                        leo.monitor.config.autoShenLanListener = null;
+                    }
                 }
             }
 
