@@ -1,9 +1,40 @@
-var cga = require('../cgaapi')(function(){
+require('./common').then(async (cga)=>{
+	var teamLeader = '此处填写队长名称';
+	var teamPlayerCount = 5;
 
+	var doctorName = '医道之殇';
+    var crystalName = '水火的水晶（5：5）';
 	var playerinfo = cga.GetPlayerInfo();
-	
+	var playerName = playerinfo.name;
+	var isTeamLeader = false;
+    if (playerName == teamLeader) {
+        isTeamLeader = true;
+    }
+    var teamplayers = cga.getTeamPlayers();
+    if(isTeamLeader){
+    	if(teamplayers.length!=teamPlayerCount){
+    		await leo.waitAfterBattle()
+    		await leo.logBack()
+    		await leo.checkHealth(doctorName)
+        	await leo.checkCrystal(crystalName)
+        	await leo.goto(n=>n.elsa.x)
+        	await leo.autoWalk([150, 94])
+        	await leo.buildTeamBlock(teamPlayerCount)
+    	}
+    }else{
+    	if(!leo.isInTeam()){
+    		await leo.waitAfterBattle()
+    		await leo.logBack()
+    		await leo.checkHealth(doctorName)
+        	await leo.checkCrystal(crystalName)
+        	await leo.goto(n=>n.elsa.x)
+        	await leo.autoWalk([150, 95])
+        	await leo.enterTeamBlock(teamLeader)
+    	}
+    }
+    //await leo.panel.load('通用任务配置.json');
+
 	var teammates = [];
-	
 	var teamplayers = cga.getTeamPlayers();
 
 	for(var i in teamplayers)

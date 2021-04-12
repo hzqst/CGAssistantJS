@@ -1,7 +1,8 @@
 require('./common').then(async (cga) => {
     //leo.baseInfoPrint();
+    leo.log('红叶の兽王学完美调教脚本，启动~');
     var skillName = '完美调教术';
-    if(!cga.findPlayerSkill(skillName)){
+    if(cga.findPlayerSkill(skillName)){
         console.error('提示：已经学有【'+skillName+'】技能！');
         return;
     }

@@ -1,9 +1,60 @@
-var cga = require('../cgaapi')(function(){
+require('./common').then(async (cga)=>{
+	var teams = [//自行修改角色名称，可以再加更多的队伍
+        ['红叶1号','红叶2号'],
+        ['绫小路清隆','堀北铃音'],
+        ['七月之殇']
+    ];
+	
+	//队伍和面板配置加载
+    var playerinfo = cga.GetPlayerInfo();
+    var playerName = playerinfo.name;
+    var findMyTeam = () => {
+        for(var i in teams){
+            for(var j in teams[i]){
+                if(playerName == teams[i][j]){
+                    return teams[i];
+                }
+            }
+        }
+        return null;
+    }
+    var teammates = findMyTeam();
+    if(teammates == null){
+        await leo.log('未找到队伍，请确认配置是否正确');
+        return;
+    }
+    var teamLeader = teammates[0];
+    var teamPlayerCount = teammates.length;
+	var doctorName = '医道之殇';
+    var crystalName = '水火的水晶（5：5）';
+	var isTeamLeader = false;
+    if (playerName == teamLeader) {
+        isTeamLeader = true;
+    }
+    var teamplayers = cga.getTeamPlayers();
+    if(isTeamLeader){
+    	if(teamplayers.length!=teamPlayerCount){
+    		await leo.waitAfterBattle()
+    		await leo.logBack()
+    		await leo.checkHealth(doctorName)
+        	await leo.checkCrystal(crystalName)
+        	await leo.goto(n=>n.elsa.x)
+        	await leo.autoWalk([150, 94])
+        	await leo.buildTeamBlock(teamPlayerCount,teammates)
+    	}
+    }else{
+    	if(!leo.isInTeam()){
+    		await leo.waitAfterBattle()
+    		await leo.logBack()
+    		await leo.checkHealth(doctorName)
+        	await leo.checkCrystal(crystalName)
+        	await leo.goto(n=>n.elsa.x)
+        	await leo.autoWalk([150, 95])
+        	await leo.enterTeamBlock(teamLeader)
+    	}
+    }
 
-	var playerinfo = cga.GetPlayerInfo();
-	
 	var teammates = [];
-	
 	var teamplayers = cga.getTeamPlayers();
 
 	for(var i in teamplayers)
