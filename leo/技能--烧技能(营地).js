@@ -1,4 +1,4 @@
-require('./common').then(cga => {
+require('./common').then(async (cga) => {
     leo.baseInfoPrint();
     //leo.logStatus = false;
 
@@ -40,14 +40,18 @@ require('./common').then(cga => {
         
     if(!skill){
         leo.log('提示：当前人物没有学习技能【'+skillName+'】，请确认脚本设置！脚本结束');
-        return;
+        return leo.delay(24*60*60*1000);
     }
 
     if(skillLevel <= skill.lv){
         leo.log('提示：技能【'+skillName+'】等级已达到【'+skill.lv+'】，达到或者超过了预设的目标等级【'+skillLevel+'】，脚本结束');
-        return;
+        return leo.delay(24*60*60*1000);
     }else{
         leo.log('要烧的技能是【'+skillName+'】，目前等级【'+skill.lv+'】，预设的目标等级【'+skillLevel+'】');
+    }
+
+    if(skillName == '精灵的盟约'){
+        await leo.panel.load('烧技能-精灵的盟约.json');
     }
 
     cga.EnableFlags(cga.ENABLE_FLAG_TEAMCHAT, false); //关闭队聊
@@ -132,7 +136,7 @@ require('./common').then(cga => {
                             var skillNow = cga.findPlayerSkill(skillName);
                             if(skillLevel <= skillNow.lv){
                                 leo.log('提示：技能【'+skillName+'】等级已达到【'+skillNow.lv+'】，达到了预设的目标等级【'+skillLevel+'】，共耗时【'+time+'】分钟，消耗魔币【'+useGold+'】，脚本结束');
-                                return leo.exit();
+                                return leo.delay(24*60*60*1000);
                             }else{
                                 return leo.log('技能【'+skillName+'】，等级【'+skillNow.lv+'/'+skillLevel+'】，已耗时【'+time+'】分钟，消耗魔币【'+useGold+'】');
                             }
@@ -152,6 +156,7 @@ require('./common').then(cga => {
                             .then(() => leo.delay(2000));
                         });
                     }
+                    return leo.logBack();
                 }
                 //console.log('延时3秒');
                 return leo.delay(3000);

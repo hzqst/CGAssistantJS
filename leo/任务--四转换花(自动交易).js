@@ -1,9 +1,29 @@
-var cga = require('../cgaapi')(function(){
-	var red = ['红组队员1','红组队员2'];
-	var blue = ['蓝组队员1','蓝组队员2','蓝组队员3'];
-	var yellow = ['黄组队员1'];
-	var green = ['绿组队员1'];
+require('./common').then(async (cga) => {
+	var red = ['绿璃之殇','琉璃之殇','奇迹之殇'];
+	var blue = ['绿萝之殇','露希之殇','栉田桔梗','一之濑帆波','龙园翔'];
+	var yellow = ['猎人仓库C'];
+	var green = ['神乎其技の殇'];
 	//console.log('重要提示：每一层白色方舟地图档都要下载，否则自动寻路会失败！')
+
+	var rewalk = true; //重启脚本是否重新走
+
+	if(cga.GetMapName().indexOf('黑色方舟')>-1){
+		await leo.log('已经在黑色方舟，脚本结束')
+		return;
+	}
+
+	if(!leo.has('誓约之花') || rewalk){
+		await leo.logBack()
+	}
+
+	if(cga.GetMapName()=='艾尔莎岛' && leo.has('誓约之花')){
+		await leo.autoWalk([144, 111])
+		await leo.dropItemEx('誓约之花')
+		if(leo.has('誓约之花')){
+			await leo.autoWalk([147, 113])
+			await leo.dropItemEx('誓约之花')
+		}
+	}
 
 	var myname = cga.GetPlayerInfo().name;
 
@@ -28,6 +48,12 @@ var cga = require('../cgaapi')(function(){
 		'绿花' : 622061,
 		'蓝花' : 622062,
 	},
+	{
+		'红花' : 622059,
+		'黄花' : 622060,
+		'绿花' : 622061,
+		'蓝花' : 622062,
+	}
 	]
 	var	waitFlower = (layerIndex, myItem, waitForItem, waitForPos, cb)=>{
 		
@@ -36,7 +62,7 @@ var cga = require('../cgaapi')(function(){
 		
 		cga.TurnTo(waitForPos[0], waitForPos[1]);
 
-		cga.SayWords('CGA四转脚本等待换花，['+myItem+']交换'+'['+waitForItem+']', 0, 3, 1);
+		var isLeft = myItem > waitForItem;
 		
 		var stuffs = 
 		{
@@ -47,24 +73,10 @@ var cga = require('../cgaapi')(function(){
 				return false;
 			}
 		}
-		
-		var flowerOk = false;
-		
+
 		var waitChat = ()=>{
-			if(flowerOk)
-				return;
-			
 			cga.AsyncWaitChatMsg((err, r)=>{
-				if(flowerOk)
-					return;
-				
-				if(err || !r){
-					cga.SayWords('CGA四转脚本等待换花，['+myItem+']交换'+'['+waitForItem+']。', 0, 3, 1);
-					waitChat();
-					return;
-				}
-				
-				if(r.unitid != -1)
+				if(r && r.unitid != -1)
 				{
 					var findpos = r.msg.indexOf(': CGA四转脚本等待换花');
 					if(findpos > 0)
@@ -76,9 +88,11 @@ var cga = require('../cgaapi')(function(){
 							var playerunit = cga.findPlayerUnit(playername);
 							if(playerunit != null && playerunit.xpos == waitForPos[0] && playerunit.ypos ==waitForPos[1])
 							{
-								cga.requestTrade(playername, (result)=>{
-									if (result.success == true){
-										
+								cga.positiveTrade(playername, stuffs, undefined, result => {
+									if (result && result.success == true){
+										cb(true);
+									} else {
+										waitChat();
 									}
 								});
 								return;
@@ -92,24 +106,23 @@ var cga = require('../cgaapi')(function(){
 		}
 		
 		var waitTrade = ()=>{
-			if(flowerOk)
-				return;
-			
 			cga.waitTrade(stuffs, null, (results)=>{
-				if(results.success == true)
+				if(results && results.success == true)
 				{
-					flowerOk = true;
 					cb(true);
 				}
 				else
 				{
+					cga.SayWords('CGA四转脚本等待换花，['+myItem+']交换'+'['+waitForItem+']', 0, 3, 1);
 					waitTrade();
 				}
 			}, 5000);
 		}
 
-		waitChat();
-		waitTrade();
+		if(isLeft)
+			waitChat();
+		else
+			waitTrade();
 	}
 	
 	var mineArray = [
@@ -406,7 +419,7 @@ var cga = require('../cgaapi')(function(){
 			cga.walkList([
 			[99, 83],
 			], ()=>{
-				waitFlower(3, '花', '花', [101, 83], ()=>{
+				waitFlower(3, '绿花', '黄花', [101, 83], ()=>{
 					cga.SayWords('已换完花，请自行完成剩余部分！', 0, 3, 1);
 					cb(true);				
 				});
@@ -508,7 +521,7 @@ var cga = require('../cgaapi')(function(){
 			cga.walkList([
 			[101, 83],
 			], ()=>{
-				waitFlower(3, '花', '花', [99, 83], ()=>{
+				waitFlower(3, '黄花', '绿花', [99, 83], ()=>{
 					cga.SayWords('已换完花，请自行完成剩余部分！', 0, 3, 1);
 					cb(true);				
 				});
@@ -680,13 +693,16 @@ var cga = require('../cgaapi')(function(){
 	}else if(is_array_contain(green,myname)){
 		cga.SayWords('我是绿组', 0, 3, 1);
 		mineObject = mineArray[3];
+	}else{
+		cga.SayWords('名字不在配置中，请检查', 0, 3, 1);
+		return;
 	}
 
 	if(mineObject != null){
+		await leo.panel.escape();
 		task.doTask(()=>{
 			
 		});
-	}else{
-		cga.SayWords('名字不在配置中，请检查', 0, 3, 1);
 	}
+	
 });
