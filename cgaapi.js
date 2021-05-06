@@ -4293,7 +4293,7 @@ module.exports = function(callback){
 				if(tradeFinished)
 					return false;
 				
-				console.log('waitSysMsg='+msg);
+				console.log('等待交易消息：'+msg);
 												
 				if(msg.indexOf('交易完成') >= 0){
 					tradeFinished = true;
@@ -4351,7 +4351,7 @@ module.exports = function(callback){
 						return;
 					}
 					
-					console.log('AsyncWaitTradeStuffs='+type);
+					console.log('等待交易物品：'+type);
 															
 					getInTradeStuffs = true;
 						
@@ -4391,7 +4391,7 @@ module.exports = function(callback){
 						return;
 					}
 					
-					console.log('AsyncWaitTradeState='+state);
+					console.log('等待交易状态变更：'+state);
 					
 					if(!err){
 						if (state == cga.TRADE_STATE_READY || state == cga.TRADE_STATE_CONFIRM) {
@@ -4435,9 +4435,7 @@ module.exports = function(callback){
 			if(tradeFinished)
 				return;
 			
-			console.log('AsyncWaitTradeDialog='+partyLevel);
-			//console.log(partyName);
-			//console.log(partyLevel);
+			console.log('等待交易对话框：'+partyLevel);
 			
 			savePartyName = partyName;
 			
@@ -4529,7 +4527,7 @@ module.exports = function(callback){
 	cga.positiveTrade = (name, stuff, checkParty, resolve, timeout) => {
 		cga.AsyncWaitPlayerMenu((err, players) => {
 			if(err){
-				console.log('player not found')
+				console.log('等待交易超时')
 				resolve({success: false, reason : 'player menu timeout'});
 				return;
 			}
@@ -4540,7 +4538,7 @@ module.exports = function(callback){
 				cga.tradeInternal(stuff, checkParty, resolve, name, timeout);
 				cga.PlayerMenuSelect(player.index);
 			} else {
-				console.log('player not found')
+				console.log('未找到目标交易对象')
 				resolve({success: false, reason : 'player not found'});
 			}
 		}, 3000);
@@ -4552,7 +4550,7 @@ module.exports = function(callback){
 	cga.requestTrade = (name, resolve, timeout) => {
 		cga.AsyncWaitPlayerMenu((err, players) => {
 			if(err){
-				console.log('player not found')
+				console.log('等待交易超时')
 				resolve({success: false, reason : 'player menu timeout'});
 				return;
 			}
@@ -4563,7 +4561,7 @@ module.exports = function(callback){
 				resolve({success: true});
 				cga.PlayerMenuSelect(player.index);
 			} else {
-				console.log('player not found')
+				console.log('未找到目标交易对象')
 				resolve({success: false, reason : 'player not found'});
 			}
 		}, 3000);
@@ -4634,7 +4632,7 @@ module.exports = function(callback){
 				cga.tradeInternal(stuff, checkParty, resolve, name, timeout);
 				cga.PlayerMenuSelect(player.index);
 			} else {
-				console.log('player not found, do nothing');
+				console.log('未找到目标交易对象');
 			}
 		}, 3000);
 				
