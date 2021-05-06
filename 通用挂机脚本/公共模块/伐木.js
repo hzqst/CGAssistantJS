@@ -228,6 +228,38 @@ var mineArray = [
 			});
 		}
 	},
+	{
+		level : 7,
+		name : '月光草',
+		display_name : '月光草阿凯鲁法',
+		func : (cb)=>{
+			if(cga.GetMapName() != '阿凯鲁法村')
+				throw new Error('必须从阿凯鲁法村启动');
+
+			cga.walkList([
+				[168, 108],
+			], ()=>{
+				cga.turnTo(167, 107);
+				cga.AsyncWaitNPCDialog((err, dlg)=>{
+					if(typeof dlg.message == 'string' && (dlg.message.indexOf('对不起') >= 0 || dlg.message.indexOf('很抱歉') >= 0)){
+						cb(new Error('无法使用前往坎那贝拉村的传送石，可能的原因：没开传送点'));
+						return;
+					}
+					cga.ClickNPCDialog(4, -1);
+					cga.AsyncWaitMovement({map:'坎那贝拉村', delay:1000, timeout:5000}, (err)=>{
+						if(err){
+							cb(new Error('无法使用前往坎那贝拉村的传送石，可能的原因：钱不够'));
+							return;
+						}
+						cga.walkList([
+							[13, 47, '米内葛尔岛'],
+							[488, 477],
+						], cb);
+					});
+				});
+			});
+		}
+	},
 ];
 
 var cga = global.cga;

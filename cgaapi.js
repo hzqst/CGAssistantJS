@@ -1593,14 +1593,21 @@ module.exports = function(callback){
 			
 			cga.walkList(list, ()=>{
 				var go = ()=>{
-					cga.TurnTo(npcPos3[0], npcPos3[1]);
+					cga.turnTo(npcPos3[0], npcPos3[1]);
 					cga.AsyncWaitNPCDialog((err, dlg)=>{
 						if(typeof dlg.message == 'string' && (dlg.message.indexOf('对不起') >= 0 || dlg.message.indexOf('很抱歉') >= 0)){
-							cb(new Error('无法使用前往'+villageName+'的传送石'));
+							cb(new Error('无法使用前往'+villageName+'的传送石，可能的原因：没开传送点'));
 							return;
 						}
 						cga.ClickNPCDialog(4, -1);
-						cga.AsyncWaitMovement({map:villageName+'的传送点', delay:1000, timeout:5000}, cb);
+						cga.AsyncWaitMovement({map:villageName+'的传送点', delay:1000, timeout:5000}, (err)=>{
+							if(err){
+								cb(new Error('无法使用前往'+villageName+'的传送石，可能的原因：钱不够'));
+								return;
+							}
+
+							cb(null);
+						});
 					});
 				}
 				if(isTeamLeader){
