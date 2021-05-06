@@ -9,7 +9,7 @@ var doneArray = [
 			cga.AsyncWaitNPCDialog(()=>{
 				cga.ClickNPCDialog(0, 0);
 				cga.AsyncWaitNPCDialog(()=>{
-					var exchangeCount = cga.getItemCount(mineObject.name) / 20;
+					var exchangeCount = parseInt( cga.getItemCount(mineObject.name) / 20 );
 					cga.BuyNPCStore([{index:0, count:exchangeCount}]);
 					cga.AsyncWaitNPCDialog(()=>{
 						cga.travel.falan.toBank(()=>{

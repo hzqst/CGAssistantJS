@@ -96,7 +96,7 @@ var thisobj = {
 
 								store.items.forEach((it)=>{
 									if(it.name == '胡椒' && emptySlotCount > 0){
-										buyitem.push({index: it.index, count:emptySlotCount * 40});
+										buyitem.push({index: it.index, count: parseInt(emptySlotCount * 40) });
 									}
 								});
 

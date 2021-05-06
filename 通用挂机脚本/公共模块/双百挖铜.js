@@ -42,7 +42,7 @@ var thisobj = {
 					cga.AsyncWaitNPCDialog(()=>{
 						cga.ClickNPCDialog(0, 0);
 						cga.AsyncWaitNPCDialog(()=>{
-							var exchangeCount = cga.getItemCount('铜') / 20;
+							var exchangeCount = parseInt(cga.getItemCount('铜') / 20);
 							cga.BuyNPCStore([{index:0, count:exchangeCount}]);
 							cga.AsyncWaitNPCDialog(()=>{
 								cb2(null);
