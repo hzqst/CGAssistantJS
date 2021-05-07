@@ -1,6 +1,6 @@
 require('./common').then(cga=>{
 	//leo.baseInfoPrint();
-	var teamLeader = '队长名称'; //队长名称
+	var teamLeader = '半夏琉璃叶撕阳°'; //队长名称
     var teamPlayerCount = 5; //队伍人数
 
     var autoBoss = false; //自动打BOSS
@@ -93,13 +93,13 @@ require('./common').then(cga=>{
 		.then(()=>{
 			if (isTeamLeader) {
 				return leo.autoWalk([200,18])
-				.then(()=>leo.buildTeamBlock(teamPlayerCount))
+				.then(()=>leo.buildTeamBlock(teamPlayerCount,teammates))
 				.then(()=>leo.autoWalk([315,221,[325,197]]))
 				.then(()=>leo.leaveTeam())
 				.then(()=>leo.autoWalk([325,184]))
 				.then(()=>leo.autoWalk([325,182,'？？？']))
 				.then(()=>leo.autoWalk([130,77]))
-				.then(()=>leo.buildTeamBlock(teamPlayerCount))
+				.then(()=>leo.buildTeamBlock(teamPlayerCount,teammates))
 				.then(()=>leo.autoWalk([140,77,'秘密回廊1层']))
 				.then(()=>leo.walkRandomMazeUntil(() => {
                         const mn = cga.GetMapName();
@@ -121,7 +121,7 @@ require('./common').then(cga=>{
 					return false;
 				}))
 				.then(()=>leo.autoWalk([318,228]))
-				.then(()=>leo.buildTeamBlock(teamPlayerCount))
+				.then(()=>leo.buildTeamBlock(teamPlayerCount,teammates))
 				.then(()=>leo.autoWalk([318,210]))
 				.then(()=>{
 					if(autoBoss){
@@ -151,7 +151,7 @@ require('./common').then(cga=>{
 					return false;
 				}))
 				.then(()=>leo.autoWalk([337,188]))
-				.then(()=>leo.buildTeamBlock(teamPlayerCount))
+				.then(()=>leo.buildTeamBlock(teamPlayerCount,teammates))
 				.then(()=>leo.autoWalk([325,198,[315, 222]]))
 				.then(()=>leo.autoWalk([201,19,'辛梅尔']))
 				.then(()=>leo.autoWalk([181,81,'公寓']))
@@ -168,7 +168,7 @@ require('./common').then(cga=>{
 				.then(()=>leo.autoWalk([240,98]))
 				.then(()=>leo.talkNpc(0,leo.talkNpcSelectorYes))
 				.then(()=>leo.autoWalk([280,141]))
-				.then(()=>leo.buildTeamBlock(teamPlayerCount))
+				.then(()=>leo.buildTeamBlock(teamPlayerCount,teammates))
 				.then(()=>leo.autoWalk([279,136]))
 				.then(()=>{
 					if(autoBoss){
@@ -187,7 +187,7 @@ require('./common').then(cga=>{
 					}
 					return false;
 				}))
-				.then(()=>leo.waitAfterBattle());
+				.then(()=>leo.waitAfterBattle())
 				.then(()=>leo.leaveTeam())
 				.then(()=>leo.talkNpc(6,leo.talkNpcSelectorYes))
 				.then(()=>leo.autoWalk([122,180]))

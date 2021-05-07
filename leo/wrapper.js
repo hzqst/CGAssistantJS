@@ -1,4 +1,4 @@
-/**
+/** version 1.1
  * health 0 1-25(白) 26-50(黄) 51-75(粉) 76-100(红)
  * direction 0(右上)
  * 高速移动中不可丢东西
@@ -303,7 +303,7 @@ module.exports = new Promise(resolve => {
 		(r, t) => r.then(() => cga.emogua.walkTo(t)),
 		Promise.resolve()
 	);
-	const excludedMaps = [27001,61001,43600,43000,15592,15593,15594,15595,15596,11032,11034,11035,11036,11037,15000,15001,15002,15003,15004,15005,15006,14000,14001,14002,14014,4400,5008,11000,11001,11002,11003,11004,11005,59501,2400];
+	const excludedMaps = [27001,61001,43600,43000,15592,15593,15594,15595,15596,11032,11034,11035,11036,11037,15000,15001,15002,15003,15004,15005,15006,14000,14001,14002,14014,4400,5008,11000,11001,11002,11003,11004,11005,59501,2400,14010,14013,14015];
 	cga.emogua.isMapDownloaded = (walls = cga.buildMapCollisionMatrix(), mapIndex = cga.GetMapIndex()) => {
 		if (mapIndex.index1 === 0 && excludedMaps.indexOf(mapIndex.index3) > -1) return true;
 		const downloadedFlag = mapIndex.index1 === 1 ? 0 : 1;
@@ -489,6 +489,7 @@ module.exports = new Promise(resolve => {
 	};
 	cga.emogua.walkRandomMazeUntil = async (check, entryFilter) => {
 		let times = 0;
+		//console.log(entryFilter)
 		while (times <= 101 && !check()) {
 			times++;
 			await cga.emogua.walkRandomMaze(entryFilter);
@@ -1163,12 +1164,13 @@ module.exports = new Promise(resolve => {
 			const mapName = cga.GetMapName();
 			const protectRecursion = () => cga.emogua.delay(2000).then(
 				() => cga.emogua.waitAfterBattle()
-			).then(() => {
+			).then(async () => {
 				if (stopEncounter) {
 					return Promise.reject();
 				}
+				const isStop = cga.emogua.checkStopEncounter(protect, false, true);
 				if (
-					cga.emogua.checkStopEncounter(protect, false, true) ||
+					isStop ||
 					mapName != cga.GetMapName()
 				) {
 					stopEncounter = true;
