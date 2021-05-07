@@ -1,4 +1,4 @@
-module.exports = require('./wrapper').then( async (cga) => {
+fmodule.exports = require('./wrapper').then( async (cga) => {
     global.leo = cga.emogua;
     leo.version = '7.0';
     leo.qq = '158583461'
@@ -1697,11 +1697,65 @@ module.exports = require('./wrapper').then( async (cga) => {
         findByNextPoints(start);
         return foundedPoints;
     }
+	leo.getEntry = (entries,up = true) => {
+        /**
+         * icon
+         *   大 down, 小 up (不全是)
+         *   12002 down 12000 up (狗洞)
+         *   17967 down 17966 up (海底墓场-保证书)
+         *   13273 down 13272 up (虫洞)
+         *   17981 down 17980 up (黑色方舟)
+         *   17975 down 17974 up (黑色的祈祷)
+         *   0 迷宫出入口
+         * return [最远，最近]
+         */
+        // entries:
+        //  [
+        //   {
+        //     x: 24,
+        //     y: 17,
+        //     mapx: 24,
+        //     mapy: 17,
+        //     cell: 3,
+        //     rawcell: -16381,
+        //     icon: 17966
+        //   },
+        //   {
+        //     x: 10,
+        //     y: 19,
+        //     mapx: 10,
+        //     mapy: 19,
+        //     cell: 3,
+        //     rawcell: -16381,
+        //     icon: 17967
+        //   }
+        // ]
+        if(entries.length==0){
+        throw 'leo.getEntry:Fail to walk random maze ' + entries;
+        }
+        if(entries.length==1){
+        return entries[0];
+        }
+        let entry0 = entries.find(entry=>entry.icon==0);//有迷宫出入口，无法正确地判断，只能选取离入口最远的
+        if(entry0){
+        return entries[0];
+        }
+        let ups = [12000,17966,13272,17980,17974];
+        let upFlag = entries.find(entry=>ups.includes(entry.icon));
+        if(upFlag){
+        up = !up;//特殊迷宫地图，上下楼梯置反
+        }
+        let entrySort = entries.sort((a,b) => {
+            return b.icon - a.icon;
+        })
+        return up? entrySort[0] : entrySort[1];
+    } 
+
     //迷宫搜索
     leo.searchInMaze = (targetFinder, recursion = true, up = true, parameters = {}) => leo.downloadMap().then(async walls => {
         //console.log('up:'+up);
         const entries = await leo.getMazeEntries();
-        var entry = entries&&entries.length>0?entries[0]:null;
+        var entry = leo.getEntry(entries,up);
         //console.log(entry);
         const getTarget = () => {
             const target = targetFinder(cga.GetMapUnits());
