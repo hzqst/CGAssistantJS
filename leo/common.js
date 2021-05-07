@@ -1,6 +1,6 @@
 module.exports = require('./wrapper').then( async (cga) => {
     global.leo = cga.emogua;
-    leo.version = '6.2';
+    leo.version = '7.0';
     leo.qq = '158583461'
     leo.copyright = '红叶散落';
     leo.FORMAT_DATE = 'yyyy-MM-dd';
@@ -971,9 +971,17 @@ module.exports = require('./wrapper').then( async (cga) => {
         }
         return isDrop;
     }
-    //返回用于算档的宠物数据(五维：血魔攻防敏)
+    //返回用于显示的宠物数据(五维：血魔攻防敏)
     leo.getPetCalcInfo = (pet, split = 'x') => {
-        return '【LV' + pet.level + '】【' + pet.realname + '】【 ' + pet.maxhp + split + pet.maxmp + split + pet.detail.value_attack + split + pet.detail.value_defensive + split + pet.detail.value_agility + ' 】';
+        return '【LV' + pet.level + '】【' + pet.realname + '】【 ' + pet.maxhp + split + pet.maxmp + split + pet.detail.value_attack + split + pet.detail.value_defensive + split + pet.detail.value_agility + ' 】，BP【 ' + pet.detail.points_endurance + split + pet.detail.points_strength + split + pet.detail.points_defense + split + pet.detail.points_agility + split + pet.detail.points_magical + split + pet.detail.value_recovery + split + pet.detail.value_spirit + ' 】';
+    }
+    //返回用于算档的宠物数据(五维：血魔攻防敏)
+    leo.getPetCalcAttribute = (pet, split = 'x') => {
+        return pet.maxhp + split + pet.maxmp + split + pet.detail.value_attack + split + pet.detail.value_defensive + split + pet.detail.value_agility;
+    }
+    //返回用于算档的宠物数据(BP：血攻防敏魔回复精神)
+    leo.getPetCalcBp = (pet, split = 'x') => {
+        return pet.points_endurance + split + pet.points_strength + split + pet.detail.points_defense + split + pet.detail.points_agility + split + pet.detail.points_magical + split + pet.value_recovery + split + pet.value_spirit;
     }
     //打印遇敌的1级宠信息，用于自动战斗抓宠过滤
     leo.isCatchPet = (enemies, petOptions,isNameOnly = false) => {
@@ -1015,8 +1023,495 @@ module.exports = require('./wrapper').then( async (cga) => {
         });
     }
 
+    leo.getDir = (x,y,fromX,fromY) => {
+        const xy = Math.max(-1, Math.min(1, x - fromX)).toString() + Math.max(-1, Math.min(1, y - fromY)).toString();
+        switch (xy) {
+            case '10':
+                return 0;
+            case '11':
+                return 1;
+            case '01':
+                return 2;
+            case '-11':
+                return 3;
+            case '-10':
+                return 4;
+            case '-1-1':
+                return 5;
+            case '0-1':
+                return 6;
+            case '1-1':
+                return 7;
+            default:
+        }
+        return -1;
+    }
+    //获取遇敌的可移动坐标列表
+    leo.getContactMovePos = (mapInfo,contactType = 0) => {
+        //contactType遇敌类型：0-按地图自适应，1-东西移动，2-南北移动，3-随机移动，
+        //4-画小圈圈，5-画中圈圈，6-画大圈圈，7-画十字，8-画8字
+        let result = [];
+        const target = {x:mapInfo.x,y:mapInfo.y};
+        const walls = cga.buildMapCollisionMatrix();
+        const entries = cga.getMapObjects().filter(e => e.cell === 3 || e.cell === 10);
+        const isPositionMovable = (x, y) => {
+            return walls.matrix[y][x] == 0 && entries.findIndex(e => e.mapx == x && e.mapy == y) < 0;
+        };
+        var index = 0;
+        result.push({
+            index: index++,
+            orientation: -1,
+            x: target.x,
+            y: target.y
+        });
+        if(contactType==1){
+            if (isPositionMovable(target.x + 1, target.y)) {
+                result.push({
+                    index: index++,
+                    orientation: 0,
+                    x: target.x + 1,
+                    y: target.y
+                });
+            }else if (isPositionMovable(target.x - 1, target.y)) {
+                result.push({
+                    index: index++,
+                    orientation: 4,
+                    x: target.x - 1,
+                    y: target.y
+                });
+            }
+        }else if(contactType==2){
+            if (isPositionMovable(target.x, target.y + 1)) {
+                result.push({
+                    index: index++,
+                    orientation: 2,
+                    x: target.x,
+                    y: target.y + 1
+                });
+            }else if (isPositionMovable(target.x, target.y - 1)) {
+                result.push({
+                    index: index++,
+                    orientation: 6,
+                    x: target.x,
+                    y: target.y - 1
+                });
+            }
+        }else if(contactType==3){
+            if (isPositionMovable(target.x + 1, target.y)) {
+                result.push({
+                    index: index++,
+                    orientation: 0,
+                    x: target.x + 1,
+                    y: target.y
+                });
+            }
+            if (isPositionMovable(target.x + 1, target.y + 1)) {
+                result.push({
+                    index: index++,
+                    orientation: 1,
+                    x: target.x + 1,
+                    y: target.y + 1
+                });
+            }
+            if (isPositionMovable(target.x, target.y + 1)) {
+                result.push({
+                    index: index++,
+                    orientation: 2,
+                    x: target.x,
+                    y: target.y + 1
+                });
+            }
+            if (isPositionMovable(target.x - 1, target.y + 1)) {
+                result.push({
+                    index: index++,
+                    orientation: 3,
+                    x: target.x - 1,
+                    y: target.y + 1
+                });
+            }
+            if (isPositionMovable(target.x - 1, target.y)) {
+                result.push({
+                    index: index++,
+                    orientation: 4,
+                    x: target.x - 1,
+                    y: target.y
+                });
+            }
+            if (isPositionMovable(target.x - 1, target.y - 1)) {
+                result.push({
+                    index: index++,
+                    orientation: 5,
+                    x: target.x - 1,
+                    y: target.y - 1
+                });
+            }
+            if (isPositionMovable(target.x, target.y - 1)) {
+                result.push({
+                    index: index++,
+                    orientation: 6,
+                    x: target.x,
+                    y: target.y - 1
+                });
+            }
+            if (isPositionMovable(target.x + 1, target.y - 1)) {
+                result.push({
+                    index: index++,
+                    orientation: 7,
+                    x: target.x + 1,
+                    y: target.y - 1
+                });
+            }
+        }else if(contactType==4){ //小圈圈
+            if (isPositionMovable(target.x + 1, target.y)) {
+                result.push({
+                    index: index++,
+                    orientation: 0,
+                    x: target.x + 1,
+                    y: target.y
+                });
+            }
+            if (isPositionMovable(target.x + 1, target.y + 1)) {
+                result.push({
+                    index: index++,
+                    orientation: 1,
+                    x: target.x + 1,
+                    y: target.y + 1
+                });
+            }
+            if (isPositionMovable(target.x, target.y + 1)) {
+                result.push({
+                    index: index++,
+                    orientation: 2,
+                    x: target.x,
+                    y: target.y + 1
+                });
+            }
+        }else if(contactType==5){ //中圈圈
+            result = [];
+            if (isPositionMovable(target.x + 1, target.y)) {
+                result.push({
+                    index: index++,
+                    orientation: 0,
+                    x: target.x + 1,
+                    y: target.y
+                });
+            }
+            if (isPositionMovable(target.x, target.y + 1)) {
+                result.push({
+                    index: index++,
+                    orientation: 2,
+                    x: target.x,
+                    y: target.y + 1
+                });
+            }
+            if (isPositionMovable(target.x - 1, target.y)) {
+                result.push({
+                    index: index++,
+                    orientation: 4,
+                    x: target.x - 1,
+                    y: target.y
+                });
+            }
+            if (isPositionMovable(target.x, target.y - 1)) {
+                result.push({
+                    index: index++,
+                    orientation: 6,
+                    x: target.x,
+                    y: target.y - 1
+                });
+            }
+        }else if(contactType==6){ //大圈圈
+            result = [];
+            if (isPositionMovable(target.x + 1, target.y)) {
+                result.push({
+                    index: index++,
+                    orientation: 0,
+                    x: target.x + 1,
+                    y: target.y
+                });
+            }
+            if (isPositionMovable(target.x + 1, target.y + 1)) {
+                result.push({
+                    index: index++,
+                    orientation: 1,
+                    x: target.x + 1,
+                    y: target.y + 1
+                });
+            }
+            if (isPositionMovable(target.x, target.y + 1)) {
+                result.push({
+                    index: index++,
+                    orientation: 2,
+                    x: target.x,
+                    y: target.y + 1
+                });
+            }
+            if (isPositionMovable(target.x - 1, target.y + 1)) {
+                result.push({
+                    index: index++,
+                    orientation: 3,
+                    x: target.x - 1,
+                    y: target.y + 1
+                });
+            }
+            if (isPositionMovable(target.x - 1, target.y)) {
+                result.push({
+                    index: index++,
+                    orientation: 4,
+                    x: target.x - 1,
+                    y: target.y
+                });
+            }
+            if (isPositionMovable(target.x - 1, target.y - 1)) {
+                result.push({
+                    index: index++,
+                    orientation: 5,
+                    x: target.x - 1,
+                    y: target.y - 1
+                });
+            }
+            if (isPositionMovable(target.x, target.y - 1)) {
+                result.push({
+                    index: index++,
+                    orientation: 6,
+                    x: target.x,
+                    y: target.y - 1
+                });
+            }
+            if (isPositionMovable(target.x + 1, target.y - 1)) {
+                result.push({
+                    index: index++,
+                    orientation: 7,
+                    x: target.x + 1,
+                    y: target.y - 1
+                });
+            }
+        }else if(contactType==7){ //十字
+            if (isPositionMovable(target.x + 1, target.y)) {
+                result.push({
+                    index: index++,
+                    orientation: 0,
+                    x: target.x + 1,
+                    y: target.y
+                });
+            }
+            if (isPositionMovable(target.x, target.y - 1)) {
+                result.push({
+                    index: index++,
+                    orientation: 6,
+                    x: target.x,
+                    y: target.y - 1
+                });
+            }
+            result.push({
+                index: index++,
+                orientation: -1,
+                x: target.x,
+                y: target.y
+            });
+            if (isPositionMovable(target.x, target.y + 1)) {
+                result.push({
+                    index: index++,
+                    orientation: 2,
+                    x: target.x,
+                    y: target.y + 1
+                });
+            }
+            if (isPositionMovable(target.x - 1, target.y)) {
+                result.push({
+                    index: index++,
+                    orientation: 4,
+                    x: target.x - 1,
+                    y: target.y
+                });
+            }
+        }else if(contactType==8){ //画8字
+            if (isPositionMovable(target.x + 1, target.y + 1)) {
+                result.push({
+                    index: index++,
+                    orientation: 1,
+                    x: target.x + 1,
+                    y: target.y + 1
+                });
+            }
+            if (isPositionMovable(target.x + 1, target.y)) {
+                result.push({
+                    index: index++,
+                    orientation: 0,
+                    x: target.x + 1,
+                    y: target.y
+                });
+            }
+            if (isPositionMovable(target.x + 1, target.y - 1)) {
+                result.push({
+                    index: index++,
+                    orientation: 7,
+                    x: target.x + 1,
+                    y: target.y - 1
+                });
+            }
+            result.push({
+                index: index++,
+                orientation: -1,
+                x: target.x,
+                y: target.y
+            });
+            if (isPositionMovable(target.x - 1, target.y + 1)) {
+                result.push({
+                    index: index++,
+                    orientation: 3,
+                    x: target.x - 1,
+                    y: target.y + 1
+                });
+            }
+            if (isPositionMovable(target.x - 1, target.y)) {
+                result.push({
+                    index: index++,
+                    orientation: 4,
+                    x: target.x - 1,
+                    y: target.y
+                });
+            }
+            if (isPositionMovable(target.x - 1, target.y - 1)) {
+                result.push({
+                    index: index++,
+                    orientation: 5,
+                    x: target.x - 1,
+                    y: target.y - 1
+                });
+            }
+        }else{
+            var pos = leo.getMovablePositionAround(target);
+            pos.index = index++;
+            result.push(pos);
+        }
+        return result;
+    }
+    //停止遇敌检测
+    leo.contactCheck = async (protect, talk = false, checkTeam = false) => {
+        if (!cga.isInNormalState()) {
+            return false;
+        }
+        const playerInfo = cga.GetPlayerInfo();
+        const pets = cga.GetPetsInfo();
+        const minHp = (protect && protect.minHp) ? protect.minHp : 100;
+        const minMp = (protect && protect.minMp) ? protect.minMp : 60;
+        const minPetHp = (protect && protect.minPetHp) ? protect.minPetHp : 100;
+        const minPetMp = (protect && protect.minPetMp) ? protect.minPetMp : 0;
+        const maxPetNumber = (protect && protect.maxPetNumber) ? protect.maxPetNumber : 5;
+        const maxItemNumber = (protect && protect.maxItemNumber) ? protect.maxItemNumber : 20;
+        const checker = await (protect && typeof protect.checker == 'function') ? protect.checker : null;
+        const minTeamNumber = (protect && protect.minTeamNumber) ? protect.minTeamNumber : 1;
+        if (
+            playerInfo.hp < minHp || playerInfo.mp < minMp || cga.getInventoryItems().length > maxItemNumber ||
+            pets.length > maxPetNumber || pets.filter(e => e.battle_flags == 2).find(p => p.hp < minPetHp || p.mp < minPetMp) ||
+            (
+                checkTeam &&
+                (leo.getTeamNumber() < minTeamNumber)
+            ) ||
+            (checker && await checker())
+        ) {
+            if (talk) {
+                await leo.say('触发战斗保护');
+            }
+            return true;
+        }
+        return false;
+    }
+    leo.contactStatus = false;
+    //队长遇敌程序
+    leo.contactTeamLeader = async (protect) => {
+        if (leo.contactStatus){
+            return leo.reject('遇敌程序错误：重复启动遇敌程序');
+        }
+        await leo.downloadMap();
+        var currentMapInfo = cga.getMapInfo();
+        //contactType遇敌类型：0-按地图自适应，1-东西移动，2-南北移动，3-随机移动，
+        //4-画小圈圈，5-画中圈圈，6-画大圈圈，7-画十字，8-画8字
+        var contactType = protect.contactType || 0;
+        var contactMovePos = leo.getContactMovePos(currentMapInfo,contactType);
+        //console.log(contactMovePos)
+        if(contactMovePos && contactMovePos.length<2){
+            return leo.reject('遇敌程序错误：附近没有可移动的坐标点');
+        }
+        leo.contactStatus = true; //标记遇敌程序开始
+        let curPos = {
+            index: 0,
+            orientation: -1,
+            x: cga.GetMapXY().x,
+            y: cga.GetMapXY().y
+        };
+        leo.waitMessageUntil((chat) => {
+            if (chat.msg && chat.msg.indexOf('触发战斗保护') >= 0) {
+                if (leo.getTeammates().find(t => t.unit_id == chat.unitid)) {
+                    leo.contactStatus = false; //标记遇敌程序停止
+                    return true;
+                }
+            }
+        });
+        await leo.loop(async () => {
+            await leo.waitAfterBattle()
+            if(!leo.contactStatus){
+                return leo.reject();
+            }
+            const isStop = await leo.contactCheck(protect, false, true);
+            if(isStop || currentMapInfo.name != cga.GetMapName()){
+                leo.contactStatus = false; //标记遇敌程序停止
+                return leo.reject();
+            }
+            if (cga.isInNormalState()) {
+                try{
+                    let movePos;
+                    if(contactType<3){
+                        let movePosArr = contactMovePos.filter((v)=>v.index!=curPos.index);
+                        if(movePosArr.length==1){
+                            movePos = movePosArr[0];
+                        }else{
+                            //随机获取移动坐标
+                            let i = Math.floor(Math.random()*movePosArr.length);
+                            movePos = movePosArr[i];
+                        }
+                    }
+                    if(contactType==3){
+                        let movePosArr = contactMovePos.filter((v)=>v.index!=curPos.index
+                            && cga.isDistanceClose(curPos.x, curPos.y, v.x, v.y)
+                            );
+                        if(movePosArr.length==1){
+                            movePos = movePosArr[0];
+                        }else{
+                            //随机获取移动坐标
+                            let i = Math.floor(Math.random()*movePosArr.length);
+                            movePos = movePosArr[i];
+                        }
+                    }
+                    if(contactType>=4 && contactType<=8){
+                        //按顺序执行 -> 转圈圈/十字/8字
+                        let movePosArr = contactMovePos.filter((v)=>v.index>curPos.index);
+                        if(movePosArr && movePosArr.length>0){
+                            movePos = movePosArr[0];
+                        }else{
+                            movePos = contactMovePos[0];
+                        }
+                    }
+                    //console.log('moveto',movePos.index)
+                    let dir = leo.getDir(movePos.x,movePos.y,curPos.x,curPos.y);
+                    let visible = protect.visible || false;
+                    cga.ForceMove(dir, visible);
+                    //cga.ForceMoveTo(movePos.x, movePos.y, visible);
+                    curPos = movePos;
+                    await leo.delay(leo.moveTimeout)
+                    return leo.next();
+                } catch(e) {
+                    console.log(leo.logTime()+'遇敌程序错误：移动失败', e);
+                }
+            }
+            await leo.delay(1000)
+        })
+    }
+
     //随机遇敌(队长用)
-    leo.encounterTeamLeader = leo.encounter;
+    //leo.encounterTeamLeader = leo.contactTeamLeader;
+	leo.encounterTeamLeader = leo.encounter;
     //随机遇敌(队员用)
     leo.encounterTeammate = (protect, endLoopCheck) => {
         if (leo.checkStopEncounter(protect, true)) {
@@ -1093,7 +1588,7 @@ module.exports = require('./wrapper').then( async (cga) => {
         });
         return items;
     }
-    leo.useItems = (itemName,times = 1) => {
+    leo.useItems = async (itemName,times = 1) => {
         var items = leo.getItems(itemName);
         if(items && items.length >0 ){
             for(var i in items){
@@ -1102,9 +1597,9 @@ module.exports = require('./wrapper').then( async (cga) => {
                 }
             }
         }
-        return leo.delay(1000);
+        await leo.delay(1000);
     }
-    leo.dropItem = (itemName,minCount) => {
+    leo.dropItem = async (itemName,minCount) => {
         var items = leo.getItems(itemName);
         if(items && items.length >0 ){
             for(var i in items){
@@ -1117,7 +1612,7 @@ module.exports = require('./wrapper').then( async (cga) => {
                 }
             }
         }
-        return leo.delay(1000);
+        await leo.delay(1000);
     }
 
     leo.getItemEx = (item) => {
@@ -1146,19 +1641,19 @@ module.exports = require('./wrapper').then( async (cga) => {
             return cga.getInventoryItems().filter(item);
         }
     }
-    leo.useItemEx = (item) => {
+    leo.useItemEx = async (item) => {
         var realItem = leo.getItemEx(item);
         if(realItem){
             cga.UseItem(realItem.pos);
-            return leo.delay(1000);
+            await leo.delay(1000);
         }
     }
-    leo.dropItemEx = (item) => {
+    leo.dropItemEx = async (item) => {
         var realItem = leo.getItemEx(item);
         if(realItem){
             if (cga.isInNormalState() && !leo.isMoving()) {
                 cga.DropItem(realItem.pos);
-                return leo.delay(1000);
+                await leo.delay(1000);
             }
         }
     }
@@ -2752,6 +3247,30 @@ module.exports = require('./wrapper').then( async (cga) => {
         }
     }
 
+    //发送网络请求
+    const request = require('request');
+    leo.sendPost = (url,param) => new Promise((resolve, reject) => { 
+        request.post({url:url,form: param}, function (error, response, body) {
+            if (!error && response.statusCode == 200) {
+                resolve(body);
+            }else{
+                resolve('{"status":"N","message":"statusCode='+response.statusCode+'"}');
+            }
+        });
+    });
+
+    leo.logServer = async (type,message) => {
+        //未实现
+    }
+
+    //宠物自动算档服务
+    try{
+        leo.calcGrade = require('./grade'); 
+    }catch(e){
+        leo.calcGrade = () => {
+            return {status:false,error:'未实现'}
+        };
+    }
 
     ///////////////////////脚本默认执行内容///////////////////////////////
     //leo.keepAlive(true); //启用防掉线功能
@@ -2788,11 +3307,16 @@ module.exports = require('./wrapper').then( async (cga) => {
         autoMpItem: '魔力之泉',
         autoShenLan: false, //自动吃深蓝
         autoShenLanListener: null,  //深蓝监听系统信息
+        autoDrop: true, //自动丢弃低耐久装备
+        autoDropItem: ['十周年纪念戒指|150','平民衣服|50','平民鞋|50',,'平民帽|50','平民斧|50','平民弓|50','ㄑ型手里剑|10','ㄟ型手里剑|10'], //自动丢弃物品栏物品（不包括装备栏）： '十周年纪念戒指|150','平民衣服|50' 等
         healSelf: false,   //自动治疗自己
         autoUpgradePoint: false,    //是否升级自动加点
         petLoyalProtect: true,  //是否开启宠物忠诚保护
         petLoyalProtectValue: 40,   //宠物忠诚保护值，出战宠物忠诚低于该值，会自动设置宠物待命
-        monitorLoop: () =>{
+        autoExit: false, //是否开启自动结束脚本
+        autoExitValue: 5, //x分钟不动自动结束脚本
+        autoExitMemory:{}, //缓存上一次检查的战斗状态和坐标值
+        monitorLoop: async () =>{
             //战斗状态监控
             if (cga.isInBattle() && leo.monitor.config.status != '战斗状态') {
                 leo.monitor.config.status = '战斗状态';
@@ -2804,6 +3328,45 @@ module.exports = require('./wrapper').then( async (cga) => {
                 leo.monitor.config.status = '正常状态';
                 if (leo.monitor.config.logStatus) {
                     console.log(leo.logTime() + '战斗结束，恢复正常状态');
+                }
+            }
+
+            if(leo.monitor.config.autoExit){
+                let autoExitValue = leo.monitor.config.autoExitValue;
+                let lastTime = leo.monitor.config.autoExitMemory.lastTime || leo.now();
+                let checkTime = leo.now();
+                let keepTime = checkTime.getTime() - lastTime.getTime();
+                if(keepTime > 1000*60*autoExitValue){
+                    await leo.log('【重要提示】 '+autoExitValue+'分钟不动自动结束脚本')
+                    await leo.logBack()
+                    return leo.exit(); //超出指定时长，结束脚本
+                }
+
+                let lastStatus = leo.monitor.config.autoExitMemory.lastStatus;
+                let checkStatus = leo.monitor.config.status;
+                if(checkStatus != lastStatus){
+                    //战斗状态发生变化，重置时间
+                    //console.log('战斗状态发生变化，重置时间')
+                    leo.monitor.config.autoExitMemory.lastStatus = checkStatus;
+                    leo.monitor.config.autoExitMemory.lastTime = leo.now();
+                }
+                let lastPos = leo.monitor.config.autoExitMemory.lastPos;
+                let mapXY = cga.GetMapXY();
+                let checkPos = mapXY.x + ',' + mapXY.y;
+                if(checkPos != lastPos){
+                    //坐标发生变化，重置时间
+                    //console.log('坐标发生变化，重置时间')
+                    leo.monitor.config.autoExitMemory.lastPos = checkPos;
+                    leo.monitor.config.autoExitMemory.lastTime = leo.now();
+                }
+                let lastHPMP = leo.monitor.config.autoExitMemory.lastHPMP;
+                let playerinfo = cga.GetPlayerInfo();
+                let checkHPMP = playerinfo.hp + ',' + mapXY.mp;
+                if(checkHPMP != lastHPMP){
+                    //玩家HP或者MP发生变化，重置时间
+                    //console.log('玩家HP或者MP发生变化，重置时间')
+                    leo.monitor.config.autoExitMemory.lastHPMP = checkHPMP;
+                    leo.monitor.config.autoExitMemory.lastTime = leo.now();
                 }
             }
 
@@ -2842,6 +3405,27 @@ module.exports = require('./wrapper').then( async (cga) => {
                             cga.MoveItem(protectEquips[i].pos, emptyIndexes[0], -1);
                         }
                     }
+                }
+            }
+
+            //自动丢弃低耐久装备
+            if(!cga.isInBattle() && leo.monitor.config.autoDrop){
+                var dropEquips = cga.getInventoryItems().filter(equip => {
+                    if(leo.monitor.config.autoDropItem.length>0){
+                        var autoDropItemArr = leo.monitor.config.autoDropItem.map(x=>x.split('|')[0]);
+                        for (var i = 0; i < autoDropItemArr.length; i++) {
+                            if(autoDropItemArr[i] == equip.name){
+                                var endurance = cga.getEquipEndurance(equip);
+                                var minValue = leo.monitor.config.autoDropItem[i].split('|')[1] || 0;
+                                return endurance && endurance[0] <= minValue;
+                            }
+                        }
+                    }
+                    return false;
+                });
+                //console.log(dropEquips);
+                for(var i in dropEquips){
+                    await leo.dropItemEx(i.pos)
                 }
             }
 
