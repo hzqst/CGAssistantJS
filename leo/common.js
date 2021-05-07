@@ -1,4 +1,4 @@
-fmodule.exports = require('./wrapper').then( async (cga) => {
+module.exports = require('./wrapper').then( async (cga) => {
     global.leo = cga.emogua;
     leo.version = '7.0';
     leo.qq = '158583461'
