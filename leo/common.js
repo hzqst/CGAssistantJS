@@ -221,38 +221,49 @@ module.exports = require('./wrapper').then( async (cga) => {
     leo.buildTeamBlock = (teamPlayerCount,teammates = [])=>{
         return leo.buildTeam(teamPlayerCount,teammates)
         .then(() => {
-            var teamplayers = cga.getTeamPlayers();
+            var teamplayers = cga.getTeamPlayers().map(v=>v.name);
             //console.log(teamplayers);
-            if (teamplayers && teamplayers.length == teamPlayerCount) {
-                for (var i in teamplayers) {
-                    teammates[i] = teamplayers[i].name;
-                }
+            if(!is_array_contain(teamplayers, cga.GetPlayerInfo().name)){
+                teamplayers.push(cga.GetPlayerInfo().name);
             }
-            return leo.log('组队完成，队员[' + teammates.toString() + ']');
+            return leo.log('组队完成，队员[' + teamplayers.toString() + ']');
         });
     }
     //队员进入队伍，参数为队长名字
-    leo.enterTeam = (teamLeader) => {
+    leo.enterTeam = (teamLeader,waitPos = cga.GetMapXY()) => {
         var teamplayers = cga.getTeamPlayers();
         if (teamplayers.length > 0 && teamplayers[0].name == teamLeader) {
             return leo.done();
         } else if (teamplayers.length > 1) {
-            return leo.leaveTeam().then(() => leo.enterTeam(teamLeader));
+            return leo.leaveTeam()
+            .then(() => leo.delay(1000))
+            .then(() => leo.autoWalk([waitPos.x,waitPos.y]))
+            .then(() => leo.enterTeam(teamLeader,waitPos));
         } else {
             return leo.todo().then(() => {
                 var leaderInfo = cga.findPlayerUnit(teamLeader);
                 var mypos = cga.GetMapXY();
                 if (leaderInfo == null || !cga.isDistanceClose(leaderInfo.xpos, leaderInfo.ypos, mypos.x, mypos.y) || (leaderInfo.xpos == mypos.x && leaderInfo.ypos == mypos.y)) {
-                    return leo.delay(1000).then(() => leo.enterTeam(teamLeader));
+                    return leo.delay(1000).then(() => leo.enterTeam(teamLeader,waitPos));
                 } else {
-                    return leo.turnTo(leaderInfo.xpos, leaderInfo.ypos).then(
-                        () => cga.DoRequest(cga.REQUEST_TYPE_JOINTEAM)).then(
-                        () => leo.waitNPCDialog(dialog => {
-                            if (dialog.type === 2) {
-                                cga.ClickNPCDialog(-1, dialog.message.split('\n').findIndex(e => e === teamLeader) - 2);
-                                return leo.delay(1000);
+                    return leo.turnTo(leaderInfo.xpos, leaderInfo.ypos)
+                    .then(() => cga.DoRequest(cga.REQUEST_TYPE_JOINTEAM))
+                    .then(() => leo.waitNPCDialog(dialog => {
+                        if (dialog.type === 2) {
+                            cga.ClickNPCDialog(-1, dialog.message.split('\n').findIndex(e => e === teamLeader) - 2);
+                            return leo.delay(1000);
+                        }
+                    }))
+                    .then(() => {
+                        var teamPlayers = cga.getTeamPlayers();
+                        if(teamPlayers.length>0){
+                            var leader = teamPlayers[0].name;
+                            if(leader != teamLeader){
+                                return leo.leaveTeam();
                             }
-                        })).then(() => leo.enterTeam(teamLeader));
+                        }
+                    })
+                    .then(() => leo.enterTeam(teamLeader,waitPos));
                 }
             });
         }
