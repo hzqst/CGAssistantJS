@@ -1,9 +1,9 @@
 module.exports = require('./wrapper').then( async (cga) => {
     global.leo = cga.emogua;
-	leo.messageServer = false;
+    leo.messageServer = false;
     leo.appId = '';
     leo.appSecret = '';
-    leo.version = '7.5';
+    leo.version = '7.6';
     leo.qq = '158583461'
     leo.copyright = '红叶散落';
     leo.FORMAT_DATE = 'yyyy-MM-dd';
@@ -477,10 +477,14 @@ module.exports = require('./wrapper').then( async (cga) => {
                 var equip2 = cga.GetItemsInfo().find(i => i.pos >= 8 && i.name == equipName && cga.getEquipEndurance(i)[0] == 150);
                 if(equip2){
                     return leo.useItemEx(equip2.pos)
+                    .then(() => leo.delay(2000))
                     .then(()=>leo.dropItemEx(equipName));
                 }else{
+                    console.log(leo.logTime()+'购买装备【' + equipName + '】');
                     return leo.buyEquipProtectLv1(equipName)
-                    .then(()=>leo.useItemEx(equipName))
+                    .then(() => leo.delay(2000))
+                    .then(()=>leo.useItemEx(cga.GetItemsInfo().find(i => i.pos >= 8 && i.name == equipName && cga.getEquipEndurance(i)[0] == 150).pos))
+                    .then(() => leo.delay(2000))
                     .then(()=>leo.dropItemEx(equipName));
                 }
             }
@@ -495,10 +499,14 @@ module.exports = require('./wrapper').then( async (cga) => {
                 var equip2 = cga.GetItemsInfo().find(i => i.pos >= 8 && i.name == equipName && cga.getEquipEndurance(i)[0] == 150);
                 if(equip2){
                     return leo.useItemEx(equip2.pos)
+                    .then(() => leo.delay(2000))
                     .then(()=>leo.dropItemEx(equipName));
                 }else{
+                    console.log(leo.logTime()+'购买装备【' + equipName + '】');
                     return leo.buyEquipProtectLv1(equipName)
-                    .then(()=>leo.useItemEx(equipName))
+                    .then(() => leo.delay(2000))
+                    .then(()=>leo.useItemEx(cga.GetItemsInfo().find(i => i.pos >= 8 && i.name == equipName && cga.getEquipEndurance(i)[0] == 150).pos))
+                    .then(() => leo.delay(2000))
                     .then(()=>leo.dropItemEx(equipName));
                 }
             }
@@ -513,10 +521,14 @@ module.exports = require('./wrapper').then( async (cga) => {
                 var equip2 = cga.GetItemsInfo().find(i => i.pos >= 8 && i.name == equipName && cga.getEquipEndurance(i)[0] == 150);
                 if(equip2){
                     return leo.useItemEx(equip2.pos)
+                    .then(() => leo.delay(2000))
                     .then(()=>leo.dropItemEx(equipName));
                 }else{
+                    console.log(leo.logTime()+'购买装备【' + equipName + '】');
                     return leo.buyEquipProtectLv1(equipName)
-                    .then(()=>leo.useItemEx(equipName))
+                    .then(() => leo.delay(2000))
+                    .then(()=>leo.useItemEx(cga.GetItemsInfo().find(i => i.pos >= 8 && i.name == equipName && cga.getEquipEndurance(i)[0] == 150).pos))
+                    .then(() => leo.delay(2000))
                     .then(()=>leo.dropItemEx(equipName));
                 }
             }
@@ -532,10 +544,14 @@ module.exports = require('./wrapper').then( async (cga) => {
                     var equip2 = cga.GetItemsInfo().find(i => i.pos >= 8 && i.name == equipName && cga.getEquipEndurance(i)[0] == 150);
                     if(equip2){
                         return leo.useItemEx(equip2.pos)
+                        .then(() => leo.delay(2000))
                         .then(()=>leo.dropItemEx(equipName));
                     }else{
+                        console.log(leo.logTime()+'购买装备【' + equipName + '】');
                         return leo.buyEquipWeaponLv1(equipName)
-                        .then(()=>leo.useItemEx(equipName))
+                        .then(() => leo.delay(2000))
+                        .then(()=>leo.useItemEx(cga.GetItemsInfo().find(i => i.pos >= 8 && i.name == equipName && cga.getEquipEndurance(i)[0] == 150).pos))
+                        .then(() => leo.delay(2000))
                         .then(()=>leo.dropItemEx(equipName));
                     }
                 }
@@ -995,7 +1011,7 @@ module.exports = require('./wrapper').then( async (cga) => {
     }
     //返回用于算档的宠物数据(BP：血攻防敏魔回复精神)
     leo.getPetCalcBp = (pet, split = 'x') => {
-        return pet.points_endurance + split + pet.points_strength + split + pet.detail.points_defense + split + pet.detail.points_agility + split + pet.detail.points_magical + split + pet.value_recovery + split + pet.value_spirit;
+        return pet.detail.points_endurance + split + pet.detail.points_strength + split + pet.detail.points_defense + split + pet.detail.points_agility + split + pet.detail.points_magical + split + pet.detail.value_recovery + split + pet.detail.value_spirit;
     }
     //打印遇敌的1级宠信息，用于自动战斗抓宠过滤
     leo.isCatchPet = (enemies, petOptions,isNameOnly = false) => {
@@ -1711,7 +1727,7 @@ module.exports = require('./wrapper').then( async (cga) => {
         findByNextPoints(start);
         return foundedPoints;
     }
-	leo.getEntry = (entries,up = true) => {
+    leo.getEntry = (entries,up = true) => {
         /**
          * icon
          *   大 down, 小 up (不全是)
@@ -1763,8 +1779,7 @@ module.exports = require('./wrapper').then( async (cga) => {
             return b.icon - a.icon;
         })
         return up? entrySort[0] : entrySort[1];
-    } 
-
+    }
     //迷宫搜索
     leo.searchInMaze = (targetFinder, recursion = true, up = true, parameters = {}) => leo.downloadMap().then(async walls => {
         //console.log('up:'+up);
@@ -3356,8 +3371,9 @@ module.exports = require('./wrapper').then( async (cga) => {
     try{
         leo.calcGrade = require('./grade'); 
     }catch(e){
+        //console.log(e)
         leo.calcGrade = () => {
-            return {status:false,error:'未实现'}
+            return {status:false,error:'没有自动算档插件，跳过自动算档功能'}
         };
     }
 
