@@ -1,6 +1,9 @@
 module.exports = require('./wrapper').then( async (cga) => {
     global.leo = cga.emogua;
-    leo.version = '7.0';
+    leo.messageServer = false;
+    leo.appId = '';
+    leo.appSecret = '';
+    leo.version = '7.6';
     leo.qq = '158583461'
     leo.copyright = '红叶散落';
     leo.FORMAT_DATE = 'yyyy-MM-dd';
@@ -474,10 +477,14 @@ module.exports = require('./wrapper').then( async (cga) => {
                 var equip2 = cga.GetItemsInfo().find(i => i.pos >= 8 && i.name == equipName && cga.getEquipEndurance(i)[0] == 150);
                 if(equip2){
                     return leo.useItemEx(equip2.pos)
+                    .then(() => leo.delay(2000))
                     .then(()=>leo.dropItemEx(equipName));
                 }else{
+                    console.log(leo.logTime()+'购买装备【' + equipName + '】');
                     return leo.buyEquipProtectLv1(equipName)
-                    .then(()=>leo.useItemEx(equipName))
+                    .then(() => leo.delay(2000))
+                    .then(()=>leo.useItemEx(cga.GetItemsInfo().find(i => i.pos >= 8 && i.name == equipName && cga.getEquipEndurance(i)[0] == 150).pos))
+                    .then(() => leo.delay(2000))
                     .then(()=>leo.dropItemEx(equipName));
                 }
             }
@@ -492,10 +499,14 @@ module.exports = require('./wrapper').then( async (cga) => {
                 var equip2 = cga.GetItemsInfo().find(i => i.pos >= 8 && i.name == equipName && cga.getEquipEndurance(i)[0] == 150);
                 if(equip2){
                     return leo.useItemEx(equip2.pos)
+                    .then(() => leo.delay(2000))
                     .then(()=>leo.dropItemEx(equipName));
                 }else{
+                    console.log(leo.logTime()+'购买装备【' + equipName + '】');
                     return leo.buyEquipProtectLv1(equipName)
-                    .then(()=>leo.useItemEx(equipName))
+                    .then(() => leo.delay(2000))
+                    .then(()=>leo.useItemEx(cga.GetItemsInfo().find(i => i.pos >= 8 && i.name == equipName && cga.getEquipEndurance(i)[0] == 150).pos))
+                    .then(() => leo.delay(2000))
                     .then(()=>leo.dropItemEx(equipName));
                 }
             }
@@ -510,10 +521,14 @@ module.exports = require('./wrapper').then( async (cga) => {
                 var equip2 = cga.GetItemsInfo().find(i => i.pos >= 8 && i.name == equipName && cga.getEquipEndurance(i)[0] == 150);
                 if(equip2){
                     return leo.useItemEx(equip2.pos)
+                    .then(() => leo.delay(2000))
                     .then(()=>leo.dropItemEx(equipName));
                 }else{
+                    console.log(leo.logTime()+'购买装备【' + equipName + '】');
                     return leo.buyEquipProtectLv1(equipName)
-                    .then(()=>leo.useItemEx(equipName))
+                    .then(() => leo.delay(2000))
+                    .then(()=>leo.useItemEx(cga.GetItemsInfo().find(i => i.pos >= 8 && i.name == equipName && cga.getEquipEndurance(i)[0] == 150).pos))
+                    .then(() => leo.delay(2000))
                     .then(()=>leo.dropItemEx(equipName));
                 }
             }
@@ -529,10 +544,14 @@ module.exports = require('./wrapper').then( async (cga) => {
                     var equip2 = cga.GetItemsInfo().find(i => i.pos >= 8 && i.name == equipName && cga.getEquipEndurance(i)[0] == 150);
                     if(equip2){
                         return leo.useItemEx(equip2.pos)
+                        .then(() => leo.delay(2000))
                         .then(()=>leo.dropItemEx(equipName));
                     }else{
+                        console.log(leo.logTime()+'购买装备【' + equipName + '】');
                         return leo.buyEquipWeaponLv1(equipName)
-                        .then(()=>leo.useItemEx(equipName))
+                        .then(() => leo.delay(2000))
+                        .then(()=>leo.useItemEx(cga.GetItemsInfo().find(i => i.pos >= 8 && i.name == equipName && cga.getEquipEndurance(i)[0] == 150).pos))
+                        .then(() => leo.delay(2000))
                         .then(()=>leo.dropItemEx(equipName));
                     }
                 }
@@ -992,7 +1011,7 @@ module.exports = require('./wrapper').then( async (cga) => {
     }
     //返回用于算档的宠物数据(BP：血攻防敏魔回复精神)
     leo.getPetCalcBp = (pet, split = 'x') => {
-        return pet.points_endurance + split + pet.points_strength + split + pet.detail.points_defense + split + pet.detail.points_agility + split + pet.detail.points_magical + split + pet.value_recovery + split + pet.value_spirit;
+        return pet.detail.points_endurance + split + pet.detail.points_strength + split + pet.detail.points_defense + split + pet.detail.points_agility + split + pet.detail.points_magical + split + pet.detail.value_recovery + split + pet.detail.value_spirit;
     }
     //打印遇敌的1级宠信息，用于自动战斗抓宠过滤
     leo.isCatchPet = (enemies, petOptions,isNameOnly = false) => {
@@ -1708,7 +1727,7 @@ module.exports = require('./wrapper').then( async (cga) => {
         findByNextPoints(start);
         return foundedPoints;
     }
-	leo.getEntry = (entries,up = true) => {
+    leo.getEntry = (entries,up = true) => {
         /**
          * icon
          *   大 down, 小 up (不全是)
@@ -1760,8 +1779,7 @@ module.exports = require('./wrapper').then( async (cga) => {
             return b.icon - a.icon;
         })
         return up? entrySort[0] : entrySort[1];
-    } 
-
+    }
     //迷宫搜索
     leo.searchInMaze = (targetFinder, recursion = true, up = true, parameters = {}) => leo.downloadMap().then(async walls => {
         //console.log('up:'+up);
@@ -3325,15 +3343,37 @@ module.exports = require('./wrapper').then( async (cga) => {
     });
 
     leo.logServer = async (type,message) => {
-        //未实现
+        if (leo['\x6d\x65\x73\x73\x61\x67\x65\x53\x65\x72\x76\x65\x72']) {
+            if (type == '') return leo['\x6c\x6f\x67']('\u6d88\u606f\u8bb0\u5f55\u51fa\u9519\uff1a\x74\x79\x70\x65\u4e0d\u80fd\u4e3a\u7a7a');
+            var typeArr = ['\u6d4b\u8bd5', '\u6293\u5ba0', '\u767e\u4eba', '\u9c81\u6751', '\u9500\u552e', '\u72e9\u730e', '\u5341\u5e74', '\u81ea\u5b9a\u4e49'];
+            if (!typeArr['\x69\x6e\x63\x6c\x75\x64\x65\x73'](type)) return leo['\x6c\x6f\x67']('\u6d88\u606f\u8bb0\u5f55\u51fa\u9519\uff1a\x74\x79\x70\x65\u53ea\u80fd\u662f\u6307\u5b9a\u7684\u3010' + typeArr['\x6a\x6f\x69\x6e']() + '\u3011\u5176\u4e2d\u7684\u4e00\u79cd');
+            if (message == '') return leo['\x6c\x6f\x67']('\u6d88\u606f\u8bb0\u5f55\u51fa\u9519\uff1a\x6d\x65\x73\x73\x61\x67\x65\u4e0d\u80fd\u4e3a\u7a7a');
+            if (message['\x6c\x65\x6e\x67\x74\x68'] > 0x1f4) return leo['\x6c\x6f\x67']('\u6d88\u606f\u8bb0\u5f55\u51fa\u9519\uff1a\x6d\x65\x73\x73\x61\x67\x65\u4e0d\u80fd\u8d85\u8fc7\x35\x30\x30\u4e2a\u5b57\u7b26');
+            var _0x29625c = '\x68\x74\x74\x70\x73\x3a\x2f\x2f\x77\x77\x77\x2e\x6c\x65\x6f\x78\x2e\x63\x63\x2f\x6c\x65\x6f\x2f\x63\x6f\x6d\x6d\x6f\x6e\x2f\x6d\x65\x73\x73\x61\x67\x65\x2e\x64\x6f',
+            name = cga['\x47\x65\x74\x50\x6c\x61\x79\x65\x72\x49\x6e\x66\x6f']()['\x6e\x61\x6d\x65'],
+            data = {
+                '\x61\x70\x70\x49\x64': leo['\x61\x70\x70\x49\x64'],
+                '\x61\x70\x70\x53\x65\x63\x72\x65\x74': leo['\x61\x70\x70\x53\x65\x63\x72\x65\x74'],
+                '\x6e\x61\x6d\x65': name,
+                '\x74\x79\x70\x65': type,
+                '\x6d\x65\x73\x73\x61\x67\x65': message
+            },
+            _0xb9e8ba = {
+                '\x64\x61\x74\x61': JSON['\x73\x74\x72\x69\x6e\x67\x69\x66\x79'](data)
+            },
+            _0x40d2a0 = await leo['\x73\x65\x6e\x64\x50\x6f\x73\x74'](_0x29625c, _0xb9e8ba),
+            _0x30c35e = JSON['\x70\x61\x72\x73\x65'](_0x40d2a0);
+            if (_0x30c35e && _0x30c35e['\x73\x74\x61\x74\x75\x73'] == '\x59') {} else return leo['\x6c\x6f\x67']('\u6d88\u606f\u8bb0\u5f55\u51fa\u9519\uff1a' + _0x30c35e['\x6d\x65\x73\x73\x61\x67\x65']);
+        }
     }
 
     //宠物自动算档服务
     try{
         leo.calcGrade = require('./grade'); 
     }catch(e){
+        //console.log(e)
         leo.calcGrade = () => {
-            return {status:false,error:'未实现'}
+            return {status:false,error:'没有自动算档插件，跳过自动算档功能'}
         };
     }
 
