@@ -35,9 +35,9 @@ var cga = require('./cgaapi')(function(){
 			//进入追忆之路
 			cga.travel.falan.toStone('C', ()=>{
 				cga.walkList([
-				[30, 81, null]
+				[30, 81]
 				], ()=>{
-					cga.TurnTo(30, 79);
+					cga.turnTo(30, 80);
 					cga.AsyncWaitNPCDialog(()=>{
 						cga.ClickNPCDialog(32, 0);
 						cga.AsyncWaitNPCDialog(()=>{
