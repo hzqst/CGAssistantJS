@@ -17,6 +17,14 @@ var deployPet = (cb)=>{
 	}
 
 	var putPet = (pet, index, cb)=>{
+		var find_pet = cga.GetMapUnits().find((u)=>{
+			return u.valid && (u.flags & 512) == 512 && u.xpos == 32 + index && u.ypos == 84;
+		});
+
+		if(find_pet != undefined){
+			putPet(pet, index + 1, cb);
+			return;
+		}
 		cga.walkList([
 			[31 + index, 84]
 		], ()=>{
@@ -25,14 +33,9 @@ var deployPet = (cb)=>{
 				cga.ChangePetState(pet.index, 0);
 				cga.ChangePetState(pet.index, 3);
 				setTimeout(()=>{
-					var npet = cga.GetPetInfo(pet.index);
-					if(npet && (npet.state & 3)){
-						cb(null);
-					} else {
-						putPet(npet, index + 1, cb);
-					}
+					cb(null);
 				}, 1500);
-			}, 1000);
+			}, 1500);
 		});
 	}
 
@@ -156,7 +159,7 @@ var loop = ()=>{
 var timer = (index)=>{
 	if(index > 10)
 		index = 0;
-		
+
 	var pets = cga.GetPetsInfo();
 	if(!pets.length){
 		throw Error('身上没有可以释放作为招牌的宠物！');
@@ -204,6 +207,7 @@ var thisobj = {
 		cb(null);
 	},
 	execute : ()=>{
+
 		cga.ChangeNickName('');
 
 		callSubPlugins('init');
