@@ -3,20 +3,17 @@ var Async = require('async');
 var cga = global.cga;
 var configTable = global.configTable;
 
+var calcLevel = ()=>{
+	var total = thisobj.enemyCountArray.reduce((total, num) => {
+		return total + num;
+	});	
+	return parseInt( (1.0 - total / (thisobj.enemyCountArray.length * 10.0)) * 100.0 );
+}
+
 var deployPet = (cb)=>{
 	var pets = cga.GetPetsInfo();
 	if(!pets.length){
-		console.error('身上没有可以释放作为招牌的宠物！');
-		cb(null);
-	}
-
-	var changeName = (pet, cb2)=>{
-		var stateArray = ['待检测', '未深蓝', '半深蓝', '全深蓝'];
-		cga.ChangeNickName('[本线状态]'+stateArray[thisobj.shenlanLevel]);
-		cga.ChangePetName(pet.index, '本线状态：'+stateArray[thisobj.shenlanLevel]);
-		setTimeout(()=>{
-			cb2(null);
-		}, 1500);
+		throw Error('身上没有可以释放作为招牌的宠物！');
 	}
 
 	var putPet = (pet, index, cb)=>{
@@ -29,12 +26,12 @@ var deployPet = (cb)=>{
 				cga.ChangePetState(pet.index, 3);
 				setTimeout(()=>{
 					var npet = cga.GetPetInfo(pet.index);
-					if(!npet || !(npet.state & 3)){
-						putPet(npet, index+1, cb);
-					} else {
+					if(npet && (npet.state & 3)){
 						cb(null);
+					} else {
+						putPet(npet, index + 1, cb);
 					}
-				}, 1000);
+				}, 1500);
 			}, 1000);
 		});
 	}
@@ -42,32 +39,26 @@ var deployPet = (cb)=>{
 	var pet = pets[0];
 
 	if(pet.state & 3){
-
-		changeName(pet, cb);
+		cb(null);
 	} else {
-
-		putPet(pet, 0, ()=>{
-			changeName(pet, cb);
-		});
-		
+		putPet(pet, 0, cb);		
 	}
 }
 
 var broadcast = (cb)=>{
 
 	var cards = cga.GetCardsInfo().filter((card)=>{
-		return card.title.indexOf('[本线状态]') >= 0 && card.server != 0;
+		return card.title.indexOf('[深蓝率]') >= 0 && card.server != 0;
 	});
 	var serverStatus = [];
 	for(var c in cards){
-		serverStatus[cards[c].server] = cards[c].title.substring('[本线状态]'.length);
+		serverStatus[parseInt(cards[c].server)] = cards[c].title.substring('[深蓝率]'.length);
 	}
 
-	var stateArray = ['待检测', '未深蓝', '半深蓝', '全深蓝'];
-	cga.sayLongWords('【CGA深蓝线广播】本线状态：'+stateArray[thisobj.shenlanLevel], 0, 5, 1);
+	cga.sayLongWords('【CGA深蓝线广播】本线深蓝率：'+thisobj.shenlanLevel+'%', 0, 5, 1);
 	for(var i = 1; i <= 10; ++i){
 		if(serverStatus[i]){
-			cga.sayLongWords('【CGA深蓝线广播】'+i+'线状态：'+serverStatus[i], 0, 5, 1);
+			cga.sayLongWords('【CGA深蓝线广播】'+i+'线深蓝率：'+serverStatus[i]+'%', 0, 5, 1);
 		}
 	}
 	cb(null);
@@ -96,6 +87,8 @@ var gotoBoss = (cb)=>{
 }
 
 var testBoss = (cb)=>{
+	thisobj.suspendUpdate = true;
+
 	cga.turnTo(15, 110);
 	cga.AsyncWaitNPCDialog(()=>{
 		cga.ClickNPCDialog(1, 0);
@@ -107,19 +100,22 @@ var testBoss = (cb)=>{
 						var units = cga.GetBattleUnits().filter((u)=>{
 							return u.pos >= 10;
 						});
-						if(units.length == 10){
-							//满10人，未深蓝
-							thisobj.shenlanLevel = 1;
-						} else {
-							//不满10人，半深蓝
-							thisobj.shenlanLevel = 2;
-						}
+						
+						thisobj.enemyCountArray.push(units.length);
 					} else {
+
 						//无法遇敌，完全深蓝
-						thisobj.shenlanLevel = 3;
-					}					
+						thisobj.enemyCountArray.push(0);
+
+					}
+
+					if(thisobj.enemyCountArray.length > 10){
+						thisobj.enemyCountArray.shift();
+					}
+
+					thisobj.shenlanLevel = calcLevel();
 					cb(null);
-				}, 1000);				
+				}, 1000);
 			} else {
 				//something wrong, try again
 				testBoss(cb);
@@ -131,7 +127,13 @@ var testBoss = (cb)=>{
 
 var retry = ()=>{
 	if(cga.isInNormalState()){
-		loop();
+
+		cga.ChangeNickName('[深蓝率]'+thisobj.shenlanLevel);
+
+		thisobj.suspendUpdate = false;
+
+		setTimeout(loop, 1000);
+
 	} else {
 		setTimeout(retry, 1000);
 	}
@@ -151,8 +153,44 @@ var loop = ()=>{
 	});
 }
 
+var timer = (index)=>{
+	if(index > 10)
+		index = 0;
+		
+	var pets = cga.GetPetsInfo();
+	if(!pets.length){
+		throw Error('身上没有可以释放作为招牌的宠物！');
+	}
+	var pet = pets[0];
+
+	var cards = cga.GetCardsInfo().filter((card)=>{
+		return card.title.indexOf('[深蓝率]') >= 0 && card.server != 0;
+	});
+	var serverStatus = [ thisobj.shenlanLevel ];
+	for(var c in cards){
+		serverStatus[parseInt(cards[c].server)] = cards[c].title.substring('[深蓝率]'.length);
+	}
+
+	if(serverStatus[index] == undefined){
+		setTimeout(timer, 100, index + 1);
+		return;
+	}
+
+	if(thisobj.suspendUpdate){
+		setTimeout(timer, 100, index);
+		return;
+	}
+	if(cga.isInNormalState()){
+		cga.ChangePetName(pet.index, (index == 0 ? '本' : index) +'线深蓝率：'+serverStatus[index]+'%');
+	}
+	
+	setTimeout(timer, 1500, index + 1);
+}
+
 var thisobj = {
+	suspendUpdate : false,
 	shenlanLevel : 0,
+	enemyCountArray : [],
 	getDangerLevel : ()=>{
 		return 0;
 	},
@@ -166,13 +204,15 @@ var thisobj = {
 		cb(null);
 	},
 	execute : ()=>{
+		cga.ChangeNickName('');
+
 		callSubPlugins('init');
 		cga.gui.LoadSettings({
 			"battle": {
 				"autobattle": true,
 				"bossprot": false,
 				"delayfrom": 4000,
-				"delayto": 4500,
+				"delayto": 4000,
 				"highspeed": true,
 				"list": [
 					{
@@ -202,6 +242,7 @@ var thisobj = {
 				"noswitchanim": true,
 			}
 		}, ()=>{
+			timer(0);
 			loop();
 		});		
 	},
