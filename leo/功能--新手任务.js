@@ -4,6 +4,8 @@ require('./common').then(cga => {
         if(cga.GetMapName() == '召唤之间'){
             await leo.autoWalk([18, 6])
             await leo.talkNpc(0, leo.talkNpcSelectorYes)
+            if(cga.GetMapName() == '召唤之间')
+                await leo.autoWalk([27, 8, '回廊'])
         }
         if(cga.GetMapName() == '回廊'){
             await leo.autoWalkList([
