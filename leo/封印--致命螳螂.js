@@ -77,7 +77,7 @@ require('./common').then(cga => {
         var pet = pets[i];
         petIndexMap[pet.index] = 1;
         var index = parseInt(pet.index) + 1;
-		console.log(index + '  ' + pet.realname + '  LV' + pet.level);
+		console.log(index + '： LV' + pet.level + ' ' + pet.realname + '  (' + pet.name + ')');
     }
     leo.todo().then(() => {
         //登出
@@ -139,8 +139,7 @@ require('./common').then(cga => {
                 }
             }).then(() => {
                 //地图判断，如果已经在1级宠捕捉点，则继续捕捉
-                var currentMap = cga.GetMapName();
-                if (currentMap == '通路') {
+                if (cga.getMapInfo().indexes.index3 == 21025) {
                     return leo.autoWalkList([
                         [44, 5],
                         [44, 4]
@@ -155,20 +154,17 @@ require('./common').then(cga => {
                     .then(() => leo.talkNpc(2,leo.talkNpcSelectorYes))
                     .then(() => leo.delay(2000))
                     .then(() => leo.autoWalkList([
-                        [46,23,'忍者的隐居地'],[31,36],[31,32],[19,9,'忍者之家'],
-                        [24,32],[22,16],[14,21],[13,20,'忍者之家2楼']
+                        [46,23,'忍者的隐居地'],[19,9,'忍者之家'],
+                        [24,32],[22,16],[14,21],[13,20]
                     ]))
-                    .then(() => leo.talkNpc(6,leo.talkNpcSelectorYes))
-                    .then(() => leo.delay(1000))
-                    .then(() => leo.autoWalkList([
+                    .then(()=>leo.talkNpc(6,leo.talkNpcSelectorYes,'忍者之家2楼'))
+                    .then(()=>leo.autoWalkList([
                         [15,29],[21,28],[32,12],[38,18],[37,19,'忍者之家'],
-                        [39,21],[44,33],[49,38],[63,38,'井的底部']
+                        [39,21],[44,33],[49,38],[63,38]
                     ]))
-                    .then(() => leo.talkNpc(0,leo.talkNpcSelectorYes))
-                    .then(() => leo.delay(1000))
-                    .then(() => leo.autoWalkList([
-                        [16,11],[7,4,'通路'],
-                        [33,4],[33,3],[44,4]
+                    .then(()=>leo.talkNpc(0,leo.talkNpcSelectorYes,'井的底部'))
+                    .then(()=>leo.autoWalkList([
+                        [7,4,'通路'],[33,3,21025],[44,4]
                     ]));
                 }
             }).then(() => {
