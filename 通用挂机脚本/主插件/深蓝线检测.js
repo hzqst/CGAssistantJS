@@ -3,7 +3,7 @@ var Async = require('async');
 var cga = global.cga;
 var configTable = global.configTable;
 
-var putPet = (cb)=>{
+var deployPet = (cb)=>{
 	var pets = cga.GetPetsInfo();
 	if(!pets.length){
 		console.error('身上没有可以释放作为招牌的宠物！');
@@ -12,39 +12,64 @@ var putPet = (cb)=>{
 
 	var changeName = (pet, cb2)=>{
 		var stateArray = ['待检测', '未深蓝', '半深蓝', '全深蓝'];
+		cga.ChangeNickName('[本线状态]'+stateArray[thisobj.shenlanLevel]);
 		cga.ChangePetName(pet.index, '本线状态：'+stateArray[thisobj.shenlanLevel]);
 		setTimeout(()=>{
 			cb2(null);
 		}, 1500);
 	}
 
-	var pet = pets[0];
-	if(pet.state & 3){
-
-		changeName(pet, cb);
-
-	} else {
-
+	var putPet = (pet, index, cb)=>{
 		cga.walkList([
-		[31 + pet.index, 84]
+			[31 + index, 84]
 		], ()=>{
 			cga.turnDir(0);
 			setTimeout(()=>{
 				cga.ChangePetState(pet.index, 0);
 				cga.ChangePetState(pet.index, 3);
-				setTimeout(()=>{				
-					changeName(pet, cb);
+				setTimeout(()=>{
+					var npet = cga.GetPetInfo(pet.index);
+					if(!npet || !(npet.state & 3)){
+						putPet(npet, index+1, cb);
+					} else {
+						cb(null);
+					}
 				}, 1000);
 			}, 1000);
 		});
+	}
 
+	var pet = pets[0];
+
+	if(pet.state & 3){
+
+		changeName(pet, cb);
+	} else {
+
+		putPet(pet, 0, ()=>{
+			changeName(pet, cb);
+		});
+		
 	}
 }
 
 var broadcast = (cb)=>{
+
+	var cards = cga.GetCardsInfo().filter((card)=>{
+		return card.title.indexOf('[本线状态]') >= 0 && card.server != 0;
+	});
+	var serverStatus = [];
+	for(var c in cards){
+		serverStatus[cards[c].server] = cards[c].title.substring('[本线状态]'.length);
+	}
+
 	var stateArray = ['待检测', '未深蓝', '半深蓝', '全深蓝'];
-	cga.sayLongWords('【CGA深蓝线广播】本线深蓝状态：'+stateArray[thisobj.shenlanLevel], 0, 5, 5);
-	cga.sayLongWords('【CGA深蓝线广播】其他线路深蓝状态将在下个版本中加入', 0, 5, 5);
+	cga.sayLongWords('【CGA深蓝线广播】本线状态：'+stateArray[thisobj.shenlanLevel], 0, 5, 1);
+	for(var i = 1; i <= 10; ++i){
+		if(serverStatus[i]){
+			cga.sayLongWords('【CGA深蓝线广播】'+i+'线状态：'+serverStatus[i], 0, 5, 1);
+		}
+	}
 	cb(null);
 }
 
@@ -92,7 +117,7 @@ var testBoss = (cb)=>{
 					} else {
 						//无法遇敌，完全深蓝
 						thisobj.shenlanLevel = 3;
-					}
+					}					
 					cb(null);
 				}, 1000);				
 			} else {
@@ -115,7 +140,7 @@ var retry = ()=>{
 var loop = ()=>{
 	callSubPluginsAsync('prepare', ()=>{
 		cga.travel.falan.toStone('C', ()=>{			
-			putPet(()=>{
+			deployPet(()=>{
 				broadcast(()=>{
 					gotoBoss(()=>{						
 						testBoss(retry);
