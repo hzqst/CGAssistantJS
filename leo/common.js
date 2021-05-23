@@ -3017,17 +3017,25 @@ module.exports = require('./wrapper').then( async (cga) => {
                         if(currentPoint < maxPoint){
                             if(obj.max && currentPoint >= obj.max){
                                 //大于等于设定值
-                                if(obj.maxTo){
-                                    attr = obj.maxTo;
-                                }
+			        if(obj.maxTo === undefined){
+				    console.log('脚本配置有误，请检查' + obj);
+			        }
+			        else
+			        {
+				    attr = obj.maxTo;
+			        }
                             }else{
                                 attr = obj.attr;
                             }
                         }else{
                             //大于等于等级最大加点值
-                            if(obj.maxTo){
-                                attr = obj.maxTo;
-                            }
+			    if(obj.maxTo === undefined){
+			        console.log('脚本配置有误，请检查' + obj);
+			    }
+			    else
+			    {
+			        attr = obj.maxTo;
+			    }
                         }
                         if(attr>=0 && attr<=4){
                             leo.upgradePlayer(attr);
