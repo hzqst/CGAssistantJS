@@ -1424,11 +1424,7 @@ module.exports = new Promise(resolve => {
 		if (requireInfo) {
 			const findJewel = ['制药', '料理'].indexOf(requireInfo.skill.name) < 0;
 			const materials = requireInfo.craft.materials;
-			const skillIndex = requireInfo.craft.level;
-			const level = requireInfo.skill.index;
-			const subSkillInfo = cga.GetSubSkillInfo(skillIndex, level);
-			//const needMp = level * 11;
-			const needMp = subSkillInfo.cost;
+			const needMp = requireInfo.craft.cost;
 			return cga.emogua.recursion(() => {
 				const items = cga.getInventoryItems();
 				materials.forEach(material => {
