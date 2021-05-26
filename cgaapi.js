@@ -1465,6 +1465,28 @@ module.exports = function(callback){
 	
 	cga.travel.AKLF.isSettled = false;
 	
+	//前往到阿凯鲁法银行
+	cga.travel.AKLF.toBank = (cb)=>{
+		if(cga.GetMapName() != '阿凯鲁法村'){
+
+			if(cga.travel.AKLF.isSettled){
+				cga.LogBack();
+				setTimeout(cga.travel.AKLF.toBank, 1000, cb);
+				return;
+			}
+
+			cb(new Error('"前往阿凯鲁法银行"功能必须从阿凯鲁法村启动'));
+			return;
+		}
+		cga.walkList([
+			[139, 136, '银行'],
+			[20, 17],
+		], ()=>{
+			cga.turnDir(0);
+			cb(null);
+		});
+	}
+
 	//从阿凯鲁法到法兰
 	cga.travel.AKLF.toFalan = (cb)=>{
 		if(cga.GetMapName() != '阿凯鲁法村'){

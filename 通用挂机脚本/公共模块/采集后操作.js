@@ -224,6 +224,22 @@ var doneArray = [
 		});
 	}
 },
+{
+	name: '阿凯鲁法存银行',
+	func: (cb, mineObject)=>{
+		cga.travel.AKLF.toBank(()=>{
+			cga.AsyncWaitNPCDialog(()=>{
+				cga.saveToBankAll(mineObject.name, 20, (err)=>{
+					cga.walkList([
+					[8, 16, '阿凯鲁法村']
+					], ()=>{
+						cb(null);
+					});
+				});
+			});
+		});
+	}
+},
 ]
 
 var thisobj = {
