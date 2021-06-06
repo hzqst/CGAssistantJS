@@ -2194,6 +2194,35 @@ module.exports = function(callback){
 		});
 	}
 
+	cga.isPathAvailable = (curX, curY, targetX, targetY)=>{
+		var walls = cga.buildMapCollisionMatrix();
+		var grid = new PF.Grid(walls.matrix);
+		var finder = new PF.AStarFinder({
+			allowDiagonal: true,
+			dontCrossCorners: true
+		});
+
+		var frompos = [curX - walls.x_bottom, curY - walls.y_bottom];
+		var topos = [targetX - walls.x_bottom, targetY - walls.y_bottom];
+
+		if(frompos[0] >= 0 && frompos[0] < walls.x_size && 
+		frompos[1] >= 0 && frompos[1] < walls.y_size &&
+			topos[0] >= 0 && topos[0] < walls.x_size && 
+			topos[1] >= 0 && topos[1] < walls.y_size){
+		
+			//console.log('using AStar path finder...');
+			
+			var path = finder.findPath(frompos[0], frompos[1], topos[0], topos[1], grid);
+			
+			if(path.length)
+			{
+				return true;
+			}
+		}
+		
+		return false;
+	}
+
 	cga.calculatePath = (curX, curY, targetX, targetY, targetMap, dstX, dstY, newList)=>{
 		var walls = cga.buildMapCollisionMatrix();
 		var grid = new PF.Grid(walls.matrix);
@@ -4222,24 +4251,29 @@ module.exports = function(callback){
 		const getTarget = (noTargetCB) => {
 			const target = targetFinder(cga.GetMapUnits());
 			if (typeof target == 'object') {
-				const walkTo = cga.getRandomSpace(target.xpos,target.ypos);
+				const walkTo = cga.getRandomSpace(target.xpos, target.ypos);
 				if (walkTo) {
 					cga.walkList([walkTo], () => cb(null, target));
 				} else noTargetCB();
 			} else if (target === true) cb(null);
 			else noTargetCB();
 		};
-		const toNextPoint = (points, centre, toNextCB) => {
+		const toNextPoint = (points, current, toNextCB) => {
 			const remain = points.filter(p => {
-				const xd = Math.abs(p.x - centre.x);
-				const yd = Math.abs(p.y - centre.y);
+				const xd = Math.abs(p.x - current.x);
+				const yd = Math.abs(p.y - current.y);
 				p.d = xd + yd;
 				return !(xd < 12 && yd < 12);
 			}).sort((a,b) => a.d - b.d);
 			const next = remain.shift();
-			if (next) {
-				cga.walkList([[next.x,next.y]], () => getTarget(() => toNextPoint(remain,next,toNextCB)));
-			} else toNextCB();
+			if (next && cga.isPathAvailable(current.x, current.y, next.x, next.y) )
+			{
+				cga.walkList([[next.x,next.y]], () => getTarget(() => toNextPoint(remain, next, toNextCB)));
+			}
+			else 
+			{
+				toNextCB();
+			}
 		};
 		//const start = cga.GetMapXY();
 		//let entry = null;
