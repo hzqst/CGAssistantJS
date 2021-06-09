@@ -3,7 +3,7 @@ module.exports = require('./wrapper').then( async (cga) => {
     leo.messageServer = false;
     leo.appId = '';
     leo.appSecret = '';
-    leo.version = '7.6';
+    leo.version = '8.0';
     leo.qq = '158583461'
     leo.copyright = '红叶散落';
     leo.FORMAT_DATE = 'yyyy-MM-dd';
@@ -170,6 +170,30 @@ module.exports = require('./wrapper').then( async (cga) => {
             teamPlayers.push(teamPlayer);
         }
         return teamPlayers;
+    }
+    leo.kickoff = async (name)=>{
+        if(leo.isInTeam()){
+            await cga.DoRequest(cga.REQUEST_TYPE_KICKTEAM)
+            await leo.waitNPCDialog(dlg => {
+                var stripper = '你要把谁踢出队伍？';
+                if (dlg && dlg.message && dlg.message.indexOf(stripper) >= 0) {
+                    var strip = dlg.message.substr(dlg.message.indexOf(stripper) + stripper.length);
+                    strip = strip.replace(/\\z/g, '|');
+                    strip = strip.replace(/\\n/g, '|');
+                    //console.log(strip);
+                    var reg = new RegExp(/([^|\n]+)/g)
+                    var match = strip.match(reg);
+                    //console.log(match);
+                    for (var j = 0; j < match.length; ++j) {
+                        if (match[j] == name) {
+                            cga.ClickNPCDialog(0, j / 2);
+                            break;
+                        }
+                    }
+                    return leo.delay(1000);
+                }
+            })
+        }
     }
     //队长创建队伍
     leo.buildTeam = (teamPlayerCount, teammates) => {
@@ -581,6 +605,19 @@ module.exports = require('./wrapper').then( async (cga) => {
             //console.log(r)
             return leo.next();
         }).then(() => leo.delay(300));
+    }
+    leo.getPetEmptyIndex = async (bank = false) => {
+        if(bank){
+            if(cga.GetMapName()!='银行') {
+                await leo.goto(n => n.falan.bank)
+            }
+            await leo.turnDir(0)
+            const pos = [100,101,102,103,104];
+            return pos.find(i=>cga.IsPetValid(i));
+        }else{
+            const pos = [0,1,2,3,4];
+            return pos.find(i=>cga.IsPetValid(i));
+        }
     }
     //银行全存
     leo.saveToBankAll = (filter) => {
@@ -1451,14 +1488,17 @@ module.exports = require('./wrapper').then( async (cga) => {
     leo.contactStatus = false;
     //队长遇敌程序
     leo.contactTeamLeader = async (protect) => {
+        //contactType遇敌类型：-1-旧遇敌(高效)，0-按地图自适应，1-东西移动，2-南北移动，3-随机移动，
+        //4-画小圈圈，5-画中圈圈，6-画大圈圈，7-画十字，8-画8字
+        var contactType = protect.contactType || -1;
+        if(contactType == -1){
+            return leo.encounter(protect);
+        }
         if (leo.contactStatus){
             return leo.reject('遇敌程序错误：重复启动遇敌程序');
         }
         await leo.downloadMap();
         var currentMapInfo = cga.getMapInfo();
-        //contactType遇敌类型：0-按地图自适应，1-东西移动，2-南北移动，3-随机移动，
-        //4-画小圈圈，5-画中圈圈，6-画大圈圈，7-画十字，8-画8字
-        var contactType = protect.contactType || 0;
         var contactMovePos = leo.getContactMovePos(currentMapInfo,contactType);
         //console.log(contactMovePos)
         if(contactMovePos && contactMovePos.length<2){
@@ -1540,8 +1580,8 @@ module.exports = require('./wrapper').then( async (cga) => {
     }
 
     //随机遇敌(队长用)
-    //leo.encounterTeamLeader = leo.contactTeamLeader;
-	leo.encounterTeamLeader = leo.encounter;
+    leo.encounterTeamLeader = leo.contactTeamLeader;
+	//leo.encounterTeamLeader = leo.encounter;
     //随机遇敌(队员用)
     leo.encounterTeammate = (protect, endLoopCheck) => {
         if (leo.checkStopEncounter(protect, true)) {
@@ -1696,6 +1736,40 @@ module.exports = require('./wrapper').then( async (cga) => {
             return leo.autoWalk([mapInfo.x+1,mapInfo.y]);
         }
     }
+    leo.moveNearest = async ([x,y]) => {
+        const walls = cga.buildMapCollisionMatrix();
+        const isPositionMovable = (x, y) => {
+            return walls.matrix[y][x] == 0;
+        }
+        if (isPositionMovable(x, y)) {
+            return leo.autoWalk([x,y]);
+        }
+        if (isPositionMovable(x + 1, y)) {
+            return leo.autoWalk([x + 1,y]);
+        }
+        if (isPositionMovable(x + 1, y + 1)) {
+            return leo.autoWalk([x + 1,y + 1]);
+        }
+        if (isPositionMovable(x, y + 1)) {
+            return leo.autoWalk([x,y + 1]);
+        }
+        if (isPositionMovable(x - 1, y)) {
+            return leo.autoWalk([x - 1,y]);
+        }
+        if (isPositionMovable(x - 1, y - 1)) {
+            return leo.autoWalk([x - 1,y - 1]);
+        }
+        if (isPositionMovable(x, y - 1)) {
+            return leo.autoWalk([x,y - 1]);
+        }
+        if (isPositionMovable(x - 1, y + 1)) {
+            return leo.autoWalk([x - 1,y + 1]);
+        }
+        if (isPositionMovable(x + 1, y - 1)) {
+            return leo.autoWalk([x + 1,y - 1]);
+        }
+        return leo.reject('没有可以到达的坐标');
+    }
 
     //地图搜索范围
     leo.getMovablePoints = (map, start) => {
@@ -1807,7 +1881,7 @@ module.exports = require('./wrapper').then( async (cga) => {
                 return !(xd < 12 && yd < 12);
             }).sort((a,b) => a.d - b.d);
             const next = remain.shift();
-            if (next&& cga.isPathAvailable(centre.x, centre.y, next.x, next.y)) {
+            if (next && cga.isPathAvailable(centre.x, centre.y, next.x, next.y)) {
                 return leo.autoWalk([next.x,next.y],undefined,undefined,{compress: false}).then(
                     () => getTarget()
                 ).then(() => toNextPoint(remain,next))
@@ -1874,8 +1948,8 @@ module.exports = require('./wrapper').then( async (cga) => {
             position.mapName = cga.GetMapName();
             return gotoOne(position);
         })
-        .catch(()=>{
-            console.log('寻找迷宫出错(findOne)');
+        .catch(error=>{
+            console.log('寻找迷宫出错(findOne),error:'+error);
         });
     }
 
@@ -2377,6 +2451,14 @@ module.exports = require('./wrapper').then( async (cga) => {
         console.log(leo.logTime()+'已保存配置，内容：');
         console.log(config);
         return config;
+    }
+    leo.saveLog = (filePath,text) => {
+        if(filePath.indexOf(leo.splitter)==-1){
+            filePath = leo.rootPath + leo.splitter + filePath;
+        }
+        var content = leo.logTime() + text + '\n';
+        var option = { encoding: 'utf-8'};
+        leo.fs.appendFileSync(filePath,content,option);
     }
 
     //职业声望表
@@ -3017,25 +3099,21 @@ module.exports = require('./wrapper').then( async (cga) => {
                         if(currentPoint < maxPoint){
                             if(obj.max && currentPoint >= obj.max){
                                 //大于等于设定值
-			        if(obj.maxTo === undefined){
-				    console.log('脚本配置有误，请检查' + obj);
-			        }
-			        else
-			        {
-				    attr = obj.maxTo;
-			        }
+                                if(obj.maxTo === undefined){
+                                    console.log('人物加点配置有误，请检查' + obj);
+                                }else{
+                                    attr = obj.maxTo;
+                                }
                             }else{
                                 attr = obj.attr;
                             }
                         }else{
                             //大于等于等级最大加点值
-			    if(obj.maxTo === undefined){
-			        console.log('脚本配置有误，请检查' + obj);
-			    }
-			    else
-			    {
-			        attr = obj.maxTo;
-			    }
+                            if(obj.maxTo === undefined){
+                                console.log('人物加点配置有误，请检查' + obj);
+                            }else{
+                                attr = obj.maxTo;
+                            }
                         }
                         if(attr>=0 && attr<=4){
                             leo.upgradePlayer(attr);
@@ -3338,10 +3416,44 @@ module.exports = require('./wrapper').then( async (cga) => {
         }
     }
 
+    leo.getRoleIndex = (roleName) => {
+        const roleMap = {
+            '巴乌':1,
+            '卡兹':2,
+            '辛':3,
+            '托布':4,
+            '凯':5,
+            '菲特':6,
+            '伯克':7,
+            '乌噜':8,
+            '萌子':9,
+            '阿咪':10,
+            '梅古':11,
+            '丽':12,
+            '卡伊':13,
+            '艾露':14,
+            '谢堤':15,
+            '彼特':16,
+            '左藏':17,
+            '尼尔森':18,
+            '贝堤特':19,
+            '兰斯洛特':20,
+            '威斯凯尔':21,
+            '莎拉':22,
+            '绫女':23,
+            '福尔蒂雅':24,
+            '夏菈':25,
+            '萍萍':26,
+            '葛蕾丝':27,
+            '荷蜜':28
+        }
+        return roleMap[roleName];
+    }
+
     //发送网络请求
-    const request = require('request');
+    leo.request = require('request');
     leo.sendPost = (url,param) => new Promise((resolve, reject) => { 
-        request.post({url:url,form: param}, function (error, response, body) {
+        leo.request.post({url:url,form: param}, function (error, response, body) {
             if (!error && response.statusCode == 200) {
                 resolve(body);
             }else{
@@ -3353,7 +3465,7 @@ module.exports = require('./wrapper').then( async (cga) => {
     leo.logServer = async (type,message) => {
         if (leo['\x6d\x65\x73\x73\x61\x67\x65\x53\x65\x72\x76\x65\x72']) {
             if (type == '') return leo['\x6c\x6f\x67']('\u6d88\u606f\u8bb0\u5f55\u51fa\u9519\uff1a\x74\x79\x70\x65\u4e0d\u80fd\u4e3a\u7a7a');
-            var typeArr = ['\u6d4b\u8bd5', '\u6293\u5ba0', '\u767e\u4eba', '\u9c81\u6751', '\u9500\u552e', '\u72e9\u730e', '\u5341\u5e74', '\u81ea\u5b9a\u4e49'];
+            var typeArr = ['\u6d4b\u8bd5', '\u6293\u5ba0', '\u767e\u4eba', '\u9c81\u6751', '\u9500\u552e', '\u72e9\u730e', '\u5341\u5e74', '\u5b9d\u7bb1', '\u81ea\u5b9a\u4e49'];
             if (!typeArr['\x69\x6e\x63\x6c\x75\x64\x65\x73'](type)) return leo['\x6c\x6f\x67']('\u6d88\u606f\u8bb0\u5f55\u51fa\u9519\uff1a\x74\x79\x70\x65\u53ea\u80fd\u662f\u6307\u5b9a\u7684\u3010' + typeArr['\x6a\x6f\x69\x6e']() + '\u3011\u5176\u4e2d\u7684\u4e00\u79cd');
             if (message == '') return leo['\x6c\x6f\x67']('\u6d88\u606f\u8bb0\u5f55\u51fa\u9519\uff1a\x6d\x65\x73\x73\x61\x67\x65\u4e0d\u80fd\u4e3a\u7a7a');
             if (message['\x6c\x65\x6e\x67\x74\x68'] > 0x1f4) return leo['\x6c\x6f\x67']('\u6d88\u606f\u8bb0\u5f55\u51fa\u9519\uff1a\x6d\x65\x73\x73\x61\x67\x65\u4e0d\u80fd\u8d85\u8fc7\x35\x30\x30\u4e2a\u5b57\u7b26');
@@ -3384,6 +3496,25 @@ module.exports = require('./wrapper').then( async (cga) => {
             return {status:false,error:'没有自动算档插件，跳过自动算档功能'}
         };
     }
+
+    //信息同步服务
+    try{
+        const {sendInfo,syncInfo} = require('./syncInfo');
+        const syncMonitor = () => {
+            if(leo.monitor.config.syncInfo && leo.appId != '' && leo.appSecret != ''){
+                sendInfo(cga);
+            }
+            setTimeout(()=>syncMonitor(),1000*60*5);
+            return;
+        }
+        setTimeout(()=>syncMonitor(),1000*30);
+        leo.syncInfo = syncInfo;
+    }catch(e){
+        leo.syncInfo = (cga,isbank,silently) => {
+            console.log('没有信息同步插件，跳过信息同步功能');
+        }
+    }
+    
 
     ///////////////////////脚本默认执行内容///////////////////////////////
     //leo.keepAlive(true); //启用防掉线功能
@@ -3429,6 +3560,7 @@ module.exports = require('./wrapper').then( async (cga) => {
         autoExit: false, //是否开启自动结束脚本
         autoExitValue: 5, //x分钟不动自动结束脚本
         autoExitMemory:{}, //缓存上一次检查的战斗状态和坐标值
+		syncInfo: false,	//是否开启角色信息同步功能
         monitorLoop: async () =>{
             //战斗状态监控
             if (cga.isInBattle() && leo.monitor.config.status != '战斗状态') {
@@ -3669,5 +3801,6 @@ module.exports = require('./wrapper').then( async (cga) => {
     };
     leo.monitor.keepAlive();    //启动防掉线循环
     setTimeout(leo.monitor.config.monitorLoop, 5000);//启动监控
+
     return cga;
 });
