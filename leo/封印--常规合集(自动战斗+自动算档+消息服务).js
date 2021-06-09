@@ -153,6 +153,14 @@ require('./common').then(async (cga) => {
     let bankPetFull = false;
 
     try{
+        //更新人物身上的宠物信息
+        let pets = cga.GetPetsInfo();
+        petIndexMap = {};
+        for (var i in pets) {
+            var pet = pets[i];
+            petIndexMap[pet.index] = 1;
+        }
+                    
         await leo.loop(async ()=>{
             await leo.waitAfterBattle()
             if(cga.GetPlayerInfo().gold < 10000){
