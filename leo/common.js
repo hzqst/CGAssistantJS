@@ -1881,10 +1881,14 @@ module.exports = require('./wrapper').then( async (cga) => {
                 return !(xd < 12 && yd < 12);
             }).sort((a,b) => a.d - b.d);
             const next = remain.shift();
-            if (next && cga.isPathAvailable(centre.x, centre.y, next.x, next.y)) {
-                return leo.autoWalk([next.x,next.y],undefined,undefined,{compress: false}).then(
-                    () => getTarget()
-                ).then(() => toNextPoint(remain,next))
+            if (next) {
+                if(cga.isPathAvailable(centre.x, centre.y, next.x, next.y)){
+                    return leo.autoWalk([next.x,next.y],undefined,undefined,{compress: false}).then(
+                        () => getTarget()
+                    ).then(() => toNextPoint(remain,next))
+                } else {
+                    return getTarget().then(() => toNextPoint(remain,next))
+                }
             }
             return Promise.resolve();
         };

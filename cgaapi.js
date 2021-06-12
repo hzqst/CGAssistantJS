@@ -4254,9 +4254,14 @@ module.exports = function(callback){
 				const walkTo = cga.getRandomSpace(target.xpos, target.ypos);
 				if (walkTo) {
 					cga.walkList([walkTo], () => cb(null, target));
-				} else noTargetCB();
-			} else if (target === true) cb(null);
-			else noTargetCB();
+				} else {
+					noTargetCB();
+				}
+			} else if (target === true){
+				cb(null);
+			} else{
+				noTargetCB();
+			}
 		};
 		const toNextPoint = (points, current, toNextCB) => {
 			const remain = points.filter(p => {
@@ -4266,9 +4271,16 @@ module.exports = function(callback){
 				return !(xd < 12 && yd < 12);
 			}).sort((a,b) => a.d - b.d);
 			const next = remain.shift();
-			if (next && cga.isPathAvailable(current.x, current.y, next.x, next.y) )
+			if (next)
 			{
-				cga.walkList([[next.x,next.y]], () => getTarget(() => toNextPoint(remain, next, toNextCB)));
+				if(cga.isPathAvailable(current.x, current.y, next.x, next.y))
+				{
+					cga.walkList([[next.x,next.y]], () => getTarget(() => toNextPoint(remain, next, toNextCB)));
+				}
+				else
+				{
+					getTarget(() => toNextPoint(remain, next, toNextCB))
+				}
 			}
 			else 
 			{
