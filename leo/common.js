@@ -3,7 +3,7 @@ module.exports = require('./wrapper').then( async (cga) => {
     leo.messageServer = false;
     leo.appId = '';
     leo.appSecret = '';
-    leo.version = '8.0';
+    leo.version = '8.1';
     leo.qq = '158583461'
     leo.copyright = '红叶散落';
     leo.FORMAT_DATE = 'yyyy-MM-dd';
@@ -1728,10 +1728,22 @@ module.exports = require('./wrapper').then( async (cga) => {
         }
     }
     //随机往旁边移动1格（队长使用，方便队员进组）
-    leo.moveAround = (mapInfo = leo.getMapInfo()) => {
+    leo.moveAround = async (mapInfo = leo.getMapInfo()) => {
         var movablePos = leo.getMovablePositionsAround(mapInfo);
         if(movablePos && movablePos.length > 0){
-            return leo.autoWalk([movablePos[0].x,movablePos[0].y]);
+            await leo.loop(async()=>{
+                for (var i = 0; i < movablePos.length; i++) {
+                    try{
+                        await leo.autoWalk([movablePos[i].x,movablePos[i].y])
+                    }catch(e){
+                        //do nothing
+                    }
+                    let newPos = cga.getMapXY();
+                    if(newPos.x != mapInfo.x || newPos.y != mapInfo.y){
+                        return leo.reject();
+                    }
+                }
+            })
         }else{
             return leo.autoWalk([mapInfo.x+1,mapInfo.y]);
         }
@@ -1883,9 +1895,9 @@ module.exports = require('./wrapper').then( async (cga) => {
             const next = remain.shift();
             if (next) {
                 if(cga.isPathAvailable(centre.x, centre.y, next.x, next.y)){
-                    return leo.autoWalk([next.x,next.y],undefined,undefined,{compress: false}).then(
-                        () => getTarget()
-                    ).then(() => toNextPoint(remain,next))
+                    return leo.autoWalk([next.x,next.y],undefined,undefined,{compress: false})
+                    .then(() => getTarget())
+                    .then(() => toNextPoint(remain,next))
                 } else {
                     return getTarget().then(() => toNextPoint(remain,next))
                 }
@@ -2484,13 +2496,13 @@ module.exports = require('./wrapper').then( async (cga) => {
 
     //合并属性（深层合并）
     leo.deepMerge = (target, source) => {
-      for (let key in source) {
-        // 如果target(也就是target[key])存在，且是对象的话再去调用deepMerge，否则就是target[key]里面没这个对象，需要与source[key]合并
-        target[key] = target[key] && target[key].toString() === "[object Object]"
-          ? leo.deepMerge(target[key], source[key])
-          : (target[key] = source[key]);
-      }
-      return target;
+        for (let key in source) {
+            // 如果target(也就是target[key])存在，且是对象的话再去调用deepMerge，否则就是target[key]里面没这个对象，需要与source[key]合并
+            target[key] = target[key] && target[key].toString() === "[object Object]"
+              ? leo.deepMerge(target[key], source[key])
+              : (target[key] = source[key]);
+        }
+        return target;
     }
 
     //获取面板设置
@@ -3466,28 +3478,29 @@ module.exports = require('./wrapper').then( async (cga) => {
         });
     });
 
-    leo.logServer = async (type,message) => {
+    leo.logServer = async(type, message) =>{
         if (leo['\x6d\x65\x73\x73\x61\x67\x65\x53\x65\x72\x76\x65\x72']) {
             if (type == '') return leo['\x6c\x6f\x67']('\u6d88\u606f\u8bb0\u5f55\u51fa\u9519\uff1a\x74\x79\x70\x65\u4e0d\u80fd\u4e3a\u7a7a');
-            var typeArr = ['\u6d4b\u8bd5', '\u6293\u5ba0', '\u767e\u4eba', '\u9c81\u6751', '\u9500\u552e', '\u72e9\u730e', '\u5341\u5e74', '\u5b9d\u7bb1', '\u81ea\u5b9a\u4e49'];
-            if (!typeArr['\x69\x6e\x63\x6c\x75\x64\x65\x73'](type)) return leo['\x6c\x6f\x67']('\u6d88\u606f\u8bb0\u5f55\u51fa\u9519\uff1a\x74\x79\x70\x65\u53ea\u80fd\u662f\u6307\u5b9a\u7684\u3010' + typeArr['\x6a\x6f\x69\x6e']() + '\u3011\u5176\u4e2d\u7684\u4e00\u79cd');
+            var _0x198aae = ['\u6d4b\u8bd5', '\u6293\u5ba0', '\u767e\u4eba', '\u9c81\u6751', '\u9500\u552e', '\u72e9\u730e', '\u5341\u5e74', '\u5b9d\u7bb1', '\u5237\u5237', '\u81ea\u5b9a\u4e49'];
+            if (!_0x198aae['\x69\x6e\x63\x6c\x75\x64\x65\x73'](type)) return leo['\x6c\x6f\x67']('\u6d88\u606f\u8bb0\u5f55\u51fa\u9519\uff1a\x74\x79\x70\x65\u53ea\u80fd\u662f\u6307\u5b9a\u7684\u3010' + _0x198aae['\x6a\x6f\x69\x6e']() + '\u3011\u5176\u4e2d\u7684\u4e00\u79cd');
             if (message == '') return leo['\x6c\x6f\x67']('\u6d88\u606f\u8bb0\u5f55\u51fa\u9519\uff1a\x6d\x65\x73\x73\x61\x67\x65\u4e0d\u80fd\u4e3a\u7a7a');
             if (message['\x6c\x65\x6e\x67\x74\x68'] > 0x1f4) return leo['\x6c\x6f\x67']('\u6d88\u606f\u8bb0\u5f55\u51fa\u9519\uff1a\x6d\x65\x73\x73\x61\x67\x65\u4e0d\u80fd\u8d85\u8fc7\x35\x30\x30\u4e2a\u5b57\u7b26');
-            var _0x29625c = '\x68\x74\x74\x70\x73\x3a\x2f\x2f\x77\x77\x77\x2e\x6c\x65\x6f\x78\x2e\x63\x63\x2f\x6c\x65\x6f\x2f\x63\x6f\x6d\x6d\x6f\x6e\x2f\x6d\x65\x73\x73\x61\x67\x65\x2e\x64\x6f',
-            name = cga['\x47\x65\x74\x50\x6c\x61\x79\x65\x72\x49\x6e\x66\x6f']()['\x6e\x61\x6d\x65'],
-            data = {
+            var _0x1ba496 = '\x68\x74\x74\x70\x73\x3a\x2f\x2f\x77\x77\x77\x2e\x6c\x65\x6f\x78\x2e\x63\x63\x2f\x6c\x65\x6f\x2f\x63\x6f\x6d\x6d\x6f\x6e\x2f\x6d\x65\x73\x73\x61\x67\x65\x2e\x64\x6f',
+            _0x234c35 = cga['\x47\x65\x74\x50\x6c\x61\x79\x65\x72\x49\x6e\x66\x6f']()['\x6e\x61\x6d\x65'],
+            _0x1e2228 = {
                 '\x61\x70\x70\x49\x64': leo['\x61\x70\x70\x49\x64'],
                 '\x61\x70\x70\x53\x65\x63\x72\x65\x74': leo['\x61\x70\x70\x53\x65\x63\x72\x65\x74'],
-                '\x6e\x61\x6d\x65': name,
+                '\x6e\x61\x6d\x65': _0x234c35,
                 '\x74\x79\x70\x65': type,
                 '\x6d\x65\x73\x73\x61\x67\x65': message
             },
-            _0xb9e8ba = {
-                '\x64\x61\x74\x61': JSON['\x73\x74\x72\x69\x6e\x67\x69\x66\x79'](data)
+            _0x1ac8f7 = {
+                '\x64\x61\x74\x61': JSON['\x73\x74\x72\x69\x6e\x67\x69\x66\x79'](_0x1e2228)
             },
-            _0x40d2a0 = await leo['\x73\x65\x6e\x64\x50\x6f\x73\x74'](_0x29625c, _0xb9e8ba),
-            _0x30c35e = JSON['\x70\x61\x72\x73\x65'](_0x40d2a0);
-            if (_0x30c35e && _0x30c35e['\x73\x74\x61\x74\x75\x73'] == '\x59') {} else return leo['\x6c\x6f\x67']('\u6d88\u606f\u8bb0\u5f55\u51fa\u9519\uff1a' + _0x30c35e['\x6d\x65\x73\x73\x61\x67\x65']);
+            _0x5e7feb = await leo['\x73\x65\x6e\x64\x50\x6f\x73\x74'](_0x1ba496, _0x1ac8f7),
+            _0x3b99fc = JSON['\x70\x61\x72\x73\x65'](_0x5e7feb);
+            if (_0x3b99fc && _0x3b99fc['\x73\x74\x61\x74\x75\x73'] == '\x59') {} else return _0x3b99fc['\x6d\x65\x73\x73\x61\x67\x65']['\x69\x6e\x63\x6c\x75\x64\x65\x73']('\u6d88\u606f\u6d88\u8d39\u6b21\u6570\u5df2\u7ecf\u5230\u8fbe\u672c\u6708\u9650\u5236\u503c') && (leo['\x6d\x65\x73\x73\x61\x67\x65\x53\x65\x72\x76\x65\x72'] = ![]),
+            leo['\x6c\x6f\x67']('\u6d88\u606f\u8bb0\u5f55\u51fa\u9519\uff1a' + _0x3b99fc['\x6d\x65\x73\x73\x61\x67\x65']);
         }
     }
 
@@ -3564,7 +3577,7 @@ module.exports = require('./wrapper').then( async (cga) => {
         autoExit: false, //是否开启自动结束脚本
         autoExitValue: 5, //x分钟不动自动结束脚本
         autoExitMemory:{}, //缓存上一次检查的战斗状态和坐标值
-		syncInfo: false,	//是否开启角色信息同步功能
+        syncInfo: false,
         monitorLoop: async () =>{
             //战斗状态监控
             if (cga.isInBattle() && leo.monitor.config.status != '战斗状态') {

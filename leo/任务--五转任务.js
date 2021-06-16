@@ -223,17 +223,7 @@ require('./common').then(cga => {
                             return false;
                     },false))
                     .then(()=>leo.useItem(8))
-                    .then(()=>{
-                        var mapInfo = leo.getMapInfo();
-                        var movablePos = leo.getMovablePositionsAround(mapInfo);
-                        if(movablePos && movablePos.length > 0){
-                            console.log("movablePos[0]:",movablePos[0]);
-                            return leo.autoWalk([movablePos[0].x,movablePos[0].y]);
-                        }else{
-                            console.log("movablePos:",movablePos);
-                            return leo.autoWalk([mapInfo.x+1,mapInfo.y]);
-                        }
-                    })
+                    .then(()=>leo.moveAround())
                     .then(() => leo.buildTeam(teamPlayerCount)).then(() => {
                         var teamplayers = cga.getTeamPlayers();
                         //console.log(teamplayers);

@@ -1,4 +1,4 @@
-/**version 1.2
+/**version 1.3
  * health 0 1-25(白) 26-50(黄) 51-75(粉) 76-100(红)
  * direction 0(右上)
  * 高速移动中不可丢东西
@@ -554,9 +554,9 @@ module.exports = new Promise(resolve => {
 			const next = remain.shift();
 			if (next) {
 				if(cga.isPathAvailable(centre.x, centre.y, next.x, next.y)){
-					return cga.emogua.autoWalk([next.x,next.y],undefined,undefined,{compress: false}).then(
-						() => getTarget()
-					).then(() => toNextPoint(remain,next))
+					return cga.emogua.autoWalk([next.x,next.y],undefined,undefined,{compress: false})
+					.then(() => getTarget())
+					.then(() => toNextPoint(remain,next))
 				}
 				else{
 					return getTarget().then(() => toNextPoint(remain,next))
