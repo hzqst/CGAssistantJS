@@ -74,9 +74,7 @@ require('./common').then(async (cga) => {
     cga.EnableFlags(cga.ENABLE_FLAG_JOINTEAM, false); //关闭组队
     cga.EnableFlags(cga.ENABLE_FLAG_CARD, false); //关闭名片
     cga.EnableFlags(cga.ENABLE_FLAG_TRADE, false); //关闭交易
-    var playerinfo = cga.GetPlayerInfo();
-    var playerName = playerinfo.name;
-    var isTeamLeader = true;
+
     var oldGold = cga.GetPlayerInfo().gold;
 
     leo.todo().then(() => {
@@ -190,7 +188,7 @@ require('./common').then(async (cga) => {
                         });
                     });
                 }else{
-                    if (mapInfo.name.indexOf('小岛')!=-1){
+                    if (cga.GetMapName().indexOf('小岛')!=-1){
                         return leo.encounterTeammate(protect, '小岛'); //队员遇敌
                     }
                 }
