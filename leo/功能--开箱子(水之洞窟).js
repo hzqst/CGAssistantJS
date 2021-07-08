@@ -1,5 +1,6 @@
 require('./common').then(cga=>{
 	//leo.baseInfoPrint();
+	leo.monitor.config.autoChangeLineForLeader = true;	//自动跟随队长换线
 	var teamLeader = '队长名称'; //队长名称
     var teamPlayerCount = 1; //队伍人数
 	var prepareOptions = {
@@ -55,12 +56,14 @@ require('./common').then(cga=>{
 	    });
     }
 
-    var mapInfo = cga.getMapInfo();
-    if (mapInfo.name.indexOf('水之洞窟')!=-1 || mapInfo.name.indexOf('水之迷宫')!=-1) {
-        return leo.todo()
-        .then(()=>leo.loop(()=>{
-			return leo.findOne(targetFinder, todo);
-		}));
+    if(isTeamLeader){
+    	var mapInfo = cga.getMapInfo();
+	    if (mapInfo.name.indexOf('水之洞窟')!=-1 || mapInfo.name.indexOf('水之迷宫')!=-1) {
+	        return leo.todo()
+	        .then(()=>leo.loop(()=>{
+				return leo.findOne(targetFinder, todo);
+			}));
+	    }
     }
 
 	leo.logBack()
@@ -78,7 +81,7 @@ require('./common').then(cga=>{
 	                    return leo.autoWalk([mapInfo.x+1,mapInfo.y]);
 	                }
 	            })
-	            .then(() => leo.buildTeam(teamPlayerCount)).then(() => {
+	            .then(() => leo.buildTeam(teamPlayerCount,teammates)).then(() => {
 	                var teamplayers = cga.getTeamPlayers();
 	                //console.log(teamplayers);
 	                if (teamplayers && teamplayers.length == teamPlayerCount) {
@@ -120,7 +123,7 @@ require('./common').then(cga=>{
 	                    return leo.autoWalk([mapInfo.x+1,mapInfo.y]);
 	                }
 	            })
-				.then(() => leo.buildTeam(teamPlayerCount)).then(() => {
+				.then(() => leo.buildTeam(teamPlayerCount,teammates)).then(() => {
 	                var teamplayers = cga.getTeamPlayers();
 	                //console.log(teamplayers);
 	                if (teamplayers && teamplayers.length == teamPlayerCount) {
@@ -140,12 +143,17 @@ require('./common').then(cga=>{
 				return leo.loop(
 	                () => leo.waitAfterBattle()
 	                .then(() => {
-	                	var mapInfo = cga.getMapInfo();
-			            if (mapInfo.name == '水之洞窟' && (mapInfo.x == 16 || mapInfo.x == 17) && mapInfo.y == 24 && !leo.isInTeam()) {
-			                return leo.talkNpc(17,23, leo.talkNpcSelectorYes)
-			                .then(()=>leo.delay(2000))
-			                .then(()=>leo.enterTeam(teamLeader));
-			            }
+	                	if(!leo.isInTeam()){
+	                		var mapInfo = cga.getMapInfo();
+				            if (mapInfo.name == '水之洞窟' && (mapInfo.x == 16 || mapInfo.x == 17) && mapInfo.y == 24) {
+				                return leo.talkNpc(17,23, leo.talkNpcSelectorYes)
+				                .then(()=>leo.delay(2000))
+				                .then(()=>leo.enterTeam(teamLeader));
+				            }else{
+				            	return leo.exit();
+				            }
+	                	}
+	                	
 		                return leo.delay(5000);
 	                })
 	                .catch (console.log)

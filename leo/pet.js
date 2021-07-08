@@ -1,4 +1,4 @@
-const version = '1.2';
+const version = '1.3';
 const doctorName = '医道之殇';
 const petConfig = {
     '水龙蜥': {
@@ -26,7 +26,7 @@ const petConfig = {
                 await leo.autoWalkList([[49, 6],[49, 8]])
             } else {
                 await leo.logBack()
-                await leo.sellCastle()
+                //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
                 await leo.goto(n => n.teleport.vinoy)
@@ -64,7 +64,7 @@ const petConfig = {
                 await leo.autoWalkList([[147, 523],[145, 523]])
             } else {
                 await leo.logBack()
-                await leo.sellCastle()
+                //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
                 await leo.goto(n => n.teleport.jenova)
@@ -100,7 +100,7 @@ const petConfig = {
                 await leo.autoWalkList([[22, 37],[20, 37]])
             } else {
                 await leo.logBack()
-                await leo.sellCastle()
+                //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
                 await leo.goto(n => n.teleport.ghana)
@@ -139,7 +139,7 @@ const petConfig = {
                 await leo.autoWalkList([[670, 310],[668, 310]])
             } else {
                 await leo.logBack()
-                await leo.sellCastle()
+                //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
                 await leo.goto(n => n.teleport.yer)
@@ -175,7 +175,7 @@ const petConfig = {
                 await leo.autoWalkList([[286, 372],[284, 372]])
             } else {
                 await leo.logBack()
-                await leo.sellCastle()
+                //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
                 await leo.goto(n => n.teleport.jenova)
@@ -211,7 +211,7 @@ const petConfig = {
                 await leo.autoWalkList([[430, 400],[428, 400]])
             } else {
                 await leo.logBack()
-                await leo.sellCastle()
+                //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
                 await leo.goto(n => n.teleport.vinoy)
@@ -247,7 +247,7 @@ const petConfig = {
                 await leo.autoWalkList([[290, 216],[292, 214]])
             } else {
                 await leo.logBack()
-                await leo.sellCastle()
+                //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
                 await leo.goto(n => n.teleport.kili)
@@ -274,7 +274,7 @@ const petConfig = {
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
         crystalName: '风地的水晶（5：5）',
-        petSkillName: '陨石魔法-Ⅰ',
+        petSkillName: '火焰魔法-Ⅰ',
         async walk(cga){
             const leo = cga.emogua;
             //地图判断，如果已经在1级宠捕捉点，则继续捕捉
@@ -282,7 +282,7 @@ const petConfig = {
                 await leo.autoWalkList([[44, 5],[44, 4]])
             } else {
                 await leo.logBack()
-                await leo.sellCastle()
+                //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
                 await leo.goto(n => n.falan.sout)
@@ -330,7 +330,7 @@ const petConfig = {
                 await leo.autoWalkList([[127, 31],[127, 29]])
             } else {
                 await leo.logBack()
-                await leo.sellCastle()
+                //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
                 await leo.goto(n => n.teleport.kili)
@@ -367,7 +367,7 @@ const petConfig = {
                 await leo.autoWalkList([[460, 330],[457, 329]])
             } else {
                 await leo.logBack()
-                await leo.sellCastle()
+                //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
                 await leo.goto(n => n.teleport.jenova)
@@ -403,7 +403,7 @@ const petConfig = {
                 await leo.autoWalkList([[248, 136],[248, 134]])
             } else {
                 await leo.logBack()
-                await leo.sellCastle()
+                //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
                 await leo.goto(n => n.elsa.x)
@@ -441,7 +441,7 @@ const petConfig = {
 
             } else {
                 await leo.logBack()
-                await leo.sellCastle()
+                //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
                 await leo.goto(n => n.falan.sout)
@@ -476,7 +476,7 @@ const petConfig = {
                 await leo.autoWalkList([[257, 180],[255, 180]])
             } else {
                 await leo.logBack()
-                await leo.sellCastle()
+                //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
                 await leo.goto(n => n.castle.teleport)
@@ -514,7 +514,7 @@ const petConfig = {
                 await leo.autoWalkList([[184, 104],[182, 104]])
             } else {
                 await leo.logBack()
-                await leo.sellCastle()
+                //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
                 await leo.goto(n => n.elsa.x)
@@ -552,7 +552,7 @@ const petConfig = {
                 await leo.autoWalkList([[237,203],[235,203]])
             } else {
                 await leo.logBack()
-                await leo.sellCastle()
+                //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
                 await leo.goto(n => n.falan.wout)
@@ -587,7 +587,7 @@ const petConfig = {
                 await leo.autoWalkList([[237,326],[235,326]])
             } else {
                 await leo.logBack()
-                await leo.sellCastle()
+                //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
                 await leo.goto(n => n.teleport.kili)
@@ -644,7 +644,7 @@ const petConfig = {
                 await leo.autoWalkList([[22,8],[24,8]])
             } else {
                 await leo.logBack()
-                await leo.sellCastle()
+                //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
                 await leo.goto(n => n.falan.w2)
@@ -701,12 +701,92 @@ const petConfig = {
                 await leo.autoWalkList([[30,51],[30,49]])
             } else {
                 await leo.logBack()
-                await leo.sellCastle()
+                //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
                 await leo.goto(n => n.castle.x)
                 await leo.autoWalkList([
                     [47,85,'召唤之间'],[27,8,'回廊'],[23,19,'灵堂'],[30,49]
+                ])
+            }
+        }
+    },
+    '水蓝鸟魔': {
+        name: '水蓝鸟魔',
+        sealCardName: '封印卡（飞行系）',
+        sealCardLevel: 4,
+        autoDropPet: true, //是否自动扔宠，true扔/false不扔
+        minHp: 97 - 3,
+        minMp: 104 - 3,
+        minAttack: 37,
+        minDefensive: 32,
+        minAgility: 33,
+        index: 1,
+        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
+        gradeLog: true, //打印算档日志
+        gradeLogMax: 5, //最多显示多少行日志
+        crystalName: '地水的水晶（5：5）',
+        petSkillName: '火焰魔法-Ⅰ',
+        async walk(cga){
+            const leo = cga.emogua;
+            //判断身上是否有【咒器·红念珠】
+            if(cga.getItemCount('咒器·红念珠') == 0){
+                await leo.log('没有【咒器·红念珠】，先去咒术师的秘密住处拿取')
+                await leo.goto(n => n.falan.w1)
+                await leo.autoWalkList([[22, 88, '芙蕾雅'],[200, 165]])
+                await leo.talkNpc(201, 165,leo.talkYes,'莎莲娜海底洞窟 地下1楼')
+                await leo.autoWalkList([[20, 8 ,'莎莲娜海底洞窟 地下2楼'],[32, 21]])
+                await leo.turnTo(31, 22)
+                await leo.say('咒术')
+                await leo.waitNPCDialog(dialog => {
+                    cga.ClickNPCDialog(1, -1);
+                    return leo.delay(2000);
+                })
+                await leo.autoWalkList([[38, 37 ,'咒术师的秘密住处'],[12, 7]])
+                await leo.talkNpc(14,7,leo.talkYes)
+                if(cga.getItemCount('咒器·红念珠') == 0){
+                    await leo.log('无法拿到【咒器·红念珠】，请检查')
+                    await leo.delay(1000*60*60*24)
+                    return leo.reject();
+                }
+            }
+            //地图判断，如果已经在1级宠捕捉点，则继续捕捉
+            var currentMap = cga.GetMapName();
+            if (currentMap == '镜中的豪宅  2楼') {
+                await leo.autoWalkList([[42,25],[40,25]])
+            } else {
+                await leo.logBack()
+                //await leo.sellCastle()
+                await leo.checkHealth(doctorName)
+                await leo.checkCrystal(this.crystalName)
+                await leo.goto(n => n.falan.w2)
+                await leo.autoWalkList([
+                    [96, 149, '豪宅'],
+                    [33, 22, '豪宅  地下'],
+                    [9, 5, '豪宅'],
+                    [33, 10, '镜中的豪宅'],
+                    [35, 2]
+                ])
+                await leo.talkNpc(35,1,leo.talkYes)
+                await leo.autoWalkList([[36,9]])
+                await leo.talkNpc(36,10,leo.talkYes)
+                await leo.autoWalkList([
+                    [27, 67, '豪宅'],
+                    [58, 66, '豪宅  地下'],
+                    [41, 23, '豪宅'],
+                    [59, 6, '豪宅  2楼'],
+                    [16, 9, '镜中的豪宅  2楼'],
+                    [40, 10]
+                ])
+                await leo.talkNpc(41,10,leo.talkYes)
+                await leo.autoWalkList([[40,16]])
+                await leo.talkNpc(40,17,leo.talkYes)
+                await leo.autoWalkList([
+                    [5, 63, '豪宅  2楼'],
+                    [5, 23, '豪宅  阁楼'],
+                    [14,30, '镜中的豪宅  阁楼'],
+                    [28,21, '镜中的豪宅  2楼'],[40,25]
                 ])
             }
         }
@@ -736,7 +816,7 @@ const petConfig = {
                 await leo.autoWalkList([[18,20],[16,20]])
             } else {
                 await leo.logBack()
-                await leo.sellCastle()
+                //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
                 await leo.goto(n => n.castle.teleport)
@@ -773,58 +853,127 @@ const petConfig = {
             }
         }
     },
-    '亚特拉斯巨神': {
-        name: '亚特拉斯巨神',
-        sealCardName: '封印卡（人形系）',
-        sealCardLevel: 4,
+    '寒冰翼龙': {
+        name: '寒冰翼龙',
+        sealCardName: '封印卡（龙系）',
+        sealCardLevel: 1,
         autoDropPet: true, //是否自动扔宠，true扔/false不扔
-        minHp: 123 - 3,
-        minMp: 86 - 3,
-        minAttack: 45,
-        minDefensive: 37,
-        minAgility: 30,
+        minHp: 118 - 3,
+        minMp: 88 - 3,
+        minAttack: 42,
+        minDefensive: 44,
+        minAgility: 31,
         index: 1,
         gradeMin: 2,    //高于该档次的宠判断丢弃
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
-        crystalName: '水火的水晶（5：5）',
+        crystalName: '风地的水晶（5：5）',
+        petSkillName: '陨石魔法-Ⅰ',
+        async walk(cga){
+            const leo = cga.emogua;
+            //地图判断，如果已经在1级宠捕捉点，则继续捕捉
+            var currentMap = cga.GetMapName();
+            if (currentMap == '青龙的洞窟 4楼') {
+                await leo.autoWalkList([[11, 25],[11, 23]])
+            } else {
+                await leo.logBack()
+                //await leo.sellCastle()
+                await leo.checkHealth(doctorName)
+                await leo.checkCrystal(this.crystalName)
+                await leo.goto(n => n.castle.teleport)
+                await leo.autoWalk([37,4])
+                await leo.talkNpc(0,leo.talkYes)
+                await leo.autoWalkList([
+                    [5, 4, 4313],[6, 13, 4312],[6, 13, '阿巴尼斯村'],
+                    [38, 71,'莎莲娜'],[118, 100 ,'魔法大学'],[106, 54, '青龙的洞窟 1楼'],
+                    [27,38]
+                ])
+                await leo.talkNpc(0,leo.talkYes)
+                await leo.autoWalkList([
+                    [26, 10, '青龙的洞窟 2楼'],[21, 45, '青龙的洞窟 3楼'],[45, 43, '青龙的洞窟 4楼'],[11, 23]
+                ])
+            }
+        }
+    },
+    '烈风翼龙': {
+        name: '寒冰翼龙',
+        sealCardName: '封印卡（龙系）',
+        sealCardLevel: 4,
+        autoDropPet: true, //是否自动扔宠，true扔/false不扔
+        minHp: 118 - 3,
+        minMp: 92 - 3,
+        minAttack: 42,
+        minDefensive: 40,
+        minAgility: 32,
+        index: 1,
+        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
+        gradeLog: true, //打印算档日志
+        gradeLogMax: 5, //最多显示多少行日志
+        crystalName: '火风的水晶（5：5）',
         petSkillName: '火焰魔法-Ⅰ',
         async walk(cga){
             const leo = cga.emogua;
             //地图判断，如果已经在1级宠捕捉点，则继续捕捉
             var currentMap = cga.GetMapName();
-            if (currentMap == '风鸣之塔 10楼') {
-                await leo.autoWalkList([[62, 64],[60, 64]])
+            if (currentMap == '星咏宫殿·地下１层') {
+                await leo.autoWalkList([[97, 91],[98, 91]])
             } else {
+                //检查进“星咏的宫殿”的任务道具
+                if(cga.getItemCount('王冠')==0){
+                    await leo.log('身上没有【王冠】，去银行获取')
+                    await leo.goto(n => n.falan.bank)
+                    await leo.turnDir(0)
+                    await leo.getOneFromBank('王冠')
+                    if(cga.getItemCount('王冠')==0){
+                        await leo.log('身上和银行都没有【王冠】，脚本结束')
+                        return leo.delay(1000*60*60*2);
+                    }
+                }
+                if(cga.getItemCount('王冠')>1){
+                    await leo.log('身上的【王冠】只能带1个，多余的请先存银行，脚本结束')
+                    return leo.delay(1000*60*60*2);
+                }
+                if(cga.getItemCount('青之证明')==0){
+                    await leo.log('身上没有【青之证明】，去银行获取')
+                    await leo.goto(n => n.falan.bank)
+                    await leo.turnDir(0)
+                    await leo.getOneFromBank('青之证明')
+                    if(cga.getItemCount('青之证明')==0){
+                        await leo.log('身上和银行都没有【青之证明】，脚本结束')
+                        return leo.delay(1000*60*60*2);
+                    }
+                }
+                if(cga.getItemCount('赤之证明')==0){
+                    await leo.log('身上没有【赤之证明】，去银行获取')
+                    await leo.goto(n => n.falan.bank)
+                    await leo.turnDir(0)
+                    await leo.getOneFromBank('赤之证明')
+                    if(cga.getItemCount('赤之证明')==0){
+                        await leo.log('身上和银行都没有【赤之证明】，脚本结束')
+                        return leo.delay(1000*60*60*2);
+                    }
+                }
+
                 await leo.logBack()
-                await leo.sellCastle()
+                //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
-                await leo.goto(n => n.teleport.ghana)
+                await leo.goto(n => n.elsa.x)
+                await leo.autoWalk([165,153])
+                await leo.talkNpc(2,leo.talkYes,'利夏岛')
+                await leo.autoWalk([90,99,'国民会馆'])
+                await leo.autoWalk([108,39,'雪拉威森塔１层'])
+                await leo.autoWalk([34,95])
+                await leo.talkNpc(0,leo.talkYes,'辛梅尔')
+                await leo.autoWalk([207,91,'光之路'])
+                await leo.autoWalk([161,118])
+                await leo.talkNpc(0,leo.talkYes)
                 await leo.autoWalkList([
-                    [47, 77, '索奇亚'],
-                    [462, 404, '索奇亚']
-                ])
-                await leo.turnTo(462, 404)
-                await leo.say('以军神之名开启海路')
-                await leo.talkNpc(-1,-1,leo.talkYes)
-                await leo.autoWalkList([
-                    [17, 13, '契约的海道'],
-                    [17, 12, '阿卡斯'],
-                    [45, 69, 20301], 
-                    [50, 15, 20302],
-                    [50, 62, 20303],    
-                    [66, 81, 20304],
-                    [72, 81, 20303],
-                    [88, 29, 20304],
-                    [94, 74, 20305],
-                    [89, 30, 20306],
-                    [50, 90, 20307],
-                    [50, 85, 20308],
-                    [93, 65, 20309],
-                    [90, 63, 20310],
-                    [60, 64]    
+                    [98,59,'星咏宫殿·地下４层'],[98,87,'星咏宫殿·地下３层'],
+                    [90,69,'星咏宫殿·地下２层'],[97,98,'星咏宫殿·地下１层'],
+                    [98, 91]
                 ])
             }
         }
@@ -854,7 +1003,7 @@ const petConfig = {
                 await leo.autoWalkList([[15,11],[13,11]])
             } else {
                 await leo.logBack()
-                await leo.sellCastle()
+                //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
                 await leo.goto(n => n.castle.teleport)
@@ -914,7 +1063,7 @@ const petConfig = {
                 await leo.autoWalkList([[117, 324],[119, 320]])
             } else {
                 await leo.logBack()
-                await leo.sellCastle()
+                //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
                 await leo.goto(n => n.teleport.jenova)
@@ -922,6 +1071,77 @@ const petConfig = {
                     [24, 40, '莎莲娜'],
                     [119, 320]
                 ])
+            }
+        }
+    },
+    '巨狼': {
+        name: '巨狼',
+        sealCardName: '封印卡（野兽系)',
+        sealCardLevel: 1,
+        autoDropPet: true, //是否自动扔宠，true扔/false不扔
+        minHp: 102 - 3,
+        minMp: 100 - 3,
+        minAttack: 45,
+        minDefensive: 33,
+        minAgility: 33,
+        index: 1,
+        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
+        gradeLog: true, //打印算档日志
+        gradeLogMax: 5, //最多显示多少行日志
+        crystalName: '火风的水晶（5：5）',
+        petSkillName: '火焰魔法-Ⅰ',
+        async walk(cga){
+            const leo = cga.emogua;
+            //地图判断，如果已经在1级宠捕捉点，则继续捕捉
+            var currentMap = cga.GetMapName();
+            if (currentMap == '雪拉威森塔７７层') {
+                await leo.autoWalkList([[87,24]])
+            } else {
+                await leo.logBack()
+                //await leo.sellCastle()
+                await leo.checkHealth(doctorName)
+                await leo.checkCrystal(this.crystalName)
+                await leo.goto(n => n.elsa.x)
+                await leo.autoWalk([165,153])
+                await leo.talkNpc(2,leo.talkYes,'利夏岛')
+                await leo.autoWalk([90,99,'国民会馆'])
+                await leo.autoWalk([107,52])
+                await leo.supply(108, 52)
+                await leo.autoWalk([108,39,'雪拉威森塔１层'])
+                await leo.autoWalkList([
+                    [73,56],[75,50,'雪拉威森塔５０层'],
+                    [24,44,'雪拉威森塔７５层'],
+                ])
+                await leo.checkHealth(doctorName)
+                await leo.autoWalkList([
+                    [133,133],[133,140],[120,140],[120,149],[109,149],
+                    [109,157],[91,157],[91,151],[91,150,'雪拉威森塔７６层']
+                ])
+                await leo.checkHealth(doctorName)
+                await leo.autoWalkList([
+                    [133,133],[133,140],[120,140],[120,149],[109,149],
+                    [109,157],[91,157],[91,151],[91,150,'雪拉威森塔７６层']
+                ])
+                await leo.checkHealth(doctorName)
+                await leo.autoWalkList([
+                    [93,148],[116,148],[116,132],[140,132],[140,125],
+                    [122,125],[121,125,'雪拉威森塔７５层']
+                ])
+                await leo.checkHealth(doctorName)
+                await leo.autoWalkList([
+                    [106,125]
+                ])
+                await leo.checkHealth(doctorName)
+                await leo.autoWalkList([
+                    [106,52],[104,52],[104,19],[93,19],[93,18,'雪拉威森塔７６层']
+                ])
+                await leo.checkHealth(doctorName)
+                await leo.autoWalkList([
+                    [95,17],[95,16,'雪拉威森塔７７层']
+                ])
+                await leo.checkHealth(doctorName)
+                await leo.autoWalkList([[87,24]])
             }
         }
     },
@@ -950,7 +1170,7 @@ const petConfig = {
                 await leo.autoWalkList([[13, 15],[15, 15]])
             } else {
                 await leo.logBack()
-                await leo.sellCastle()
+                //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
                 await leo.goto(n => n.teleport.jenova)
@@ -987,7 +1207,7 @@ const petConfig = {
                 await leo.autoWalkList([[23,5],[25,5]])
             } else {
                 await leo.logBack()
-                await leo.sellCastle()
+                //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
                 await leo.goto(n => n.castle.teleport)
@@ -1030,6 +1250,158 @@ const petConfig = {
             }
         }
     },
+    '猫人': {
+        name: '猫人',
+        sealCardName: '封印卡（野兽系)',
+        sealCardLevel: 4,
+        autoDropPet: false, //是否自动扔宠，true扔/false不扔
+        minHp: 101 - 3,
+        minMp: 86 - 3,
+        minAttack: 40,
+        minDefensive: 35,
+        minAgility: 33,
+        index: 1,
+        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
+        gradeLog: true, //打印算档日志
+        gradeLogMax: 5, //最多显示多少行日志
+        crystalName: '火风的水晶（5：5）',
+        petSkillName: '火焰魔法-Ⅰ',
+        async walk(cga){
+            const leo = cga.emogua;
+            //地图判断，如果已经在1级宠捕捉点，则继续捕捉
+            var currentMap = cga.GetMapName();
+            if (currentMap == '莎莲娜东方洞窟 地下2楼') {
+                await leo.autoWalkList([[14, 16],[12, 16]])
+            } else {
+                await leo.logBack()
+                //await leo.sellCastle()
+                await leo.checkHealth(doctorName)
+                await leo.checkCrystal(this.crystalName)
+                await leo.goto(n => n.teleport.jenova)
+                await leo.autoWalkList([
+                    [71, 19, '莎莲娜'],
+                    [527, 209]
+                ])
+                await leo.talkNpc(0,leo.talkYes,'莎莲娜东方洞窟 地下1楼')
+                await leo.autoWalkList([
+                    [18,5,'莎莲娜东方洞窟 地下2楼'],[12,16]
+                ])
+            }
+        }
+    },
+    '巨人': {
+        name: '巨人',
+        sealCardName: '封印卡（人形系）',
+        sealCardLevel: 1,
+        autoDropPet: true, //是否自动扔宠，true扔/false不扔
+        minHp: 124 - 3,
+        minMp: 89 - 3,
+        minAttack: 44,
+        minDefensive: 40,
+        minAgility: 28,
+        index: 1,
+        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
+        gradeLog: true, //打印算档日志
+        gradeLogMax: 5, //最多显示多少行日志
+        crystalName: '风地的水晶（5：5）',
+        petSkillName: '火焰魔法-Ⅰ',
+        async walk(cga){
+            const leo = cga.emogua;
+            //地图判断，如果已经在1级宠捕捉点，则继续捕捉
+            var currentMap = cga.GetMapName();
+            if (currentMap == '风鸣之塔 10楼') {
+                await leo.autoWalkList([[15, 62],[14, 62]])
+            } else {
+                await leo.logBack()
+                //await leo.sellCastle()
+                await leo.checkHealth(doctorName)
+                await leo.checkCrystal(this.crystalName)
+                await leo.goto(n => n.teleport.ghana)
+                await leo.autoWalkList([
+                    [47, 77, '索奇亚'],
+                    [462, 404, '索奇亚']
+                ])
+                await leo.turnTo(462, 404)
+                await leo.say('以军神之名开启海路')
+                await leo.talkNpc(-1,-1,leo.talkYes)
+                await leo.autoWalkList([
+                    [17, 13, '契约的海道'],
+                    [17, 12, '阿卡斯'],
+                    [45, 69, 20301], 
+                    [50, 15, 20302],
+                    [50, 62, 20303],    
+                    [66, 81, 20304],
+                    [72, 81, 20303],
+                    [88, 29, 20304],
+                    [94, 74, 20305],
+                    [89, 30, 20306],
+                    [50, 90, 20307],
+                    [50, 85, 20308],
+                    [93, 65, 20309],
+                    [90, 63, 20310],
+                    [14, 62]  
+                ])
+            }
+        }
+    },
+    '亚特拉斯巨神': {
+        name: '亚特拉斯巨神',
+        sealCardName: '封印卡（人形系）',
+        sealCardLevel: 4,
+        autoDropPet: true, //是否自动扔宠，true扔/false不扔
+        minHp: 123 - 3,
+        minMp: 86 - 3,
+        minAttack: 45,
+        minDefensive: 37,
+        minAgility: 30,
+        index: 1,
+        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
+        gradeLog: true, //打印算档日志
+        gradeLogMax: 5, //最多显示多少行日志
+        crystalName: '水火的水晶（5：5）',
+        petSkillName: '火焰魔法-Ⅰ',
+        async walk(cga){
+            const leo = cga.emogua;
+            //地图判断，如果已经在1级宠捕捉点，则继续捕捉
+            var currentMap = cga.GetMapName();
+            if (currentMap == '风鸣之塔 10楼') {
+                await leo.autoWalkList([[62, 64],[60, 64]])
+            } else {
+                await leo.logBack()
+                //await leo.sellCastle()
+                await leo.checkHealth(doctorName)
+                await leo.checkCrystal(this.crystalName)
+                await leo.goto(n => n.teleport.ghana)
+                await leo.autoWalkList([
+                    [47, 77, '索奇亚'],
+                    [462, 404, '索奇亚']
+                ])
+                await leo.turnTo(462, 404)
+                await leo.say('以军神之名开启海路')
+                await leo.talkNpc(-1,-1,leo.talkYes)
+                await leo.autoWalkList([
+                    [17, 13, '契约的海道'],
+                    [17, 12, '阿卡斯'],
+                    [45, 69, 20301], 
+                    [50, 15, 20302],
+                    [50, 62, 20303],    
+                    [66, 81, 20304],
+                    [72, 81, 20303],
+                    [88, 29, 20304],
+                    [94, 74, 20305],
+                    [89, 30, 20306],
+                    [50, 90, 20307],
+                    [50, 85, 20308],
+                    [93, 65, 20309],
+                    [90, 63, 20310],
+                    [60, 64]    
+                ])
+            }
+        }
+    },
     '哥布林': {
         name: '哥布林',
         sealCardName: '封印卡（人形系）',
@@ -1055,7 +1427,7 @@ const petConfig = {
                 await leo.autoWalkList([[484, 170],[482, 170]])
             } else {
                 await leo.logBack()
-                await leo.sellCastle()
+                //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
                 await leo.goto(n => n.falan.eout)
@@ -1090,7 +1462,7 @@ const petConfig = {
                 await leo.autoWalkList([[255, 593],[257, 593]])
             } else {
                 await leo.logBack()
-                await leo.sellCastle()
+                //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
                 await leo.goto(n => n.teleport.jenova)
@@ -1126,7 +1498,7 @@ const petConfig = {
                 await leo.autoWalkList([[282, 488],[280, 488]])
             } else {
                 await leo.logBack()
-                await leo.sellCastle()
+                //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
                 await leo.goto(n => n.teleport.jenova)
@@ -1162,7 +1534,7 @@ const petConfig = {
                 await leo.autoWalkList([[420, 357],[422, 357]])
             } else {
                 await leo.logBack()
-                await leo.sellCastle()
+                //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
                 await leo.goto(n => n.teleport.vinoy)
@@ -1198,12 +1570,52 @@ const petConfig = {
                 await leo.autoWalkList([[478, 193],[478, 194]])
             } else {
                 await leo.logBack()
-                await leo.sellCastle()
+                //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
                 await leo.goto(n => n.falan.eout)
                 await leo.autoWalkList([
                     [478, 194]
+                ])
+            }
+        }
+    },
+    '扫把蝙蝠': {
+        name: '扫把蝙蝠',
+        sealCardName: '封印卡（飞行系）',
+        sealCardLevel: 4,
+        autoDropPet: true, //是否自动扔宠，true扔/false不扔
+        minHp: 87 - 3,
+        minMp: 93 - 3,
+        minAttack: 40,
+        minDefensive: 33,
+        minAgility: 34,
+        index: 1,
+        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
+        gradeLog: true, //打印算档日志
+        gradeLogMax: 5, //最多显示多少行日志
+        crystalName: '地水的水晶（5：5）',
+        petSkillName: '火焰魔法-Ⅰ',
+        async walk(cga){
+            const leo = cga.emogua;
+            //地图判断，如果已经在1级宠捕捉点，则继续捕捉
+            var currentMap = cga.GetMapName();
+            if (currentMap == '莎莲娜东方洞窟 地下2楼') {
+                await leo.autoWalkList([[20,25],[18,25]])
+            } else {
+                await leo.logBack()
+                //await leo.sellCastle()
+                await leo.checkHealth(doctorName)
+                await leo.checkCrystal(this.crystalName)
+                await leo.goto(n => n.teleport.jenova)
+                await leo.autoWalkList([
+                    [71, 19, '莎莲娜'],
+                    [527, 209]
+                ])
+                await leo.talkNpc(0,leo.talkYes,'莎莲娜东方洞窟 地下1楼')
+                await leo.autoWalkList([
+                    [18,5,'莎莲娜东方洞窟 地下2楼'],[32,9,'莎莲娜东方洞窟 地下3楼'],[9,17,'莎莲娜东方洞窟 地下2楼'],[18,25]
                 ])
             }
         }
@@ -1233,7 +1645,7 @@ const petConfig = {
                 await leo.autoWalkList([[41, 35],[40, 35]])
             } else {
                 await leo.logBack()
-                await leo.sellCastle()
+                //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
                 if(!leo.has('试炼洞穴通行证')){
@@ -1279,7 +1691,7 @@ const petConfig = {
                 await leo.autoWalkList([[28, 46],[30, 46]])
             } else {
                 await leo.logBack()
-                await leo.sellCastle()
+                //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
                 await leo.goto(n => n.teleport.jenova)
@@ -1287,6 +1699,49 @@ const petConfig = {
                     [24, 40, '莎莲娜'],
                     [235,338,'莎莲娜西方洞窟'],
                     [45, 9, 14001],[57, 13, 14002],[30, 46]
+                ])
+            }
+        }
+    },
+    '巨蝙蝠': {
+        name: '巨蝙蝠',
+        sealCardName: '封印卡（飞行系）',
+        sealCardLevel: 1,
+        autoDropPet: true, //是否自动扔宠，true扔/false不扔
+        minHp: 112 - 3,
+        minMp: 86 - 3,
+        minAttack: 42,
+        minDefensive: 39,
+        minAgility: 33,
+        index: 1,
+        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
+        gradeLog: true, //打印算档日志
+        gradeLogMax: 5, //最多显示多少行日志
+        crystalName: '火风的水晶（5：5）',
+        petSkillName: '火焰魔法-Ⅰ',
+        async walk(cga){
+            const leo = cga.emogua;
+            //地图判断，如果已经在1级宠捕捉点，则继续捕捉
+            var currentMap = cga.GetMapName();
+            if (currentMap == '青龙的洞窟 4楼') {
+                await leo.autoWalkList([[70, 66],[72, 66]])
+            } else {
+                await leo.logBack()
+                //await leo.sellCastle()
+                await leo.checkHealth(doctorName)
+                await leo.checkCrystal(this.crystalName)
+                await leo.goto(n => n.castle.teleport)
+                await leo.autoWalk([37,4])
+                await leo.talkNpc(0,leo.talkYes)
+                await leo.autoWalkList([
+                    [5, 4, 4313],[6, 13, 4312],[6, 13, '阿巴尼斯村'],
+                    [38, 71,'莎莲娜'],[118, 100 ,'魔法大学'],[106, 54, '青龙的洞窟 1楼'],
+                    [27,38]
+                ])
+                await leo.talkNpc(0,leo.talkYes)
+                await leo.autoWalkList([
+                    [26, 10, '青龙的洞窟 2楼'],[21, 45, '青龙的洞窟 3楼'],[45, 43, '青龙的洞窟 4楼'],[72, 66]
                 ])
             }
         }
@@ -1316,7 +1771,7 @@ const petConfig = {
                 await leo.autoWalkList([[479, 255],[481, 255]])
             } else {
                 await leo.logBack()
-                await leo.sellCastle()
+                //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
                 await leo.goto(n => n.teleport.jenova)
@@ -1352,7 +1807,7 @@ const petConfig = {
                 await leo.autoWalkList([[22,14]])
             } else {
                 await leo.logBack()
-                await leo.sellCastle()
+                //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
                 if(!leo.has('试炼洞穴通行证')){
@@ -1405,7 +1860,7 @@ const petConfig = {
                 await leo.autoWalkList([[9, 31],[10, 33]])
             } else {
                 await leo.logBack()
-                await leo.sellCastle()
+                //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
                 await leo.goto(n => n.teleport.kili)
@@ -1442,7 +1897,7 @@ const petConfig = {
                 await leo.autoWalkList([[565,200],[563,200]])
             } else {
                 await leo.logBack()
-                await leo.sellCastle()
+                //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
                 await leo.goto(n => n.falan.eout)
@@ -1477,7 +1932,7 @@ const petConfig = {
                 await leo.autoWalkList([[570, 242],[570, 240]])
             } else {
                 await leo.logBack()
-                await leo.sellCastle()
+                //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
                 await leo.goto(n => n.teleport.jenova)
@@ -1513,7 +1968,7 @@ const petConfig = {
                 await leo.autoWalkList([[588, 46],[590, 46]])
             } else {
                 await leo.logBack()
-                await leo.sellCastle()
+                //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
                 await leo.goto(n => n.teleport.aleut)
@@ -1549,7 +2004,7 @@ const petConfig = {
                 await leo.autoWalkList([[361, 339]])
             } else {
                 await leo.logBack()
-                await leo.sellCastle()
+                //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
                 await leo.goto(n => n.teleport.jenova)
@@ -1585,7 +2040,7 @@ const petConfig = {
                 await leo.autoWalkList([[527, 333],[529, 333]])
             } else {
                 await leo.logBack()
-                await leo.sellCastle()
+                //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
                 await leo.goto(n => n.teleport.jenova)
@@ -1621,7 +2076,7 @@ const petConfig = {
                 await leo.autoWalkList([[483, 217],[485, 217]])
             } else {
                 await leo.logBack()
-                await leo.sellCastle()
+                //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
                 await leo.goto(n => n.teleport.ghana)
@@ -1656,7 +2111,7 @@ const petConfig = {
                 await leo.autoWalkList([[22,29]])
             } else {
                 await leo.logBack()
-                await leo.sellCastle()
+                //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
                 await leo.goto(n => n.falan.sout)
@@ -1704,7 +2159,7 @@ const petConfig = {
 
             } else {
                 await leo.logBack()
-                await leo.sellCastle()
+                //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
                 await leo.goto(n => n.falan.sout)
@@ -1742,7 +2197,7 @@ const petConfig = {
                 ]);
             } else {
                 await leo.logBack()
-                await leo.sellCastle()
+                //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
                 await leo.goto(n => n.teleport.jenova)
@@ -1797,7 +2252,7 @@ const petConfig = {
                 await leo.autoWalkList([[282, 400],[280, 400]])
             } else {
                 await leo.logBack()
-                await leo.sellCastle()
+                //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
                 await leo.goto(n => n.teleport.kili)
@@ -1833,7 +2288,7 @@ const petConfig = {
                 await leo.autoWalkList([[23,13],[21,13]])
             } else {
                 await leo.logBack()
-                await leo.sellCastle()
+                //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
                 await leo.goto(n => n.castle.teleport)
@@ -1905,7 +2360,7 @@ const petConfig = {
                 await leo.autoWalkList([[286, 186],[282, 186]])
             } else {
                 await leo.logBack()
-                await leo.sellCastle()
+                //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
                 await leo.goto(n => n.elsa.x)
@@ -1953,7 +2408,7 @@ const petConfig = {
                 await leo.autoWalkList([[18, 16],[21, 16]])
             } else {
                 await leo.logBack()
-                await leo.sellCastle()
+                //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
                 await leo.goto(n => n.castle.teleport)
@@ -2015,7 +2470,7 @@ const petConfig = {
             } else {
                 if(mapInfo.name != '索奇亚') {
                     await leo.logBack()
-                    await leo.sellCastle()
+                    //await leo.sellCastle()
                     await leo.checkHealth(doctorName)
                     await leo.checkCrystal(this.crystalName)
                     await leo.goto(n => n.teleport.ghana)
@@ -2137,7 +2592,7 @@ const petConfig = {
                 await leo.autoWalkList([[26, 18],[26, 17]])
             } else {
                 await leo.logBack()
-                await leo.sellCastle()
+                //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
                 await leo.goto(n => n.teleport.ghana)
@@ -2176,7 +2631,7 @@ const petConfig = {
                 await leo.autoWalkList([[580, 328],[582, 328]])
             } else {
                 await leo.logBack()
-                await leo.sellCastle()
+                //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
                 await leo.goto(n => n.teleport.ghana)
@@ -2212,13 +2667,121 @@ const petConfig = {
                 await leo.autoWalkList([[523, 348],[525, 348]])
             } else {
                 await leo.logBack()
-                await leo.sellCastle()
+                //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
                 await leo.goto(n => n.teleport.ghana)
                 await leo.autoWalkList([
                     [47, 77, '索奇亚'],
                     [525, 348]
+                ])
+            }
+        }
+    },
+    '印第安仙人掌 ': {
+        name: '印第安仙人掌 ',
+        sealCardName: '封印卡（植物系）',
+        sealCardLevel: 1,
+        autoDropPet: true, //是否自动扔宠，true扔/false不扔
+        minHp: 105 - 3,
+        minMp: 89 - 3 ,
+        minAttack: 44,
+        minDefensive: 40,
+        minAgility: 27,
+        index: 1,
+        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
+        gradeLog: true, //打印算档日志
+        gradeLogMax: 5, //最多显示多少行日志
+        crystalName: '地水的水晶（5：5）',
+        petSkillName: '陨石魔法-Ⅰ',
+        async walk(cga){
+            const leo = cga.emogua;
+            //地图判断，如果已经在1级宠捕捉点，则继续捕捉
+            var currentMap = cga.GetMapName();
+            if (currentMap == '索奇亚') {
+                await leo.autoWalkList([[339, 316],[341, 316]])
+            } else {
+                await leo.logBack()
+                //await leo.sellCastle()
+                await leo.checkHealth(doctorName)
+                await leo.checkCrystal(this.crystalName)
+                await leo.goto(n => n.teleport.kili)
+                await leo.autoWalkList([
+                    [60, 45, '索奇亚'],
+                    [341, 316]
+                ])
+            }
+        }
+    },
+    '兔耳仙人掌': {
+        name: '兔耳仙人掌',
+        sealCardName: '封印卡（植物系）',
+        sealCardLevel: 4,
+        autoDropPet: true, //是否自动扔宠，true扔/false不扔
+        minHp: 108 - 3,
+        minMp: 87 - 3 ,
+        minAttack: 43,
+        minDefensive: 36,
+        minAgility: 28,
+        index: 1,
+        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
+        gradeLog: true, //打印算档日志
+        gradeLogMax: 5, //最多显示多少行日志
+        crystalName: '火风的水晶（5：5）',
+        petSkillName: '强力火焰魔法-Ⅰ',
+        async walk(cga){
+            const leo = cga.emogua;
+            //地图判断，如果已经在1级宠捕捉点，则继续捕捉
+            var currentMap = cga.GetMapName();
+            if (currentMap == '索奇亚') {
+                await leo.autoWalkList([[627, 295],[627, 302]])
+            } else {
+                await leo.logBack()
+                //await leo.sellCastle()
+                await leo.checkHealth(doctorName)
+                await leo.checkCrystal(this.crystalName)
+                await leo.goto(n => n.teleport.ghana)
+                await leo.autoWalkList([
+                    [47, 77, '索奇亚'],
+                    [627, 302]
+                ])
+            }
+        }
+    },
+    '武术仙人掌': {
+        name: '武术仙人掌',
+        sealCardName: '封印卡（植物系）',
+        sealCardLevel: 4,
+        autoDropPet: true, //是否自动扔宠，true扔/false不扔
+        minHp: 103 - 3,
+        minMp: 93 - 3 ,
+        minAttack: 41,
+        minDefensive: 41,
+        minAgility: 27,
+        index: 1,
+        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
+        gradeLog: true, //打印算档日志
+        gradeLogMax: 5, //最多显示多少行日志
+        crystalName: '火风的水晶（5：5）',
+        petSkillName: '强力火焰魔法-Ⅰ',
+        async walk(cga){
+            const leo = cga.emogua;
+            //地图判断，如果已经在1级宠捕捉点，则继续捕捉
+            var currentMap = cga.GetMapName();
+            if (currentMap == '索奇亚') {
+                await leo.autoWalkList([[552, 398],[552, 400]])
+            } else {
+                await leo.logBack()
+                //await leo.sellCastle()
+                await leo.checkHealth(doctorName)
+                await leo.checkCrystal(this.crystalName)
+                await leo.goto(n => n.teleport.ghana)
+                await leo.autoWalkList([
+                    [47, 77, '索奇亚'],
+                    [552, 400]
                 ])
             }
         }
@@ -2248,7 +2811,7 @@ const petConfig = {
                 await leo.autoWalkList([[293, 819],[292, 819]])
             } else {
                 await leo.logBack()
-                await leo.sellCastle()
+                //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
                 await leo.goto(n=>n.grahl.c)
@@ -2286,121 +2849,13 @@ const petConfig = {
                 await leo.autoWalkList([[402, 346],[402, 345]])
             } else {
                 await leo.logBack()
-                await leo.sellCastle()
+                //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
                 await leo.goto(n=>n.grahl.c)
                 await leo.autoWalkList([
                     [176, 105,'库鲁克斯岛'],
                     [402, 345]
-                ])
-            }
-        }
-    },
-    '兔耳仙人掌': {
-        name: '兔耳仙人掌',
-        sealCardName: '封印卡（植物系）',
-        sealCardLevel: 4,
-        autoDropPet: true, //是否自动扔宠，true扔/false不扔
-        minHp: 108 - 3,
-        minMp: 87 - 3 ,
-        minAttack: 43,
-        minDefensive: 36,
-        minAgility: 28,
-        index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
-        gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
-        gradeLog: true, //打印算档日志
-        gradeLogMax: 5, //最多显示多少行日志
-        crystalName: '火风的水晶（5：5）',
-        petSkillName: '强力火焰魔法-Ⅰ',
-        async walk(cga){
-            const leo = cga.emogua;
-            //地图判断，如果已经在1级宠捕捉点，则继续捕捉
-            var currentMap = cga.GetMapName();
-            if (currentMap == '索奇亚') {
-                await leo.autoWalkList([[627, 295],[627, 302]])
-            } else {
-                await leo.logBack()
-                await leo.sellCastle()
-                await leo.checkHealth(doctorName)
-                await leo.checkCrystal(this.crystalName)
-                await leo.goto(n => n.teleport.ghana)
-                await leo.autoWalkList([
-                    [47, 77, '索奇亚'],
-                    [627, 302]
-                ])
-            }
-        }
-    },
-    '印第安仙人掌 ': {
-        name: '印第安仙人掌 ',
-        sealCardName: '封印卡（植物系）',
-        sealCardLevel: 1,
-        autoDropPet: true, //是否自动扔宠，true扔/false不扔
-        minHp: 105 - 3,
-        minMp: 89 - 3 ,
-        minAttack: 44,
-        minDefensive: 40,
-        minAgility: 27,
-        index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
-        gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
-        gradeLog: true, //打印算档日志
-        gradeLogMax: 5, //最多显示多少行日志
-        crystalName: '地水的水晶（5：5）',
-        petSkillName: '陨石魔法-Ⅰ',
-        async walk(cga){
-            const leo = cga.emogua;
-            //地图判断，如果已经在1级宠捕捉点，则继续捕捉
-            var currentMap = cga.GetMapName();
-            if (currentMap == '索奇亚') {
-                await leo.autoWalkList([[339, 316],[341, 316]])
-            } else {
-                await leo.logBack()
-                await leo.sellCastle()
-                await leo.checkHealth(doctorName)
-                await leo.checkCrystal(this.crystalName)
-                await leo.goto(n => n.teleport.kili)
-                await leo.autoWalkList([
-                    [60, 45, '索奇亚'],
-                    [341, 316]
-                ])
-            }
-        }
-    },
-    '武术仙人掌': {
-        name: '武术仙人掌',
-        sealCardName: '封印卡（植物系）',
-        sealCardLevel: 4,
-        autoDropPet: true, //是否自动扔宠，true扔/false不扔
-        minHp: 103 - 3,
-        minMp: 93 - 3 ,
-        minAttack: 41,
-        minDefensive: 41,
-        minAgility: 27,
-        index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
-        gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
-        gradeLog: true, //打印算档日志
-        gradeLogMax: 5, //最多显示多少行日志
-        crystalName: '火风的水晶（5：5）',
-        petSkillName: '强力火焰魔法-Ⅰ',
-        async walk(cga){
-            const leo = cga.emogua;
-            //地图判断，如果已经在1级宠捕捉点，则继续捕捉
-            var currentMap = cga.GetMapName();
-            if (currentMap == '索奇亚') {
-                await leo.autoWalkList([[552, 398],[552, 400]])
-            } else {
-                await leo.logBack()
-                await leo.sellCastle()
-                await leo.checkHealth(doctorName)
-                await leo.checkCrystal(this.crystalName)
-                await leo.goto(n => n.teleport.ghana)
-                await leo.autoWalkList([
-                    [47, 77, '索奇亚'],
-                    [552, 400]
                 ])
             }
         }
@@ -2430,7 +2885,7 @@ const petConfig = {
                 await leo.autoWalkList([[618, 65],[620, 65]])
             } else {
                 await leo.logBack()
-                await leo.sellCastle()
+                //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
                 await leo.goto(n => n.teleport.aleut)
@@ -2466,7 +2921,7 @@ const petConfig = {
                 await leo.autoWalkList([[453, 389],[451, 389]])
             } else {
                 await leo.logBack()
-                await leo.sellCastle()
+                //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
                 await leo.goto(n => n.teleport.ghana)
@@ -2502,7 +2957,7 @@ const petConfig = {
                 await leo.autoWalkList([[54, 163],[56, 163]])
             } else {
                 await leo.logBack()
-                await leo.sellCastle()
+                //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
                 await leo.goto(n => n.castle.teleport)
@@ -2540,7 +2995,7 @@ const petConfig = {
                 await leo.autoWalkList([[78, 346],[80, 346]])
             } else {
                 await leo.logBack()
-                await leo.sellCastle()
+                //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
                 await leo.goto(n => n.teleport.jenova)
@@ -2576,7 +3031,7 @@ const petConfig = {
                 await leo.autoWalkList([[10, 13],[10, 10]])
             } else {
                 await leo.logBack()
-                await leo.sellCastle()
+                //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
                 await leo.goto(n => n.teleport.jenova)
@@ -2613,7 +3068,7 @@ const petConfig = {
                 await leo.autoWalkList([[414, 564],[416, 564]])
             } else {
                 await leo.logBack()
-                await leo.sellCastle()
+                //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
                 await leo.goto(n => n.teleport.vinoy)
@@ -2621,6 +3076,44 @@ const petConfig = {
                     [67, 46, '芙蕾雅'],
                     [416, 564]
                 ])
+            }
+        }
+    },
+    '史莱姆': {
+        name: '史莱姆',
+        sealCardName: '封印卡（特殊系）',
+        sealCardLevel: 1,
+        autoDropPet: true, //是否自动扔宠，true扔/false不扔
+        minHp: 124 - 3,
+        minMp: 85 - 3 ,
+        minAttack: 39,
+        minDefensive: 32,
+        minAgility: 26,
+        index: 1,
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
+        gradeLog: true, //打印算档日志
+        gradeLogMax: 5, //最多显示多少行日志
+        crystalName: '火风的水晶（5：5）',
+        petSkillName: '火焰魔法-Ⅰ',
+        async walk(cga){
+            const leo = cga.emogua;
+            //地图判断，如果已经在1级宠捕捉点，则继续捕捉
+            var currentMap = cga.GetMapName();
+            if (currentMap == '龟裂的地下道地下1楼') {
+                await leo.moveAround()
+            } else {
+                await leo.logBack()
+                //await leo.sellCastle()
+                await leo.checkHealth(doctorName)
+                await leo.checkCrystal(this.crystalName)
+                await leo.goto(n => n.falan.w1)
+                await leo.autoWalkList([
+                    [95, 49, '修理工波利的家'],
+                    [9, 2, '地下道'],
+                    [7, 23, '龟裂的地下道地下1楼']
+                ])
+                await leo.moveAround()
             }
         }
     },
@@ -2649,7 +3142,7 @@ const petConfig = {
                 await leo.autoWalkList([[6, 8],[7, 8]])
             } else {
                 await leo.logBack()
-                await leo.sellCastle()
+                //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
                 await leo.goto(n => n.teleport.jenova)
@@ -2686,7 +3179,7 @@ const petConfig = {
                 await leo.autoWalkList([[6, 47],[8, 47]])
             } else {
                 await leo.logBack()
-                await leo.sellCastle()
+                //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
                 await leo.goto(n => n.teleport.vinoy)
@@ -2695,6 +3188,296 @@ const petConfig = {
                     [343, 497, '索奇亚海底洞窟 地下1楼'],
                     [18, 34, '索奇亚海底洞窟 地下2楼'],
                     [8, 47]
+                ])
+            }
+        }
+    },
+    '绿烟': {
+        name: '绿烟',
+        sealCardName: '封印卡（特殊系）',
+        sealCardLevel: 1,
+        autoDropPet: true, //是否自动扔宠，true扔/false不扔
+        minHp: 97 - 3,
+        minMp: 126 - 3 ,
+        minAttack: 36,
+        minDefensive: 34,
+        minAgility: 33,
+        index: 1,
+        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
+        gradeLog: true, //打印算档日志
+        gradeLogMax: 5, //最多显示多少行日志
+        crystalName: '火风的水晶（5：5）',
+        petSkillName: '火焰魔法-Ⅰ',
+        async walk(cga){
+            const leo = cga.emogua;
+            //地图判断，如果已经在1级宠捕捉点，则继续捕捉
+            var currentMap = cga.GetMapName();
+            if (currentMap == '方堡盆地') {
+                await leo.autoWalkList([[221,165],[219,165]])
+            } else {
+                await leo.logBack()
+                //await leo.sellCastle()
+                await leo.checkHealth(doctorName)
+                await leo.checkCrystal(this.crystalName)
+                await leo.goto(n => n.elsa.x)
+                await leo.autoWalkList([
+                    [130, 50, '盖雷布伦森林'],
+                    [215, 43]
+                ])
+                await leo.talkNpc(0,leo.talkNo,'方堡盆地')
+                await leo.autoWalk([219,165])
+            }
+        }
+    },
+    '水晶怪': {
+        name: '水晶怪',
+        sealCardName: '封印卡（金属系）',
+        sealCardLevel: 4,
+        autoDropPet: true, //是否自动扔宠，true扔/false不扔
+        minHp: 90 - 3,
+        minMp: 135 - 3 ,
+        minAttack: 30,
+        minDefensive: 44,
+        minAgility: 26,
+        index: 1,
+        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
+        gradeLog: true, //打印算档日志
+        gradeLogMax: 5, //最多显示多少行日志
+        crystalName: '火风的水晶（5：5）',
+        petSkillName: '火焰魔法-Ⅰ',
+        async walk(cga){
+            const leo = cga.emogua;
+            //地图判断，如果已经在1级宠捕捉点，则继续捕捉
+            var currentMap = cga.GetMapName();
+            if (currentMap == '肯吉罗岛') {
+                await leo.autoWalkList([[546, 327],[546, 325]])
+            } else {
+                await leo.logBack()
+                //await leo.sellCastle()
+                await leo.checkHealth(doctorName)
+                await leo.checkCrystal(this.crystalName)
+                await leo.goto(n => n.camp.x)
+                await leo.autoWalkList([
+                    [36, 87, '肯吉罗岛'],
+                    [546, 325]
+                ])
+            }
+        }
+    },
+    '马优尔': {
+        name: '马优尔',
+        sealCardName: '封印卡（野兽系)',
+        sealCardLevel: 4,
+        autoDropPet: true, //是否自动扔宠，true扔/false不扔
+        minHp: 108 - 3,
+        minMp: 107 - 3 ,
+        minAttack: 43,
+        minDefensive: 40,
+        minAgility: 34,
+        index: 1,
+        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
+        gradeLog: true, //打印算档日志
+        gradeLogMax: 5, //最多显示多少行日志
+        crystalName: '火风的水晶（5：5）',
+        petSkillName: '火焰魔法-Ⅰ',
+        async walk(cga){
+            const leo = cga.emogua;
+            //地图判断，如果已经在1级宠捕捉点，则继续捕捉
+            var currentMap = cga.GetMapName();
+            if (currentMap == '方堡盆地·南') {
+                await leo.autoWalkList([[178,109],[176,109]])
+            } else {
+                await leo.logBack()
+                //await leo.sellCastle()
+                await leo.checkHealth(doctorName)
+                await leo.checkCrystal(this.crystalName)
+                await leo.goto(n => n.elsa.x)
+                await leo.autoWalkList([
+                    [130, 50, '盖雷布伦森林'],
+                    [215, 43]
+                ])
+                await leo.talkNpc(0,leo.talkNo,'方堡盆地')
+                await leo.autoWalk([228,178,'方堡盆地·南'])
+                await leo.autoWalk([176,109])
+            }
+        }
+    },
+    '葡萄酒粉怪': {
+        name: '葡萄酒粉怪',
+        sealCardName: '封印卡（特殊系）',
+        sealCardLevel: 1,
+        autoDropPet: true, //是否自动扔宠，true扔/false不扔
+        minHp: 91 - 3,
+        minMp: 83 - 3 ,
+        minAttack: 49,
+        minDefensive: 36,
+        minAgility: 35,
+        index: 1,
+        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
+        gradeLog: true, //打印算档日志
+        gradeLogMax: 5, //最多显示多少行日志
+        crystalName: '水火的水晶（5：5）',
+        petSkillName: '陨石魔法-Ⅰ',
+        async walk(cga){
+            const leo = cga.emogua;
+            //地图判断，如果已经在1级宠捕捉点，则继续捕捉
+            var currentMap = cga.GetMapName();
+            if (currentMap == '方堡盆地·南') {
+                await leo.autoWalkList([[237,152],[235,152]])
+            } else {
+                await leo.logBack()
+                //await leo.sellCastle()
+                await leo.checkHealth(doctorName)
+                await leo.checkCrystal(this.crystalName)
+                await leo.goto(n => n.elsa.x)
+                await leo.autoWalkList([
+                    [130, 50, '盖雷布伦森林'],
+                    [215, 43]
+                ])
+                await leo.talkNpc(0,leo.talkNo,'方堡盆地')
+                await leo.autoWalk([228,178,'方堡盆地·南'])
+                await leo.autoWalk([235,152])
+            }
+        }
+    },
+    '剑鸵鸟': {
+        name: '剑鸵鸟',
+        sealCardName: '封印卡（野兽系)',
+        sealCardLevel: 1,
+        autoDropPet: true, //是否自动扔宠，true扔/false不扔
+        minHp: 106 - 3,
+        minMp: 88 - 3 ,
+        minAttack: 36,
+        minDefensive: 36,
+        minAgility: 32,
+        index: 1,
+        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
+        gradeLog: true, //打印算档日志
+        gradeLogMax: 5, //最多显示多少行日志
+        crystalName: '火风的水晶（5：5）',
+        petSkillName: '陨石魔法-Ⅰ',
+        async walk(cga){
+            const leo = cga.emogua;
+            //地图判断，如果已经在1级宠捕捉点，则继续捕捉
+            var currentMap = cga.GetMapName();
+            if (currentMap == '方堡盆地·西') {
+                await leo.autoWalkList([[144,155],[142,155]])
+            } else {
+                await leo.logBack()
+                //await leo.sellCastle()
+                await leo.checkHealth(doctorName)
+                await leo.checkCrystal(this.crystalName)
+                await leo.goto(n => n.elsa.x)
+                await leo.autoWalkList([
+                    [130, 50, '盖雷布伦森林'],
+                    [215, 43]
+                ])
+                await leo.talkNpc(0,leo.talkNo,'方堡盆地')
+                await leo.autoWalk([163,77,'方堡盆地·西'])
+                await leo.autoWalk([142,155])
+            }
+        }
+    },
+    '银狮': {
+        name: '银狮',
+        sealCardName: '封印卡（野兽系)',
+        sealCardLevel: 4,
+        autoDropPet: true, //是否自动扔宠，true扔/false不扔
+        minHp: 98 - 3,
+        minMp: 74 - 3 ,
+        minAttack: 47,
+        minDefensive: 32,
+        minAgility: 36,
+        index: 1,
+        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
+        gradeLog: true, //打印算档日志
+        gradeLogMax: 5, //最多显示多少行日志
+        crystalName: '火风的水晶（5：5）',
+        petSkillName: '火焰魔法-Ⅰ',
+        async walk(cga){
+            const leo = cga.emogua;
+            //地图判断，如果已经在1级宠捕捉点，则继续捕捉
+            var currentMap = cga.GetMapName();
+            if (currentMap == '布拉基姆高地') {
+                await leo.autoWalkList([[173,117],[171,117]])
+            } else {
+                await leo.logBack()
+                //await leo.sellCastle()
+                await leo.checkHealth(doctorName)
+                await leo.checkCrystal(this.crystalName)
+                await leo.goto(n => n.elsa.x)
+                await leo.autoWalk([157, 93])
+                await leo.turnDir(0)
+                await leo.delay(500)
+                await leo.autoWalkList([
+                    [190, 116, '盖雷布伦森林'],
+                    [231, 222, '布拉基姆高地'],[171,117]
+                ])
+            }
+        }
+    },
+    '大炸弹': {
+        name: '大炸弹',
+        sealCardName: '封印卡（特殊系）',
+        sealCardLevel: 4,
+        autoDropPet: true, //是否自动扔宠，true扔/false不扔
+        minHp: 78 - 3,
+        minMp: 128 - 3,
+        minAttack: 36,
+        minDefensive: 34,
+        minAgility: 29,
+        index: 1,
+        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
+        gradeLog: true, //打印算档日志
+        gradeLogMax: 5, //最多显示多少行日志
+        crystalName: '水火的水晶（5：5）',
+        petSkillName: '强力火焰魔法-Ⅰ',
+        async walk(cga){
+            const leo = cga.emogua;
+            //地图判断，如果已经在1级宠捕捉点，则继续捕捉
+            var currentMap = cga.GetMapName();
+            if (currentMap == '雪拉威森塔３９层') {
+                await leo.autoWalkList([[100, 127],[96, 127]])
+            } else {
+                await leo.logBack()
+                //await leo.sellCastle()
+                await leo.checkHealth(doctorName)
+                await leo.checkCrystal(this.crystalName)
+                await leo.goto(n => n.elsa.x)
+                await leo.autoWalk([165,153])
+                await leo.talkNpc(2,leo.talkYes,'利夏岛')
+                await leo.autoWalk([90,99,'国民会馆'])
+                await leo.autoWalk([107,52])
+                await leo.supply(108, 52)
+                await leo.autoWalk([108,39,'雪拉威森塔１层'])
+                await leo.autoWalkList([[73,56],[72,56,'雪拉威森塔４０层']])
+                await leo.autoWalk([96,83,'雪拉威森塔３９层'])
+                await leo.autoWalkList([
+                    [239,176],[257,176],[257,224],[262,224],[262,235],
+                    [266,235],[266,224],[270,224],[270,236],[277,236],
+                    [277,218],[274,218],[274,204],[281,204],[281,212],
+                    [285,212],[285,208],[289,208],[289,192],[301,192],
+                    [301,196],[305,196],[305,193],[310,193],[310,196],
+                    [317,196],[317,186],[313,186],[313,180],[329,180],
+                    [329,164],[311,164],[311,175],[287,175],[287,180],
+                    [273,180],[273,135],[265,135],[265,115],[252,115],
+                    [252,124],[237,124],[237,120],[242,120],[242,111],
+                    [249,111],[249,80],[233,80],[233,92],[225,92],
+                    [225,88],[229,88],[229,56],[225,56],[225,68],
+                    [221,68],[221,93],[217,93],[217,96],[233,96],
+                    [233,136],[221,136],[221,120],[217,120],[217,108],
+                    [185,108],[185,88],[169,88],[169,84],[165,84],
+                    [165,80],[157,80],[157,84],[153,84],[153,88],
+                    [145,88],[145,92],[141,92],[141,88],[137,88],
+                    [137,121],[113,121],[113,144],[100,144],[100,127],
+                    [96,127]
                 ])
             }
         }

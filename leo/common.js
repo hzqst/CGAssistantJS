@@ -3,7 +3,7 @@ module.exports = require('./wrapper').then( async (cga) => {
     leo.messageServer = false;
     leo.appId = '';
     leo.appSecret = '';
-    leo.version = '8.1';
+    leo.version = '8.6';
     leo.qq = '158583461'
     leo.copyright = '红叶散落';
     leo.FORMAT_DATE = 'yyyy-MM-dd';
@@ -257,7 +257,10 @@ module.exports = require('./wrapper').then( async (cga) => {
         });
     }
     //队员进入队伍，参数为队长名字
-    leo.enterTeam = (teamLeader,waitPos = cga.GetMapXY()) => {
+    leo.enterTeam = async (teamLeader,waitPos = cga.GetMapXY()) => {
+        if(leo.monitor.config.autoChangeLineForLeader) {
+            await leo.changeLineForLeader(teamLeader)
+        }
         var teamplayers = cga.getTeamPlayers();
         if (teamplayers.length > 0 && teamplayers[0].name == teamLeader) {
             return leo.done();
@@ -613,10 +616,10 @@ module.exports = require('./wrapper').then( async (cga) => {
             }
             await leo.turnDir(0)
             const pos = [100,101,102,103,104];
-            return pos.find(i=>cga.IsPetValid(i));
+            return pos.find(i=>!cga.IsPetValid(i));
         }else{
             const pos = [0,1,2,3,4];
-            return pos.find(i=>cga.IsPetValid(i));
+            return pos.find(i=>!cga.IsPetValid(i));
         }
     }
     //银行全存
@@ -1569,7 +1572,9 @@ module.exports = require('./wrapper').then( async (cga) => {
                     cga.ForceMove(dir, visible);
                     //cga.ForceMoveTo(movePos.x, movePos.y, visible);
                     curPos = movePos;
-                    await leo.delay(leo.moveTimeout)
+                    const speedFix = 50;
+                    const realTimeout = leo.moveTimeout - speedFix;
+                    await leo.delay(realTimeout)
                     return leo.next();
                 } catch(e) {
                     console.log(leo.logTime()+'遇敌程序错误：移动失败', e);
@@ -3216,6 +3221,10 @@ module.exports = require('./wrapper').then( async (cga) => {
         }
         await leo.goto(n=>n.falan.bank)
         await leo.turnDir(0)
+        var bankGold = cga.GetBankGold();
+        if(bankGold < money){
+            money = bankGold;
+        }
         await leo.moveGold(money,cga.MOVE_GOLD_FROMBANK)
     }
 
@@ -3527,11 +3536,108 @@ module.exports = require('./wrapper').then( async (cga) => {
         setTimeout(()=>syncMonitor(),1000*30);
         leo.syncInfo = syncInfo;
     }catch(e){
-        leo.syncInfo = (cga,isbank,silently) => {
+        leo.syncInfo = (cga,isbank,silently,logback) => {
             console.log('没有信息同步插件，跳过信息同步功能');
         }
     }
-    
+
+    //播放某个动作（表情），index允许的值是0~17
+    leo.gesture = (index) => new Promise( async (resolve, reject) => {
+        if(cga.PlayGesture && cga.isInNormalState()){
+            cga.PlayGesture(index);
+        }
+        resolve();
+    });
+
+    //获取主机名
+    leo.host = (upperCase = true) => {
+        let hostname = require("os").hostname();
+        return upperCase?hostname.toUpperCase():hostname;
+    }
+    //获取MAC地址，可能获取不正确
+    leo.mac = (upperCase = true) => {
+        let networkInterfaces = require("os").networkInterfaces();
+        //console.info(networkInterfaces);
+        let ips = [];
+        for(let m in networkInterfaces){
+            ips.push(...networkInterfaces[m]);
+        }
+        let ip = {};
+        ips.forEach(v=>{
+            if(v.family.toUpperCase() == 'IPV4' && !v.cidr.includes('127.0.0.1')){
+                ip = v;
+            }
+        })
+        if(ip.mac){
+            return upperCase?ip.mac.toUpperCase():ip.mac;
+        }
+    }
+
+    //宠物图鉴卡
+    leo.getPetCard = (petName) => {
+        let ret;
+        if(cga.GetPicBooksInfo){
+            ret = cga.GetPicBooksInfo().find(v=>v.name==petName);
+        }
+        return ret;
+    }
+    leo.checkPetCard = (petName) => {
+        if(cga.GetPicBooksInfo){
+            return cga.GetPicBooksInfo().find(v=>v.name==petName) !== undefined;
+        }else{
+            console.log(leo.logTime()+'CGA版本太低，跳过检测。此功能需CGA版本大于2021-06-26')
+            return true;
+        }
+    }
+
+    //获取自己所在游戏线路
+    leo.getLine = () => {
+        return cga.getMapInfo().indexes.index2;
+    }
+    //通过好友名片，获取队长所在的游戏线路
+    leo.getLeaderLine = (teamLeader) => {
+        const cards = cga.GetCardsInfo();
+        const leaderCard = cards.find(i=>i.name==teamLeader);
+        if(leaderCard){
+            return leaderCard.server; //0-离线，1-10具体的线路
+        }else{
+            return -1;//-1-没有队长名片
+        }
+    }
+    //切换游戏线路
+    leo.changeLine = async (line) => {
+        cga.gui.LoadAccount({
+            server : line
+        }, (err, result)=>{
+            console.log('切换到'+line+'线',err,result);
+            cga.LogOut();
+        })
+        return leo.delay(1000*60*5);
+    }
+    //切换到队长所在游戏线路
+    leo.changeLineForLeader = async (teamLeader) => {
+        if(teamLeader==''){
+            await leo.log('未指定队长')
+            return leo.delay(1000*60*60*2);
+        }
+        let leaderLine = leo.getLeaderLine(teamLeader);
+        if(leaderLine==-1){
+            await leo.log('没有与队长【'+teamLeader+'】交换名片')
+            return leo.delay(1000*60*60*2);
+        }
+        const line = leo.getLine();
+        await leo.loop(async()=>{
+            if(leaderLine == line) {
+                return leo.reject();
+            }
+            if(leaderLine == 0) {
+                console.log(leo.logTime()+'队长【'+teamLeader+'】处于离线状态，等待...');
+            }else{
+                return leo.changeLine(leaderLine);
+            }
+            await leo.delay(1000*30)
+        })
+    }
 
     ///////////////////////脚本默认执行内容///////////////////////////////
     //leo.keepAlive(true); //启用防掉线功能
@@ -3577,7 +3683,8 @@ module.exports = require('./wrapper').then( async (cga) => {
         autoExit: false, //是否开启自动结束脚本
         autoExitValue: 5, //x分钟不动自动结束脚本
         autoExitMemory:{}, //缓存上一次检查的战斗状态和坐标值
-        syncInfo: false,
+        syncInfo: false, //是否开启角色信息同步功能
+        autoChangeLineForLeader: false, //自动跟随队长换线
         monitorLoop: async () =>{
             //战斗状态监控
             if (cga.isInBattle() && leo.monitor.config.status != '战斗状态') {

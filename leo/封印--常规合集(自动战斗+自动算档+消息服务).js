@@ -1,6 +1,6 @@
 require('./common').then(async (cga) => {
 
-    const petName = '杀人螳螂';
+    const petName = '赤熊';
 
     let protect = {
         minHp: 500,
@@ -15,12 +15,17 @@ require('./common').then(async (cga) => {
         await leo.log('缺少抓宠插件pet.js')
         return leo.delay(1000*60*60*24);
     }else{
-        await petPlugins.tips(cga);
+        await petPlugins.tips(cga)
         console.log('')
     }
     const petOptions = petPlugins.getPetConfig(petName);
     if(!petOptions){
-        await leo.log('抓宠插件中没有指定宠物配置：' + petName);
+        await leo.log('抓宠插件中没有指定宠物配置：' + petName)
+        return leo.delay(1000*60*60*24);
+    }
+
+    if(!leo.checkPetCard(petName)){
+        await leo.log('缺少宠物图鉴，请检查：' + petName)
         return leo.delay(1000*60*60*24);
     }
 
@@ -181,7 +186,7 @@ require('./common').then(async (cga) => {
                     let petToSave = cga.GetPetsInfo().filter(p=>p.realname==petName && p.level==1);
                     for (var i = 0; i < petToSave.length; i++) {
                         let pet = petToSave[i];
-                        let emptyIndex = leo.getPetEmptyIndex(true);
+                        let emptyIndex = await leo.getPetEmptyIndex(true);
                         if(emptyIndex != undefined){
                             await leo.movePet(pet.index, emptyIndex)
                         }else{
@@ -197,15 +202,7 @@ require('./common').then(async (cga) => {
                         petIndexMap[pet.index] = 1;
                     }
                 }
-                try{
-                    //角色信息同步
-                    const {syncInfo} = require('./syncInfo');
-                    const isbank = true;
-                    const silently = true;
-                    await syncInfo(cga,isbank,silently)
-                }catch(e){
-                    console.log('没有信息同步插件，跳过信息同步功能，e:'+e);
-                }
+                await leo.syncInfo(cga,true,true,true)
             }
             var sealCardCount = cga.getItemCount(petOptions.sealCardName);
             if (sealCardCount < 2) {
@@ -217,6 +214,7 @@ require('./common').then(async (cga) => {
             await leo.encounterTeamLeader(protect)
             protect.checker()
             console.log(leo.logTime() + "触发回补")
+            await leo.syncInfo(cga,true)
             await leo.logBack()
         })
     }catch(e){

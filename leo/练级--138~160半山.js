@@ -12,7 +12,7 @@ require('./common').then(cga => {
         maxItemNumber: 21,
         minTeamNumber: 5
     };
-    var teammates = ['蓝倾之殇','楚城之殇','蓝绝之殇','华丽之殇'];
+    var teammates = [];
     var isPrepare = false; //招魂、治疗、补血、卖石
     var isLogBackFirst = false; //启动登出
     var prepareOptions = {
