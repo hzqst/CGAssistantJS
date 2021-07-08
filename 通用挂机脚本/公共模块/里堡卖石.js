@@ -16,7 +16,7 @@ module.exports = {
 												
 						setTimeout(()=>{
 							
-							if(cga.GetPlayerInfo().gold >= 990000)
+							if(cga.GetPlayerInfo().gold >= 950000)
 							{
 								if(cga.getTeamPlayers().length)
 									cga.DoRequest(cga.REQUEST_TYPE_LEAVETEAM);
@@ -28,7 +28,7 @@ module.exports = {
 								], ()=>{
 									cga.turnDir(0);
 									cga.AsyncWaitNPCDialog(()=>{
-										cga.MoveGold(980000, cga.MOVE_GOLD_TOBANK);
+										cga.MoveGold(900000, cga.MOVE_GOLD_TOBANK);
 										setTimeout(()=>{
 											cga.walkList([
 											[3, 23, '圣骑士营地'],

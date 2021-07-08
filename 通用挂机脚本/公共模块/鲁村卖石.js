@@ -28,7 +28,7 @@ module.exports = {
 			cga.sellStone(()=>{
 				setTimeout(()=>{
 					
-					if(cga.GetPlayerInfo().gold >= 990000)
+					if(cga.GetPlayerInfo().gold >= 950000)
 					{
 						if(cga.travel.gelaer.isSettled)
 						{
@@ -36,7 +36,7 @@ module.exports = {
 							setTimeout(()=>{
 								cga.travel.gelaer.toBank(()=>{
 									cga.AsyncWaitNPCDialog(()=>{
-										cga.MoveGold(980000, cga.MOVE_GOLD_TOBANK);
+										cga.MoveGold(900000, cga.MOVE_GOLD_TOBANK);
 										setTimeout(cb, 1000, null);
 									});
 								});
@@ -52,7 +52,7 @@ module.exports = {
 									], ()=>{
 										cga.turnDir(0);
 										cga.AsyncWaitNPCDialog(()=>{
-											cga.MoveGold(980000, cga.MOVE_GOLD_TOBANK);
+											cga.MoveGold(900000, cga.MOVE_GOLD_TOBANK);
 											setTimeout(cb, 1000, null);
 										});
 									});
