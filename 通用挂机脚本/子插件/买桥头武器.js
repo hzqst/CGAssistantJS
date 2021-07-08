@@ -5,41 +5,48 @@ var buyArray = [
 {
 	name : '平民剑',
 	type : 0,
+	cost : 400,
 },
 {
 	name : '平民斧',
-	type : 1,	
+	type : 1,
+	cost : 600,	
 },
 {
 	name : '平民枪',
 	type : 2,	
+	cost : 600,
 },
 {
 	name : '平民弓',
-	type : 3,	
+	type : 3,
+	cost : 400,
 },
 {
 	name : '平民回力镖',
-	type : 4,	
+	type : 4,
+	cost : 700,
 },
 {
 	name : '平民小刀',
-	type : 5,	
+	type : 5,
+	cost : 400,
 },
 {
 	name : '平民杖',
-	type : 6,	
+	type : 6,
+	cost : 400,
 }
 ]
 
-const filterWeapon = (eq) => {
+const filterHasWeapon = (eq) => {
 	if (eq.type >= 0 && eq.type <= 6) {
 		return true
 	}
 	return false;
 }
 
-const repairFilterWeapon = (eq) => {
+const filterRepairWeapon = (eq) => {
 	if (eq.type >= 0 && eq.type <= 6 && eq.level <= 10) {
 		const durability = cga.getEquipEndurance(eq);
 		return durability && durability[0] < durability[1] &&
@@ -52,14 +59,15 @@ const repairFilterWeapon = (eq) => {
 }
 
 const putdownEquipments = (cb)=>{
-	var items = cga.getEquipItems().filter(repairFilterWeapon);
+	var items = cga.getEquipItems().filter(filterRepairWeapon);
 	if(items.length){
-		var emptyslot = cga.findInventoryEmptySlot();
+		/*var emptyslot = cga.findInventoryEmptySlot();
 		if(emptyslot == -1){
 			cb(new Error('物品栏没有空位'));
 			return;
 		}
-		cga.MoveItem(items[0].pos, emptyslot, -1)
+		cga.MoveItem(items[0].pos, emptyslot, -1)*/
+		cga.DropItem(items[0].pos);
 		setTimeout(putdownEquipments, 1000, cb);
 		return;
 	}
@@ -70,7 +78,7 @@ const putdownEquipments = (cb)=>{
 const putupEquipments = (cb)=>{
 	var currentEquip = cga.getEquipItems();
 	var item = cga.getInventoryItems().find((eq)=>{
-		return eq.name == thisobj.buyWeapon.name && repairFilterWeapon(eq) == false;
+		return eq.name == thisobj.buyWeapon.name && filterRepairWeapon(eq) == false;
 	});
 	
 	if(item != undefined){
@@ -85,7 +93,16 @@ const putupEquipments = (cb)=>{
 var thisobj = {
 	prepare : (cb)=>{
 		var items = cga.getEquipItems();
-		if(items.filter(filterWeapon).length && !items.filter(repairFilterWeapon).length){			
+		if(items.filter(filterHasWeapon).length && !items.filter(filterRepairWeapon).length){			
+			cb(null);
+			return;
+		}
+
+		var buySlot = buyArray.find((eq)=>{
+			return eq.name = thisobj.buyWeapon.name;
+		});
+
+		if(buySlot && cga.GetPlayerInfo().gold < buySlot.cost){
 			cb(null);
 			return;
 		}
@@ -96,49 +113,49 @@ var thisobj = {
 			return;
 		}
 
-		cga.travel.falan.toStone('B1', ()=>{
-			cga.turnTo(150, 122);
-			cga.AsyncWaitNPCDialog(()=>{
-				cga.ClickNPCDialog(0, 0);
-				cga.AsyncWaitNPCDialog((err, dlg)=>{
-					var store = cga.parseBuyStoreMsg(dlg);
-					if(!store)
-					{
-						cb(new Error('商店内容解析失败'));
-						return;
-					}
-
-					var buyitem = [];
-					var buyCount = 0;
-					var emptySlotCount = cga.getInventoryEmptySlotCount();
-
-					store.items.forEach((it)=>{
-						if(it.name == thisobj.buyWeapon.name && buyCount < emptySlotCount){
-							buyitem.push({index: it.index, count:1});
-							buyCount ++;
-						}
-					});
-					if(!buyitem.length)
-					{
-						cb(new Error('桥头武器购买失败，可能已被买完或者背包没空间'));
-						return;
-					}
-
-					cga.BuyNPCStore(buyitem);
+		putdownEquipments(()=>{
+			cga.travel.falan.toStone('B1', ()=>{
+				cga.turnTo(150, 122);
+				cga.AsyncWaitNPCDialog(()=>{
+					cga.ClickNPCDialog(0, 0);
 					cga.AsyncWaitNPCDialog((err, dlg)=>{
-						if(dlg && dlg.message.indexOf('谢谢') >= 0){
-							putdownEquipments(()=>{
+						var store = cga.parseBuyStoreMsg(dlg);
+						if(!store)
+						{
+							cb(new Error('商店内容解析失败'));
+							return;
+						}
+
+						var buyitem = [];
+						var buyCount = 0;
+						var emptySlotCount = cga.getInventoryEmptySlotCount();
+
+						store.items.forEach((it)=>{
+							if(it.name == thisobj.buyWeapon.name && buyCount < emptySlotCount){
+								buyitem.push({index: it.index, count:1});
+								buyCount ++;
+							}
+						});
+						if(!buyitem.length)
+						{
+							cb(new Error('桥头武器购买失败，可能已被买完或者背包没空间'));
+							return;
+						}
+
+						cga.BuyNPCStore(buyitem);
+						cga.AsyncWaitNPCDialog((err, dlg)=>{
+							if(dlg && dlg.message.indexOf('谢谢') >= 0){							
 								putupEquipments(()=>{
 									cb(null);
 								});
-							});
-							return;
-						}
-						else
-						{
-							cb(null);
-							return;
-						}
+								return;
+							}
+							else
+							{
+								cb(null);
+								return;
+							}
+						});
 					});
 				});
 			});

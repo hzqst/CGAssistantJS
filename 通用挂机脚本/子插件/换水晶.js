@@ -1,10 +1,36 @@
 var cga = global.cga;
 var configTable = global.configTable;
 
+var buyArray = [
+	{
+		name : '地水的水晶（5：5）',
+		type : 0,
+	},
+	{
+		name : '水火的水晶（5：5）',
+		type : 1,	
+	},
+	{
+		name : '火风的水晶（5：5）',
+		type : 2,	
+	},
+	{
+		name : '风地的水晶（5：5）',
+		type : 3,	
+	},
+]
+
 const repairFilter = (eq) => {
 	if (eq.type == 22) {
 		const durability = cga.getEquipEndurance(eq);
-		return durability && durability[0] < 100;
+		return durability && durability[0] < 150;
+	}
+	return false;
+}
+
+const hasFilter = (eq) => {
+	if (eq.type == 22) {
+		return true;
 	}
 	return false;
 }
@@ -12,12 +38,13 @@ const repairFilter = (eq) => {
 const putdownEquipments = (cb)=>{
 	var items = cga.getEquipItems().filter(repairFilter);
 	if(items.length){
-		var emptyslot = cga.findInventoryEmptySlot();
+		/*var emptyslot = cga.findInventoryEmptySlot();
 		if(emptyslot == -1){
 			cb(new Error('物品栏没有空位'));
 			return;
 		}
-		cga.MoveItem(items[0].pos, emptyslot, -1)
+		cga.MoveItem(items[0].pos, emptyslot, -1)*/
+		cga.DropItem(items[0].pos);
 		setTimeout(putdownEquipments, 1000, cb);
 		return;
 	}
@@ -25,7 +52,7 @@ const putdownEquipments = (cb)=>{
 	setTimeout(cb, 1000);
 }
 
-const putupEquipments = (equipped, cb)=>{
+const putupEquipments = (buyCrystal, cb)=>{
 	var currentEquip = cga.getEquipItems();
 	var item = cga.getInventoryItems().find((eq)=>{
 		
@@ -34,33 +61,23 @@ const putupEquipments = (equipped, cb)=>{
 		if( durability && durability[0] != durability[1])
 			return false;
 		
-		if( equipped.find((eq2)=>{
-			return eq2.name == eq.name;
-		}) != undefined){
-
-			var foundEq = currentEquip.find((eq2)=>{
-				return eq2.name == eq.name;
-			});
-			
-			if(foundEq == undefined)
-				return true;
-			
-			const durability2 = cga.getEquipEndurance(foundEq);
-			if( durability2 && durability2[0] < durability[0])
-				return true;
+		if( buyCrystal.name == eq.name ){
+			return true;
 		}
+
+		return false;
 	});
 	
 	if(item != undefined){
 		cga.UseItem(item.pos)
-		setTimeout(putupEquipments, 500, equipped, cb);
+		setTimeout(putupEquipments, 500, buyCrystal, cb);
 		return;
 	}
 	
 	setTimeout(cb, 1000);
 }
 
-const repairLoop = (needRepair, cb)=>{
+const repairEquipments = (buyCrystal, cb)=>{
 	cga.turnDir(0);
 	cga.AsyncWaitNPCDialog(()=>{
 		cga.ClickNPCDialog(0, 0);
@@ -74,7 +91,7 @@ const repairLoop = (needRepair, cb)=>{
 			}
 			
 			var buyitem = store.items.find((it)=>{
-				return it.name == needRepair[0].name;
+				return it.name == buyCrystal.name;
 			});
 			if(buyitem == undefined)
 			{
@@ -100,8 +117,14 @@ const repairLoop = (needRepair, cb)=>{
 
 var thisobj = {
 	prepare : (cb)=>{
+		var anyitems = cga.getEquipItems().filter(hasFilter);
 		var items = cga.getEquipItems().filter(repairFilter);
-		if(!items.length){
+		if(!items.length && anyitems.length){
+			cb(null);
+			return;
+		}
+
+		if(cga.GetPlayerInfo().gold < 600){
 			cb(null);
 			return;
 		}
@@ -112,29 +135,14 @@ var thisobj = {
 			return;
 		}
 
-		var buy = (cb2)=>{
-			var equipped = cga.getEquipItems();
-			var needRepair = equipped.filter(repairFilter);
-			if(needRepair && needRepair[0]){
-				repairLoop(needRepair, ()=>{
-					putupEquipments(equipped, ()=>{
-						
-						var drop = cga.getInventoryItems().filter(repairFilter);
-						
-						if(drop && drop[0])
-						{
-							cga.DropItem(drop[0].pos);
-							setTimeout(cb2, 1000, null);
-						}
-						else
-						{
-							cb2(null);
-						}
+		var buy = (cb)=>{
+			putdownEquipments(()=>{
+				repairEquipments(thisobj.buyCrystal, ()=>{
+					putupEquipments(thisobj.buyCrystal, ()=>{
+						cb(null);
 					});
 				});
-			} else {
-				cb2(null);
-			}
+			});
 		}
 		
 		var map = cga.GetMapName();
@@ -211,11 +219,56 @@ var thisobj = {
 			});
 		}
 	},
+	translate : (pair)=>{
+		
+		if(pair.field == 'buyCrystal'){
+			pair.field = '购买水晶';
+			pair.value = pair.value;
+			pair.translated = true;
+			return true;
+		}
+		
+		return false;
+	},
 	loadconfig : (obj, cb)=>{
+		for(var i in buyArray){
+			if(buyArray[i].name == obj.buyCrystal){
+				configTable.buyCrystal = buyArray[i].name;
+				thisobj.buyCrystal = buyArray[i];
+				break;
+			}
+		}
+		
+		if(thisobj.buyCrystal === undefined){
+			console.error('读取配置：购买水晶失败！');
+			return false;
+		}
+		
 		return true;
 	},
 	inputcb : (cb)=>{
-		cb(null);
+		var sayString = '【换水晶】请选择水晶类型:';
+		for(var i in buyArray){
+			if(i != 0)
+				sayString += ', ';
+			sayString += '('+ (parseInt(i)+1) + ')' + buyArray[i].name;
+		}
+		cga.sayLongWords(sayString, 0, 3, 1);
+		cga.waitForChatInput((msg, index)=>{
+			if(index !== null && index >= 1 && buyArray[index - 1]){
+				configTable.buyCrystal = buyArray[index - 1].name;
+				thisobj.buyCrystal = buyArray[index - 1];
+				
+				var sayString2 = '当前已选择:[' + thisobj.buyCrystal.name + ']。';
+				cga.sayLongWords(sayString2, 0, 3, 1);
+				
+				cb(null);
+				
+				return false;
+			}
+			
+			return true;
+		});
 	}
 };
 
