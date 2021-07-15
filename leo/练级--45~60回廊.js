@@ -1,12 +1,21 @@
-require('./common').then(cga => {
-    //leo.baseInfoPrint();
-    leo.monitor.config.keepAlive = false;   //关闭防掉线的话改false
+require('./common').then(async (cga) => {
+    leo.baseInfoPrint();                    //显示基础信息
+    leo.moveTimeout = 220;                  //遇敌速度
+    leo.monitor.config.keepAlive = false;   //关闭防掉线
+    leo.monitor.config.logStatus = false;   //关闭战斗状态提示
+    //自动跟随队长换线，设置为true时，需要先提前与队长交换名片
+    leo.monitor.config.autoChangeLineForLeader = false;
+    leo.monitor.config.equipsProtect = false;   //关闭装备低耐久保护
 
-    var teamLeader = '此处填写队长名称'; //队长名称
+    var teamLeader = '此处填队长名称'; //队长名称
     var teamPlayerCount = 5; //队伍人数
     var teammates = [];
 
     var protect = {
+        //contactType遇敌类型：-1-旧遇敌，0-按地图自适应，1-东西移动，2-南北移动，
+        //3-随机移动，4-画小圈圈，5-画中圈圈，6-画大圈圈，7-画十字，8-画8字
+        contactType: 0,
+        visible: false, 
         minHp: 500,
         minMp: 30,
         minPetHp: 500,

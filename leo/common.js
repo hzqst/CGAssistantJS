@@ -3,7 +3,7 @@ module.exports = require('./wrapper').then( async (cga) => {
     leo.messageServer = false;
     leo.appId = '';
     leo.appSecret = '';
-    leo.version = '8.6';
+    leo.version = '8.7';
     leo.qq = '158583461'
     leo.copyright = '红叶散落';
     leo.FORMAT_DATE = 'yyyy-MM-dd';
@@ -845,6 +845,11 @@ module.exports = require('./wrapper').then( async (cga) => {
         if(leo.isInTeam()){
             await leo.leaveTeam()
         }
+        var emptyIndexes = leo.getEmptyBagIndexes();
+        if(emptyIndexes && emptyIndexes.length == 0){
+            await leo.logBack()
+            await leo.sellCastle()
+        }
         return leo.goto(n => n.falan.w1).then(() => leo.autoWalkList([
             [94, 78, '达美姊妹的店'],
             [17, 18]
@@ -1493,7 +1498,7 @@ module.exports = require('./wrapper').then( async (cga) => {
     leo.contactTeamLeader = async (protect) => {
         //contactType遇敌类型：-1-旧遇敌(高效)，0-按地图自适应，1-东西移动，2-南北移动，3-随机移动，
         //4-画小圈圈，5-画中圈圈，6-画大圈圈，7-画十字，8-画8字
-        var contactType = protect.contactType || -1;
+        var contactType = protect.contactType || 0;
         if(contactType == -1){
             return leo.encounter(protect);
         }
@@ -1525,11 +1530,13 @@ module.exports = require('./wrapper').then( async (cga) => {
         await leo.loop(async () => {
             await leo.waitAfterBattle()
             if(!leo.contactStatus){
+                await leo.delay(2000)
                 return leo.reject();
             }
             const isStop = await leo.contactCheck(protect, false, true);
             if(isStop || currentMapInfo.name != cga.GetMapName()){
                 leo.contactStatus = false; //标记遇敌程序停止
+                await leo.delay(2000)
                 return leo.reject();
             }
             if (cga.isInNormalState()) {
@@ -1567,12 +1574,12 @@ module.exports = require('./wrapper').then( async (cga) => {
                         }
                     }
                     //console.log('moveto',movePos.index)
-                    let dir = leo.getDir(movePos.x,movePos.y,curPos.x,curPos.y);
+                    //let dir = leo.getDir(movePos.x,movePos.y,curPos.x,curPos.y);
                     let visible = protect.visible || false;
-                    cga.ForceMove(dir, visible);
-                    //cga.ForceMoveTo(movePos.x, movePos.y, visible);
+                    //cga.ForceMove(dir, visible);
+                    cga.ForceMoveTo(movePos.x, movePos.y, visible);
                     curPos = movePos;
-                    const speedFix = 50;
+                    const speedFix = 100;
                     const realTimeout = leo.moveTimeout - speedFix;
                     await leo.delay(realTimeout)
                     return leo.next();
