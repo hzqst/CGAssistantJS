@@ -1,66 +1,84 @@
+var ProResupply = (cb)=>{
+	var map = cga.GetMapName();
+	
+	var path = [
+		[8, 33],
+		[7, 33],
+		[8, 33],
+		[7, 33],
+		[8, 33],
+	];
+	if(map == '芙蕾雅'){
+		path.unshift([82, 83, '医院']);
+		path.unshift([378, 195, '法兰城']);
+	} else if(map == '法兰城'){
+		path.unshift([82, 83, '医院']);
+	} else if(map == '里谢里雅堡'){
+		path.unshift([82, 83, '医院']);
+		path.unshift([41, 98, '法兰城']);
+	} else if(map == '里谢里雅堡'){
+		cga.travel.falan.toCastle(()=>{
+			ProResupply(cb);
+		});
+		return;
+	}
+	
+	cga.walkList(path, ()=>{
+		cga.TurnTo(6, 31);
+		setTimeout(cb, 5000);
+	});
+}
+
+var NonProResupply = (cb)=>{
+	var map = cga.GetMapName();
+	
+	var path = [
+		[9, 31],
+		[8, 31],
+		[9, 31],
+		[8, 31],
+		[9, 31],
+	];
+	if(map == '芙蕾雅') {
+		path.unshift([82, 83, '医院']);
+		path.unshift([378, 195, '法兰城']);
+	} else if(map == '法兰城') {
+		path.unshift([82, 83, '医院']);
+	} else if(map == '里谢里雅堡') {
+		path.unshift([82, 83, '医院']);
+		path.unshift([41, 98, '法兰城']);
+	} else if(map == '里谢里雅堡'){
+		cga.travel.falan.toCastle(()=>{
+			NonProResupply(cb);
+		});
+		return;
+	}
+	
+	cga.walkList(path, ()=>{
+		cga.TurnTo(9, 29);
+		setTimeout(cb, 5000);
+	});
+}
+
 var supplyModeArray = [
 {
 	name : '法兰西医资深护士回补',
-	func : (cb)=>{
-		var map = cga.GetMapName();
-		
-		var path = [
-			[8, 33],
-			[7, 33],
-			[8, 33],
-			[7, 33],
-			[8, 33],
-		];
-		if(map == '芙蕾雅'){
-			path.unshift([82, 83, '医院']);
-			path.unshift([378, 195, '法兰城']);
-		}
-		else if(map == '法兰城'){
-			path.unshift([82, 83, '医院']);
-		}
-		
-		cga.walkList(path, ()=>{
-			cga.TurnTo(6, 31);
-			setTimeout(cb, 5000);
-		});
-	},
+	func : ProResupply,
 	isLogBack : (map, mapindex)=>{
 		return false;
 	},
 	isAvailable : (map, mapindex)=>{
-		return (map == '芙蕾雅' || map == '法兰城' || map.indexOf('诅咒的迷宫') >= 0) ? true : false;
+		return (map == '芙蕾雅' || map == '法兰城' || map == '里谢里雅堡' || map == '艾尔莎岛' || map.indexOf('诅咒的迷宫') >= 0) ? true : false;
 	},
 },
 {
 	name : '法兰西医普通护士回补',
-	func : (cb)=>{
-		var map = cga.GetMapName();
-		
-		var path = [
-			[9, 31],
-			[8, 31],
-			[9, 31],
-			[8, 31],
-			[9, 31],
-		];
-		if(map == '芙蕾雅'){
-			path.unshift([82, 83, '医院']);
-			path.unshift([378, 195, '法兰城']);
-		}
-		else if(map == '法兰城'){
-			path.unshift([82, 83, '医院']);
-		}
-		
-		cga.walkList(path, ()=>{
-			cga.TurnTo(9, 29);
-			setTimeout(cb, 5000);
-		});
-	},
+	func : NonProResupply,
 	isLogBack : (map, mapindex)=>{
 		return false;
 	},
 	isAvailable : (map, mapindex)=>{
-		return (map == '芙蕾雅' || map == '法兰城' || map.indexOf('诅咒的迷宫') >= 0) ? true : false;
+		return (map == '芙蕾雅' || map == '法兰城' || map == '里谢里雅堡' || map == '艾尔莎岛' || map.indexOf('诅咒的迷宫') >= 0) ? true : false;
 	},
 },
 {

@@ -1,5 +1,6 @@
 var Async = require('async');
 var supplyCastle = require('./../公共模块/里堡回补');
+var supplyFalan = require('./../公共模块/法兰回补');
 var sellCastle = require('./../公共模块/里堡卖石');
 var teamMode = require('./../公共模块/组队模式');
 var logbackEx = require('./../公共模块/登出防卡住');
@@ -14,7 +15,7 @@ var moveThinkInterrupt = new interrupt();
 var playerThinkInterrupt = new interrupt();
 var playerThinkRunning = false;
 
-var supplyArray = [ supplyCastle ];
+var supplyArray = [ supplyCastle, supplyFalan ];
 
 var getSupplyObject = (map, mapindex)=>{
 	if(typeof map != 'string')
@@ -25,7 +26,6 @@ var getSupplyObject = (map, mapindex)=>{
 		return s.isAvailable(map, mapindex);
 	})
 }
-
 
 var sellArray = [sellCastle];
 
