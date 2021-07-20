@@ -3,7 +3,7 @@ module.exports = require('./wrapper').then( async (cga) => {
     leo.messageServer = false;
     leo.appId = '';
     leo.appSecret = '';
-    leo.version = '8.7';
+    leo.version = '8.8';
     leo.qq = '158583461'
     leo.copyright = '红叶散落';
     leo.FORMAT_DATE = 'yyyy-MM-dd';
@@ -384,10 +384,37 @@ module.exports = require('./wrapper').then( async (cga) => {
     //护士补血魔，方向(0-东，2-南，4-西，6-北)
     leo.supplyDir = leo.recharge;
     //护士补血魔，x,y为护士坐标
+    let supplyFailureTimes = 0;
     leo.supply = (x, y) => {
-        return leo.turnTo(x, y).then(() => leo.delay(5000));
+        return leo.turnTo(x, y)
+        .then(() => leo.delay(5000))
+        .then(()=>{
+            var playerinfo = cga.GetPlayerInfo();
+            if(playerinfo.hp < playerinfo.maxhp || playerinfo.mp < playerinfo.maxmp){
+                supplyFailureTimes++;
+                if(supplyFailureTimes<10){
+                    console.log('护士补给失败，重新进行补给');
+                    return leo.todo()
+                    .then(()=>{
+                        leo.panel.autosupply(false);
+                        return leo.delay(1000);
+                    })
+                    .then(()=>{
+                        leo.panel.autosupply(true);
+                        return leo.delay(1000);
+                    })
+                    .then(()=>leo.supply(x, y));
+                }else{
+                    cga.LogOut();
+                    return leo.delay(1000*60*60*24);
+                }
+            }
+        });
     }
-    leo.supplyCastle = () => {
+    leo.supplyCastle = async (isLogBack = false) => {
+        if(isLogBack){
+            await leo.logBack()
+        }
         var needSupply = false;
         var playerinfo = cga.GetPlayerInfo();
         if(playerinfo.hp < playerinfo.maxhp || playerinfo.mp < playerinfo.maxmp){
@@ -1519,6 +1546,10 @@ module.exports = require('./wrapper').then( async (cga) => {
             x: cga.GetMapXY().x,
             y: cga.GetMapXY().y
         };
+        //先往返移动一格位置，避免因为刚切了图，导致的遇敌无效
+        let checkPos = contactMovePos.find((v)=>v.index!=curPos.index);
+        await leo.autoWalk([checkPos.x,checkPos.y])
+        await leo.autoWalk([curPos.x,curPos.y])
         leo.waitMessageUntil((chat) => {
             if (chat.msg && chat.msg.indexOf('触发战斗保护') >= 0) {
                 if (leo.getTeammates().find(t => t.unit_id == chat.unitid)) {
@@ -1540,6 +1571,7 @@ module.exports = require('./wrapper').then( async (cga) => {
                 return leo.reject();
             }
             if (cga.isInNormalState()) {
+                //console.log(curPos)
                 try{
                     let movePos;
                     if(contactType<3){
@@ -2165,7 +2197,29 @@ module.exports = require('./wrapper').then( async (cga) => {
             return leo.logBackA()
             .then(()=>leo.autoWalkList([[117,155,'夏姆吉诊所'],[22,17]]))
             .then(()=>leo.supplyDir(6))
-            .then(()=>leo.delay(2000));
+            .then(()=>leo.delay(2000))
+            .then(()=>{
+                playerinfo = cga.GetPlayerInfo();
+                if(playerinfo.hp < playerinfo.maxhp || playerinfo.mp < playerinfo.maxmp){
+                    supplyFailureTimes++;
+                    if(supplyFailureTimes<10){
+                        console.log('护士补给失败，重新进行补给');
+                        return leo.todo()
+                        .then(()=>{
+                            leo.panel.autosupply(false);
+                            return leo.delay(1000);
+                        })
+                        .then(()=>{
+                            leo.panel.autosupply(true);
+                            return leo.delay(1000);
+                        })
+                        .then(()=>leo.supplyA());
+                    }else{
+                        cga.LogOut();
+                        return leo.delay(1000*60*60*24);
+                    }
+                }
+            });
         }
     }
     leo.checkHealthA = (doctorName,needSupply = true) => {
@@ -3147,6 +3201,47 @@ module.exports = require('./wrapper').then( async (cga) => {
                             leo.upgradePlayer(attr);
                         }
                     }
+                }else{
+                    //有默认加点设置的话，按默认加点方案
+                    if(leo.pointSetting.player && leo.pointSetting.player['默认']){
+                        var setting = leo.pointSetting.player['默认'];
+                        // setting = [
+                        //     {attr:1,max:333,maxTo:0},
+                        //     {attr:1,max:333,maxTo:0},
+                        //     {attr:0},
+                        //     {attr:3,max:120,maxTo:0}
+                        // ]
+                        var points = leo.checkUpgradePlayer();
+                        var index = (4 - (points % 4)) % 4;
+                        var obj = setting[index];
+                        var attr = -1;
+                        if(obj && typeof obj.attr == 'number'){
+                            var maxPoint = 15 + (playerInfo.level - 1) * 2;
+                            var currentPoint = leo.getPlayerPoints(obj.attr);
+                            if(currentPoint < maxPoint){
+                                if(obj.max && currentPoint >= obj.max){
+                                    //大于等于设定值
+                                    if(obj.maxTo === undefined){
+                                        console.log('人物加点配置有误，请检查' + obj);
+                                    }else{
+                                        attr = obj.maxTo;
+                                    }
+                                }else{
+                                    attr = obj.attr;
+                                }
+                            }else{
+                                //大于等于等级最大加点值
+                                if(obj.maxTo === undefined){
+                                    console.log('人物加点配置有误，请检查' + obj);
+                                }else{
+                                    attr = obj.maxTo;
+                                }
+                            }
+                            if(attr>=0 && attr<=4){
+                                leo.upgradePlayer(attr);
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -3236,215 +3331,265 @@ module.exports = require('./wrapper').then( async (cga) => {
     }
 
     leo.autoLearnSkill = async (skillName) => {
-        if(skillName=='气功弹'){
-            var skill = cga.findPlayerSkill(skillName);
-            if(!skill){
-                await leo.log('去学习技能【'+skillName+'】');
-                if(leo.isInTeam()){
-                    await leo.leaveTeam()
-                }
-                if(cga.GetPlayerInfo().gold<100){
-                    await leo.getMoneyFromBank(1000)
-                }
-                await leo.goto(n=>n.falan.s1)
-                await leo.autoWalk([124, 161])
-                await leo.loop(async ()=>{
-                    if(cga.GetMapName()=='竞技场的入口'){
-                        return leo.reject();
+        try{
+            if(skillName=='气功弹'){
+                var skill = cga.findPlayerSkill(skillName);
+                if(!skill){
+                    await leo.log('去学习技能【'+skillName+'】');
+                    if(leo.isInTeam()){
+                        await leo.leaveTeam()
                     }
-                    await leo.turnDir(4)
-                })
-                await leo.autoWalk([15,6,'*'])
-                await leo.autoWalk([15,57])
-                await leo.learnPlayerSkill(15, 56)
-                if(cga.findPlayerSkill(skillName)){
-                    await leo.log('已经完成技能【'+skillName+'】的学习');
-                } else{
-                    await leo.log('未能完成技能【'+skillName+'】的学习，请检查！')
+                    if(cga.GetPlayerInfo().gold<100){
+                        await leo.getMoneyFromBank(1000)
+                    }
+                    await leo.goto(n=>n.falan.s1)
+                    await leo.autoWalk([124, 161])
+                    await leo.loop(async ()=>{
+                        if(cga.GetMapName()=='竞技场的入口'){
+                            return leo.reject();
+                        }
+                        await leo.turnDir(4)
+                    })
+                    await leo.autoWalk([15,6,'*'])
+                    await leo.loop(async ()=>{
+                        await leo.autoWalk([15,57])
+                        await leo.learnPlayerSkill(15, 56)
+                        await leo.delay(2000)
+                        if(cga.findPlayerSkill(skillName)){
+                            await leo.log('已经完成技能【'+skillName+'】的学习')
+                            return leo.reject();
+                        } else{
+                            await leo.log('未能完成技能【'+skillName+'】的学习，请检查！')
+                        }
+                        await leo.delay(1000)
+                    })
+                }else{
+                    await leo.log('已经存在技能【'+skillName+'】');
                 }
-            }else{
-                await leo.log('已经存在技能【'+skillName+'】');
             }
-        }
-        if(skillName=='乾坤一掷'){
-            var skill = cga.findPlayerSkill(skillName);
-            if(!skill){
-                await leo.log('去学习技能【'+skillName+'】');
-                if(leo.isInTeam()){
-                    await leo.leaveTeam()
+            if(skillName=='乾坤一掷'){
+                var skill = cga.findPlayerSkill(skillName);
+                if(!skill){
+                    await leo.log('去学习技能【'+skillName+'】');
+                    if(leo.isInTeam()){
+                        await leo.leaveTeam()
+                    }
+                    if(cga.GetPlayerInfo().gold<100){
+                        await leo.getMoneyFromBank(1000)
+                    }
+                    await leo.goto(n=>n.falan.w2)
+                    await leo.autoWalkList([[102,131,'安其摩酒吧']])
+                    await leo.loop(async ()=>{
+                        await leo.autoWalk([10,13])
+                        await leo.learnPlayerSkill(11, 13)
+                        await leo.delay(2000)
+                        if(cga.findPlayerSkill(skillName)){
+                            await leo.log('已经完成技能【'+skillName+'】的学习')
+                            return leo.reject();
+                        } else{
+                            await leo.log('未能完成技能【'+skillName+'】的学习，请检查！')
+                        }
+                        await leo.delay(1000)
+                    })
+                }else{
+                    await leo.log('已经存在技能【'+skillName+'】');
                 }
-                if(cga.GetPlayerInfo().gold<100){
-                    await leo.getMoneyFromBank(1000)
-                }
-                await leo.goto(n=>n.falan.w2)
-                await leo.autoWalkList([[102,131,'安其摩酒吧'],[10,13]])
-                await leo.learnPlayerSkill(11, 13)
-                if(cga.findPlayerSkill(skillName)){
-                    await leo.log('已经完成技能【'+skillName+'】的学习');
-                } else{
-                    await leo.log('未能完成技能【'+skillName+'】的学习，请检查！')
-                }
-            }else{
-                await leo.log('已经存在技能【'+skillName+'】');
             }
-        }
-        if(skillName=='调教'){
-            var skill = cga.findPlayerSkill(skillName);
-            if(!skill){
-                await leo.log('去学习技能【'+skillName+'】');
-                if(leo.isInTeam()){
-                    await leo.leaveTeam()
+            if(skillName=='调教'){
+                var skill = cga.findPlayerSkill(skillName);
+                if(!skill){
+                    await leo.log('去学习技能【'+skillName+'】');
+                    if(leo.isInTeam()){
+                        await leo.leaveTeam()
+                    }
+                    if(cga.GetPlayerInfo().gold<100){
+                        await leo.getMoneyFromBank(1000)
+                    }
+                    await leo.goto(n=>n.falan.e1)
+                    await leo.autoWalkList([[219,136,'科特利亚酒吧'],[27,20,'酒吧里面'],[10,6,'客房']])
+                    await leo.loop(async ()=>{
+                        await leo.autoWalk([10,5])
+                        await leo.learnPlayerSkill(11, 5)
+                        await leo.delay(2000)
+                        if(cga.findPlayerSkill(skillName)){
+                            await leo.log('已经完成技能【'+skillName+'】的学习')
+                            return leo.reject();
+                        } else{
+                            await leo.log('未能完成技能【'+skillName+'】的学习，请检查！')
+                        }
+                        await leo.delay(1000)
+                    })
+                }else{
+                    await leo.log('已经存在技能【'+skillName+'】');
                 }
-                if(cga.GetPlayerInfo().gold<100){
-                    await leo.getMoneyFromBank(1000)
-                }
-                await leo.goto(n=>n.falan.e1)
-                await leo.autoWalkList([[219,136,'科特利亚酒吧'],[27,20,'酒吧里面'],[10,6,'客房'],[10,5]])
-                await leo.learnPlayerSkill(11, 5)
-                if(cga.findPlayerSkill(skillName)){
-                    await leo.log('已经完成技能【'+skillName+'】的学习');
-                } else{
-                    await leo.log('未能完成技能【'+skillName+'】的学习，请检查！')
-                }
-            }else{
-                await leo.log('已经存在技能【'+skillName+'】');
             }
-        }
-        if(skillName=='宠物强化'){
-            var skill = cga.findPlayerSkill(skillName);
-            if(!skill){
-                await leo.log('去学习技能【'+skillName+'】');
-                if(leo.isInTeam()){
-                    await leo.leaveTeam()
-                }
-                if(cga.GetPlayerInfo().gold<100){
-                    await leo.getMoneyFromBank(1000)
-                }
-                await leo.goto(n => n.castle.x)
-                await leo.autoWalkList([[41, 14, '法兰城'],[122, 36, '饲养师之家'],[13,4]])
-                await leo.learnPlayerSkill(14, 4)
-                if(cga.findPlayerSkill(skillName)){
-                    await leo.log('已经完成技能【'+skillName+'】的学习');
-                } else{
-                    await leo.log('未能完成技能【'+skillName+'】的学习，请检查！')
-                }
-            }else{
-                await leo.log('已经存在技能【'+skillName+'】');
-            }
-        }
-        if(skillName=='石化魔法'){
-            var skill = cga.findPlayerSkill(skillName);
-            if(!skill){
-                await leo.log('去学习技能【'+skillName+'】');
-                if(leo.isInTeam()){
-                    await leo.leaveTeam()
-                }
-                if(cga.GetPlayerInfo().gold<100){
-                    await leo.getMoneyFromBank(1000)
-                }
-                await leo.goto(n => n.castle.x)
-                await leo.autoWalkList([[17, 54, '法兰城'],[120, 65]])
-                await leo.learnPlayerSkill(120, 64)
-                if(cga.findPlayerSkill(skillName)){
-                    await leo.log('已经完成技能【'+skillName+'】的学习');
-                } else{
-                    await leo.log('未能完成技能【'+skillName+'】的学习，请检查！')
-                }
-            }else{
-                await leo.log('已经存在技能【'+skillName+'】');
-            }
-        }
-        if(skillName=='补血魔法'){
-            var skill = cga.findPlayerSkill(skillName);
-            if(!skill){
-                await leo.log('去学习技能【'+skillName+'】');
-                if(leo.isInTeam()){
-                    await leo.leaveTeam()
-                }
-                if(cga.GetPlayerInfo().gold<100){
-                    await leo.getMoneyFromBank(1000)
-                }
-                if(cga.getMapInfo().indexes.index3!=1208){
+            if(skillName=='宠物强化'){
+                var skill = cga.findPlayerSkill(skillName);
+                if(!skill){
+                    await leo.log('去学习技能【'+skillName+'】');
+                    if(leo.isInTeam()){
+                        await leo.leaveTeam()
+                    }
+                    if(cga.GetPlayerInfo().gold<100){
+                        await leo.getMoneyFromBank(1000)
+                    }
                     await leo.goto(n => n.castle.x)
-                    await leo.autoWalkList([
-                        [41, 14, '法兰城'],
-                        [154, 29, '大圣堂的入口'],
-                        [14, 7, '礼拜堂'],
-                        [23, 0,'大圣堂里面'],
-                        [13, 6]
-                    ])
-                    await leo.talkNpc(0,leo.talkNpcSelectorYes)
+                    await leo.autoWalkList([[41, 14, '法兰城'],[122, 36, '饲养师之家']])
+                    await leo.loop(async ()=>{
+                        await leo.autoWalk([13,4])
+                        await leo.learnPlayerSkill(14, 4)
+                        await leo.delay(2000)
+                        if(cga.findPlayerSkill(skillName)){
+                            await leo.log('已经完成技能【'+skillName+'】的学习')
+                            return leo.reject();
+                        } else{
+                            await leo.log('未能完成技能【'+skillName+'】的学习，请检查！')
+                        }
+                        await leo.delay(1000)
+                    })
+                }else{
+                    await leo.log('已经存在技能【'+skillName+'】');
                 }
-                await leo.autoWalk([13, 10])
-                await leo.learnPlayerSkill(14, 10)
-                if(cga.findPlayerSkill(skillName)){
-                    await leo.log('已经完成技能【'+skillName+'】的学习');
-                } else{
-                    await leo.log('未能完成技能【'+skillName+'】的学习，请检查！')
-                }
-            }else{
-                await leo.log('已经存在技能【'+skillName+'】');
             }
-        }
-        if(skillName=='强力补血魔法'){
-            var skill = cga.findPlayerSkill(skillName);
-            if(!skill){
-                await leo.log('去学习技能【'+skillName+'】');
-                if(leo.isInTeam()){
-                    await leo.leaveTeam()
-                }
-                if(cga.GetPlayerInfo().gold<100){
-                    await leo.getMoneyFromBank(1000)
-                }
-                if(cga.getMapInfo().indexes.index3!=1208){
+            if(skillName=='石化魔法'){
+                var skill = cga.findPlayerSkill(skillName);
+                if(!skill){
+                    await leo.log('去学习技能【'+skillName+'】');
+                    if(leo.isInTeam()){
+                        await leo.leaveTeam()
+                    }
+                    if(cga.GetPlayerInfo().gold<100){
+                        await leo.getMoneyFromBank(1000)
+                    }
                     await leo.goto(n => n.castle.x)
-                    await leo.autoWalkList([
-                        [41, 14, '法兰城'],
-                        [154, 29, '大圣堂的入口'],
-                        [14, 7, '礼拜堂'],
-                        [23, 0,'大圣堂里面'],
-                        [13, 6]
-                    ])
-                    await leo.talkNpc(0,leo.talkNpcSelectorYes)
+                    await leo.autoWalkList([[17, 54, '法兰城']])
+                    await leo.loop(async ()=>{
+                        await leo.autoWalk([120, 65])
+                        await leo.learnPlayerSkill(120, 64)
+                        await leo.delay(2000)
+                        if(cga.findPlayerSkill(skillName)){
+                            await leo.log('已经完成技能【'+skillName+'】的学习')
+                            return leo.reject();
+                        } else{
+                            await leo.log('未能完成技能【'+skillName+'】的学习，请检查！')
+                        }
+                        await leo.delay(1000)
+                    })
+                }else{
+                    await leo.log('已经存在技能【'+skillName+'】');
                 }
-                await leo.autoWalk([18, 12])
-                await leo.learnPlayerSkill(19, 12)
-                if(cga.findPlayerSkill(skillName)){
-                    await leo.log('已经完成技能【'+skillName+'】的学习');
-                } else{
-                    await leo.log('未能完成技能【'+skillName+'】的学习，请检查！')
-                }
-            }else{
-                await leo.log('已经存在技能【'+skillName+'】');
             }
-        }
-        if(skillName=='气绝回复'){
-            var skill = cga.findPlayerSkill(skillName);
-            if(!skill){
-                await leo.log('去学习技能【'+skillName+'】');
-                if(leo.isInTeam()){
-                    await leo.leaveTeam()
+            if(skillName=='补血魔法'){
+                var skill = cga.findPlayerSkill(skillName);
+                if(!skill){
+                    await leo.log('去学习技能【'+skillName+'】');
+                    if(leo.isInTeam()){
+                        await leo.leaveTeam()
+                    }
+                    if(cga.GetPlayerInfo().gold<100){
+                        await leo.getMoneyFromBank(1000)
+                    }
+                    if(cga.getMapInfo().indexes.index3!=1208){
+                        await leo.goto(n => n.castle.x)
+                        await leo.autoWalkList([
+                            [41, 14, '法兰城'],
+                            [154, 29, '大圣堂的入口'],
+                            [14, 7, '礼拜堂'],
+                            [23, 0,'大圣堂里面'],
+                            [13, 6]
+                        ])
+                        await leo.talkNpc(0,leo.talkNpcSelectorYes)
+                    }
+                    await leo.loop(async ()=>{
+                        await leo.autoWalk([13, 10])
+                        await leo.learnPlayerSkill(14, 10)
+                        await leo.delay(2000)
+                        if(cga.findPlayerSkill(skillName)){
+                            await leo.log('已经完成技能【'+skillName+'】的学习')
+                            return leo.reject();
+                        } else{
+                            await leo.log('未能完成技能【'+skillName+'】的学习，请检查！')
+                        }
+                        await leo.delay(1000)
+                    })
+                }else{
+                    await leo.log('已经存在技能【'+skillName+'】');
                 }
-                if(cga.GetPlayerInfo().gold<100){
-                    await leo.getMoneyFromBank(1000)
-                }
-                try{
-                    await leo.goto(n => n.teleport.aleut)
-                }catch(e){
-                    await leo.log('无法到达【亚留特村】，请确认传送是否开启')
-                }
-                if(cga.GetMapName()=='亚留特村'){
-                    await leo.autoWalk([47,72])
-                    await leo.learnPlayerSkill(48, 72)
-                }
-                if(cga.findPlayerSkill(skillName)){
-                    await leo.log('已经完成技能【'+skillName+'】的学习');
-                } else{
-                    await leo.log('未能完成技能【'+skillName+'】的学习，请检查！')
-                }
-            }else{
-                await leo.log('已经存在技能【'+skillName+'】');
             }
+            if(skillName=='强力补血魔法'){
+                var skill = cga.findPlayerSkill(skillName);
+                if(!skill){
+                    await leo.log('去学习技能【'+skillName+'】');
+                    if(leo.isInTeam()){
+                        await leo.leaveTeam()
+                    }
+                    if(cga.GetPlayerInfo().gold<100){
+                        await leo.getMoneyFromBank(1000)
+                    }
+                    if(cga.getMapInfo().indexes.index3!=1208){
+                        await leo.goto(n => n.castle.x)
+                        await leo.autoWalkList([
+                            [41, 14, '法兰城'],
+                            [154, 29, '大圣堂的入口'],
+                            [14, 7, '礼拜堂'],
+                            [23, 0,'大圣堂里面'],
+                            [13, 6]
+                        ])
+                        await leo.talkNpc(0,leo.talkNpcSelectorYes)
+                    }
+                    await leo.loop(async ()=>{
+                        await leo.autoWalk([18, 12])
+                        await leo.learnPlayerSkill(19, 12)
+                        await leo.delay(2000)
+                        if(cga.findPlayerSkill(skillName)){
+                            await leo.log('已经完成技能【'+skillName+'】的学习')
+                            return leo.reject();
+                        } else{
+                            await leo.log('未能完成技能【'+skillName+'】的学习，请检查！')
+                        }
+                        await leo.delay(1000)
+                    })
+                }else{
+                    await leo.log('已经存在技能【'+skillName+'】');
+                }
+            }
+            if(skillName=='气绝回复'){
+                var skill = cga.findPlayerSkill(skillName);
+                if(!skill){
+                    await leo.log('去学习技能【'+skillName+'】');
+                    if(leo.isInTeam()){
+                        await leo.leaveTeam()
+                    }
+                    if(cga.GetPlayerInfo().gold<100){
+                        await leo.getMoneyFromBank(1000)
+                    }
+                    try{
+                        await leo.goto(n => n.teleport.aleut)
+                    }catch(e){
+                        await leo.log('无法到达【亚留特村】，请确认传送是否开启')
+                    }
+                    if(cga.GetMapName()=='亚留特村'){
+                        await leo.loop(async ()=>{
+                            await leo.autoWalk([47,72])
+                            await leo.learnPlayerSkill(48, 72)
+                            await leo.delay(2000)
+                            if(cga.findPlayerSkill(skillName)){
+                                await leo.log('已经完成技能【'+skillName+'】的学习')
+                                return leo.reject();
+                            } else{
+                                await leo.log('未能完成技能【'+skillName+'】的学习，请检查！')
+                            }
+                            await leo.delay(1000)
+                        })
+                    }
+                }else{
+                    await leo.log('已经存在技能【'+skillName+'】');
+                }
+            }
+        }catch(e){
+            console.log(leo.logTime()+'autoLearnSkill出现异常：' + e);
+            await leo.delay(5000)
+            return leo.autoLearnSkill(skillName);
         }
     }
 
