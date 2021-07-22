@@ -1,8 +1,12 @@
 require('./common').then(async (cga) => {
 
-    const petName = '赤熊';
+    const petName = '哥布林';
 
     let protect = {
+        //contactType遇敌类型：-1-旧遇敌，0-按地图自适应，1-东西移动，2-南北移动，
+        //3-随机移动，4-画小圈圈，5-画中圈圈，6-画大圈圈，7-画十字，8-画8字
+        contactType: 0,
+        visible: false, 
         minHp: 500,
         minMp: 200,
         minPetHp: 500,
@@ -25,8 +29,12 @@ require('./common').then(async (cga) => {
     }
 
     if(!leo.checkPetCard(petName)){
-        await leo.log('缺少宠物图鉴，请检查：' + petName)
-        return leo.delay(1000*60*60*24);
+        await leo.log('缺少宠物图鉴，5秒后重新获取')
+        await leo.delay(5000)
+        if(!leo.checkPetCard(petName)){
+            await leo.log('缺少宠物图鉴，请检查：' + petName)
+            return leo.delay(1000*60*60*24);
+        }
     }
 
     leo.baseInfoPrint();
@@ -183,7 +191,7 @@ require('./common').then(async (cga) => {
                     await leo.delay(1000*60*60*24)
                     return leo.reject();
                 } else {
-                    let petToSave = cga.GetPetsInfo().filter(p=>p.realname==petName && p.level==1);
+                    let petToSave = cga.GetPetsInfo().filter(p=>p.level==1);
                     for (var i = 0; i < petToSave.length; i++) {
                         let pet = petToSave[i];
                         let emptyIndex = await leo.getPetEmptyIndex(true);
