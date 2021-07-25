@@ -16,7 +16,7 @@ var ProResupply = (cb)=>{
 	} else if(map == '里谢里雅堡'){
 		path.unshift([82, 83, '医院']);
 		path.unshift([41, 98, '法兰城']);
-	} else if(map == '里谢里雅堡'){
+	} else if(map == '艾尔莎岛'){
 		cga.travel.falan.toCastle(()=>{
 			ProResupply(cb);
 		});
@@ -47,7 +47,7 @@ var NonProResupply = (cb)=>{
 	} else if(map == '里谢里雅堡') {
 		path.unshift([82, 83, '医院']);
 		path.unshift([41, 98, '法兰城']);
-	} else if(map == '里谢里雅堡'){
+	} else if(map == '艾尔莎岛'){
 		cga.travel.falan.toCastle(()=>{
 			NonProResupply(cb);
 		});
