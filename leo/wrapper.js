@@ -1,4 +1,4 @@
-/**version 1.4
+/**version 1.5
  * health 0 1-25(白) 26-50(黄) 51-75(粉) 76-100(红)
  * direction 0(右上)
  * 高速移动中不可丢东西
@@ -1162,7 +1162,12 @@ module.exports = new Promise(resolve => {
 		return false;
 	};
 	cga.emogua.encounter = (protect) => {
-		if (!encounterStopped) return Promise.reject('repeated encounter');
+		if (!encounterStopped){
+			console.log('repeated encounter,restart at 30s.')
+			encounterStopped = false;
+			return cga.emogua.delay(1000*30)
+			.then(()=>cga.emogua.encounter(protect));
+		}
 		else return cga.emogua.downloadMap().then(() => {
 			encounterStopped = false;
 			let stopEncounter = false;

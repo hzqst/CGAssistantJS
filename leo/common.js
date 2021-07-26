@@ -3,7 +3,7 @@ module.exports = require('./wrapper').then( async (cga) => {
     leo.messageServer = false;
     leo.appId = '';
     leo.appSecret = '';
-    leo.version = '8.8';
+    leo.version = '8.9';
     leo.qq = '158583461'
     leo.copyright = '红叶散落';
     leo.FORMAT_DATE = 'yyyy-MM-dd';
@@ -258,9 +258,6 @@ module.exports = require('./wrapper').then( async (cga) => {
     }
     //队员进入队伍，参数为队长名字
     leo.enterTeam = async (teamLeader,waitPos = cga.GetMapXY()) => {
-        if(leo.monitor.config.autoChangeLineForLeader) {
-            await leo.changeLineForLeader(teamLeader)
-        }
         var teamplayers = cga.getTeamPlayers();
         if (teamplayers.length > 0 && teamplayers[0].name == teamLeader) {
             return leo.done();
@@ -298,7 +295,10 @@ module.exports = require('./wrapper').then( async (cga) => {
             });
         }
     }
-    leo.enterTeamBlock = (teamLeader)=>{
+    leo.enterTeamBlock = async (teamLeader)=>{
+        if(leo.monitor.config.autoChangeLineForLeader) {
+            await leo.changeLineForLeader(teamLeader)
+        }
         return leo.enterTeam(teamLeader)
         .then(() => {
             return leo.log('已进入队伍，队长[' + cga.getTeamPlayers()[0].name + ']');
@@ -463,6 +463,19 @@ module.exports = require('./wrapper').then( async (cga) => {
                 .then(()=>leo.sell(4))
                 .then(()=>leo.logBack());
             }
+        }
+    }
+    leo.assessNpc = async (name) => {
+        if(leo.has(name)){
+            if(cga.GetPlayerInfo().gold<10000){
+                await leo.getMoneyFromBank(500000)
+            }
+            if(cga.GetMapName()!='凯蒂夫人的店'){
+                await leo.goto(n=>n.falan.s1)
+                await leo.autoWalk([196,78,'凯蒂夫人的店'])
+            }
+            await leo.autoWalk([15,12])
+            await leo.assessRepairFromNpc(0,i=>i.name==name)
         }
     }
     leo.checkHealth = (doctorName,needSupply = true) => {
@@ -1530,7 +1543,10 @@ module.exports = require('./wrapper').then( async (cga) => {
             return leo.encounter(protect);
         }
         if (leo.contactStatus){
-            return leo.reject('遇敌程序错误：重复启动遇敌程序');
+            console.log(leo.logTime()+'遇敌程序错误：重复启动遇敌程序，等待30秒进行重启')
+            leo.contactStatus = false;
+            await leo.delay(1000*30)
+            //return leo.reject('遇敌程序错误：重复启动遇敌程序');
         }
         await leo.downloadMap();
         var currentMapInfo = cga.getMapInfo();
@@ -3690,6 +3706,16 @@ module.exports = require('./wrapper').then( async (cga) => {
     }catch(e){
         leo.syncInfo = (cga,isbank,silently,logback) => {
             console.log('没有信息同步插件，跳过信息同步功能');
+        }
+    }
+
+    //战斗状态监控
+    try{
+        leo.battleMonitor = require('./battle-status');
+    }catch(e){
+        leo.battleMonitor = {
+            start:()=>{},
+            stop:()=>{},
         }
     }
 

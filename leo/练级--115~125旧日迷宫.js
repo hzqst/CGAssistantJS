@@ -5,7 +5,7 @@ require('./common').then(async (cga) => {
     leo.monitor.config.logStatus = false;   //关闭战斗状态提示
     //自动跟随队长换线，设置为true时，需要先提前与队长交换名片
     leo.monitor.config.autoChangeLineForLeader = false;
-	
+    var battleStatus = true;   //队长打印战斗明细
     var teamLeader = '此处填队长名称'; //队长名称
     var teamPlayerCount = 5; //队伍人数
     var level = 1;  //指定楼层
@@ -45,6 +45,9 @@ require('./common').then(async (cga) => {
         isTeamLeader = true;
         protect.minMp = 350; //队长是传教，回城魔值至少要大于等于一次祈祷的魔
         leo.log('我是队长，预设队伍人数【'+teamPlayerCount+'】');
+        if(battleStatus){
+            leo.battleMonitor.start(cga);
+        }
     }else{
         leo.log('我是队员，队长是【'+teamLeader+'】');
     }

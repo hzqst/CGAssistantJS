@@ -3,6 +3,10 @@ require('./common').then(cga => {
     leo.monitor.config.keepAlive = false;   //关闭防掉线
     leo.logStatus = false;
     var protect = {
+        //contactType遇敌类型：-1-旧遇敌，0-按地图自适应，1-东西移动，2-南北移动，
+        //3-随机移动，4-画小圈圈，5-画中圈圈，6-画大圈圈，7-画十字，8-画8字
+        contactType: 0,
+        visible: false, 
         minHp: 300,
         minMp: 30,
         minPetHp: 300,
@@ -118,11 +122,46 @@ require('./common').then(cga => {
             }
         });
     }
+    var checkSupply = async ()=>{
+        var needSupply = false;
+        var playerinfo = cga.GetPlayerInfo();
+        if(playerinfo.hp < playerinfo.maxhp || playerinfo.mp < playerinfo.maxmp){
+            needSupply = true;
+        }
+        var pets = cga.GetPetsInfo();
+        if(pets && pets.length > 0){
+            for(var i in pets){
+                if(pets[i].hp < pets[i].maxhp || pets[i].mp < pets[i].maxmp){
+                    needSupply = true;
+                }
+            }
+        }
+        if(needSupply){
+            if(cga.getMapInfo().name !='哥拉尔镇'){
+                await logBackG()
+            }
+            await leo.autoWalkList([
+                [165,91,'医院'],[29,26]
+            ])
+            await leo.supply(30,26)
+            await logBackG()
+        }
+    }
     var buyCrystal = (crystalName, count = 1)=>{
         if (!crystalName) {
             crystalName = '水火的水晶（5：5）';
         }
         return logBackG()
+        .then(()=>{
+            var emptyIndexes = leo.getEmptyBagIndexes();
+            if(emptyIndexes && emptyIndexes.length == 0){
+                return leo.autoWalkList([
+                    [147,79,'杂货店'],[11,18]
+                ])
+                .then(()=>leo.sell(6))
+                .then(()=>leo.autoWalk([18,30,'哥拉尔镇']));
+            }
+        })
         .then(()=>leo.autoWalkList([[146,117,'魔法店'],[18,12]]))
         .then(() => {
             return leo.talkNpc(0, dialog => {
@@ -136,6 +175,12 @@ require('./common').then(cga => {
                     var buyitem = [];
                     var buyCount = 0;
                     var emptySlotCount = cga.getInventoryEmptySlotCount();
+                    if(emptySlotCount==0){
+                        //return leo.reject('背包没空间');
+                        leo.log('背包没空间，尝试扔魔石')
+                        leo.dropItemEx('魔石');
+                        emptySlotCount = 1;
+                    }
                     store.items.forEach((it) => {
                         if (it.name.indexOf(crystalName) >= 0 && buyCount < emptySlotCount) {
                             buyitem.push({
@@ -145,9 +190,6 @@ require('./common').then(cga => {
                             buyCount++;
                         }
                     });
-                    if(emptySlotCount==0){
-                        return leo.reject('背包没空间');
-                    }
                     if (!buyitem.length){
                         return leo.reject('商店没有水晶出售，可能已被买完或者背包没空间');
                     }
@@ -195,9 +237,11 @@ require('./common').then(cga => {
             await leo.moveGold(100000,cga.MOVE_GOLD_TOBANK)
             if(cga.GetPlayerInfo().gold >= 990000){
                 await leo.log('钱包满了，银行也放不下了，脚本结束')
-                throw '脚本结束';
+                await leo.delay(1000*60*60*24)
             }else{
-                oldGold = cga.GetPlayerInfo().gold;
+                //oldGold = cga.GetPlayerInfo().gold;
+                //重启脚本，释放内存占用
+                return leo.exit();
             }
         }
         var mapInfo = leo.getMapInfo();
@@ -229,6 +273,7 @@ require('./common').then(cga => {
         }
         else{
             await logBackG()
+            await checkSupply()
             await leo.autoWalk([176,105,'库鲁克斯岛'])
             await leo.autoWalk([476,526])
             await leo.talkNpc(477,526,leo.talkNpcSelectorYes);

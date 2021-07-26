@@ -5,8 +5,8 @@ require('./common').then(async (cga) => {
     leo.monitor.config.logStatus = false;   //关闭战斗状态提示
     //自动跟随队长换线，设置为true时，需要先提前与队长交换名片
     leo.monitor.config.autoChangeLineForLeader = false;
+    var battleStatus = true;   //队长打印战斗明细
     leo.monitor.config.equipsProtect = false;   //关闭装备低耐久保护
-	
     var teamLeader = '此处填队长名称'; //队长名称
     var teamPlayerCount = 5; //队伍人数
     var protect = {
@@ -43,6 +43,9 @@ require('./common').then(async (cga) => {
     if (playerName == teamLeader) {
         isTeamLeader = true;
         leo.log('我是队长，预设队伍人数【'+teamPlayerCount+'】');
+        if(battleStatus){
+            leo.battleMonitor.start(cga);
+        }
     }else{
         leo.log('我是队员，队长是【'+teamLeader+'】');
     }

@@ -93,11 +93,7 @@ require('./common').then(cga=>{
 	                return leo.next();
 	            });
 			}else{
-				return leo.enterTeam(teamLeader)
-				.then(() => {
-                    leo.log('已进入队伍，队长[' + cga.getTeamPlayers()[0].name + ']');
-                    return leo.next();
-                });
+				return leo.enterTeamBlock(teamLeader);
 			}
 		})
 		.then(()=>{
@@ -148,7 +144,7 @@ require('./common').then(cga=>{
 				            if (mapInfo.name == '水之洞窟' && (mapInfo.x == 16 || mapInfo.x == 17) && mapInfo.y == 24) {
 				                return leo.talkNpc(17,23, leo.talkNpcSelectorYes)
 				                .then(()=>leo.delay(2000))
-				                .then(()=>leo.enterTeam(teamLeader));
+				                .then(()=>leo.enterTeamBlock(teamLeader));
 				            }else{
 				            	return leo.exit();
 				            }

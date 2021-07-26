@@ -3,6 +3,10 @@ require('./common').then(cga => {
     leo.monitor.config.keepAlive = false;   //关闭防掉线
     leo.logStatus = false;
     var protect = {
+        //contactType遇敌类型：-1-旧遇敌，0-按地图自适应，1-东西移动，2-南北移动，
+        //3-随机移动，4-画小圈圈，5-画中圈圈，6-画大圈圈，7-画十字，8-画8字
+        contactType: 0,
+        visible: false, 
         minHp: 300,
         minMp: 30,
         minPetHp: 300,
@@ -60,9 +64,11 @@ require('./common').then(cga => {
             await leo.moveGold(100000,cga.MOVE_GOLD_TOBANK)
             if(cga.GetPlayerInfo().gold >= 990000){
                 await leo.log('钱包满了，银行也放不下了，脚本结束')
-                throw '脚本结束';
+                await leo.delay(1000*60*60*24)
             }else{
-                oldGold = cga.GetPlayerInfo().gold;
+                //oldGold = cga.GetPlayerInfo().gold;
+                //重启脚本，释放内存占用
+                return leo.exit();
             }
         }
         var mapInfo = leo.getMapInfo();
