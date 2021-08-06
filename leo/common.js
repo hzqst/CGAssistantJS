@@ -3,7 +3,7 @@ module.exports = require('./wrapper').then( async (cga) => {
     leo.messageServer = false;
     leo.appId = '';
     leo.appSecret = '';
-    leo.version = '8.9';
+    leo.version = '8.10';
     leo.qq = '158583461'
     leo.copyright = '红叶散落';
     leo.FORMAT_DATE = 'yyyy-MM-dd';
@@ -3798,13 +3798,13 @@ module.exports = require('./wrapper').then( async (cga) => {
             await leo.log('未指定队长')
             return leo.delay(1000*60*60*2);
         }
-        let leaderLine = leo.getLeaderLine(teamLeader);
-        if(leaderLine==-1){
-            await leo.log('没有与队长【'+teamLeader+'】交换名片')
-            return leo.delay(1000*60*60*2);
-        }
         const line = leo.getLine();
         await leo.loop(async()=>{
+            let leaderLine = leo.getLeaderLine(teamLeader);
+            if(leaderLine==-1){
+                await leo.log('没有与队长【'+teamLeader+'】交换名片')
+                return leo.delay(1000*60*60*2);
+            }
             if(leaderLine == line) {
                 return leo.reject();
             }
