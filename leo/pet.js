@@ -1,4 +1,4 @@
-const version = '1.3';
+const version = '1.5';
 const doctorName = '医道之殇';
 const petConfig = {
     '水龙蜥': {
@@ -154,7 +154,7 @@ const petConfig = {
         name: '死亡蜂',
         sealCardName: '封印卡（昆虫系）',
         sealCardLevel: 4,
-        autoDropPet: false, //是否自动扔宠，true扔/false不扔
+        autoDropPet: true, //是否自动扔宠，true扔/false不扔
         minHp: 88 - 3,
         minMp: 82 - 3,
         minAttack: 46,
@@ -897,7 +897,7 @@ const petConfig = {
         }
     },
     '烈风翼龙': {
-        name: '寒冰翼龙',
+        name: '烈风翼龙',
         sealCardName: '封印卡（龙系）',
         sealCardLevel: 4,
         autoDropPet: true, //是否自动扔宠，true扔/false不扔
@@ -1186,7 +1186,7 @@ const petConfig = {
         name: '罗刹',
         sealCardName: '封印卡（野兽系)',
         sealCardLevel: 4,
-        autoDropPet: false, //是否自动扔宠，true扔/false不扔
+        autoDropPet: true, //是否自动扔宠，true扔/false不扔
         minHp: 97 - 3,
         minMp: 99 - 3,
         minAttack: 37,
@@ -1254,14 +1254,14 @@ const petConfig = {
         name: '猫人',
         sealCardName: '封印卡（野兽系)',
         sealCardLevel: 4,
-        autoDropPet: false, //是否自动扔宠，true扔/false不扔
+        autoDropPet: true, //是否自动扔宠，true扔/false不扔
         minHp: 101 - 3,
         minMp: 86 - 3,
         minAttack: 40,
         minDefensive: 35,
         minAgility: 33,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 1,    //高于该档次的宠判断丢弃
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
@@ -1531,7 +1531,7 @@ const petConfig = {
             //地图判断，如果已经在1级宠捕捉点，则继续捕捉
             var currentMap = cga.GetMapName();
             if (currentMap == '芙蕾雅') {
-                await leo.autoWalkList([[420, 357],[422, 357]])
+                await leo.autoWalkList([[471, 393],[471, 395]])
             } else {
                 await leo.logBack()
                 //await leo.sellCastle()
@@ -1540,7 +1540,7 @@ const petConfig = {
                 await leo.goto(n => n.teleport.vinoy)
                 await leo.autoWalkList([
                     [67, 46, '芙蕾雅'],
-                    [422, 357]
+                    [471, 395]
                 ])
             }
         }
@@ -1677,7 +1677,7 @@ const petConfig = {
         minDefensive: 38,
         minAgility: 34,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 1,    //高于该档次的宠判断丢弃
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
@@ -2421,15 +2421,15 @@ const petConfig = {
                 ])
                 await leo.loop(async ()=>{
                     try{
-                        if(cga.GetMapName().name == '莎莲娜') {
+                        if(cga.GetMapName() == '莎莲娜') {
                             await leo.autoWalk([84, 193,'积雪的山路海拔100M'])
                         }
-                        if(cga.GetMapName().name == '雪山之顶') {
+                        if(cga.GetMapName() == '雪山之顶') {
                             return leo.reject();
                         }
-                        if(cga.GetMapName().name.includes('积雪的山路海拔')){
+                        if(cga.GetMapName().includes('积雪的山路海拔')){
                             await leo.walkRandomMazeUntil(() => {
-                                if (!cga.GetMapName().name.includes('积雪的山路海拔')) {
+                                if (!cga.GetMapName().includes('积雪的山路海拔')) {
                                     return true;
                                 }
                                 return false;
@@ -2664,7 +2664,7 @@ const petConfig = {
             //地图判断，如果已经在1级宠捕捉点，则继续捕捉
             var currentMap = cga.GetMapName();
             if (currentMap == '索奇亚') {
-                await leo.autoWalkList([[523, 348],[525, 348]])
+                await leo.autoWalkList([[539, 348],[539, 346]])
             } else {
                 await leo.logBack()
                 //await leo.sellCastle()
@@ -2673,7 +2673,7 @@ const petConfig = {
                 await leo.goto(n => n.teleport.ghana)
                 await leo.autoWalkList([
                     [47, 77, '索奇亚'],
-                    [525, 348]
+                    [539, 346]
                 ])
             }
         }

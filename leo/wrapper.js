@@ -1,4 +1,4 @@
-/**version 1.5
+/**version 1.6
  * health 0 1-25(白) 26-50(黄) 51-75(粉) 76-100(红)
  * direction 0(右上)
  * 高速移动中不可丢东西
@@ -296,7 +296,7 @@ module.exports = new Promise(resolve => {
 				console.log('walkTo error', result);
 				return Promise.reject();
 			}
-		});
+		}).catch(e=>cga.emogua.walkTo(target,currentMapInfo));
 	};
 	// [ [x, y, destination] ]
 	cga.emogua.walkList = (list) => list.reduce(
@@ -433,12 +433,13 @@ module.exports = new Promise(resolve => {
 				}
 				if (r == 3) {
 					console.log('被卡住');
+					return cga.emogua.autoWalk(target, walls, currentMapInfo, options);
 				}
 			}
 			//console.log('自动寻路失败', target, r);
 			return Promise.reject(r);
 		}
-	);
+	).catch(e=>cga.emogua.autoWalk(target, walls, mapInfo, options));
 	// [ [x, y, destination] ]
 	cga.emogua.autoWalkList = (list) => list.reduce((a, c) => a.then(() => cga.emogua.autoWalk(c)), Promise.resolve());
 	cga.emogua.goto = require('./goto')(cga);
@@ -633,7 +634,13 @@ module.exports = new Promise(resolve => {
 				cga.TurnTo(current.x + 2, current.y - 2); break;
 			default:
 		}
-		if (destination) return cga.emogua.waitDestination(destination, current);
+		if (destination) { 
+			return cga.emogua.waitDestination(destination, current)
+			.catch(e=>{
+				console.log('人物转向重试');
+				return cga.emogua.turnOrientation(orientation, destination);
+			})
+		}
 		return cga.emogua.delay(1500); // 避免后续事件延迟导致判断有误
 	};
 	cga.emogua.getOrientation = (x, y) => {
@@ -764,7 +771,10 @@ module.exports = new Promise(resolve => {
 				);
 			}).then(
 				() => cga.emogua.waitDestination(destination, mapInfo)
-			);
+			).catch(e=>{
+				console.log('对话NPC重试');
+				return cga.emogua.talkNpc(x, y, select, dest);
+			});
 		}
 		console.log('Talk npc wrong arguments');
 		return Promise.reject();
