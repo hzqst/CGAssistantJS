@@ -34,6 +34,7 @@ require('./common').then(async (cga)=>{
     }
 	
 	var teammates = [];
+	teamplayers = cga.getTeamPlayers();
 	for(var i in teamplayers)
 		teammates[i] = teamplayers[i].name;
 	
