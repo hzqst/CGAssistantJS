@@ -1,9 +1,7 @@
 var cga = require('bindings')('node_cga');	
 var moment = require('moment');
 var PF = require('pathfinding');
-var Async = require('async');
 var request = require('request');
-const { createVerify } = require('crypto');
 
 global.is_array_contain = function(arr, val)
 {
@@ -3350,17 +3348,37 @@ module.exports = function(callback){
 		move();
 	}
 	
-	//从NPC对话框解析商店购物列表
+	//从NPC对话框内容解析商店购物列表
 	cga.parseBuyStoreMsg = (dlg)=>{
 		
-		if(!dlg.message)
+		if(!dlg){
+			throw new Error('解析商店购物列表失败，可能对话超时!');
 			return null;
+		}
+
+		if(!dlg.message){
+			throw new Error('解析商店购物列表失败，可能对话超时!');
+			return null;
+		}
+
+		//28?
+		if(dlg.type != 6){
+			throw new Error('解析商店购物列表失败，可能对话不是购物商店!');
+			return null;
+		}
 		
 		var reg = new RegExp(/([^|\n]+)/g)
 		var match = dlg.message.match(reg);
 		
-		if(match.length < 5)
+		if(match.length < 5){
+			throw new Error('解析商店购物列表失败，格式错误!');
 			return null;
+		}
+
+		if((match.length - 5) % 6 != 0){
+			throw new Error('解析商店购物列表失败，格式错误!');
+			return null;
+		}
 		
 		var storeItemCount = (match.length - 5) / 6;
 		
@@ -3376,16 +3394,177 @@ module.exports = function(callback){
 			obj.items.push({
 				index : i,
 				name : match[5 + 6 * i + 0],
-				image_id : match[5 + 6 * i + 1],
-				cost : match[5 + 6 * i + 2],
+				image_id : parseInt(match[5 + 6 * i + 1]),
+				cost : parseInt(match[5 + 6 * i + 2]),
 				attr : match[5 + 6 * i + 3],
-				unk1 : match[5 + 6 * i + 4],
-				max_buy : match[5 + 6 * i + 5],
+				batch : parseInt(match[5 + 6 * i + 4]),//最少买多少
+				max_buy : parseInt(match[5 + 6 * i + 5]),//最多买多少
+			});
+		}
+		return obj;
+	}
+
+	//从NPC对话框内容解析兑换列表
+	cga.parseExchangeStoreMsg = (dlg)=>{
+		
+		if(!dlg){
+			throw new Error('解析兑换列表失败，可能对话超时!');
+			return null;
+		}
+
+		if(!dlg.message){
+			throw new Error('解析兑换列表失败，可能对话超时!');
+			return null;
+		}
+
+		if(dlg.type != 28){
+			throw new Error('解析兑换列表失败，可能对话不是兑换商店!');
+			return null;
+		}
+		
+		var reg = new RegExp(/([^|\n]+)/g)
+		var match = dlg.message.match(reg);
+		
+		if(match.length < 5){
+			throw new Error('解析兑换列表失败，格式错误!');
+			return null;
+		}
+
+		if((match.length - 5) % 7 != 0){
+			throw new Error('解析兑换列表失败，格式错误!');
+			return null;
+		}
+		
+		var storeItemCount = (match.length - 5) / 7;
+		
+		var obj = {
+			storeid : match[0],
+			name : match[1],
+			welcome : match[2],
+			insuff_funds : match[3],
+			insuff_inventory : match[4],
+			items : []
+		}
+		for(var i = 0; i < storeItemCount; ++i){
+			obj.items.push({
+				index : i,
+				item_id : parseInt(match[5 + 6 * i + 0]),
+				required : match[5 + 6 * i + 1],
+				name : match[5 + 6 * i + 2],
+				image_id : parseInt(match[5 + 6 * i + 3]),
+				count : parseInt(match[5 + 6 * i + 4]),//count个required才能换取一个
+				batch : parseInt(match[5 + 6 * i + 5]),//最少换多少
+				attr : match[5 + 6 * i + 6],
+			});
+		}
+		return obj;
+	}
+
+	//从NPC对话框内容解析宠物技能学习列表
+	cga.parsePetSkillStoreMsg = (dlg)=>{
+		
+		if(!dlg){
+			throw new Error('解析宠物学习技能列表失败，可能对话超时!');
+			return null;
+		}
+
+		if(!dlg.message){
+			throw new Error('解析宠物学习技能列表失败，可能对话超时!');
+			return null;
+		}
+
+		if(dlg.type != 24){
+			throw new Error('解析宠物学习技能列表失败，可能对话不是宠物技能商店!');
+			return null;
+		}
+
+		var reg = new RegExp(/([^|\n]+)/g)
+		var match = dlg.message.match(reg);
+		
+		if(match.length < 5){
+			throw new Error('解析宠物学习技能列表失败，格式错误!');
+			return null;
+		}
+		
+		if((match.length - 5) % 4 != 0){
+			throw new Error('解析宠物学习技能列表失败，格式错误!');
+			return null;
+		}
+
+		var storeItemCount = (match.length - 5) / 4;
+		
+		var obj = {
+			storeid : match[0],
+			name : match[1],
+			welcome : match[2],
+			insuff_funds : match[3],
+			insuff_pets : match[4],
+			skills : []
+		}
+
+		for(var i = 0; i < storeItemCount; ++i){
+			obj.skills.push({
+				index : i,
+				name : match[5 + 4 * i + 0],
+				mana : parseInt(match[5 + 4 * i + 1]),
+				cost : parseInt(match[5 + 4 * i + 2]),
+				info : match[5 + 4 * i + 3],
 			});
 		}
 		return obj;
 	}
 	
+	//从NPC对话框内容解析遗忘技能列表
+	cga.parseForgetSkillStoreMsg = (dlg)=>{
+		
+		if(!dlg){
+			throw new Error('解析遗忘技能列表失败，可能对话超时!');
+			return null;
+		}
+
+		if(!dlg.message){
+			throw new Error('解析遗忘技能列表失败，可能对话超时!');
+			return null;
+		}
+
+		if(dlg.type != 18){
+			throw new Error('解析遗忘技能列表失败，可能对话不是遗忘技能!');
+			return null;
+		}
+		
+		var reg = new RegExp(/([^|\n]+)/g)
+		var match = dlg.message.match(reg);
+		
+		if(match.length < 3){
+			throw new Error('解析遗忘技能列表失败，格式错误!');
+			return null;
+		}
+		
+		if((match.length - 3) % 3 != 0){
+			throw new Error('解析遗忘技能列表失败，格式错误!');
+			return null;
+		}
+
+		var storeItemCount = (match.length - 3) / 3;
+		
+		var obj = {
+			storeid : match[0],
+			name : match[1],
+			welcome : match[2],
+			skills : []
+		}
+
+		for(var i = 0; i < storeItemCount; ++i){
+			obj.skills.push({
+				index : i,
+				name : match[3 + 3 * i + 0],
+				level : parseInt(match[3 + 3 * i + 1]),
+				slots : parseInt(match[3 + 3 * i + 2]),
+			});
+		}
+		return obj;
+	}
+
 	//获取队伍成员详细信息
 	cga.getTeamPlayers = ()=>{
 		var teaminfo = cga.GetTeamPlayerInfo();
