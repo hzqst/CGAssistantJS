@@ -2,6 +2,7 @@ var cga = require('bindings')('node_cga');
 var moment = require('moment');
 var PF = require('pathfinding');
 var request = require('request');
+var fs = require('fs');
 
 global.is_array_contain = function(arr, val)
 {
@@ -3127,8 +3128,152 @@ module.exports = function(callback){
 		return false;
 	}
 
-	//寻找银行中的空闲格子
-	cga.findBankEmptySlot = (filter, maxcount) =>{
+	cga.savePlayerConfig = (config, cb) => {
+		console.log('正在保存个人配置文件...');
+
+		var configPath = __dirname+'\\个人配置';
+		var configName = configPath+'\\个人配置_'+cga.FileNameEscape(cga.GetPlayerInfo().name)+'.json';
+
+		fs.mkdir(configPath, (err)=>{
+			if(err && err.code != 'EEXIST'){
+				console.log('个人配置文件保存失败：');
+				console.log(err);
+				if(cb) cb(err);
+				return;
+			}
+
+			fs.writeFile(configName, JSON.stringify(config), (err)=>{
+				if(err){
+					console.log('个人配置文件保存失败：');
+					console.log(err);
+					if(cb) cb(err);
+					return;
+				}			
+				console.log('个人配置文件保存成功!...');
+				if(cb) cb(null);
+			});
+		});		
+	}
+
+	cga.loadPlayerConfig = () => {
+		console.log('正在读取个人配置文件...');
+
+		var configPath = __dirname+'\\个人配置';
+		var configName = configPath+'\\个人配置_'+cga.FileNameEscape(cga.GetPlayerInfo().name)+'.json';
+
+		try
+		{
+			var json = fs.readFileSync(configName, 'utf8');
+				
+			if(typeof json != 'string' || !json.length)
+				throw new Error('个人配置文件格式错误或文件不存在');
+
+			var obj = JSON.parse(json);
+
+			return obj;
+		}
+		catch(e)
+		{
+			if(e.code != 'ENOENT'){
+				console.log('读取个人配置时发生错误：');
+				console.log(e);
+			} else {
+				console.log('读取个人配置文件不存在');
+			}
+
+		}
+		
+		return null;
+	}
+
+	//异步获取最大银行格，必须跟柜员对话一次
+	cga.getBankMaxSlots = (filter, cb) => {
+		var banks = cga.GetBankItemsInfo();
+
+		//先从配置文件里获取
+		var config = cga.loadPlayerConfig();
+
+		if(!config)
+			config = {};
+
+		if(config.maxbankslots)
+		{
+			console.log('最大银行格为：'+config.maxbankslots);
+			cb(null, config.maxbankslots);
+			return;
+		} 
+		else
+		{
+			//看看60~79，40~59，20~39是否有物品
+			var bank6079 = banks.filter((val)=>{ return val.pos >= 160 });
+
+			if(bank6079.length > 0)
+			{
+				cb(null, 80);
+				return;
+			}
+			else
+			{
+				var testitempos = cga.findItem(filter);
+				if(testitempos != -1)
+				{
+					cga.MoveItem(testitempos, 160, -1);
+
+					cga.waitSysMsgTimeout((err, msg)=>{
+						if(err){
+							//银行第60格物品保存成功
+							if(cga.GetBankItemsInfo().find((item)=>{
+								return item.pos == 160;
+							}) != undefined)
+							{
+								//第60格物品取回包里
+								cga.MoveItem(160, testitempos, -1);
+
+								config.maxbankslots = 80;
+								cga.savePlayerConfig(config);
+								console.log('最大银行格为：'+config.maxbankslots);
+								setTimeout(cb, 1000, config.maxbankslots);
+
+								return false;
+							}
+							//未知问题
+
+							console.log('获取最大银行格时发生未知问题，可能网络不稳定或没有与柜员对话！');
+							console.log('最大银行格默认为：'+20);
+							setTimeout(cb, 1000, 20);
+							return false;
+						}
+
+						if(msg.indexOf('您现在只能使用银行物品栏位中的第') >= 0)
+						{
+							var regex = msg.match(/您现在只能使用银行物品栏位中的第 (\d+)到(\d+)个！/);
+							if(regex && regex.length >= 3){
+
+								config.maxbankslots = parseInt(regex[2]);
+								cga.savePlayerConfig(config);
+								console.log('最大银行格为：'+config.maxbankslots);
+								setTimeout(cb, 1000, config.maxbankslots);
+
+								return false;
+							}
+						}
+
+						return true;
+					}, 1000);					
+				}
+				else
+				{
+					console.log('获取最大银行格失败，可能包中没有符合条件的物品！');
+					console.log('最大银行格默认为：'+20);
+					setTimeout(cb, 1000, 20);
+					return false;
+				}
+			}
+		}
+	};
+
+	//寻找银行中的空闲格子, 参数：物品filter、最大堆叠数量、最大银行格
+	cga.findBankEmptySlot = (filter, maxcount, maxslots = 20) => {
 		
 		var banks = cga.GetBankItemsInfo();
 
@@ -3138,7 +3283,7 @@ module.exports = function(callback){
 			arr[banks[i].pos-100] = banks[i];
 		}
 		
-		for(var i = 0; i < 80; ++i){
+		for(var i = 0; i < maxslots; ++i){
 			if(typeof arr[i] != 'undefined'){
 				if(typeof filter == 'string' && maxcount > 0){
 					if(arr[i].name == filter && arr[i].count < maxcount)
@@ -3212,31 +3357,42 @@ module.exports = function(callback){
 			cb(new Error('包里没有该物品, 无法存放到银行'));
 			return;
 		}
-		
-		var emptyslot = cga.findBankEmptySlot(filter, maxcount);
-		if(emptyslot == -1){
-			cb(new Error('银行没有空位, 无法存放到银行'));
-			return;
-		}
-		
-		cga.MoveItem(itempos, emptyslot, -1);
-		
-		var saveToBank = ()=>{
-			if(cga.GetItemInfo(emptyslot))
-			{
-				cb(null);
+
+		cga.getBankMaxSlots(filter, (err, maxslots)=>{
+			if(err){
+				cb(err);
+				return;
 			}
-			else
-			{
-				cb(new Error('存银行失败，可能银行格子已满'));
+
+			var emptyslot = cga.findBankEmptySlot(filter, maxcount, maxslots);
+			if(emptyslot == -1){
+				cb(new Error('银行没有空位, 无法存放到银行'));
+				return;
 			}
-		}
-		
-		setTimeout(saveToBank, 800);
+			
+			cga.MoveItem(itempos, emptyslot, -1);
+
+			setTimeout(()=>{
+				var bankitem = cga.GetBankItemsInfo().find((item)=>{
+					return item.pos == emptyslot;
+				});
+				if(bankitem != undefined)
+				{
+					//保存成功
+					console.log(bankitem.name+' 成功存到银行第 ' + (bankitem.pos - 100 + 1) + ' 格!');
+					cb(null);
+				}
+				else
+				{
+					cb(new Error('保存到银行失败，可能银行格子已满、未与柜员对话或网络问题'));
+				}
+			}, 1000);
+		});
 	}
 	
 	//循环将符合条件的物品存至银行，maxcount为最大堆叠数量
 	cga.saveToBankAll = (filter, maxcount, cb)=>{
+		console.log('开始批量保存物品到银行...');
 		var repeat = ()=>{
 			cga.saveToBankOnce(filter, maxcount, (err)=>{
 				if(err){
@@ -3245,10 +3401,11 @@ module.exports = function(callback){
 					return;
 				}
 				if(cga.findItem(filter) == -1){
+					console.log('包里已经没有指定物品，批量保存到银行执行完毕！');
 					cb(null);
 					return;
-				}				
-				setTimeout(repeat, 800);
+				}
+				setTimeout(repeat, 1000);
 			});
 		}
 		
@@ -3910,11 +4067,37 @@ module.exports = function(callback){
 				return;
 			}
 			
-			listen = cb(r.msg);	
+			listen = cb(r.msg);
 
 			if(listen == true)
 				cga.waitSysMsg(cb);
 		}, 1000);
+	}
+
+	cga.waitSysMsgTimeout = (cb, timeout)=>{
+		cga.AsyncWaitChatMsg((err, r)=>{
+
+			if(err){
+
+				listen = cb(err);
+
+				if(listen == true)
+					cga.waitSysMsgTimeout(cb, timeout);
+
+				return;
+			}
+
+			if(!r || r.unitid != -1){
+				cga.waitSysMsgTimeout(cb, timeout);
+				return;
+			}
+			
+			listen = cb(null, r.msg);
+
+			if(listen == true)
+				cga.waitSysMsgTimeout(cb, timeout);
+
+		}, timeout);
 	}
 	
 	//发送超长聊天信息
@@ -4555,7 +4738,7 @@ module.exports = function(callback){
 		var waitTradeMsg = ()=>{
 			
 			cga.waitSysMsg((msg)=>{
-								
+
 				if(tradeFinished)
 					return false;
 				
