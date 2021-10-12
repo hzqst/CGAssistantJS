@@ -41,6 +41,13 @@ module.exports = function(callback){
 	cga.TRADE_STUFFS_PETSKILL = 3;
 	cga.TRADE_STUFFS_GOLD = 4;
 
+	cga.TRADE_STUFFS_TRANSLATION = {
+		1 : '物品',
+		2 : '宠物',
+		3 : '宠物技能',
+		4 : '金币',
+	};
+
 	cga.REQUEST_TYPE_PK = 1;
 	cga.REQUEST_TYPE_JOINTEAM = 3;
 	cga.REQUEST_TYPE_EXCAHNGECARD = 4;
@@ -65,6 +72,13 @@ module.exports = function(callback){
 	cga.TRADE_STATE_READY = 1;
 	cga.TRADE_STATE_CONFIRM = 2;
 	cga.TRADE_STATE_SUCCEED = 3;
+
+	cga.TRADE_STATE_TRANSLATION = {
+		0 : '取消交易',
+		1 : '准备交易',
+		2 : '确认交易',
+		3 : '交易成功',
+	};
 	
 	cga.FL_BATTLE_ACTION_ISPLAYER = 1;
 	cga.FL_BATTLE_ACTION_ISDOUBLE = 2;
@@ -4741,14 +4755,13 @@ module.exports = function(callback){
 
 				if(tradeFinished)
 					return false;
-				
-				console.log('等待交易消息：'+msg);
-												
+																
 				if(msg.indexOf('交易完成') >= 0){
 					tradeFinished = true;
 					resolve({
 						success: true,
-						received: receivedStuffs
+						received: receivedStuffs,
+						reason : '交易成功',
 					});
 					return false;
 				} else if(msg.indexOf('交易中止') >= 0 || msg.indexOf('因物品栏已满所以无法交易') >= 0){
@@ -4757,8 +4770,7 @@ module.exports = function(callback){
 					tradeFinished = true;
 					resolve({
 						success: false,
-						received: [],
-						reason : 'refused'
+						reason : '交易被拒绝',
 					});
 					return false;
 				} else if(msg.indexOf('没有可交易的对象') >= 0){
@@ -4766,8 +4778,7 @@ module.exports = function(callback){
 					tradeFinished = true;
 					resolve({
 						success: false,
-						received: [],
-						reason : 'no target'
+						reason : '没有可交易的对象',
 					});
 					return false;
 				}
@@ -4788,10 +4799,6 @@ module.exports = function(callback){
 
 				cga.AsyncWaitTradeStuffs((err, type, args) => {
 				
-					//console.log(err);
-					//console.log(type);
-					//console.log(args);
-
 					if(!args){
 
 						if(getInTradeStuffs == false && !tradeFinished)
@@ -4800,8 +4807,9 @@ module.exports = function(callback){
 						return;
 					}
 					
-					console.log('等待交易物品：'+type);
-															
+					if(type >= cga.TRADE_STUFFS_ITEM && type <= cga.TRADE_STUFFS_GOLD )
+						console.log('正在等待获取交易内容：' + cga.TRADE_STUFFS_TRANSLATION[type]);
+
 					getInTradeStuffs = true;
 						
 					if(type == cga.TRADE_STUFFS_ITEM){
@@ -4827,30 +4835,30 @@ module.exports = function(callback){
 
 					if(tradeFinished)
 						return;
-										
+
 					var timeout_trade = (typeof timeout == 'number') ? timeout : 30000;
 					if( (new Date()).getTime() > beginTime + timeout_trade){
 						tradeFinished = true;
 						cga.DoRequest(cga.REQUEST_TYPE_TRADE_REFUSE);
 						resolve({
 							success: false,
-							received: [],
-							reason : 'refused'
+							reason : '交易被拒绝',
 						});
 						return;
 					}
 					
-					console.log('等待交易状态变更：'+state);
+					if(state != undefined)
+						console.log('交易状态变更为：' + cga.TRADE_STATE_TRANSLATION[state]);
 					
 					if(!err){
 						if (state == cga.TRADE_STATE_READY || state == cga.TRADE_STATE_CONFIRM) {
 							getInTradeStuffs = true;
 							if (!checkParty || tradeStuffsChecked || checkParty(playerName ? playerName : savePartyName, receivedStuffs)) {
 								tradeStuffsChecked = true;
-								console.log('confirm');
+								console.log('确认交易...');
 								cga.DoRequest(cga.REQUEST_TYPE_TRADE_CONFIRM);
 							} else {
-								console.log('refuse');
+								console.log('拒绝交易...');
 								cga.DoRequest(cga.REQUEST_TYPE_TRADE_REFUSE);
 							}
 						} else if (state == cga.TRADE_STATE_SUCCEED || state == cga.TRADE_STATE_CANCEL) {
@@ -4872,9 +4880,13 @@ module.exports = function(callback){
 				return {itemid: e.itemid, itempos: e.pos, count: (e.count > 1 ? e.count : 1)};
 			});
 
+			const tracePets = cga.GetPetsInfo().filter(petFilter).map((e)=>{
+				return e.index;
+			});
+
 			cga.TradeAddStuffs(
 				tradeItems,
-				cga.GetPetsInfo().filter(petFilter).map((p, index) => index),
+				tracePets,
 				(stuff && stuff.gold) ? stuff.gold : 0
 			);
 		}
@@ -4884,7 +4896,7 @@ module.exports = function(callback){
 			if(tradeFinished)
 				return;
 			
-			console.log('等待交易对话框：'+partyLevel);
+			console.log('正在等待交易对话框...');
 			
 			savePartyName = partyName;
 			
@@ -4893,7 +4905,10 @@ module.exports = function(callback){
 			} else {
 				cga.DoRequest(cga.REQUEST_TYPE_TRADE_REFUSE);
 				tradeFinished = true;
-				resolve({success: false, reason : 'trade dialog timeout'});
+				resolve({
+					success: false,
+					reason : '等待交易对话框超时',
+				});
 			}
 		}, 10000);
 		
@@ -4972,49 +4987,147 @@ module.exports = function(callback){
 				console.log('交易失败! 原因：'+arg.reason);
 			}
 		});
+
+		//arg中可能的返回值：
+		{
+			success: false,                 //是否交易成功
+			received: [],                   //交易成功时接受到的物品、宠物、金币
+			reason: '交易被拒绝',              //交易失败的原因
+		}
 	*/
 	cga.positiveTrade = (name, stuff, checkParty, resolve, timeout) => {
+	
+		var resulted = false;
+
 		cga.AsyncWaitPlayerMenu((err, players) => {
+			
+			if(resulted)
+				return false;
+			
 			if(err){
-				console.log('等待交易超时')
-				resolve({success: false, reason : 'player menu timeout'});
+
+				resulted = true;
+				
+				resolve({
+					success: false,
+					reason : '等待交易玩家选择菜单超时',
+				});
+
 				return;
 			}
 			
 			if (!(players instanceof Array)) players = [];
 			var player = players.find((e, index) => typeof name == 'number' ? index == name : e.name == name);
 			if (player !== undefined) {
+
+				resulted = true;
+
 				cga.tradeInternal(stuff, checkParty, resolve, name, timeout);
 				cga.PlayerMenuSelect(player.index);
 			} else {
-				console.log('未找到目标交易对象')
-				resolve({success: false, reason : 'player not found'});
+				
+				resulted = true;
+
+				resolve({
+					success: false, 
+					reason : '未找到目标交易对象',
+				});
+
 			}
-		}, 3000);
+		}, 5000);
+
+		cga.waitSysMsgTimeout((err, msg)=>{
+
+			if(resulted)
+				return false;
+
+			if(err)
+				return false;
+
+			if(msg && msg.indexOf('没有可交易的对象！') >= 0)
+			{
+				resulted = true;
+
+				resolve({
+					success: false, 
+					reason : '没有可交易的对象',
+				});
+
+				return false;
+			}
+
+			return true;
+
+		}, 2000);
 		
 		cga.DoRequest(cga.REQUEST_TYPE_TRADE);
 	}
 	
 	//主动向name玩家发起交易（到开启交易对话框为止），成功或失败时回调resolve
-	cga.requestTrade = (name, resolve, timeout) => {
+	cga.requestTrade = (name, resolve) => {
+		var resulted = false;
+		
 		cga.AsyncWaitPlayerMenu((err, players) => {
+			if(resulted)
+				return;
+
 			if(err){
-				console.log('等待交易超时')
-				resolve({success: false, reason : 'player menu timeout'});
+				resulted = true;
+				
+				resolve({
+					success: false,
+					reason : '等待交易玩家选择菜单超时',
+				});
+
 				return;
 			}
 			
 			if (!(players instanceof Array)) players = [];
 			var player = players.find((e, index) => typeof name == 'number' ? index == name : e.name == name);
 			if (player !== undefined) {
+
+				resulted = true;
+
 				resolve({success: true});
+
 				cga.PlayerMenuSelect(player.index);
+
 			} else {
-				console.log('未找到目标交易对象')
-				resolve({success: false, reason : 'player not found'});
+
+				resulted = true;
+
+				resolve({
+					success: false, 
+					reason : '未找到目标交易对象',
+				});
+
 			}
-		}, 3000);
+		}, 5000);
 		
+		cga.waitSysMsgTimeout((err, msg)=>{
+
+			if(resulted)
+				return false;
+
+			if(err)
+				return false;
+
+			if(msg && msg.indexOf('没有可交易的对象！') >= 0)
+			{
+				resulted = true;
+
+				resolve({
+					success: false, 
+					reason : '没有可交易的对象',
+				});
+
+				return false;
+			}
+
+			return true;
+
+		}, 2000);
+
 		cga.DoRequest(cga.REQUEST_TYPE_TRADE);
 	}
 
@@ -5080,11 +5193,9 @@ module.exports = function(callback){
 			if (player) {
 				cga.tradeInternal(stuff, checkParty, resolve, name, timeout);
 				cga.PlayerMenuSelect(player.index);
-			} else {
-				console.log('未找到目标交易对象');
 			}
-		}, 3000);
-				
+		}, 5000);
+
 		cga.DoRequest(cga.REQUEST_TYPE_TRADE);
 	}
 
