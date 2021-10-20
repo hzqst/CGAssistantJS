@@ -3,7 +3,7 @@ module.exports = require('./wrapper').then( async (cga) => {
     leo.messageServer = false;
     leo.appId = '';
     leo.appSecret = '';
-    leo.version = '8.10';
+    leo.version = '8.11';
     leo.qq = '158583461'
     leo.copyright = '红叶散落';
     leo.FORMAT_DATE = 'yyyy-MM-dd';
@@ -471,7 +471,7 @@ module.exports = require('./wrapper').then( async (cga) => {
                 await leo.getMoneyFromBank(500000)
             }
             if(cga.GetMapName()!='凯蒂夫人的店'){
-                await leo.goto(n=>n.falan.s1)
+                await leo.goto(n=>n.falan.s2)
                 await leo.autoWalk([196,78,'凯蒂夫人的店'])
             }
             await leo.autoWalk([15,12])
@@ -3333,17 +3333,32 @@ module.exports = require('./wrapper').then( async (cga) => {
     }
 
     leo.getMoneyFromBank = async (money)=>{
-        await leo.waitAfterBattle()
-        if(leo.isInTeam()){
-            await leo.leaveTeam()
+        try{
+            await leo.waitAfterBattle()
+            if(leo.isInTeam()){
+                await leo.leaveTeam()
+            }
+            if(cga.GetMapName()!='银行'){
+                try{
+                    await leo.goto(n => n.falan.bank)
+                }catch(e){
+                    console.log(leo.logTime()+'出错，e:' + e);
+                }
+            }
+            if(cga.GetMapName()=='银行'){
+                await leo.autoWalk([11,8])
+                await leo.turnDir(0)
+                var bankGold = cga.GetBankGold();
+                if(bankGold < money){
+                    money = bankGold;
+                }
+                await leo.moveGold(money,cga.MOVE_GOLD_FROMBANK)
+            }
+        }catch(e){
+            console.log('出错，e：' + e);
+            await leo.logBack()
+            return leo.getMoneyFromBank(money);
         }
-        await leo.goto(n=>n.falan.bank)
-        await leo.turnDir(0)
-        var bankGold = cga.GetBankGold();
-        if(bankGold < money){
-            money = bankGold;
-        }
-        await leo.moveGold(money,cga.MOVE_GOLD_FROMBANK)
     }
 
     leo.autoLearnSkill = async (skillName) => {
@@ -3609,6 +3624,27 @@ module.exports = require('./wrapper').then( async (cga) => {
         }
     }
 
+    //调用await leo.learnPetSkill([0],0,1,2)
+    leo.learnPetSkill = async ([x, y], skillIndex, petIndex, petSkillIndex) => {
+        await leo.talkNpc(x, y, async (dialog) => {
+            //console.log(dialog)
+            if (dialog.type == 24) {
+                cga.ClickNPCDialog(0, skillIndex)
+                await leo.delay(1000)
+            }
+            if (dialog.type == 25) {
+                cga.ClickNPCDialog(0, petIndex)
+                await leo.delay(1000)
+            }
+            if (dialog.type == 26) {
+                cga.ClickNPCDialog(0, petSkillIndex)
+                await leo.delay(1000)
+                return false;
+            }
+            return true;
+        })
+    }
+
     leo.getRoleIndex = (roleName) => {
         const roleMap = {
             '巴乌':1,
@@ -3716,6 +3752,16 @@ module.exports = require('./wrapper').then( async (cga) => {
         leo.battleMonitor = {
             start:()=>{},
             stop:()=>{},
+        }
+    }
+
+    //收银员插件
+    try{
+        leo.cashier = require('./cashier');
+    }catch(e){
+        leo.cashier = {
+            getMoney:()=>{},
+            saveMoney:()=>{},
         }
     }
 
@@ -3970,9 +4016,8 @@ module.exports = require('./wrapper').then( async (cga) => {
                     }
                     return false;
                 });
-                //console.log(dropEquips);
-                for(var i in dropEquips){
-                    await leo.dropItemEx(i.pos)
+                if(dropEquips.length>0){
+                    cga.DropItem(dropEquips[0].pos);
                 }
             }
 

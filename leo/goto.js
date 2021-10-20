@@ -1,4 +1,6 @@
-
+//version 1.2
+const fix = true;
+const debug = false;
 module.exports = function(cga) {
 	class Station {
 		// id: [x,y,'map']
@@ -16,6 +18,7 @@ module.exports = function(cga) {
 				this.arrive = arrive;
 		}
 		arrive() {
+			//console.log(this.station.id);
 			return cga.emogua.autoWalk(this.station.id);
 		}
 	}
@@ -119,7 +122,8 @@ module.exports = function(cga) {
 								return Promise.reject(23);
 							}
 							times++;
-							return cga.emogua.logBack();
+							return cga.emogua.logBack()
+							.then(()=>cga.emogua.delay(2000));
 						}
 					)
 				).then(r => {
@@ -518,7 +522,33 @@ module.exports = function(cga) {
 							short = p;
 						}
 					}
-					return short.reduce((a,c) => a.then(() => c.arrive()), Promise.resolve()).catch(r => {
+					//console.log(short);
+					return short.reduce(
+						(a,c) => a.then(async () => {
+							if(fix){
+								if(debug) console.log('目标：'+c.station.id)
+								await cga.emogua.recursion(async ()=>{
+									if(debug) console.log('移动中...' + c.station.id)
+									await c.arrive();
+									if(debug) console.log('到达并进行坐标检查')
+									const mapInfo = cga.getMapInfo();
+									const mapIndex = mapInfo.indexes.index3;
+									if(mapInfo.x == c.station.id[0] && mapInfo.y == c.station.id[1] && (mapInfo.name == c.station.id[2] || mapIndex === c.station.id[2])){
+										if(debug) console.log('检查 通过!')
+										return Promise.reject();
+									}else{
+										if(debug) console.log('检查 不通过!')
+										await cga.emogua.delay(2000);
+										if(debug) console.log('重试!')
+									}
+								})
+								return Promise.resolve();
+							}else{
+								return c.arrive();
+							}
+						}), 
+						Promise.resolve()
+					).catch(r => {
 						console.log('goto failed', r);
 						return Promise.reject();
 					});

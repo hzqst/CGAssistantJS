@@ -1,4 +1,4 @@
-const version = '1.5';
+const version = '1.8';
 const doctorName = '医道之殇';
 const petConfig = {
     '水龙蜥': {
@@ -12,7 +12,9 @@ const petConfig = {
         minDefensive: 46,
         minAgility: 29,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 0,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
@@ -50,7 +52,9 @@ const petConfig = {
         minDefensive: 44,
         minAgility: 28,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
@@ -86,7 +90,9 @@ const petConfig = {
         minDefensive: 46,
         minAgility: 30,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
@@ -125,12 +131,14 @@ const petConfig = {
         minDefensive: 34,
         minAgility: 40,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 0,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
         crystalName: '火风的水晶（5：5）',
-        petSkillName: '陨石魔法-Ⅰ',
+        petSkillName: '强力火焰魔法-Ⅰ',
         async walk(cga){
             const leo = cga.emogua;
             //地图判断，如果已经在1级宠捕捉点，则继续捕捉
@@ -161,12 +169,14 @@ const petConfig = {
         minDefensive: 36,
         minAgility: 39,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
         crystalName: '地水的水晶（5：5）',
-        petSkillName: '火焰魔法-Ⅰ',
+        petSkillName: '强力陨石魔法-Ⅰ',
         async walk(cga){
             const leo = cga.emogua;
             //地图判断，如果已经在1级宠捕捉点，则继续捕捉
@@ -197,12 +207,14 @@ const petConfig = {
         minDefensive: 33,
         minAgility: 37,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
         crystalName: '火风的水晶（5：5）',
-        petSkillName: '陨石魔法-Ⅰ',
+        petSkillName: '强力火焰魔法-Ⅰ',
         async walk(cga){
             const leo = cga.emogua;
             //地图判断，如果已经在1级宠捕捉点，则继续捕捉
@@ -233,12 +245,14 @@ const petConfig = {
         minDefensive: 40,
         minAgility: 35,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 0,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
         crystalName: '火风的水晶（5：5）',
-        petSkillName: '陨石魔法-Ⅰ',
+        petSkillName: '强力火焰魔法-Ⅰ',
         async walk(cga){
             const leo = cga.emogua;
             //地图判断，如果已经在1级宠捕捉点，则继续捕捉
@@ -269,12 +283,14 @@ const petConfig = {
         minDefensive: 37,
         minAgility: 35,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
         crystalName: '风地的水晶（5：5）',
-        petSkillName: '火焰魔法-Ⅰ',
+        petSkillName: '强力陨石魔法-Ⅰ',
         async walk(cga){
             const leo = cga.emogua;
             //地图判断，如果已经在1级宠捕捉点，则继续捕捉
@@ -316,12 +332,14 @@ const petConfig = {
         minDefensive: 38,
         minAgility: 35,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 0,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
         crystalName: '水火的水晶（5：5）',
-        petSkillName: '陨石魔法-Ⅰ',
+        petSkillName: '强力火焰魔法-Ⅰ',
         async walk(cga){
             const leo = cga.emogua;
             //地图判断，如果已经在1级宠捕捉点，则继续捕捉
@@ -353,12 +371,14 @@ const petConfig = {
         minDefensive: 37,
         minAgility: 37,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
         crystalName: '风地的水晶（5：5）',
-        petSkillName: '陨石魔法-Ⅰ',
+        petSkillName: '强力陨石魔法-Ⅰ',
         async walk(cga){
             const leo = cga.emogua;
             //地图判断，如果已经在1级宠捕捉点，则继续捕捉
@@ -389,7 +409,9 @@ const petConfig = {
         minDefensive: 39,
         minAgility: 34,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
@@ -427,7 +449,9 @@ const petConfig = {
         minDefensive: 37,
         minAgility: 31,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
@@ -462,7 +486,9 @@ const petConfig = {
         minDefensive: 40,
         minAgility: 30,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
@@ -500,7 +526,9 @@ const petConfig = {
         minDefensive: 35,
         minAgility: 32,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
@@ -538,12 +566,14 @@ const petConfig = {
         minDefensive: 37,
         minAgility: 33,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 0,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
         crystalName: '火风的水晶（5：5）',
-        petSkillName: '陨石魔法-Ⅰ',
+        petSkillName: '强力陨石魔法-Ⅰ',
         async walk(cga){
             const leo = cga.emogua;
             //地图判断，如果已经在1级宠捕捉点，则继续捕捉
@@ -573,12 +603,14 @@ const petConfig = {
         minDefensive: 34,
         minAgility: 36,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 0,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
         crystalName: '水火的水晶（5：5）',
-        petSkillName: '陨石魔法-Ⅰ',
+        petSkillName: '强力陨石魔法-Ⅰ',
         async walk(cga){
             const leo = cga.emogua;
             //地图判断，如果已经在1级宠捕捉点，则继续捕捉
@@ -609,12 +641,14 @@ const petConfig = {
         minDefensive: 38,
         minAgility: 33,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
         crystalName: '火风的水晶（5：5）',
-        petSkillName: '陨石魔法-Ⅰ',
+        petSkillName: '强力陨石魔法-Ⅰ',
         async walk(cga){
             const leo = cga.emogua;
             //判断身上是否有【咒器·红念珠】
@@ -687,12 +721,14 @@ const petConfig = {
         minDefensive: 33,
         minAgility: 35,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 0,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
         crystalName: '火风的水晶（5：5）',
-        petSkillName: '火焰魔法-Ⅰ',
+        petSkillName: '强力火焰魔法-Ⅰ',
         async walk(cga){
             const leo = cga.emogua;
             //地图判断，如果已经在1级宠捕捉点，则继续捕捉
@@ -722,12 +758,14 @@ const petConfig = {
         minDefensive: 32,
         minAgility: 33,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
         crystalName: '地水的水晶（5：5）',
-        petSkillName: '火焰魔法-Ⅰ',
+        petSkillName: '强力陨石魔法-Ⅰ',
         async walk(cga){
             const leo = cga.emogua;
             //判断身上是否有【咒器·红念珠】
@@ -802,7 +840,9 @@ const petConfig = {
         minDefensive: 45,
         minAgility: 32,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
@@ -864,7 +904,9 @@ const petConfig = {
         minDefensive: 44,
         minAgility: 31,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
@@ -907,7 +949,9 @@ const petConfig = {
         minDefensive: 40,
         minAgility: 32,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
@@ -989,7 +1033,9 @@ const petConfig = {
         minDefensive: 37,
         minAgility: 32,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
@@ -1049,12 +1095,14 @@ const petConfig = {
         minDefensive: 34,
         minAgility: 32,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 0,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
         crystalName: '火风的水晶（5：5）',
-        petSkillName: '火焰魔法-Ⅰ',
+        petSkillName: '强力火焰魔法-Ⅰ',
         async walk(cga){
             const leo = cga.emogua;
             //地图判断，如果已经在1级宠捕捉点，则继续捕捉
@@ -1085,12 +1133,14 @@ const petConfig = {
         minDefensive: 33,
         minAgility: 33,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
         crystalName: '火风的水晶（5：5）',
-        petSkillName: '火焰魔法-Ⅰ',
+        petSkillName: '强力火焰魔法-Ⅰ',
         async walk(cga){
             const leo = cga.emogua;
             //地图判断，如果已经在1级宠捕捉点，则继续捕捉
@@ -1112,11 +1162,6 @@ const petConfig = {
                 await leo.autoWalkList([
                     [73,56],[75,50,'雪拉威森塔５０层'],
                     [24,44,'雪拉威森塔７５层'],
-                ])
-                await leo.checkHealth(doctorName)
-                await leo.autoWalkList([
-                    [133,133],[133,140],[120,140],[120,149],[109,149],
-                    [109,157],[91,157],[91,151],[91,150,'雪拉威森塔７６层']
                 ])
                 await leo.checkHealth(doctorName)
                 await leo.autoWalkList([
@@ -1156,12 +1201,14 @@ const petConfig = {
         minDefensive: 33,
         minAgility: 34,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
         crystalName: '火风的水晶（5：5）',
-        petSkillName: '火焰魔法-Ⅰ',
+        petSkillName: '强力火焰魔法-Ⅰ',
         async walk(cga){
             const leo = cga.emogua;
             //地图判断，如果已经在1级宠捕捉点，则继续捕捉
@@ -1193,12 +1240,14 @@ const petConfig = {
         minDefensive: 33,
         minAgility: 34,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
         crystalName: '火风的水晶（5：5）',
-        petSkillName: '火焰魔法-Ⅰ',
+        petSkillName: '强力火焰魔法-Ⅰ',
         async walk(cga){
             const leo = cga.emogua;
             //地图判断，如果已经在1级宠捕捉点，则继续捕捉
@@ -1262,11 +1311,13 @@ const petConfig = {
         minAgility: 33,
         index: 1,
         gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
         crystalName: '火风的水晶（5：5）',
-        petSkillName: '火焰魔法-Ⅰ',
+        petSkillName: '强力火焰魔法-Ⅰ',
         async walk(cga){
             const leo = cga.emogua;
             //地图判断，如果已经在1级宠捕捉点，则继续捕捉
@@ -1301,7 +1352,9 @@ const petConfig = {
         minDefensive: 40,
         minAgility: 28,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
@@ -1357,7 +1410,9 @@ const petConfig = {
         minDefensive: 37,
         minAgility: 30,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
@@ -1414,6 +1469,8 @@ const petConfig = {
         minAgility: 30,
         index: 1,
         gradeMin: 0,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
@@ -1448,12 +1505,14 @@ const petConfig = {
         minDefensive: 41,
         minAgility: 29,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
         crystalName: '水火的水晶（5：5）',
-        petSkillName: '火焰魔法-Ⅰ',
+        petSkillName: '强力火焰魔法-Ⅰ',
         async walk(cga){
             const leo = cga.emogua;
             //地图判断，如果已经在1级宠捕捉点，则继续捕捉
@@ -1484,12 +1543,14 @@ const petConfig = {
         minDefensive: 34,
         minAgility: 29,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
         crystalName: '火风的水晶（5：5）',
-        petSkillName: '火焰魔法-Ⅰ',
+        petSkillName: '强力火焰魔法-Ⅰ',
         async walk(cga){
             const leo = cga.emogua;
             //地图判断，如果已经在1级宠捕捉点，则继续捕捉
@@ -1520,12 +1581,14 @@ const petConfig = {
         minDefensive: 35,
         minAgility: 29,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
         crystalName: '火风的水晶（5：5）',
-        petSkillName: '火焰魔法-Ⅰ',
+        petSkillName: '强力火焰魔法-Ⅰ',
         async walk(cga){
             const leo = cga.emogua;
             //地图判断，如果已经在1级宠捕捉点，则继续捕捉
@@ -1557,11 +1620,13 @@ const petConfig = {
         minAgility: 34,
         index: 1,
         gradeMin: 0,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
         crystalName: '火风的水晶（5：5）',
-        petSkillName: '火焰魔法-Ⅰ',
+        petSkillName: '强力火焰魔法-Ⅰ',
         async walk(cga){
             const leo = cga.emogua;
             //地图判断，如果已经在1级宠捕捉点，则继续捕捉
@@ -1591,12 +1656,14 @@ const petConfig = {
         minDefensive: 33,
         minAgility: 34,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
         crystalName: '地水的水晶（5：5）',
-        petSkillName: '火焰魔法-Ⅰ',
+        petSkillName: '强力火焰魔法-Ⅰ',
         async walk(cga){
             const leo = cga.emogua;
             //地图判断，如果已经在1级宠捕捉点，则继续捕捉
@@ -1632,6 +1699,8 @@ const petConfig = {
         minAgility: 35,
         index: 1,
         gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
@@ -1678,6 +1747,8 @@ const petConfig = {
         minAgility: 34,
         index: 1,
         gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
@@ -1714,7 +1785,9 @@ const petConfig = {
         minDefensive: 39,
         minAgility: 33,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
@@ -1757,7 +1830,9 @@ const petConfig = {
         minDefensive: 37,
         minAgility: 35,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
@@ -1793,7 +1868,9 @@ const petConfig = {
         minDefensive: 35,
         minAgility: 33,
         index: 1,
-        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMin: 0,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
@@ -1846,12 +1923,14 @@ const petConfig = {
         minDefensive: 36,
         minAgility: 31,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 0,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
         crystalName: '地水的水晶（5：5）',
-        petSkillName: '陨石魔法-Ⅰ',
+        petSkillName: '强力陨石魔法-Ⅰ',
         async walk(cga){
             const leo = cga.emogua;
             //地图判断，如果已经在1级宠捕捉点，则继续捕捉
@@ -1884,6 +1963,8 @@ const petConfig = {
         minAgility: 28,
         index: 1,
         gradeMin: 0,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
@@ -1918,7 +1999,9 @@ const petConfig = {
         minDefensive: 42,
         minAgility: 30,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
@@ -1954,7 +2037,9 @@ const petConfig = {
         minDefensive: 41,
         minAgility: 30,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 0,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
@@ -1984,13 +2069,15 @@ const petConfig = {
         sealCardName: '封印卡（植物系）',
         sealCardLevel: 4,
         autoDropPet: true, //是否自动扔宠，true扔/false不扔
-        minHp: 103 - 3,
-        minMp: 84 - 3 ,
-        minAttack: 35,
-        minDefensive: 45,
-        minAgility: 26,
+        minHp: 110 - 3,
+        minMp: 90 - 3 ,
+        minAttack: 36,
+        minDefensive: 47,
+        minAgility: 27,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
@@ -2026,18 +2113,20 @@ const petConfig = {
         minDefensive: 46,
         minAgility: 28,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
         crystalName: '地水的水晶（5：5）',
-        petSkillName: '陨石魔法-Ⅰ',
+        petSkillName: '强力陨石魔法-Ⅰ',
         async walk(cga){
             const leo = cga.emogua;
             //地图判断，如果已经在1级宠捕捉点，则继续捕捉
             var currentMap = cga.GetMapName();
             if (currentMap == '莎莲娜') {
-                await leo.autoWalkList([[527, 333],[529, 333]])
+                await leo.autoWalkList([[517, 236],[517, 238]])
             } else {
                 await leo.logBack()
                 //await leo.sellCastle()
@@ -2046,7 +2135,7 @@ const petConfig = {
                 await leo.goto(n => n.teleport.jenova)
                 await leo.autoWalkList([
                     [71, 19, '莎莲娜'],
-                    [529, 333]
+                    [517, 238]
                 ])
             }
         }
@@ -2062,12 +2151,14 @@ const petConfig = {
         minDefensive: 47,
         minAgility: 29,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 0,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
         crystalName: '火风的水晶（5：5）',
-        petSkillName: '火焰魔法-Ⅰ',
+        petSkillName: '强力火焰魔法-Ⅰ',
         async walk(cga){
             const leo = cga.emogua;
             //地图判断，如果已经在1级宠捕捉点，则继续捕捉
@@ -2098,12 +2189,14 @@ const petConfig = {
         minDefensive: 45,
         minAgility: 27,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
         crystalName: '火风的水晶（5：5）',
-        petSkillName: '火焰魔法-Ⅰ',
+        petSkillName: '强力火焰魔法-Ⅰ',
         async walk(cga){
             const leo = cga.emogua;
             //地图判断，如果已经在1级宠捕捉点，则继续捕捉
@@ -2145,12 +2238,14 @@ const petConfig = {
         minDefensive: 46,
         minAgility: 28,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 0,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
         crystalName: '水火的水晶（5：5）',
-        petSkillName: '陨石魔法-Ⅰ',
+        petSkillName: '强力陨石魔法-Ⅰ',
         async walk(cga){
             const leo = cga.emogua;
             //地图判断，如果已经在1级宠捕捉点，则继续捕捉
@@ -2180,7 +2275,9 @@ const petConfig = {
         minDefensive: 45,
         minAgility: 31,
         index: 1,
-        gradeMin: 0,    //高于该档次的宠判断丢弃
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
@@ -2238,12 +2335,14 @@ const petConfig = {
         minDefensive: 31,
         minAgility: 33,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 0,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
         crystalName: '火风的水晶（5：5）',
-        petSkillName: '陨石魔法-Ⅰ',
+        petSkillName: '强力陨石魔法-Ⅰ',
         async walk(cga){
             const leo = cga.emogua;
             //地图判断，如果已经在1级宠捕捉点，则继续捕捉
@@ -2274,12 +2373,14 @@ const petConfig = {
         minDefensive: 46,
         minAgility: 30,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
         crystalName: '火风的水晶（5：5）',
-        petSkillName: '火焰魔法-Ⅰ',
+        petSkillName: '强力火焰魔法-Ⅰ',
         async walk(cga){
             const leo = cga.emogua;
             //地图判断，如果已经在1级宠捕捉点，则继续捕捉
@@ -2346,7 +2447,9 @@ const petConfig = {
         minDefensive: 45,
         minAgility: 27,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
@@ -2394,7 +2497,9 @@ const petConfig = {
         minDefensive: 30,
         minAgility: 28,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
@@ -2455,7 +2560,9 @@ const petConfig = {
         minDefensive: 34,
         minAgility: 27,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
@@ -2578,7 +2685,9 @@ const petConfig = {
         minDefensive: 49,
         minAgility: 31,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
@@ -2617,7 +2726,9 @@ const petConfig = {
         minDefensive: 53,
         minAgility: 29,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
@@ -2653,7 +2764,9 @@ const petConfig = {
         minDefensive: 51,
         minAgility: 29,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
@@ -2689,7 +2802,9 @@ const petConfig = {
         minDefensive: 40,
         minAgility: 27,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
@@ -2725,7 +2840,9 @@ const petConfig = {
         minDefensive: 36,
         minAgility: 28,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
@@ -2761,7 +2878,9 @@ const petConfig = {
         minDefensive: 41,
         minAgility: 27,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
@@ -2797,7 +2916,9 @@ const petConfig = {
         minDefensive: 37,
         minAgility: 31,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
@@ -2835,7 +2956,9 @@ const petConfig = {
         minDefensive: 37,
         minAgility: 32,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
@@ -2871,7 +2994,9 @@ const petConfig = {
         minDefensive: 36,
         minAgility: 37,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 0,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
@@ -2907,7 +3032,9 @@ const petConfig = {
         minDefensive: 35,
         minAgility: 38,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
@@ -2943,12 +3070,14 @@ const petConfig = {
         minDefensive: 33,
         minAgility: 39,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
         crystalName: '火风的水晶（5：5）',
-        petSkillName: '火焰魔法-Ⅰ',
+        petSkillName: '强力火焰魔法-Ⅰ',
         async walk(cga){
             const leo = cga.emogua;
             //地图判断，如果已经在1级宠捕捉点，则继续捕捉
@@ -2981,12 +3110,14 @@ const petConfig = {
         minDefensive: 38,
         minAgility: 38,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
         crystalName: '地水的水晶（5：5）',
-        petSkillName: '陨石魔法-Ⅰ',
+        petSkillName: '强力陨石魔法-Ⅰ',
         async walk(cga){
             const leo = cga.emogua;
             //地图判断，如果已经在1级宠捕捉点，则继续捕捉
@@ -3017,7 +3148,9 @@ const petConfig = {
         minDefensive: 35,
         minAgility: 29,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
@@ -3054,7 +3187,9 @@ const petConfig = {
         minDefensive: 37,
         minAgility: 28,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
@@ -3090,7 +3225,9 @@ const petConfig = {
         minDefensive: 32,
         minAgility: 26,
         index: 1,
-        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMin: 0,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
@@ -3128,7 +3265,9 @@ const petConfig = {
         minDefensive: 29,
         minAgility: 27,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
@@ -3165,7 +3304,9 @@ const petConfig = {
         minDefensive: 44,
         minAgility: 29,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
@@ -3203,12 +3344,14 @@ const petConfig = {
         minDefensive: 34,
         minAgility: 33,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
         crystalName: '火风的水晶（5：5）',
-        petSkillName: '火焰魔法-Ⅰ',
+        petSkillName: '强力火焰魔法-Ⅰ',
         async walk(cga){
             const leo = cga.emogua;
             //地图判断，如果已经在1级宠捕捉点，则继续捕捉
@@ -3241,7 +3384,9 @@ const petConfig = {
         minDefensive: 44,
         minAgility: 26,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
@@ -3277,7 +3422,9 @@ const petConfig = {
         minDefensive: 40,
         minAgility: 34,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
@@ -3316,12 +3463,14 @@ const petConfig = {
         minDefensive: 36,
         minAgility: 35,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
         crystalName: '水火的水晶（5：5）',
-        petSkillName: '陨石魔法-Ⅰ',
+        petSkillName: '强力陨石魔法-Ⅰ',
         async walk(cga){
             const leo = cga.emogua;
             //地图判断，如果已经在1级宠捕捉点，则继续捕捉
@@ -3355,7 +3504,9 @@ const petConfig = {
         minDefensive: 36,
         minAgility: 32,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
@@ -3394,12 +3545,14 @@ const petConfig = {
         minDefensive: 32,
         minAgility: 36,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
         crystalName: '火风的水晶（5：5）',
-        petSkillName: '火焰魔法-Ⅰ',
+        petSkillName: '强力火焰魔法-Ⅰ',
         async walk(cga){
             const leo = cga.emogua;
             //地图判断，如果已经在1级宠捕捉点，则继续捕捉
@@ -3433,7 +3586,9 @@ const petConfig = {
         minDefensive: 34,
         minAgility: 29,
         index: 1,
-        gradeMin: 2,    //高于该档次的宠判断丢弃
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
