@@ -1,4 +1,4 @@
-//version 1.2
+//version 1.3
 const fix = true;
 const debug = false;
 module.exports = function(cga) {
@@ -268,12 +268,14 @@ module.exports = function(cga) {
 	];
 	Network.falan.s1.links = [
 		new Link(Network.falan.s2), new Link(Network.falan.sell), new Link(Network.falan.sout,() => cga.emogua.autoWalk([153,241,'芙蕾雅'])),
-		new Link(Network.falan.w1, () => cga.emogua.turnOrientation(6)),
+		new Link(Network.falan.w1, () => cga.emogua.turnOrientation(6)
+			.then(()=>cga.emogua.delay(1000))),
 		new Link(Network.falan.fabric, () => cga.emogua.autoWalkList([[117,112,'流行商店'],Network.falan.fabric.id]))
 	];
 	Network.falan.s2.links = [
 		new Link(Network.falan.s1), new Link(Network.falan.sell), new Link(Network.falan.sout,() => cga.emogua.autoWalk([153,241,'芙蕾雅'])),
-		new Link(Network.falan.w2, () => cga.emogua.turnOrientation(0)),
+		new Link(Network.falan.w2, () => cga.emogua.turnOrientation(0)
+			.then(()=>cga.emogua.delay(1000))),
 		new Link(Network.falan.fabric, () => cga.emogua.autoWalkList([[117,112,'流行商店'],Network.falan.fabric.id]))
 	];
 	Network.falan.sell.links = [
@@ -283,16 +285,25 @@ module.exports = function(cga) {
 	];
 	Network.falan.w1.links = [
 		new Link(Network.falan.w2), new Link(Network.falan.wout,() => cga.emogua.autoWalk([22,88,'芙蕾雅'])),
-		new Link(Network.falan.e1, () => cga.emogua.turnOrientation(6)),
+		new Link(Network.falan.e1, () => cga.emogua.turnOrientation(6)
+			.then(()=>cga.emogua.delay(1000))),
 		new Link(Network.falan.whospital, () => cga.emogua.autoWalk([82,83,'医院']))
 	];
 	Network.falan.w2.links = [
 		new Link(Network.falan.w1), new Link(Network.falan.wout,() => cga.emogua.autoWalk([22,88,'芙蕾雅'])),
-		new Link(Network.falan.e2, () => cga.emogua.turnOrientation(0))
+		new Link(Network.falan.e2, () => cga.emogua.turnOrientation(0)
+			.then(()=>cga.emogua.delay(1000)))
 	];
 	Network.falan.e1.links = [
 		new Link(Network.falan.e2), new Link(Network.falan.eout,() => cga.emogua.autoWalk([281,88,'芙蕾雅'])),
-		new Link(Network.falan.m1, () => cga.emogua.turnOrientation(0)),
+		new Link(Network.falan.m1, () => cga.emogua.recursion(async ()=>{
+			//if(cga.GetMapName()!='法兰城') {
+			if(cga.GetMapName()=='市场三楼 - 修理专区') {	
+				return Promise.reject();
+			}
+			await cga.emogua.turnOrientation(0);
+			await cga.emogua.delay(1000);
+		})),
 		new Link(Network.falan.bank, () => cga.emogua.autoWalkList([
 			[238,111,'银行'], Network.falan.bank.id
 		]))
@@ -523,6 +534,7 @@ module.exports = function(cga) {
 						}
 					}
 					//console.log(short);
+					let errorTimes = 0;
 					return short.reduce(
 						(a,c) => a.then(async () => {
 							if(fix){
@@ -540,6 +552,11 @@ module.exports = function(cga) {
 										if(debug) console.log('检查 不通过!')
 										await cga.emogua.delay(2000);
 										if(debug) console.log('重试!')
+										errorTimes++;
+										if(errorTimes>20){
+											//超过20次无法切图，重启脚本
+											process.abort();
+										}
 									}
 								})
 								return Promise.resolve();
