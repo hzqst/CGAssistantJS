@@ -3,7 +3,7 @@ module.exports = require('./wrapper').then( async (cga) => {
     leo.messageServer = false;
     leo.appId = '';
     leo.appSecret = '';
-    leo.version = '8.11';
+    leo.version = '8.12';
     leo.qq = '158583461'
     leo.copyright = '红叶散落';
     leo.FORMAT_DATE = 'yyyy-MM-dd';
@@ -531,99 +531,61 @@ module.exports = require('./wrapper').then( async (cga) => {
     }
     //自动购买和换平民装
     //装备栏顺序 0 头 1 衣服 2 左手 3 右手 4 鞋 5 左饰品 6 右饰品 7 水晶
-    leo.autoEquipLv1 = (weaponName) => {
-        var protectValue = 50;
-        return leo.todo()
-        .then(()=>{
-            //检查头的耐久，未装备或者装备的耐久低于protectValue，则去更换
-            var equipName = '平民帽';
-            var equip = cga.GetItemsInfo().find(i => i.pos == 0);
-            if(equip && cga.getEquipEndurance(equip)[0] > protectValue){
-                return leo.next();
-            }else{
-                var equip2 = cga.GetItemsInfo().find(i => i.pos >= 8 && i.name == equipName && cga.getEquipEndurance(i)[0] == 150);
-                if(equip2){
-                    return leo.useItemEx(equip2.pos)
-                    .then(() => leo.delay(2000))
-                    .then(()=>leo.dropItemEx(equipName));
-                }else{
-                    console.log(leo.logTime()+'购买装备【' + equipName + '】');
-                    return leo.buyEquipProtectLv1(equipName)
-                    .then(() => leo.delay(2000))
-                    .then(()=>leo.useItemEx(cga.GetItemsInfo().find(i => i.pos >= 8 && i.name == equipName && cga.getEquipEndurance(i)[0] == 150).pos))
-                    .then(() => leo.delay(2000))
-                    .then(()=>leo.dropItemEx(equipName));
-                }
-            }
-        })
-        .then(()=>{
-            //检查衣服的耐久，未装备或者装备的耐久低于protectValue，则去更换
-            var equipName = '平民衣';
-            var equip = cga.GetItemsInfo().find(i => i.pos == 1);
-            if(equip && cga.getEquipEndurance(equip)[0] > protectValue){
-                return leo.next();
-            }else{
-                var equip2 = cga.GetItemsInfo().find(i => i.pos >= 8 && i.name == equipName && cga.getEquipEndurance(i)[0] == 150);
-                if(equip2){
-                    return leo.useItemEx(equip2.pos)
-                    .then(() => leo.delay(2000))
-                    .then(()=>leo.dropItemEx(equipName));
-                }else{
-                    console.log(leo.logTime()+'购买装备【' + equipName + '】');
-                    return leo.buyEquipProtectLv1(equipName)
-                    .then(() => leo.delay(2000))
-                    .then(()=>leo.useItemEx(cga.GetItemsInfo().find(i => i.pos >= 8 && i.name == equipName && cga.getEquipEndurance(i)[0] == 150).pos))
-                    .then(() => leo.delay(2000))
-                    .then(()=>leo.dropItemEx(equipName));
-                }
-            }
-        })
-        .then(()=>{
-            //检查鞋的耐久，未装备或者装备的耐久低于protectValue，则去更换
-            var equipName = '平民鞋';
-            var equip = cga.GetItemsInfo().find(i => i.pos == 4);
-            if(equip && cga.getEquipEndurance(equip)[0] > protectValue){
-                return leo.next();
-            }else{
-                var equip2 = cga.GetItemsInfo().find(i => i.pos >= 8 && i.name == equipName && cga.getEquipEndurance(i)[0] == 150);
-                if(equip2){
-                    return leo.useItemEx(equip2.pos)
-                    .then(() => leo.delay(2000))
-                    .then(()=>leo.dropItemEx(equipName));
-                }else{
-                    console.log(leo.logTime()+'购买装备【' + equipName + '】');
-                    return leo.buyEquipProtectLv1(equipName)
-                    .then(() => leo.delay(2000))
-                    .then(()=>leo.useItemEx(cga.GetItemsInfo().find(i => i.pos >= 8 && i.name == equipName && cga.getEquipEndurance(i)[0] == 150).pos))
-                    .then(() => leo.delay(2000))
-                    .then(()=>leo.dropItemEx(equipName));
-                }
-            }
-        })
-        .then(()=>{
-            //检查武器的耐久，未装备或者装备的耐久低于protectValue，则去更换
-            if(weaponName){
-                var equipName = weaponName;
-                var equip = cga.GetItemsInfo().find(i => (i.pos == 2 || i.pos == 3) && i.name == equipName);
+    leo.autoEquipLv1 = async (weaponName, protectValue = 50) => {
+        const equipCheckArr = [
+            {name:'平民帽',pos:0},
+            {name:'平民衣',pos:1},
+            {name:'平民鞋',pos:4},
+        ];
+        for (var i = 0; i < equipCheckArr.length; i++) {
+            const equipCheck = equipCheckArr[i];
+            await leo.loop(async ()=>{
+                //1.检查身上是否已经装备有高耐久的装备
+                const equip = cga.GetItemsInfo().find(i => i.pos == equipCheck.pos);
                 if(equip && cga.getEquipEndurance(equip)[0] > protectValue){
-                    return leo.next();
-                }else{
-                    var equip2 = cga.GetItemsInfo().find(i => i.pos >= 8 && i.name == equipName && cga.getEquipEndurance(i)[0] == 150);
-                    if(equip2){
-                        return leo.useItemEx(equip2.pos)
-                        .then(() => leo.delay(2000))
-                        .then(()=>leo.dropItemEx(equipName));
-                    }else{
-                        console.log(leo.logTime()+'购买装备【' + equipName + '】');
-                        return leo.buyEquipWeaponLv1(equipName)
-                        .then(() => leo.delay(2000))
-                        .then(()=>leo.useItemEx(cga.GetItemsInfo().find(i => i.pos >= 8 && i.name == equipName && cga.getEquipEndurance(i)[0] == 150).pos))
-                        .then(() => leo.delay(2000))
-                        .then(()=>leo.dropItemEx(equipName));
-                    }
+                    return leo.reject();
                 }
-            }
-        });
+                //2.检查包里是否已经有可更换的备用装备（以前是要满耐久，现在改成高耐久就行）
+                const equip2 = cga.GetItemsInfo().find(i => i.pos >= 8 && i.name == equipCheck.name && cga.getEquipEndurance(i)[0] > protectValue);
+                if(equip2){
+                    //3.1找到了，装备到身上
+                    await leo.waitAfterBattle()
+                    await leo.useItemEx(equip2.pos)
+                    await leo.delay(2000)
+                    //丢弃，建议注释，改成用定时检测自动丢弃
+                    //await leo.dropItemEx(equipCheck.name) 
+                }else{
+                    //3.2没找到，去桥头购买
+                    console.log(leo.logTime()+'桥头购买装备【' + equipCheck.name + '】');
+                    await leo.buyEquipProtectLv1(equipCheck.name)
+                }
+                await leo.delay(1000)
+            })
+        }
+        if(weaponName) {
+            await leo.loop(async ()=>{
+                //1.检查身上是否已经装备该武器
+                const equip = cga.GetItemsInfo().find(i => (i.pos == 2 || i.pos == 3) && i.name == weaponName);
+                if(equip && cga.getEquipEndurance(equip)[0] > protectValue){
+                    return leo.reject();
+                }
+                //2.检查包里是否已经有可更换的备用武器
+                const equip2 = cga.GetItemsInfo().find(i => i.pos >= 8 && i.name == weaponName && cga.getEquipEndurance(i)[0] > protectValue);
+                if(equip2){
+                    //3.1找到了，装备到身上
+                    await leo.waitAfterBattle()
+                    await leo.useItemEx(equip2.pos)
+                    await leo.delay(2000)
+                    //丢弃，建议注释，改成用定时检测自动丢弃
+                    //await leo.dropItemEx(weaponName) 
+                }else{
+                    //3.2没找到，去桥头购买
+                    console.log(leo.logTime()+'桥头购买武器【' + weaponName + '】');
+                    await leo.buyEquipWeaponLv1(weaponName)
+                }
+                await leo.delay(1000)
+            })
+        }
     }
 
     //魔币操作： cga.MOVE_GOLD_TOBANK = 1;cga.MOVE_GOLD_FROMBANK =  2;cga.MOVE_GOLD_DROP = 3
@@ -975,8 +937,10 @@ module.exports = require('./wrapper').then( async (cga) => {
         if(leo.isInTeam()){
             await leo.leaveTeam()
         }
-        return leo.goto(n => n.falan.sell)
-        .then(() => leo.autoWalk([150,123]))
+        if(cga.GetMapName()!='法兰城'){
+            await leo.goto(n => n.falan.sell)
+        }
+        return leo.autoWalk([150,123])
         .then(() => {
             return leo.talkNpc(6, dialog => {
                 if (dialog.type == 5) {
@@ -1013,7 +977,10 @@ module.exports = require('./wrapper').then( async (cga) => {
         if(leo.isInTeam()){
             await leo.leaveTeam()
         }
-        return leo.goto(n => n.falan.sell)
+        if(cga.GetMapName()!='法兰城'){
+            await leo.goto(n => n.falan.sell)
+        }
+        return leo.autoWalk([156,123])
         .then(() => {
             return leo.talkNpc(6, dialog => {
                 if (dialog.type == 5) {
@@ -1106,11 +1073,11 @@ module.exports = require('./wrapper').then( async (cga) => {
                 isPrint = e.name == petOptions.name;
             }
             if(isPrint){
-                let flag = (e.maxhp >= petOptions.minHp && e.maxmp >= petOptions.minMp)
+                let flag = (e.maxhp >= petOptions.minHp && e.maxmp >= petOptions.minMp) && e.name == petOptions.name;
 
                 if(!flag){
                     //如果实际的血+魔总和也大于等于过滤的血+魔总和
-                    flag = (e.maxhp + e.maxmp) >= (petOptions.minHp + petOptions.minMp);
+                    flag = (e.maxhp + e.maxmp) >= (petOptions.minHp + petOptions.minMp) && e.name == petOptions.name;
                 }
 
                 let flagStr = flag?'，抓！':'';
@@ -3899,7 +3866,7 @@ module.exports = require('./wrapper').then( async (cga) => {
         autoShenLan: false, //自动吃深蓝
         autoShenLanListener: null,  //深蓝监听系统信息
         autoDrop: true, //自动丢弃低耐久装备
-        autoDropItem: ['十周年纪念戒指|150','平民衣服|50','平民鞋|50',,'平民帽|50','平民斧|50','平民弓|50','ㄑ型手里剑|10','ㄟ型手里剑|10'], //自动丢弃物品栏物品（不包括装备栏）： '十周年纪念戒指|150','平民衣服|50' 等
+        autoDropItem: ['十周年纪念戒指|150','平民衣|50','平民鞋|50',,'平民帽|50','平民斧|50','平民弓|50','ㄑ型手里剑|10','ㄟ型手里剑|10'], //自动丢弃物品栏物品（不包括装备栏）： '十周年纪念戒指|150','平民衣服|50' 等
         healSelf: false,   //自动治疗自己
         autoUpgradePoint: false,    //是否升级自动加点
         petLoyalProtect: true,  //是否开启宠物忠诚保护
