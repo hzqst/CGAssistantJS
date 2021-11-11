@@ -1,4 +1,4 @@
-/**version 1.7
+/**version 1.8
  * health 0 1-25(白) 26-50(黄) 51-75(粉) 76-100(红)
  * direction 0(右上)
  * 高速移动中不可丢东西
@@ -401,7 +401,9 @@ module.exports = new Promise(resolve => {
 				if (target[2]) path[path.length - 1][2] = target[2];
 				return cga.emogua.walkList(path);
 			}
-			console.log(`Can not find path to ${target}`);
+			//console.log(`Can not find path to ${target}`);
+			console.log(`未预期的目的，无法寻路到 ${target}，请检查是否已下载地图`);
+			//cga.LogOut();
 			return Promise.reject();
 		});
 	}).then(
@@ -488,7 +490,7 @@ module.exports = new Promise(resolve => {
 				return await cga.emogua.autoWalk([target.x, target.y, '*']);
 			}
 		}
-		throw 'Fail to walk random maze ' + entries;
+		throw '迷宫寻路出现异常： ' + entries;
 	};
 	cga.emogua.walkRandomMazeUntil = async (check, entryFilter) => {
 		let times = 0;
@@ -728,7 +730,7 @@ module.exports = new Promise(resolve => {
 		return false;
 	};
 	cga.emogua.talkNpcSelectorNo = cga.emogua.talkNpcSelectorNoFixTimes();
-	cga.emogua.talkNpc = function(x, y, select, dest) {
+	cga.emogua.talkNpc = function(x, y, select, dest, retryTimes) {
 		let selector, orientation, targetx, targety, destination;
 		for (let i = 0; i < arguments.length; i++) {
 			switch (typeof arguments[i]) {
@@ -774,8 +776,18 @@ module.exports = new Promise(resolve => {
 			}).then(
 				() => cga.emogua.waitDestination(destination, mapInfo)
 			).catch(e=>{
-				console.log('对话NPC重试');
-				return cga.emogua.talkNpc(x, y, select, dest);
+				if(!retryTimes) {
+					retryTimes = 0;
+				}
+				retryTimes++;
+				if(retryTimes>=10){
+					//超过10次无法切图，登出游戏
+					console.log('超过' + retryTimes + '次无法切图，登出游戏');
+					return cga.LogOut();
+				}else{
+					console.log('对话NPC重试，次数：' + retryTimes);
+					return cga.emogua.talkNpc(x, y, select, dest, retryTimes);
+				}
 			});
 		}
 		console.log('Talk npc wrong arguments');
