@@ -3,7 +3,7 @@ module.exports = require('./wrapper').then( async (cga) => {
     leo.messageServer = false;
     leo.appId = '';
     leo.appSecret = '';
-    leo.version = '8.12';
+    leo.version = '8.13';
     leo.qq = '158583461'
     leo.copyright = '红叶散落';
     leo.FORMAT_DATE = 'yyyy-MM-dd';
@@ -3828,6 +3828,18 @@ module.exports = require('./wrapper').then( async (cga) => {
             }
             await leo.delay(1000*30)
         })
+    }
+	
+	leo.findMyTeam = (teams = [[]]) => {
+        const playerName = cga.GetPlayerInfo().name;
+        for(let i in teams){
+            for(let j in teams[i]){
+                if(playerName == teams[i][j]){
+                    return teams[i];
+                }
+            }
+        }
+        return null;
     }
 
     ///////////////////////脚本默认执行内容///////////////////////////////

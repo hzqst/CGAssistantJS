@@ -1,14 +1,43 @@
 require('./common').then(async (cga) => {
     leo.baseInfoPrint();                    //显示基础信息
-    leo.moveTimeout = 220;                  //遇敌速度
+    leo.moveTimeout = 20;                  //遇敌速度
     leo.monitor.config.keepAlive = false;   //关闭防掉线
     leo.monitor.config.logStatus = false;   //关闭战斗状态提示
     //自动跟随队长换线，设置为true时，需要先提前与队长交换名片
     leo.monitor.config.autoChangeLineForLeader = false;
     var battleStatus = true;   //队长打印战斗明细
     leo.monitor.config.equipsProtect = false;   //关闭装备低耐久保护
-    var teamLeader = '此处填队长名称'; //队长名称
-    var teamPlayerCount = 5; //队伍人数
+
+    let teams = [//自行修改角色名称，可以再加更多的队伍
+        ['队长01','小号01','小号02','小号03','小号04'],
+        ['队长02','小号05','小号06','小号07','小号08'],
+        ['队长03','小号09','小号10','小号11','小号12'],
+        ['队长04','小号13','小号14','小号15','小号16'],
+        ['队长05','小号17','小号18','小号19','小号20'],
+    ];
+
+    let playerName = cga.GetPlayerInfo().name;
+    let teammates = leo.findMyTeam(teams);
+    if(teammates == null){
+        await leo.log('红叶の雪塔49脚本，未找到队伍，请确认配置是否正确')
+        return leo.delay(1000*60*60*2);
+    }else{
+        await leo.log('红叶の雪塔49脚本，推荐43~50级使用，启动~');
+        await leo.log('我的队伍是：['+teammates.join(',')+']')
+    }
+    let teamLeader = teammates[0];
+    let teamPlayerCount = teammates.length;
+    let isTeamLeader = false;
+    if (playerName == teamLeader) {
+        isTeamLeader = true;
+        await leo.log('我是队长，预设队伍人数【'+teamPlayerCount+'】');
+        if(battleStatus){
+            leo.battleMonitor.start(cga);
+        }
+    }else{
+        await leo.log('我是队员，队长是【'+teamLeader+'】');
+    }
+
     var protect = {
         //contactType遇敌类型：-1-旧遇敌，0-按地图自适应，1-东西移动，2-南北移动，
         //3-随机移动，4-画小圈圈，5-画中圈圈，6-画大圈圈，7-画十字，8-画8字
@@ -18,9 +47,8 @@ require('./common').then(async (cga) => {
         minMp: 100,
         minPetHp: 100,
         minPetMp: 100,
-        minTeamNumber: 5
+        minTeamNumber: teamPlayerCount
     };
-    var teammates = [];
     var isPrepare = false; //招魂、治疗、补血、卖石
     var isLogBackFirst = false; //启动登出
     var sellStone = true; //卖魔石
@@ -41,24 +69,14 @@ require('./common').then(async (cga) => {
         [112, 51],
         [112, 54]
     ];
-    leo.log('红叶の雪塔49脚本，位置点【' + meetingPoint + '】，推荐43~50级使用，启动~');
     cga.EnableFlags(cga.ENABLE_FLAG_TEAMCHAT, true); //开启队聊
     cga.EnableFlags(cga.ENABLE_FLAG_JOINTEAM, true); //开启组队
     cga.EnableFlags(cga.ENABLE_FLAG_CARD, false); //关闭名片
     cga.EnableFlags(cga.ENABLE_FLAG_TRADE, false); //关闭交易
-    var playerinfo = cga.GetPlayerInfo();
-    var playerName = playerinfo.name;
-    var isTeamLeader = false;
-    if (playerName == teamLeader) {
-        isTeamLeader = true;
-        leo.log('我是队长，预设队伍人数【'+teamPlayerCount+'】');
-        if(battleStatus){
-            leo.battleMonitor.start(cga);
-        }
-    }else{
-        leo.log('我是队员，队长是【'+teamLeader+'】');
+    if (isTeamLeader) {
+        protect.minMp = 350; //队长是传教，回城魔值至少要大于等于一次祈祷的魔
     }
-
+    
     leo.todo().then(() => {
         //登出
         if (isLogBackFirst) {

@@ -1,6 +1,6 @@
 require('./common').then(async (cga) => {
     leo.baseInfoPrint();                    //显示基础信息
-    leo.moveTimeout = 220;                  //遇敌速度
+    leo.moveTimeout = 20;                  //遇敌速度
     leo.monitor.config.keepAlive = false;   //关闭防掉线
     leo.monitor.config.logStatus = false;   //关闭战斗状态提示
     //自动跟随队长换线，设置为true时，需要先提前与队长交换名片
@@ -8,9 +8,35 @@ require('./common').then(async (cga) => {
     var battleStatus = true;   //队长打印战斗明细
     leo.monitor.config.equipsProtect = false;   //关闭装备低耐久保护
 
-    var teamLeader = '此处填队长名称'; //队长名称
-    var teamPlayerCount = 5; //队伍人数
-    var teammates = [];
+    let teams = [//自行修改角色名称，可以再加更多的队伍
+        ['队长01','小号01','小号02','小号03','小号04'],
+        ['队长02','小号05','小号06','小号07','小号08'],
+        ['队长03','小号09','小号10','小号11','小号12'],
+        ['队长04','小号13','小号14','小号15','小号16'],
+        ['队长05','小号17','小号18','小号19','小号20'],
+    ];
+
+    let playerName = cga.GetPlayerInfo().name;
+    let teammates = leo.findMyTeam(teams);
+    if(teammates == null){
+        await leo.log('红叶の沙滩登出回补脚本，未找到队伍，请确认配置是否正确')
+        return leo.delay(1000*60*60*2);
+    }else{
+        await leo.log('红叶の沙滩登出回补脚本，推荐80~100级使用，启动~');
+        await leo.log('我的队伍是：['+teammates.join(',')+']')
+    }
+    let teamLeader = teammates[0];
+    let teamPlayerCount = teammates.length;
+    let isTeamLeader = false;
+    if (playerName == teamLeader) {
+        isTeamLeader = true;
+        await leo.log('我是队长，预设队伍人数【'+teamPlayerCount+'】');
+        if(battleStatus){
+            leo.battleMonitor.start(cga);
+        }
+    }else{
+        await leo.log('我是队员，队长是【'+teamLeader+'】');
+    }
 
     var protect = {
         //contactType遇敌类型：-1-旧遇敌，0-按地图自适应，1-东西移动，2-南北移动，
@@ -22,7 +48,7 @@ require('./common').then(async (cga) => {
         minPetHp: 200,
         minPetMp: 50,
         maxItemNumber: 19,
-        minTeamNumber: 0,
+        minTeamNumber: teamPlayerCount,
         normalNurse: false
     };
 
@@ -30,6 +56,9 @@ require('./common').then(async (cga) => {
     cga.EnableFlags(cga.ENABLE_FLAG_JOINTEAM, true); //开启组队
     cga.EnableFlags(cga.ENABLE_FLAG_CARD, false); //关闭名片
     cga.EnableFlags(cga.ENABLE_FLAG_TRADE, false); //关闭交易
+    if (isTeamLeader) {
+        protect.minMp = 350; //队长是传教，回城魔值至少要大于等于一次祈祷的魔
+    }
 
     var prepareOptions = {
         rechargeFlag: -1,
@@ -37,20 +66,6 @@ require('./common').then(async (cga) => {
         crystalName: '火风的水晶（5：5）',
         doctorName: '医道之殇'
     };
-    var playerinfo = cga.GetPlayerInfo();
-    var playerName = playerinfo.name;
-    var isTeamLeader = false;
-    if (playerName == teamLeader) {
-        isTeamLeader = true;
-        leo.log('我是队长，预设队伍人数【'+teamPlayerCount+'】');
-        if(battleStatus){
-            leo.battleMonitor.start(cga);
-        }
-    }else{
-        leo.log('我是队员，队长是【'+teamLeader+'】');
-    }
-
-    leo.log('高仿红叶の沙滩登出回补脚本，推荐80~100级使用，启动~');
 
     var task = async () => {
         await leo.waitAfterBattle()
