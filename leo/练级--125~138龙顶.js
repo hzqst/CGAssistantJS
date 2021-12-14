@@ -19,7 +19,7 @@ require('./common').then(async (cga) => {
     let playerName = cga.GetPlayerInfo().name;
     let teammates = leo.findMyTeam(teams);
     if(teammates == null){
-        await leo.log('红叶の黑一脚本，未找到队伍，请确认配置是否正确')
+        await leo.log('红叶の龙顶脚本，未找到队伍，请确认配置是否正确')
         return leo.delay(1000*60*60*2);
     }else{
         await leo.log('红叶の龙顶脚本，推荐125~138级使用，启动~');
