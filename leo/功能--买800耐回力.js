@@ -1,4 +1,4 @@
-require('./common').then(async (cga) => {
+require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
 	await leo.log('红叶の买800耐回力脚本，启动~')
 	var task = async ()=>{
 		var emptyIndexes = leo.getEmptyBagIndexes()

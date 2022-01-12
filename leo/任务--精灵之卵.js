@@ -1,4 +1,4 @@
-require('./common').then(async (cga) => {
+require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
 	//leo.baseInfoPrint();
 	var target = 3;//1-地，2-水，3-火，4-风
 

@@ -1,4 +1,4 @@
-require('./common').then(cga=>{
+require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
 	//leo.baseInfoPrint();
 	//没有转职保证书也强制转职，可设置成true，默认false，
 	var forceChange = true;

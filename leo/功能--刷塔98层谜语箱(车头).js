@@ -1,4 +1,4 @@
-require('./common').then(cga => {
+require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
     //leo.baseInfoPrint();
     leo.monitor.config.keepAlive = false;   //关闭防掉线
     var teamLeader = '香莲碧水动风凉°'; //队长名称

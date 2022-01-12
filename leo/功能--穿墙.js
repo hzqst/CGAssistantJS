@@ -1,4 +1,4 @@
-require('./common').then(cga=>{
+require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
 	//leo.baseInfoPrint();
 	console.log('红叶の穿墙脚本，请注意人物的方向，启动~');
 

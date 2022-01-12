@@ -1,4 +1,4 @@
-require('./common').then(cga=>{
+require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
 	//leo.baseInfoPrint();
     var npcName = '旋律影子';   //要寻找的NPC名字，请确保名字无误
 

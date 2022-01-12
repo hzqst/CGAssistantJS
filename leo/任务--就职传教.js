@@ -1,4 +1,4 @@
-require('./common').then(async (cga) => {
+require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
 	
 	await leo.log('红叶の就职传教脚本，启动~')
 

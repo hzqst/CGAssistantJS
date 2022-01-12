@@ -1,4 +1,4 @@
-require('./common').then(async (cga)=>{
+require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
 	await leo.log('红叶の驯兽进阶脚本，启动~');
 
 	if(leo.isInTeam()){

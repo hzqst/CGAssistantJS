@@ -1,4 +1,4 @@
-require('./common').then(cga=>{
+require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
 	//leo.baseInfoPrint();
 	leo.monitor.config.autoChangeLineForLeader = true; //自动跟随队长换线
 	var teamLeader = '队长名称'; //队长名称

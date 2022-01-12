@@ -1,5 +1,5 @@
 //该脚本为自动做法国面包卖店脚本，请注意！
-require('./common').then(cga=>{
+require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
 	//leo.baseInfoPrint();
 	var bankSize = 20; //银行大小
 	leo.monitor.config.healSelf = true;//自动治疗自己

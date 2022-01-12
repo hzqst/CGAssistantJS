@@ -1,4 +1,4 @@
-require('./common').then(cga=>{
+require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
 	//leo.baseInfoPrint();
     var autoBoss = false; 	//自动打BOSS梅兹
     var getJob = false;		//true-就职忍者，false-仅做任务

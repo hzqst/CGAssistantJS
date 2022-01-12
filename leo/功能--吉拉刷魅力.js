@@ -1,4 +1,4 @@
-require('./common').then(cga => {
+require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
 	var target = 100;//目标魅力，101等于无限刷
 
 	var prepareOptions = {

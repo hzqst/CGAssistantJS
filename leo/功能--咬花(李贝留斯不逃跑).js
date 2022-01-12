@@ -1,4 +1,4 @@
-require('./common').then(cga => {
+require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
 	//leo.baseInfoPrint();
 
 	var target = 200;	//打算刷多少次

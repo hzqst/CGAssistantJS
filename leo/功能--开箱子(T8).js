@@ -1,4 +1,4 @@
-require('./common').then(async cga=>{
+require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
 	//leo.baseInfoPrint();
 	leo.log('红叶の开箱子(T8)脚本，启动~');
 

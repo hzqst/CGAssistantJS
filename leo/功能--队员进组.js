@@ -1,4 +1,4 @@
-require('./common').then(async (cga) => {
+require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
 	var teamLeader = '队长名称'; //队长名称
 
 	await leo.log('红叶の队员进组脚本，启动~')

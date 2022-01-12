@@ -1,4 +1,4 @@
-require('./common').then(async (cga) => {
+require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
 
     const petName = '哥布林';
 
@@ -14,7 +14,7 @@ require('./common').then(async (cga) => {
         maxPetNumber: 4, //超过4只宠物
     };
 
-    const petPlugins = require('./pet.js');
+    const petPlugins = require(process.env.CGA_DIR_PATH+'/leo/pet.js');
     if(!petPlugins) {
         await leo.log('缺少抓宠插件pet.js')
         return leo.delay(1000*60*60*24);

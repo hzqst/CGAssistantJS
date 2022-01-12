@@ -1,4 +1,4 @@
-require('./common').then(cga => {
+require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
 	cga.LogBack();
 
 	var loop_count = 0;

@@ -1,6 +1,6 @@
 //该脚本为自动做烧鸡脚本,使用此脚本的厨师最好把银行开到80格。
 //需要厨师伐木2级，狩猎4级，否则无法运行
-require('./common').then(cga=>{
+require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
 	//leo.baseInfoPrint();
 	var bankSize = 20; //银行大小
 	leo.monitor.config.healSelf = true;//自动治疗自己

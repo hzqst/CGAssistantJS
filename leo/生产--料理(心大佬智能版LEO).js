@@ -20,7 +20,7 @@
 可选技持银行取盐做法面. 默认为打盐做法面.
 */
 
-require('./common').then(cga=>{
+require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
 	var bankSize = 20; //银行大小 自己更改
 	var bankgetyan =false // 是否开启银行自动取盐 (true/false)  true是开启
 	var daka = false  //是否打卡(true/false) true是打卡

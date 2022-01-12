@@ -1,4 +1,4 @@
-require('./common').then(cga=>{
+require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
 	//leo.baseInfoPrint();
 	leo.log('红叶の学羊头狗肉技能脚本，启动~');
 	if(cga.getItemCount('烧鸡')==0){

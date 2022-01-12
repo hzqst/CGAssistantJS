@@ -1,4 +1,4 @@
-require('./common').then(async (cga) => {
+require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
 	await leo.log('红叶の称号成就提交脚本，启动~');
 
 	var pos = [31, 72];

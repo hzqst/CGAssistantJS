@@ -1,4 +1,4 @@
-require('./common').then(async (cga) => {
+require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
 	var waitPos = [11, 8]; 
 	await leo.log('红叶の银行全取脚本，启动~');
 	if(leo.getMapInfo().name != '银行'){

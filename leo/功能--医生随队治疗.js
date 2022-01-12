@@ -1,4 +1,4 @@
-require('./common').then(cga=>{
+require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
     //leo.baseInfoPrint();
     leo.say('红叶の医生随队治疗脚本，启动~');
 

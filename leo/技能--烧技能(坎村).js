@@ -1,4 +1,4 @@
-require('./common').then(async (cga) => {
+require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
     leo.baseInfoPrint();
     //leo.logStatus = false;
 

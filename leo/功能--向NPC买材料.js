@@ -1,4 +1,4 @@
-require('./common').then(async (cga) => {
+require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
 	leo.log('红叶の向NPC买材料脚本，启动~');
 
 	var dir = 0;	//方向0-东2-南4-西6北

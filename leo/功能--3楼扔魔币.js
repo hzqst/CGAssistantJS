@@ -1,4 +1,4 @@
-require('./common').then(cga => {
+require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
 	var times = 1;	//扔魔币次数
 	var target = [79,7];	//扔魔币时人物坐标
 	leo.log('红叶の3楼扔魔币脚本，启动~');

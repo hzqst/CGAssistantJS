@@ -1,4 +1,4 @@
-require('./common').then(cga => {
+require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
 	var items = ['金币','小护士家庭号','魔力之泉'];
 	
 	var itemFilter = (unit)=>{

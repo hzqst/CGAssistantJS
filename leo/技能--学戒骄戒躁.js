@@ -1,4 +1,4 @@
-require('./common').then(cga => {
+require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
     //leo.baseInfoPrint();
     var teamLeader = '红花落雨映山空℡'; //队长名称
     var teamPlayerCount = 5; //队伍人数

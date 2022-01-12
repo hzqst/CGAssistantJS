@@ -1,4 +1,4 @@
-require('./common').then(cga => {
+require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
     //leo.baseInfoPrint();
     var teamPlayerCount = 5; //队伍人数
     var flag = 1;//1-从刷梯子开始，2-有梯子了学技能

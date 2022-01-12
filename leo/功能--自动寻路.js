@@ -1,4 +1,4 @@
-require('./common').then(cga=>{
+require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
 	//leo.baseInfoPrint();
     var position = '10,20';       //要去的坐标，例如 10,20 或者 10.20
     var des = false;                //是否要切图，true-切图，false-不切图
