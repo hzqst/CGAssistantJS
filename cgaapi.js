@@ -209,6 +209,46 @@ module.exports = function(callback){
 		var pos = cga.getOrientationPosition(orientation, offset);
 		cga.TurnTo(pos[0], pos[1]);
 	}
+
+	/*  异步登出回城
+		由于2022年1月18日的一次更新之后登出回城有可能失败，故所有脚本中的登出回城操作均推荐更改为异步操作
+	*/
+	cga.logBack = (cb)=>{
+		cga.waitSysMsgTimeout((err, msg)=>{
+			if(err){
+				throw new Error('异步登出无反应，可能网络不稳定或者已经掉线！');
+			}
+
+			if(msg == '注销回到传送点。')
+			{
+				//保存登出回城的地点到配置文件
+				var config = cga.loadPlayerConfig();
+
+				if(!config)
+					config = {};
+
+				config.settledCity = cga.GetMapName();
+
+				cga.savePlayerConfig(config, cb);
+				return false;
+			}
+
+			var regex = msg.match(/一分钟内'回到城内登入点'最多使用5次，请过(\d+)秒钟后再用！/);
+			
+			if(regex && regex.length >= 2){
+
+				console.log('一分钟登出次数已达上限！等待 '+parseInt(regex[1])+' 秒后重试...');
+
+				var wait = parseInt(regex[1]) * 1000;
+				setTimeout(cga.logBack, wait + 1000, cb);
+				return false;
+			}
+
+			return true;
+		}, 5000);
+
+		cga.LogBack();
+	}
 	
 	//转向(x,y)坐标，默认往前一格避免捡起面前的物品
 	cga.turnTo = (x, y)=>{
@@ -473,7 +513,15 @@ module.exports = function(callback){
 		
 	cga.travel.falan = {};
 
-	cga.travel.falan.isSettled = false;
+	cga.travel.falan.isSettled = ()=>{
+
+		var config = cga.loadPlayerConfig();
+
+		if(config)
+			return config.settledCity == '法兰城' ? true : false;
+
+		return false;
+	}
 	
 	cga.travel.falan.xy2name = (x, y, mapname)=>{
 		if(x == 242 && y == 100 && mapname == '法兰城')
@@ -666,13 +714,14 @@ module.exports = function(callback){
 			});
 			return;
 		}
-		cga.LogBack();
-		cga.AsyncWaitMovement({map:desiredMap, delay:1000, timeout:5000}, (err, reason)=>{
-			if(err){
-				cb(err, reason);
-				return;
-			}
-			cga.travel.falan.toStoneInternal(stone, cb);
+		cga.logBack(()=>{
+			cga.AsyncWaitMovement({map:desiredMap, delay:1000, timeout:5000}, (err, reason)=>{
+				if(err){
+					cb(err, reason);
+					return;
+				}
+				cga.travel.falan.toStoneInternal(stone, cb);
+			});
 		});
 	}
 	
@@ -1476,15 +1525,24 @@ module.exports = function(callback){
 	
 	cga.travel.AKLF = {};
 	
-	cga.travel.AKLF.isSettled = false;
+	cga.travel.AKLF.isSettled = ()=>{
+
+		var config = cga.loadPlayerConfig();
+
+		if(config)
+			return config.settledCity == '阿凯鲁法村' ? true : false;
+
+		return false;
+	}
 	
 	//前往到阿凯鲁法银行
 	cga.travel.AKLF.toBank = (cb)=>{
 		if(cga.GetMapName() != '阿凯鲁法村'){
 
-			if(cga.travel.AKLF.isSettled){
-				cga.LogBack();
-				setTimeout(cga.travel.AKLF.toBank, 1000, cb);
+			if( cga.travel.AKLF.isSettled() ){
+				cga.logBack(()=>{
+					setTimeout(cga.travel.AKLF.toBank, 1000, cb);
+				});
 				return;
 			}
 
@@ -1749,7 +1807,15 @@ module.exports = function(callback){
 	
 	cga.travel.newisland = {};
 		
-	cga.travel.newisland.isSettled = true;
+	cga.travel.newisland.isSettled = ()=>{
+
+		var config = cga.loadPlayerConfig();
+
+		if(config)
+			return config.settledCity == '艾尔莎岛' ? true : false;
+
+		return false;
+	}
 	
 	cga.travel.newisland.xy2name = function(x, y, mapname){
 		if(x == 140 && y == 105 && mapname == '艾尔莎岛')
@@ -1847,14 +1913,15 @@ module.exports = function(callback){
 			}
 		}
 
-		if(cga.travel.newisland.isSettled){
-			cga.LogBack();
-			cga.AsyncWaitMovement({map:desiredMap, delay:1000, timeout:5000}, (err, reason)=>{
-				if(err){
-					cb(err, reason);
-					return;
-				}
-				cga.travel.newisland.toStoneInternal(stone, cb);
+		if(cga.travel.newisland.isSettled()){
+			cga.logBack(()=>{
+				cga.AsyncWaitMovement({map:desiredMap, delay:1000, timeout:5000}, (err, reason)=>{
+					if(err){
+						cb(err, reason);
+						return;
+					}
+					cga.travel.newisland.toStoneInternal(stone, cb);
+				});
 			});
 		}
 	}
@@ -1913,7 +1980,15 @@ module.exports = function(callback){
 	
 	cga.travel.gelaer = {};
 	
-	cga.travel.gelaer.isSettled = false;
+	cga.travel.gelaer.isSettled = ()=>{
+
+		var config = cga.loadPlayerConfig();
+
+		if(config)
+			return config.settledCity == '哥拉尔镇' ? true : false;
+
+		return false;
+	}
 	
 	cga.travel.gelaer.xy2name = function(x, y, mapname){
 		if(x == 120 && y == 107 && mapname == '哥拉尔镇')
@@ -1984,14 +2059,15 @@ module.exports = function(callback){
 			}
 		}
 
-		if(cga.travel.gelaer.isSettled){
-			cga.LogBack();
-			cga.AsyncWaitMovement({map:'哥拉尔镇', delay:1000, timeout:5000}, (err, reason)=>{
-				if(err){
-					cb(err, reason);
-					return;
-				}
-				cga.travel.gelaer.toStoneInternal(stone, cb);
+		if(cga.travel.gelaer.isSettled()){
+			cga.logBack(()=>{
+				cga.AsyncWaitMovement({map:'哥拉尔镇', delay:1000, timeout:5000}, (err, reason)=>{
+					if(err){
+						cb(err, reason);
+						return;
+					}
+					cga.travel.gelaer.toStoneInternal(stone, cb);
+				});
 			});
 		}
 	}
@@ -2010,9 +2086,10 @@ module.exports = function(callback){
 	cga.travel.gelaer.toHospital = (cb, isPro)=>{
 		if(cga.GetMapName() != '哥拉尔镇'){
 
-			if(cga.travel.gelaer.isSettled){
-				cga.LogBack();
-				setTimeout(cga.travel.gelaer.toHospital, 1000, cb, isPro);
+			if(cga.travel.gelaer.isSettled()){
+				cga.logBack(()=>{
+					setTimeout(cga.travel.gelaer.toHospital, 1000, cb, isPro);
+				});				
 				return;
 			}
 
@@ -2037,9 +2114,10 @@ module.exports = function(callback){
 	cga.travel.gelaer.toBank = (cb)=>{
 		if(cga.GetMapName() != '哥拉尔镇'){
 
-			if(cga.travel.gelaer.isSettled){
-				cga.LogBack();
-				setTimeout(cga.travel.gelaer.toBank, 1000, cb);
+			if(cga.travel.gelaer.isSettled()){
+				cga.logBack(()=>{
+					setTimeout(cga.travel.gelaer.toBank, 1000, cb);
+				});				
 				return;
 			}
 
@@ -2061,9 +2139,10 @@ module.exports = function(callback){
 	cga.travel.gelaer.toLumi = (cb)=>{
 		if(cga.GetMapName() != '哥拉尔镇'){
 
-			if(cga.travel.gelaer.isSettled){
-				cga.LogBack();
-				setTimeout(cga.travel.gelaer.toLumi, 1000, cb);
+			if(cga.travel.gelaer.isSettled()){
+				cga.logBack(()=>{
+					setTimeout(cga.travel.gelaer.toLumi, 1000, cb);
+				});
 				return;
 			}
 
@@ -3142,6 +3221,7 @@ module.exports = function(callback){
 		return false;
 	}
 
+	//保存每个人物自己的个人配置文件，用于保存银行格信息和登出点信息
 	cga.savePlayerConfig = (config, cb) => {
 		console.log('正在保存个人配置文件...');
 
@@ -3169,6 +3249,7 @@ module.exports = function(callback){
 		});		
 	}
 
+	//读取每个人物自己的个人配置文件
 	cga.loadPlayerConfig = () => {
 		console.log('正在读取个人配置文件...');
 
