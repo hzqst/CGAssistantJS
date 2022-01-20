@@ -15,6 +15,9 @@ var moveThinkInterrupt = new interrupt();
 var playerThinkInterrupt = new interrupt();
 var playerThinkRunning = false;
 
+var blacklistEntrance = [];
+var currentEntrance = null;
+
 var supplyArray = [supplyMode, supplyCastle];
 
 var getSupplyObject = (map, mapindex)=>{
@@ -204,38 +207,44 @@ var playerThinkTimer = ()=>{
 	setTimeout(playerThinkTimer, 1500);
 }
 
-var getMazeEntrance = (cb)=>{
-	console.log('搜索迷宫入口...');
+var getMazeEntrance = (cb, index)=>{
 
-	var objs = cga.getMapObjects();
-	var entrance = objs.find((obj)=>{
-		return (obj.cell == 3 && obj.mapx >= 260 && obj.mapx <= 273 && obj.mapy >= 133 && obj.mapy <= 164)
-	})
-	if(entrance == undefined){
-		console.log('迷宫入口未找到,尝试下一个区域...');
-		setTimeout(getMazeEntrance, 15000, cb);
-		return;
-	}
-	
-	cb(entrance);
+	var table = [[263, 149], [284, 140], [295, 127] ];
+	console.log('前往区域'+(index+1)+'搜索迷宫入口...');
 
-	/*console.log('正在下载地图')
-	cga.downloadMapEx(260, 260+24, 133, 133+24*2, ()=>{
-		console.log('地图已下载完成')
-		
+	cga.walkList([
+		table[index]
+	], ()=>{
+		console.log('在区域'+(index+1)+'搜索迷宫入口！');
 		var objs = cga.getMapObjects();
 		var entrance = objs.find((obj)=>{
-			return (obj.cell == 3 && obj.mapx >= 260 && obj.mapx <= 273 && obj.mapy >= 133 && obj.mapy <= 164)
+
+			if(blacklistEntrance.find((e)=>{
+				return e.mapx == obj.mapx && e.mapy == obj.mapy;
+			}) != undefined)
+			{
+				return false;
+			}
+
+			return (obj.cell == 3 && obj.mapx >= 260 && obj.mapx <= 273 && obj.mapy >= 133 && obj.mapy <= 164);
 		})
-		
 		if(entrance == undefined){
-			console.log('迷宫入口未找到,等待15秒后重试')
-			setTimeout(getMazeEntrance, 15000, cb);
+			index ++;
+			if(table[index] == undefined)
+			{
+				throw new Error('所有区域都已搜索完毕，没有找到迷宫入口！');
+			}
+
+			console.log('迷宫入口未找到,尝试区域'+(index+1)+'...');
+			getMazeEntrance(cb, index);
 			return;
 		}
-		
-		cb(entrance);
-	});*/
+		else
+		{
+			currentEntrance = entrance;
+			cb(entrance);
+		}
+	});
 }
 
 var loop = ()=>{
@@ -254,14 +263,15 @@ var loop = ()=>{
 			
 			cga.walkList([
 				[22, 88, '芙蕾雅'],
-				[263, 149],
 			], ()=>{
 
 				getMazeEntrance((obj)=>{
+
 					cga.walkList([
 						[obj.mapx, obj.mapy, '诅咒之迷宫地下1楼']
 					], loop);
-				})
+
+				}, 0);
 			});
 			return;
 		}
@@ -275,8 +285,20 @@ var loop = ()=>{
 			supplyMode.func(loop);
 			return;
 		}
-		if(map == '诅咒之迷宫地下1楼')
-		{
+		if(map == '黑暗医生的巢穴地下1楼'){
+
+			if(currentEntrance != null)
+				blacklistEntrance.push(currentEntrance);
+
+			var supplyObject = getSupplyObject(map, mapindex);
+			if(supplyObject)
+			{
+				supplyObject.func(loop);
+				return;
+			}
+			return;
+		}
+		if(map == '诅咒之迷宫地下1楼'){
 			playerThinkInterrupt.hasInterrupt();//restore interrupt state
 			console.log('playerThink on');
 			playerThinkRunning = true;

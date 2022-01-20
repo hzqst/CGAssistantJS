@@ -4514,7 +4514,7 @@ module.exports = function(callback){
 	//下载地图的部分区域并等待下载完成
 	cga.downloadMapEx = (xfrom, yfrom, xsize, ysize, cb)=>{
 
-		console.log('警告：2022年1月18日一次更新后服务器对下载地图功能增加了验证，不再推荐使用该API!');
+		throw new Error('警告：2022年1月18日一次更新后服务器对下载地图功能增加了验证，不再推荐使用该API!');
 		cb(null);
 		return;
 		var last_index3 = cga.GetMapIndex().index3;
@@ -4565,9 +4565,6 @@ module.exports = function(callback){
 		}
 	*/
 	cga.walkMaze = (target_map, cb, filter)=>{
-
-		if(cga.walkMazeStartPosition == null)
-			cga.walkMazeStartPosition = cga.GetMapXY();
 
 		var objs = cga.getMapObjects();
 				
@@ -4622,7 +4619,14 @@ module.exports = function(callback){
 		else
 		{
 			objs.forEach((obj)=>{
-				if(target == null && obj.cell == 3 && !(obj.mapx == cga.walkMazeStartPosition.x && obj.mapy == cga.walkMazeStartPosition.y)){
+
+				if(cga.walkMazeStartPosition != null){
+					if(obj.mapx == cga.walkMazeStartPosition.x && obj.mapy == cga.walkMazeStartPosition.y){
+						return;
+					}
+				}
+
+				if(target == null && obj.cell == 3){
 					target = obj;
 					return false;
 				}
@@ -4633,6 +4637,8 @@ module.exports = function(callback){
 			cb(new Error('无法找到迷宫的出口'));
 			return;
 		}
+
+		console.log('迷宫出口：('+target.mapx+', '+target.mapy+')');
 
 		var pos = cga.GetMapXY();
 
@@ -4645,56 +4651,67 @@ module.exports = function(callback){
 		cga.walkMazeStartPosition = null;
 
 		cga.walkList(walklist, (err, reason)=>{
-			cb(err, reason);
-			return;
-		});
-	}
-
-	//判断当前地图是否已经下载完成
-	
-	cga.isMapDownloaded = ()=>{
-		var tiles = cga.buildMapTileMatrix(true);
-		
-		for(var y = 0; y < tiles.y_size; ++y){
-			for(var x = 0; x < tiles.x_size; ++x){
-				if(tiles.matrix[y][x] == 0)
-					return false;
-			}
-		}
-		
-		return true;
-	}
-	
-	//走随机迷宫
-	cga.walkMazeStartPosition = null;
-	cga.walkRandomMaze = (target_map, cb, filter)=>{
-		console.log('开始走随机迷宫...');
-		cga.walkMaze(target_map, (err, reason)=>{
-			if(err && err.message == '无法找到迷宫的出口'){
-				
-				cga.searchMap(()=>{
-					return cga.getMapObjects().find((obj)=>{
-						return obj.cell == 3 && !(obj.mapx == cga.walkMazeStartPosition.x && obj.mapy == cga.walkMazeStartPosition.y);
-					}) != undefined ? true : false;
-				}, ()=>{
-					console.log('成功寻找到随机迷宫出口！');
-					cga.walkMaze(target_map, cb, filter);
+			if(err == null){
+				cga.waitUntilMapLoaded(()=>{
+					cb(err, reason);
 				});
 				return;
 			}
 			cb(err, reason);
-		}, filter);
+			return;
+		});
+	}
+	
+	cga.waitUntilMapLoaded = (cb)=>{
+		var curpos = cga.GetMapXY();
+		if(cga.getRandomSpace(curpos.x, curpos.y) != null){
+			cb(null);
+			return;
+		}
+		console.log('地图未下载完成，服务器可能卡住，等待1秒后再试...');
+		setTimeout(cga.waitUntilMapLoaded, 1000, cb);
+	}
 
-		/*if(!cga.isMapDownloaded())
-		{
-			cga.downloadMap(()=>{
-				cga.walkMaze(target_map, cb, filter);
-			});
-		} 
-		else
-		{
-			cga.walkMaze(target_map, cb, filter);
-		}*/
+	//走随机迷宫
+	cga.walkMazeStartPosition = null;
+	cga.walkRandomMaze = (target_map, cb, filter)=>{
+
+		cga.waitUntilMapLoaded(()=>{
+
+			if(cga.walkMazeStartPosition == null)
+			{
+				cga.walkMazeStartPosition = cga.GetMapXY();
+				console.log('开始走随机迷宫...');
+				console.log('起始坐标：('+cga.walkMazeStartPosition.x+', '+cga.walkMazeStartPosition.y+')');
+			}
+			else
+			{
+				console.log('继续走随机迷宫...');
+				console.log('起始坐标：('+cga.walkMazeStartPosition.x+', '+cga.walkMazeStartPosition.y+')');
+			}
+			cga.walkMaze(target_map, (err, reason)=>{
+				if(err && err.message == '无法找到迷宫的出口'){					
+					cga.searchMap(()=>{
+						return cga.getMapObjects().find((obj)=>{
+							if(cga.walkMazeStartPosition != null && obj.mapx == cga.walkMazeStartPosition.x && obj.mapy == cga.walkMazeStartPosition.y)
+								return false;
+							
+							if(obj.cell == 3){
+								console.log(obj);
+							}
+
+							return obj.cell == 3 ? true : false;
+						}) != undefined ? true : false;
+					}, (err)=>{
+						console.log(err);
+						console.log('成功寻找到随机迷宫出口');
+						cga.walkMaze(target_map, cb, filter);
+					});
+					return;
+				}
+				cb(err, reason);
+			}, filter);
+		});
 	}
 	
 	/**
@@ -4744,6 +4761,7 @@ module.exports = function(callback){
 		const getTarget = (noTargetCB) => {
 			const target = targetFinder(cga.GetMapUnits());
 			if (typeof target == 'object') {
+				console.log('cga.searchMap找到有效目标！');
 				const walkTo = cga.getRandomSpace(target.xpos, target.ypos);
 				if (walkTo) {
 					cga.walkList([walkTo], () => cb(null, target));
@@ -4751,6 +4769,7 @@ module.exports = function(callback){
 					noTargetCB();
 				}
 			} else if (target === true){
+				console.log('cga.searchMap找到有效目标');
 				cb(null);
 			} else{
 				noTargetCB();
