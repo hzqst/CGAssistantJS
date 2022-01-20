@@ -1,4 +1,4 @@
-var cga = require('./cgaapi')(function(){
+var cga = require(process.env.CGA_DIR_PATH_UTF8+'/cgaapi')(function(){
 
 	var taskObj = cga.task.Task('就职驯兽师', [
 	{

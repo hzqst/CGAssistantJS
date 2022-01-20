@@ -1,4 +1,4 @@
-var cga = require('./cgaapi')(function(){
+var cga = require(process.env.CGA_DIR_PATH_UTF8+'/cgaapi')(function(){
 	console.log('咬花 起始地点：艾尔莎岛')
 	
 	var loop_count = 0;

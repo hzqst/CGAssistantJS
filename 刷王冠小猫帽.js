@@ -1,4 +1,4 @@
-var cga = require('./cgaapi')(function(){
+var cga = require(process.env.CGA_DIR_PATH_UTF8+'/cgaapi')(function(){
 
 	console.log('重要提示：途经的每一层塔地图档都要下载，否则自动寻路会失败！')
 	console.log('BUG期间建议移动速度不超过300%否则容易掉线')

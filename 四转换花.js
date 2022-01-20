@@ -1,4 +1,4 @@
-var cga = require('./cgaapi')(function(){
+var cga = require(process.env.CGA_DIR_PATH_UTF8+'/cgaapi')(function(){
 
 	console.log('重要提示：每一层白色方舟地图档都要下载，否则自动寻路会失败！')
 

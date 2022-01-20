@@ -1,4 +1,4 @@
-var cga = require('./cgaapi')(function(){
+var cga = require(process.env.CGA_DIR_PATH_UTF8+'/cgaapi')(function(){
 	var task = cga.task.Task('矿山钥匙', [
 	{
 		intro: '1.到法兰城里谢里雅堡(47.85)进入召唤之间，从召唤之间右上角进入回廊。由回廊(23.19)进入灵堂，再从灵堂(7.52)的楼梯进入地下牢房。在地下牢房的(31.20)跟 乔尔凯夫 交谈取得"给朋友的信"',

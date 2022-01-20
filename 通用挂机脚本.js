@@ -2,7 +2,7 @@ var fs = require('fs');
 var path = require('path');
 var Async = require('async');
 
-var cga = require('./cgaapi')(function(){
+var cga = require(process.env.CGA_DIR_PATH_UTF8+'/cgaapi')(function(){
 	
 	global.cga = cga;
 		
