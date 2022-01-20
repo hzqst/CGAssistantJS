@@ -106,8 +106,9 @@ var doneArray = [
 	func: (cb, mineObject)=>{
 		if(cga.GetMapName() != '阿凯鲁法村'){
 			console.log('提示：阿凯鲁法卖店必须定居阿凯鲁法')
-			cga.LogBack();
-			setTimeout(thisobj.object.func, 1000, cb, mineObject);
+			cga.logBack(()=>{
+				setTimeout(thisobj.object.func, 1000, cb, mineObject);
+			});
 			return;
 		}
 		cga.walkList([
@@ -160,8 +161,9 @@ var doneArray = [
 	func: (cb, mineObject)=>{
 		if(cga.GetMapName() != '哥拉尔镇'){
 			console.log('提示：哥拉尔卖店必须定居哥拉尔')
-			cga.LogBack();
-			setTimeout(thisobj.object.func, 1000, cb, mineObject);
+			cga.logBack(()=>{
+				setTimeout(thisobj.object.func, 1000, cb, mineObject);
+			});			
 			return;
 		}
 		cga.walkList([

@@ -4,10 +4,8 @@ var configTable = global.configTable;
 var thisobj = {
 	func : (cb)=>{
 		var mapname = cga.GetMapName();
-		if(mapname != '艾尔莎岛' && mapname != '里谢里雅堡' && mapname != '法兰城' && mapname != '阿凯鲁法村' && mapname != '哥拉尔镇')
-			cga.LogBack();
-		
-		setTimeout(()=>{
+		cga.logBack(()=>{
+			console.log('通用登出回补成功！');
 			var mapname = cga.GetMapName();
 			switch(mapname)
 			{
@@ -56,7 +54,7 @@ var thisobj = {
 					break;
 				default: throw new Error('登出回到未知的定居地: '+mapname);
 			}
-		}, 1000);
+		});
 	},
 	translate : (pair)=>{
 		return false;
