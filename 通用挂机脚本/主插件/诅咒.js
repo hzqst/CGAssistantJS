@@ -205,7 +205,21 @@ var playerThinkTimer = ()=>{
 }
 
 var getMazeEntrance = (cb)=>{
-	console.log('正在下载地图')
+	console.log('搜索迷宫入口...');
+
+	var objs = cga.getMapObjects();
+	var entrance = objs.find((obj)=>{
+		return (obj.cell == 3 && obj.mapx >= 260 && obj.mapx <= 273 && obj.mapy >= 133 && obj.mapy <= 164)
+	})
+	if(entrance == undefined){
+		console.log('迷宫入口未找到,尝试下一个区域...');
+		setTimeout(getMazeEntrance, 15000, cb);
+		return;
+	}
+	
+	cb(entrance);
+
+	/*console.log('正在下载地图')
 	cga.downloadMapEx(260, 260+24, 133, 133+24*2, ()=>{
 		console.log('地图已下载完成')
 		
@@ -221,7 +235,7 @@ var getMazeEntrance = (cb)=>{
 		}
 		
 		cb(entrance);
-	});
+	});*/
 }
 
 var loop = ()=>{
@@ -240,7 +254,9 @@ var loop = ()=>{
 			
 			cga.walkList([
 				[22, 88, '芙蕾雅'],
+				[263, 149],
 			], ()=>{
+
 				getMazeEntrance((obj)=>{
 					cga.walkList([
 						[obj.mapx, obj.mapy, '诅咒之迷宫地下1楼']

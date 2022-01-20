@@ -4513,6 +4513,10 @@ module.exports = function(callback){
 	
 	//下载地图的部分区域并等待下载完成
 	cga.downloadMapEx = (xfrom, yfrom, xsize, ysize, cb)=>{
+
+		console.log('警告：2022年1月18日一次更新后服务器对下载地图功能增加了验证，不再推荐使用该API!');
+		cb(null);
+		return;
 		var last_index3 = cga.GetMapIndex().index3;
 		var x = xfrom, y = yfrom;
 		var recursiveDownload = ()=>{
@@ -4562,10 +4566,11 @@ module.exports = function(callback){
 	*/
 	cga.walkMaze = (target_map, cb, filter)=>{
 
+		if(cga.walkMazeStartPosition == null)
+			cga.walkMazeStartPosition = cga.GetMapXY();
+
 		var objs = cga.getMapObjects();
-		
-		var pos = cga.GetMapXY();
-		
+				
 		var newmap = null;
 
 		if(typeof target_map != 'string'){
@@ -4617,9 +4622,7 @@ module.exports = function(callback){
 		else
 		{
 			objs.forEach((obj)=>{
-				if(obj.mapx == pos.x && obj.mapy == pos.y)
-					return;
-				if(target == null && obj.cell == 3){
+				if(target == null && obj.cell == 3 && !(obj.mapx == cga.walkMazeStartPosition.x && obj.mapy == cga.walkMazeStartPosition.y)){
 					target = obj;
 					return false;
 				}
@@ -4631,11 +4634,15 @@ module.exports = function(callback){
 			return;
 		}
 
+		var pos = cga.GetMapXY();
+
 		var walklist = cga.calculatePath(pos.x, pos.y, target.mapx, target.mapy, newmap, null, null, []);
 		if(walklist.length == 0){
 			cb(new Error('无法计算到迷宫出口的路径'));
 			return;
 		}
+
+		cga.walkMazeStartPosition = null;
 
 		cga.walkList(walklist, (err, reason)=>{
 			cb(err, reason);
@@ -4658,10 +4665,27 @@ module.exports = function(callback){
 		return true;
 	}
 	
-	//走一层随机迷宫，和cga.walkMaze的区别是走之前会先下载地图
-	
+	//走随机迷宫
+	cga.walkMazeStartPosition = null;
 	cga.walkRandomMaze = (target_map, cb, filter)=>{
-		if(!cga.isMapDownloaded())
+		console.log('开始走随机迷宫...');
+		cga.walkMaze(target_map, (err, reason)=>{
+			if(err && err.message == '无法找到迷宫的出口'){
+				
+				cga.searchMap(()=>{
+					return cga.getMapObjects().find((obj)=>{
+						return obj.cell == 3 && !(obj.mapx == cga.walkMazeStartPosition.x && obj.mapy == cga.walkMazeStartPosition.y);
+					}) != undefined ? true : false;
+				}, ()=>{
+					console.log('成功寻找到随机迷宫出口！');
+					cga.walkMaze(target_map, cb, filter);
+				});
+				return;
+			}
+			cb(err, reason);
+		}, filter);
+
+		/*if(!cga.isMapDownloaded())
 		{
 			cga.downloadMap(()=>{
 				cga.walkMaze(target_map, cb, filter);
@@ -4670,7 +4694,7 @@ module.exports = function(callback){
 		else
 		{
 			cga.walkMaze(target_map, cb, filter);
-		}
+		}*/
 	}
 	
 	/**
@@ -4767,13 +4791,14 @@ module.exports = function(callback){
 		};
 		getTarget(() => {
 			let walls = cga.buildMapCollisionMatrix();
-			if(walls.matrix[0][0] == 1
+			/*if(walls.matrix[0][0] == 1
 				|| walls.matrix[walls.y_size-1][0] == 1
 				|| walls.matrix[walls.y_size-1][walls.x_size-1] == 1
 				|| walls.matrix[0][walls.x_size-1] == 1
 			) {
 				cga.downloadMap(() => findNext(cga.buildMapCollisionMatrix()));
-			} else findNext(walls);
+			} else findNext(walls);*/
+			findNext(walls);
 		});
 	}
 	
