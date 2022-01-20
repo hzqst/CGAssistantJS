@@ -4693,6 +4693,10 @@ module.exports = function(callback){
 				if(err && err.message == '无法找到迷宫的出口'){					
 					cga.searchMap(()=>{
 						return cga.getMapObjects().find((obj)=>{
+							
+							console.log('cga.walkMazeStartPosition');
+							console.log(cga.walkMazeStartPosition);
+							
 							if(cga.walkMazeStartPosition != null && obj.mapx == cga.walkMazeStartPosition.x && obj.mapy == cga.walkMazeStartPosition.y)
 								return false;
 							
@@ -4703,7 +4707,10 @@ module.exports = function(callback){
 							return obj.cell == 3 ? true : false;
 						}) != undefined ? true : false;
 					}, (err)=>{
-						console.log(err);
+						if(err && err.message.indexOf('无法找到') >= 0){
+							cga.walkRandomMaze(target_map, cb, filter);
+							return;
+						}
 						console.log('成功寻找到随机迷宫出口');
 						cga.walkMaze(target_map, cb, filter);
 					});
@@ -4714,6 +4721,66 @@ module.exports = function(callback){
 		});
 	}
 	
+	cga.getRandomMazeEntrance = (args, cb, index = 0)=>{
+
+		if(index == undefined)
+			index = 0;
+
+		if(args.table[index] == undefined)
+		{
+			throw new Error('所有区域都已搜索完毕，没有找到迷宫入口！');
+		}
+
+		console.log('前往区域'+(index+1)+'搜索迷宫入口！');
+	
+		cga.walkList([
+			args.table[index]
+		], ()=>{
+			console.log('正在区域'+(index+1)+'搜索迷宫入口...');
+			var entrance = cga.getMapObjects().find((obj)=>{
+	
+				if(args.blacklist && args.blacklist.find((e)=>{
+					return e.mapx == obj.mapx && e.mapy == obj.mapy;
+				}) != undefined)
+				{
+					return false;
+				}
+	
+				return args.filter(obj);
+			});
+
+			if(entrance == undefined){
+				console.log('未找到迷宫入口,尝试下一区域...');
+				cga.getRandomMazeEntrance(args, cb, index+1);
+			} else {
+				if(args.expectmap)
+				{
+					var originalmap = cga.GetMapName();
+					cga.walkList([
+						[entrance.mapx, entrance.mapy, args.expectmap]
+					], (err)=>{
+						if(err && err.message == 'Unexcepted map changed.'){
+							var xy = cga.GetMapXY();
+							args.blacklist.push(entrance);
+							cga.walkList([
+								[xy.x, xy.y, originalmap],
+							], ()=>{
+								console.log('未找到迷宫入口,尝试下一区域...');
+								cga.getRandomMazeEntrance(args, cb, index+1);
+							});
+							return;
+						}
+						cb(entrance);
+					});
+				}
+				else
+				{
+					cb(entrance);
+				}
+			}
+		});
+	}
+
 	/**
 	 * targetFinder返回unit object 或者 true都将停止搜索
 	 * cga.searchMap(units => units.find(u => u.unit_name == '守墓员' && u.type == 1) || cga.GetMapName() == '？？？', result => {
@@ -4761,7 +4828,7 @@ module.exports = function(callback){
 		const getTarget = (noTargetCB) => {
 			const target = targetFinder(cga.GetMapUnits());
 			if (typeof target == 'object') {
-				console.log('cga.searchMap找到有效目标！');
+				console.log('成功找到有效目标2');
 				const walkTo = cga.getRandomSpace(target.xpos, target.ypos);
 				if (walkTo) {
 					cga.walkList([walkTo], () => cb(null, target));
@@ -4769,9 +4836,10 @@ module.exports = function(callback){
 					noTargetCB();
 				}
 			} else if (target === true){
-				console.log('cga.searchMap找到有效目标');
+				console.log('成功找到有效目标1');
 				cb(null);
 			} else{
+				console.log('未找到有效目标');
 				noTargetCB();
 			}
 		};
@@ -4805,7 +4873,7 @@ module.exports = function(callback){
 			const current = cga.GetMapXY();
 			//if (!entry && recursion) entry = getFarthestEntry(start);
 			toNextPoint(Object.values(getMovablePoints(walls, current)), current, () => {
-				cb(null);
+				cb(new Error('无法找到符合条件的对象'));
 			});
 		};
 		getTarget(() => {

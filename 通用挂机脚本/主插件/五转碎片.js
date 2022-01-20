@@ -43,22 +43,41 @@ var getSellObject = (map, mapindex)=>{
 	})
 }
 
+var randomMazeArgs = {
+	table : null,
+	filter : null,
+	blacklist : [],
+	expectmap : '隐秘之洞地下1层',
+};
+
 var battleAreaArray = [
 {
 	name : '地洞',
-	range : [450, 600, 200, 300],
+	filter :  (obj)=>{
+		return obj.cell == 3 && obj.mapx >= 450 && obj.mapx <= 600 && obj.mapy >= 200 && obj.mapy <= 300;
+	},
+	table : [[504, 300], [485, 272], [461, 259], [449, 247], [462, 222], [506, 235], [538, 257], [521, 269], [547, 284]]
 },
 {
 	name : '水洞',
-	range : [300, 400, 500, 550],
+	filter :  (obj)=>{
+		return obj.cell == 3 && obj.mapx >= 300 && obj.mapx <= 400 && obj.mapy >= 500 && obj.mapy <= 550;
+	},
+	table : [[379, 459], [358, 488]],
 },
 {
 	name : '火洞',
-	range : [400, 450, 400, 450],
+	filter :  (obj)=>{
+		return obj.cell == 3 && obj.mapx >= 400 && obj.mapx <= 450 && obj.mapy >= 400 && obj.mapy <= 450;
+	},
+	table : [[422, 417], [412, 439]],
 },
 {
 	name : '风洞',
-	range : [300, 450, 150, 300],
+	filter :  (obj)=>{
+		return obj.cell == 3 && obj.mapx >= 300 && obj.mapx <= 450 && obj.mapy >= 150 && obj.mapy <= 300;
+	},
+	table : [[396, 250], [395, 224], [399, 204]],
 }
 ]
 
@@ -227,65 +246,6 @@ var playerThinkTimer = ()=>{
 	setTimeout(playerThinkTimer, 1500);
 }
 
-var getMazeEntrance = (cb)=>{
-		
-	if(cachedEntrance)
-	{
-		cga.downloadMapEx(cachedEntrance.mapx - 12, cachedEntrance.mapy - 12, cachedEntrance.mapx + 12, cachedEntrance.mapy + 12, ()=>{
-			var objs = cga.getMapObjects();
-			var entrance = objs.find((obj)=>{
-				return (obj.cell == 3 && obj.mapx == cachedEntrance.mapx && obj.mapy == cachedEntrance.mapy)
-			})
-			
-			if(entrance == undefined){
-				cachedEntrance = null;
-				console.log('缓存的迷宫入口失效,重新寻找入口')
-				getMazeEntrance(cb);
-				return;
-			}
-			
-			cb(entrance);
-		});
-		return;
-	}
-	
-	console.log('正在下载地图')
-	cga.downloadMapEx(
-	thisobj.battleArea.range[0],
-	thisobj.battleArea.range[1], 
-	thisobj.battleArea.range[2], 
-	thisobj.battleArea.range[3], ()=>{
-		console.log('地图已下载完成')
-		
-		var objs = cga.getMapObjects();
-		console.log(objs.filter((o)=>{
-			return o.cell == 3;
-		}))
-		var entrance = objs.find((obj)=>{
-
-			return (obj.cell == 3 && 
-			obj.mapx >= thisobj.battleArea.range[0] &&
-			obj.mapx <= thisobj.battleArea.range[1] && 
-			obj.mapy >= thisobj.battleArea.range[2] && 
-			obj.mapy <= thisobj.battleArea.range[3] && 
-			( !blacklistEntrance.length || (blacklistEntrance.length && blacklistEntrance.find((b)=>{
-				return b.mapx == obj.mapx && b.mapy == obj.mapy;
-			}) == undefined) )
-			);
-		})
-		
-		if(entrance == undefined){
-			console.log('迷宫入口未找到,等待15秒后重试')
-			setTimeout(getMazeEntrance, 15000, cb);
-			return;
-		}
-		
-		cachedEntrance = entrance;
-		cb(entrance);
-	});
-}
-
-
 var loop = ()=>{
 		
 	var map = cga.GetMapName();
@@ -326,23 +286,9 @@ var loop = ()=>{
 				cga.walkList([
 					[36, 87, '肯吉罗岛'],
 				], ()=>{
-					getMazeEntrance((obj)=>{
-						cga.walkList([
-							[obj.mapx, obj.mapy, '隐秘之洞地下1层']
-						], (err)=>{
-							console.log(err);
-							if(err && err.message == 'Unexcepted map changed.'){
-								var xy = cga.GetMapXY();
-								cachedEntrance = null;
-								blacklistEntrance.push(obj);
-								cga.walkList([
-								[xy.x, xy.y, '肯吉罗岛'],
-								], loop);
-								return;
-							}
-							loop();
-						});
-					})
+					randomMazeArgs.table = thisobj.battleArea.table;
+					randomMazeArgs.filter = thisobj.battleArea.filter;
+					cga.getRandomMazeEntrance(randomMazeArgs, loop);
 				});
 			});
 			return;
