@@ -3,7 +3,7 @@ module.exports = require('./wrapper').then( async (cga) => {
     leo.messageServer = false;
     leo.appId = '';
     leo.appSecret = '';
-    leo.version = '9.1';
+    leo.version = '9.2';
     leo.qq = '158583461'
     leo.copyright = '红叶散落';
     leo.FORMAT_DATE = 'yyyy-MM-dd';
@@ -1898,13 +1898,13 @@ module.exports = require('./wrapper').then( async (cga) => {
                 }
             };
             push({x: centre.x + 1, y: centre.y});
-            push({x: centre.x + 1, y: centre.y + 1});
+            //push({x: centre.x + 1, y: centre.y + 1});
             push({x: centre.x, y: centre.y + 1});
-            push({x: centre.x - 1, y: centre.y + 1});
+            //push({x: centre.x - 1, y: centre.y + 1});
             push({x: centre.x - 1, y: centre.y});
-            push({x: centre.x - 1, y: centre.y - 1});
+            //push({x: centre.x - 1, y: centre.y - 1});
             push({x: centre.x, y: centre.y - 1});
-            push({x: centre.x + 1, y: centre.y - 1});
+            //push({x: centre.x + 1, y: centre.y - 1});
             nextPoints.forEach(findByNextPoints);
         };
         findByNextPoints(start);
@@ -1941,12 +1941,13 @@ module.exports = require('./wrapper').then( async (cga) => {
     leo.getEntry = (entries,up = true) => {
         /**
          * icon
-         *   大 down, 小 up (不全是)
+         *   小 down, 大 up (不全是)
          *   12002 down 12000 up (狗洞)
          *   17967 down 17966 up (海底墓场-保证书)
          *   13273 down 13272 up (虫洞)
          *   17981 down 17980 up (黑色方舟)
          *   17975 down 17974 up (黑色的祈祷)
+         *   13997 down 13996 up (半山)
          *   0 迷宫出入口
          * return [最远，最近]
          */
@@ -1977,19 +1978,60 @@ module.exports = require('./wrapper').then( async (cga) => {
         if(entries.length==1){
             return entries[0];
         }
-        let entry0 = entries.find(entry=>entry.icon==0);//有迷宫出入口，无法正确地判断，只能选取离入口最远的
-        if(entry0){
+        if(entries.length>2){
+            //超出2个迷宫入口，随机返回
+            const index = Math.floor((Math.random()*entries.length));
+            return entries[index];
+        }
+        //两个楼梯的icon一样的，无法正确地判断，只能选取离入口最远的
+        if(entries[0].icon == entries[1].icon){
             return entries[0];
         }
-        let ups = [12000,17966,13272,17980,17974];
-        let upFlag = entries.find(entry=>ups.includes(entry.icon));
-        if(upFlag){
-            up = !up;//特殊迷宫地图，上下楼梯置反
-        }
-        let entrySort = entries.sort((a,b) => {
-            return b.icon - a.icon;
+        //特殊的迷宫地图
+        const mazeSpecial = [12000,12002,17966,17967,13272,13273,17980,17981,17974,17975,13996,13997]; //楼梯是往下走，层数越高
+        const mazeSpecialFlag = entries.find(entry=>mazeSpecial.includes(entry.icon));
+        const entrySpecial = [12000,12002,17966,17967,13272,13273,17980,17981,17974,17975]; //楼梯是往下走
+        const entrySpecialFlag = entries.find(entry=>entrySpecial.includes(entry.icon));
+        const entryFlag = entries.find(entry=>entry.icon===0);
+        const elist = entries.map((v,i,arr)=>{
+            if(entryFlag) {
+                const regStr = '([^0-9]+1[^0-9]+)|([^0-9]+100[^0-9]+)|([^0-9]+1100[^0-9]+)';
+                const reg = new RegExp(regStr,"g");
+                const mapName = cga.GetMapName();
+                const isMatch = reg.test(mapName);
+                //console.log('isMatch:'+isMatch);
+                if(isMatch){
+                    if(v.icon === 0){
+                        v.up = false;
+                    }else{
+                        v.up = true;
+                    }
+                }else{
+                    if(v.icon === 0){
+                        v.up = true;
+                    }else{
+                        v.up = false;
+                    }
+                }
+                if(entrySpecialFlag){
+                    v.up = !v.up;
+                }
+            }else{
+                const e1 = v;
+                const e2 = arr.find((v2,i2)=>i!=i2);
+                if(e1.icon > e2.icon){
+                    v.up = true;
+                }else{
+                    v.up = false;
+                }
+                if(mazeSpecialFlag){
+                    v.up = !v.up;
+                }
+            }
+            return v;
         })
-        return up? entrySort[0] : entrySort[1];
+        //console.log(elist);
+        return elist.find(e=>e.up === up);
     }
     //迷宫搜索
     leo.searchInMaze = (targetFinder, recursion = true, up = true, parameters = {}) => leo.downloadMap().then(async walls => {
@@ -2145,7 +2187,7 @@ module.exports = require('./wrapper').then( async (cga) => {
         }
         return leo.autoWalkEx(target,options.compress);
     }
-    leo.walkRandomMaze = async (up) => {
+    leo.walkRandomMaze1 = async (up, protect) => {
         const toNextPoint = async (points, centre, up, randomSize = 12) => {
             const remain = points.filter(p => {
                 const xd = Math.abs(p.x - centre.x);
@@ -2165,6 +2207,9 @@ module.exports = require('./wrapper').then( async (cga) => {
                             return leo.done();
                         }
                     }
+                    if(protect && protect()) {
+                        return leo.reject('触发保护');
+                    }
                 }
                 return toNextPoint(remain,next,up,randomSize);
             }
@@ -2177,7 +2222,7 @@ module.exports = require('./wrapper').then( async (cga) => {
                 await leo.delay(2000)
             })
             randomSize = randomSize - 1;
-            if(randomSize<4) randomSize = 12;
+            if(randomSize<1) randomSize = 12;
             console.log(leo.logTime()+'重新寻找，当前坐标：['+cga.GetMapName()+'] ['+current.x+','+current.y+']，randomSize='+randomSize);
             points = leo.getMovablePoints(walls, current);
             return toNextPoint(Object.values(points), current,up,randomSize);
@@ -2220,6 +2265,234 @@ module.exports = require('./wrapper').then( async (cga) => {
         await toNextPoint(Object.values(points), current,up)
         return leo.walkRandomMaze(up);
     }
+    leo.walkRandomMaze = async (up, protect) => {
+        let excludePoints = [];
+        let pointList = [];
+        const checkEntry = async (up) => {
+            let targetEntry = null;
+            const entries = await leo.getMazeEntries(false);
+            if(entries.length>1) {
+                targetEntry = leo.getEntry(entries, up);
+            }
+            if(targetEntry) {
+                //找到出口
+                const current = cga.GetMapXY();
+                const list = leo.findPathList([current.x,current.y],[targetEntry.x, targetEntry.y, '*']);
+                if(list.length>0) {
+                    //找到通路
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        const addExclude = (pathList) => {
+            //console.log('pathList');
+            //console.log(pathList);
+            const current = cga.GetMapXY();
+            const walls = cga.buildMapCollisionMatrix();
+            const points = Object.values(leo.getMovablePoints(walls, current))
+            .filter(p=>{
+                p.key = p.x + '-' + p.y;
+                return !excludePoints.includes(p.key);
+            });
+
+            for (let i = 0; i < pathList.length; i++) {
+                const position = pathList[i];
+                points.forEach(p=>{
+                    let xd = p.x - position[0];
+                    let yd = p.y - position[1];
+                    let distance = Math.abs(xd) + Math.abs(yd);
+                    let key = p.x + '-' + p.y;
+                    if(distance<=6 && !excludePoints.includes(key)){
+                        //console.log('新增排除点：' + p.key);
+                        excludePoints.push(p.key);
+                    }
+                })
+            }
+            //console.log('排除点数量：' + excludePoints.length);
+        }
+
+        const toNextPoint = async (points, centre, up) => {
+            const allPoint = points
+            .map(p=>{
+                let xd = p.x - centre.x;
+                let yd = p.y - centre.y;
+                let distance = Math.abs(xd) + Math.abs(yd);
+                p.distance = distance;
+                if(xd>=0&&yd<0){
+                    p.quadrant = 0; 
+                }else if(xd>0&&yd>=0){
+                    p.quadrant = 1;
+                }else if(xd<=0&&yd>0){
+                    p.quadrant = 2;
+                }else if(xd<0&&yd<=0){
+                    p.quadrant = 3;
+                }
+                p.key = p.x + '-' + p.y;
+                return p;
+            })
+            .filter(p=>{
+                p.key = p.x + '-' + p.y;
+                return !excludePoints.includes(p.key);
+            });
+            for (var i = 0; i < 4; i++) {
+                let maxDistance = -1;
+                const quadrantList = allPoint.filter(p=>p.quadrant===i);
+                quadrantList.forEach(p=>{
+                    if(p.distance>maxDistance) {
+                        maxDistance = p.distance;
+                    }
+                })
+                const furthestList = quadrantList.filter(p=>p.distance===maxDistance);
+                if(furthestList.length>0) {
+                    const index = Math.floor((Math.random()*furthestList.length));
+                    const next = furthestList[index];
+                    pointList.push(next);
+                }
+            }
+            //console.log('坐标点列表：')
+            //console.log(pointList);
+
+            await leo.loop(async ()=>{
+                if(pointList.length===0) {
+                    return leo.reject();
+                }
+                const check = await checkEntry(up)
+                if(check){
+                    return leo.reject();
+                }
+                const current = cga.GetMapXY();
+                const next = pointList.shift();
+                //console.log('当前目标：')
+                //console.log(next);
+                const pathList = leo.findPathList([current.x,current.y],[next.x,next.y],false);
+                if(pathList.length>0) {
+                    await leo.autoWalkEx([next.x,next.y],false)
+                    addExclude(pathList)
+                    if(protect && protect()) {
+                        return leo.reject('触发保护');
+                    }
+                    //检查是否因为走到新的坐标点，同象限有新的可移动坐标出现
+                    await leo.loop(async ()=>{
+                        const check = await checkEntry(up)
+                        if(check){
+                            return leo.reject();
+                        }
+                        const current2 = cga.GetMapXY();
+                        const walls = cga.buildMapCollisionMatrix();
+                        const newPoints = Object.values(leo.getMovablePoints(walls, current2))
+                        .filter(p=>{
+                            p.key = p.x + '-' + p.y;
+                            return !excludePoints.includes(p.key);
+                        })
+                        .map(p=>{
+                            let xd = p.x - current2.x;
+                            let yd = p.y - current2.y;
+                            let distance = Math.abs(xd) + Math.abs(yd);
+                            p.distance = distance;
+                            if(xd>=0&&yd<0){
+                                p.quadrant = 0; 
+                            }else if(xd>0&&yd>=0){
+                                p.quadrant = 1;
+                            }else if(xd<=0&&yd>0){
+                                p.quadrant = 2;
+                            }else if(xd<0&&yd<=0){
+                                p.quadrant = 3;
+                            }
+                            p.key = p.x + '-' + p.y;
+                            return p;
+                        })
+                        .filter(p=>p.quadrant===next.quadrant&&p.distance>0);
+                        if(newPoints.length==0) {
+                            return leo.reject();
+                        }
+                        //继续往前开图
+                        const index2 = Math.floor((Math.random()*newPoints.length));
+                        const next2 = newPoints[index2];
+                        console.log(leo.logTime()+'继续往前开图，坐标：['+next2.x+','+next2.y+']')
+                        const pathList2 = leo.findPathList([current2.x,current2.y],[next2.x,next2.y],false);
+                        if(pathList2.length>0){
+                            await leo.autoWalkEx([next2.x,next2.y],false)
+                            addExclude(pathList2);
+                            if(protect && protect()) {
+                                return leo.reject('触发保护');
+                            }
+                        }
+                    })
+                }else{
+                    addExclude([next]);
+                }
+                await leo.delay(1000)
+            })
+            const check = await checkEntry(up)
+            if(check){
+                return leo.done();
+            }
+
+            const current = cga.GetMapXY();
+            await leo.loop(async ()=>{
+                //等待加载周围的地图块
+                if(cga.getRandomSpace(current.x, current.y) != null){
+                    return leo.reject();
+                }
+                await leo.delay(2000)
+            })
+            const walls = cga.buildMapCollisionMatrix();
+            //console.log(leo.logTime()+'重新寻找，当前坐标：['+cga.GetMapName()+'] ['+current.x+','+current.y+']');
+            points = leo.getMovablePoints(walls, current);
+            return toNextPoint(Object.values(points), current,up);
+            //return Promise.resolve();
+        }
+
+        const walkMaze = async (up = true) => {
+            //console.log('开始寻路...');
+            const entries = await leo.getMazeEntries(false);
+            let targetEntry = null;
+            if(entries && entries.length>1) {
+                targetEntry = leo.getEntry(entries, up)
+            }
+            if(targetEntry) {
+                const current = cga.GetMapXY();
+                //找到出口
+                const list = leo.findPathList([current.x,current.y],[targetEntry.x, targetEntry.y, '*']);
+                if(list.length>0) {
+                    //找到通路
+                    console.log(leo.logTime()+'找到出口坐标：['+targetEntry.x+','+targetEntry.y+']')
+                    await leo.autoWalkEx([targetEntry.x, targetEntry.y, '*'])
+                    return leo.delay(2000);
+                }else{
+                    //没有通路，继续开图
+                }
+            }else{
+                //没有找到出口，继续开图
+            }
+            //开图逻辑，以原始坐标为中心，向四周逐步寻找可移动的坐标点（顺时针方向）
+            const current = cga.GetMapXY();
+            await leo.loop(async ()=>{
+                //等待加载周围的地图块
+                if(cga.getRandomSpace(current.x, current.y) != null){
+                    return leo.reject();
+                }
+                await leo.delay(2000)
+            })
+            const walls = cga.buildMapCollisionMatrix();
+            console.log(leo.logTime()+'开始寻找，当前坐标：['+cga.GetMapName()+'] ['+current.x+','+current.y+']');
+            const points = leo.getMovablePoints(walls, current);
+            //console.log(points)
+            await toNextPoint(Object.values(points), current,up)
+            return leo.walkRandomMaze(up,protect);
+        }
+        return walkMaze(up);
+    }
+    leo.walkRandomMazeUntil = async (check, entryFilter, protect) => {
+        let times = 0;
+        //console.log(entryFilter)
+        while (times <= 101 && !check()) {
+            times++;
+            await leo.walkRandomMaze(entryFilter,protect);
+        }
+    };
 
     //哥拉尔镇定居登出
     leo.logBackG = async ()=>{
