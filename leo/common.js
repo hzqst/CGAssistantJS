@@ -1,9 +1,10 @@
 module.exports = require('./wrapper').then( async (cga) => {
+    global.cga = cga;
     global.leo = cga.emogua;
     leo.messageServer = false;
     leo.appId = '';
     leo.appSecret = '';
-    leo.version = '9.3';
+    leo.version = '9.4';
     leo.qq = '158583461'
     leo.copyright = '红叶散落';
     leo.FORMAT_DATE = 'yyyy-MM-dd';
@@ -2076,7 +2077,7 @@ module.exports = require('./wrapper').then( async (cga) => {
             //console.log('非指定的迷宫')
             elist = entries.map((v,i,arr)=>{
                 if(entryFlag) {
-                    const regStr = '([^0-9]+1[^0-9]+)|([^0-9]+100[^0-9]+)|([^0-9]+1100[^0-9]+)';
+                    const regStr = '([^0-9]+1[^0-9]+)|([^0-9]+100[^0-9]+)|([^0-9]+1100[^0-9]+)|([^0-9]+B1$)';
                     const reg = new RegExp(regStr,"g");
                     const isMatch = reg.test(mapName);
                     //console.log('isMatch:'+isMatch);
@@ -2340,13 +2341,8 @@ module.exports = require('./wrapper').then( async (cga) => {
                 return !excludePoints.includes(p.key);
             });
             for (var i = 0; i < 4; i++) {
-                let maxDistance = -1;
                 const quadrantList = allPoint.filter(p=>p.quadrant===i);
-                quadrantList.forEach(p=>{
-                    if(p.distance>maxDistance) {
-                        maxDistance = p.distance;
-                    }
-                })
+                const maxDistance = Math.max(...quadrantList.map(p=>p.distance),-1);
                 const furthestList = quadrantList.filter(p=>p.distance===maxDistance);
                 if(furthestList.length>0) {
                     const index = Math.floor((Math.random()*furthestList.length));
@@ -4711,6 +4707,17 @@ module.exports = require('./wrapper').then( async (cga) => {
         leo.plugins.searchRandomMaze = {
             findNpc:()=>{
                 console.log('没有自动寻找迷宫NPC插件，跳过该功能');
+            }
+        }
+    }
+
+    //插件：加载脚本
+    try{
+        leo.plugins.load = require('./plugin_load');
+    }catch(e){
+        leo.plugins.load = {
+            start:()=>{
+                console.log('没有加载脚本插件，跳过该功能');
             }
         }
     }
