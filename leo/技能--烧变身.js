@@ -1,4 +1,4 @@
-require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
+require(process.env.CGA_DIR_PATH_UTF8+'/leo').then(async (cga) => {
     //leo.baseInfoPrint();
     leo.log('红叶の烧变身脚本，启动~');
 

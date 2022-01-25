@@ -1,4 +1,4 @@
-require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
+require(process.env.CGA_DIR_PATH_UTF8+'/leo').then(async (cga) => {
     leo.baseInfoPrint();                    //显示基础信息
     leo.moveTimeout = 20;                  //遇敌速度
     leo.monitor.config.keepAlive = false;   //关闭防掉线

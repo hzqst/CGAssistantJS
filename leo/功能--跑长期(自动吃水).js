@@ -1,4 +1,4 @@
-require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
+require(process.env.CGA_DIR_PATH_UTF8+'/leo').then(async (cga) => {
     var times = 6;//一次最多跑6个，避免满包
 
 	leo.log('红叶の跑长期(自动吃水)脚本，启动~');

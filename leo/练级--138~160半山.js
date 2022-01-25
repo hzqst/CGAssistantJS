@@ -1,4 +1,4 @@
-require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
+require(process.env.CGA_DIR_PATH_UTF8+'/leo').then(async (cga) => {
     leo.monitor.config.keepAlive = false;   //关闭防掉线
     leo.monitor.config.logStatus = false;   //关闭战斗状态提示
     leo.moveTimeout = 20;                   //遇敌速度
@@ -193,6 +193,7 @@ require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
                     await leo.checkHealth(doctorName)
                     await leo.checkCrystal(crystalName)
                     if(cga.isInNormalState() && !leo.isInTeam()){
+                        await leo.logBack()
                         return leo.reject();
                     }
                     const mapInfo = leo.getMapInfo();

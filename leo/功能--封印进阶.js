@@ -1,4 +1,4 @@
-require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
+require(process.env.CGA_DIR_PATH_UTF8+'/leo').then(async (cga) => {
 	await leo.log('红叶の封印进阶脚本，启动~');
 
 	if(leo.isInTeam()){

@@ -1,4 +1,4 @@
-require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
+require(process.env.CGA_DIR_PATH_UTF8+'/leo').then(async (cga) => {
 	//leo.baseInfoPrint();
 	var teamLeader = '队长名称'; //队长名称
     var teamPlayerCount = 1; //队伍人数
@@ -41,7 +41,7 @@ require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
 				return true;
 			}
 			return false;
-		},false)
+		},true)
     	await leo.autoWalkList([
     		[80, 56],[80, 57],[80, 56],[80, 57],[80, 56]
     	])
@@ -55,7 +55,7 @@ require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
 				return true;
 			}
 			return false;
-		},false)
+		},true)
 		await leo.autoWalkList([
     		[24, 26],[25, 25],[24, 26],[25, 25],[24, 26]
     	])

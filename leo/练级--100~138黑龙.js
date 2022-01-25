@@ -1,27 +1,29 @@
-require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
-    leo.baseInfoPrint();                    //显示基础信息
-    leo.moveTimeout = 20;                  //遇敌速度
+require(process.env.CGA_DIR_PATH_UTF8+'/leo').then(async (cga) => {
     leo.monitor.config.keepAlive = false;   //关闭防掉线
     leo.monitor.config.logStatus = false;   //关闭战斗状态提示
+    leo.moveTimeout = 20;                   //遇敌速度
     //自动跟随队长换线，设置为true时，需要先提前与队长交换名片
     leo.monitor.config.autoChangeLineForLeader = false;
-    var battleStatus = true;   //队长打印战斗明细
-    var usingpunchclock = false; //是否打卡
-    var level = 9;  //指定楼层
-
-    let teams = [//自行修改角色名称，可以再加更多的队伍
+    leo.monitor.config.equipsProtect = false;   //关闭装备低耐久保护
+    const battleStatus = false;   //队长打印战斗明细
+    const doctorName = '医道之殇';
+    const crystalName = '水火的水晶（5：5）';
+    const teams = [//自行修改角色名称，可以再加更多的队伍
         ['队长01','小号01','小号02','小号03','小号04'],
         ['队长02','小号05','小号06','小号07','小号08'],
         ['队长03','小号09','小号10','小号11','小号12'],
         ['队长04','小号13','小号14','小号15','小号16'],
         ['队长05','小号17','小号18','小号19','小号20'],
     ];
-
-    let playerName = cga.GetPlayerInfo().name;
+    const usingpunchclock = false; //是否打卡
+    const meetingPoint = 8; //集合点1~8
+    const level = 9;  //指定楼层
+    
+    leo.baseInfoPrint(); //显示基础信息
     let teammates = leo.findMyTeam(teams);
     if(teammates == null){
         await leo.log('红叶の黑龙脚本，未找到队伍，请确认配置是否正确')
-        return leo.delay(1000*60*60*2);
+        return leo.exit(1000*60*60*2);
     }else{
         await leo.log('红叶の黑龙脚本，楼层【' + level + '】，推荐100~138级使用，启动~');
         await leo.log('我的队伍是：['+teammates.join(',')+']')
@@ -29,7 +31,7 @@ require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
     let teamLeader = teammates[0];
     let teamPlayerCount = teammates.length;
     let isTeamLeader = false;
-    if (playerName == teamLeader) {
+    if (cga.GetPlayerInfo().name == teamLeader) {
         isTeamLeader = true;
         await leo.log('我是队长，预设队伍人数【'+teamPlayerCount+'】');
         if(battleStatus){
@@ -38,9 +40,8 @@ require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
     }else{
         await leo.log('我是队员，队长是【'+teamLeader+'】');
     }
-
-
-    var protect = {
+    
+    const protect = {
         //contactType遇敌类型：-1-旧遇敌，0-按地图自适应，1-东西移动，2-南北移动，
         //3-随机移动，4-画小圈圈，5-画中圈圈，6-画大圈圈，7-画十字，8-画8字
         contactType: 0,
@@ -51,18 +52,18 @@ require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
         minPetMp: 100,
         maxItemNumber: 19,
         minTeamNumber: teamPlayerCount,
-        normalNurse: false
+        normalNurse: false,
+        petIndex: 0,
     };
-    var isPrepare = false; //招魂、治疗、补血、卖石
-    var isLogBackFirst = false; //启动登出
-    var meetingPoint = 8; //集合点1~8
-    var prepareOptions = {
-        rechargeFlag: 1,
-        repairFlag: -1,
-        crystalName: '水火的水晶（5：5）',
-        doctorName: '医道之殇'
-    };
-    var meetingPointTeamLeader = [
+    if (isTeamLeader) {
+        protect.minMp = 350; //队长是传教，回城魔值至少要大于等于一次祈祷的魔
+    }
+    cga.EnableFlags(cga.ENABLE_FLAG_TEAMCHAT, true); //开启队聊
+    cga.EnableFlags(cga.ENABLE_FLAG_JOINTEAM, true); //开启组队
+    cga.EnableFlags(cga.ENABLE_FLAG_CARD, false); //关闭名片
+    cga.EnableFlags(cga.ENABLE_FLAG_TRADE, false); //关闭交易
+
+    const meetingPointTeamLeader = [
         [97, 85],
         [98, 85],
         [99, 85],
@@ -72,7 +73,7 @@ require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
         [99, 83],
         [100, 83]
     ];
-    var meetingPointTeammate = [
+    const meetingPointTeammate = [
         [97, 86],
         [98, 86],
         [99, 86],
@@ -82,191 +83,182 @@ require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
         [99, 84],
         [100, 84]
     ];
-    cga.EnableFlags(cga.ENABLE_FLAG_TEAMCHAT, true); //开启队聊
-    cga.EnableFlags(cga.ENABLE_FLAG_JOINTEAM, true); //开启组队
-    cga.EnableFlags(cga.ENABLE_FLAG_CARD, false); //关闭名片
-    cga.EnableFlags(cga.ENABLE_FLAG_TRADE, false); //关闭交易
-    if (isTeamLeader) {
-        protect.minMp = 350; //队长是传教，回城魔值至少要大于等于一次祈祷的魔
+
+    const checkGold = async () => {
+        //检查是否满魔币
+        if(cga.GetPlayerInfo().gold >= 990000){
+            await leo.logServer('鲁村','钱包快满了：' + cga.GetPlayerInfo().gold + '去银行存钱');
+            await leo.log('钱包快满了：' + cga.GetPlayerInfo().gold + '去银行存钱');
+            await leo.goto(n => n.falan.bank)
+            await leo.turnDir(0)
+            await leo.moveGold(100000,cga.MOVE_GOLD_TOBANK)
+            await leo.moveGold(100000,cga.MOVE_GOLD_TOBANK)
+            await leo.moveGold(100000,cga.MOVE_GOLD_TOBANK)
+            await leo.moveGold(100000,cga.MOVE_GOLD_TOBANK)
+            await leo.moveGold(100000,cga.MOVE_GOLD_TOBANK)
+            await leo.moveGold(100000,cga.MOVE_GOLD_TOBANK)
+            await leo.moveGold(100000,cga.MOVE_GOLD_TOBANK)
+            await leo.moveGold(100000,cga.MOVE_GOLD_TOBANK)
+            await leo.moveGold(100000,cga.MOVE_GOLD_TOBANK)
+            if(cga.GetPlayerInfo().gold >= 990000) {
+                await leo.log('钱包满了，银行也放不下了，脚本结束')
+                return leo.exit(1000*60*60*2);
+            }
+            await leo.logBack()
+        }
     }
 
-    leo.todo().then(() => {
-        //登出
-        if (isLogBackFirst) {
-            return leo.logBack();
-        } else {
-            return leo.next();
-        }
-    }).then(() => {
-        //招魂、治疗、补血、卖石
-        if (isPrepare) {
-            return leo.logBack().then(() => leo.prepare(prepareOptions));
-        } else {
-            return leo.next();
-        }
-    }).then(() => {
-        return leo.loop(
-            () => leo.waitAfterBattle()
-            .then(() => leo.checkHealth(prepareOptions.doctorName))
-            .then(() => leo.checkCrystal(prepareOptions.crystalName))
-            .then(() => {
-                //检查是否满魔币
-                var playerinfo = cga.GetPlayerInfo();
-                if (playerinfo.gold >= 990000) {
-                    leo.log('钱包快满了：' + playerinfo.gold + '去银行存钱');
-                    return leo.goto(n => n.falan.bank)
-                    .then(()=>leo.turnDir(0))
-                    .then(()=>leo.moveGold(100000,cga.MOVE_GOLD_TOBANK))
-                    .then(()=>leo.moveGold(100000,cga.MOVE_GOLD_TOBANK))
-                    .then(()=>leo.moveGold(100000,cga.MOVE_GOLD_TOBANK))
-                    .then(()=>leo.moveGold(100000,cga.MOVE_GOLD_TOBANK))
-                    .then(()=>leo.moveGold(100000,cga.MOVE_GOLD_TOBANK))
-                    .then(()=>leo.moveGold(100000,cga.MOVE_GOLD_TOBANK))
-                    .then(()=>leo.moveGold(100000,cga.MOVE_GOLD_TOBANK))
-                    .then(()=>leo.moveGold(100000,cga.MOVE_GOLD_TOBANK))
-                    .then(()=>leo.moveGold(100000,cga.MOVE_GOLD_TOBANK))
-                    .then(()=>{
-                        playerinfo = cga.GetPlayerInfo();
-                        if(playerinfo.gold >= 900000){
-                            leo.log('钱包满了，银行也放不下了，脚本结束');
-                            return leo.reject();
-                        }else{
-                            return leo.next();
-                        }
-                    });
+    try{
+        let targetMapName = ('黑龙沼泽'+level+'区');
+        await leo.loop(async ()=>{
+            await leo.waitAfterBattle()
+            if(!isTeamLeader){
+                await leo.setPetBattle(protect.petIndex)
+            }
+            await leo.checkHealth(doctorName)
+            await leo.checkCrystal(crystalName)
+            await checkGold()
+
+            let needTeam = false;
+            const teamPlayers = leo.getTeamPlayerAll();
+            if(isTeamLeader && teamPlayers.length < protect.minTeamNumber){
+                needTeam = true;
+            }
+            if(!isTeamLeader && teamPlayers.length == 1) {
+                needTeam = true;
+            }
+            if(needTeam) {
+                console.log(leo.logTime() + '寻找队伍');
+                await leo.loop(async ()=>{
+                    if(cga.GetMapName()=='艾尔莎岛') {
+                        return leo.reject();
+                    }
+                    await leo.logBack()
+                    await leo.delay(3000)
+                })
+                if(usingpunchclock){
+                    await leo.goto(n => n.castle.clock)
+                    await leo.talkNpc(2,leo.talkYes)
                 }
-            })
-            .then(() => {
-                //完成组队
-                var teamplayers = cga.getTeamPlayers();
-                if ((isTeamLeader && teamplayers.length >= protect.minTeamNumber)
-                		|| (!isTeamLeader && teamplayers.length > 0)) {
-                    //console.log('组队已就绪');
-                    return leo.next();
-                } else {
-                    console.log(leo.logTime() + '寻找队伍');
-                    return leo.todo()
-                    .then(()=>{
-                        if(usingpunchclock){
-                            return leo.goto(n => n.castle.clock)
-                            .then(()=>leo.talkNpc(2,leo.talkNpcSelectorYes));
-                        }
-                    })
-                    .then(()=>leo.goto(n => n.camp.x))
-                    .then(() => {
-                        if (isTeamLeader) {
-                            cga.EnableFlags(cga.ENABLE_FLAG_JOINTEAM, true); //开启组队
-                            return leo.autoWalk(meetingPointTeamLeader[meetingPoint - 1]).then(() => leo.buildTeam(teamPlayerCount,teammates)).then(() => {
-                                var teamplayers = cga.getTeamPlayers();
-                                //console.log(teamplayers);
-                                if (teamplayers && teamplayers.length == teamPlayerCount) {
-                                    for (var i in teamplayers) {
-                                        teammates[i] = teamplayers[i].name;
-                                    }
-                                }
-                                leo.log('组队完成，队员[' + teammates.toString() + ']');
-                                cga.EnableFlags(cga.ENABLE_FLAG_JOINTEAM, false); //关闭组队
-                                return leo.next();
-                            });
-                        } else {
-                            return leo.autoWalk(meetingPointTeammate[meetingPoint - 1])
-                            .then(() => leo.enterTeamBlock(teamLeader));
-                        }
-                    });
-                }
-            }).then(() => {
-                //黑一练级
+                await leo.goto(n => n.camp.x)
                 if (isTeamLeader) {
-                    var currentMap = cga.GetMapName();
-                    if (currentMap == '圣骑士营地') {
-                        return leo.autoWalkList([
-                            [87, 72, '工房'],
-                            [20, 23]
-                        ]).then(() => leo.walkList([
-                            [20, 22],
-                            [20, 23],
-                            [20, 22]
-                        ])).then(() => leo.sell(21, 23)).then(() => leo.delay(5000));
-                    }
-                    if (currentMap == '工房') {
-                        return leo.autoWalkList([
-                            [30, 37, '圣骑士营地'],
-                            [95, 72, '医院']
-                        ]);
-                    }
-                    if (currentMap == '医院') {
-                        return leo.autoWalkList([
-                            [9, 20]
-                        ])
-                        .then(() => leo.walkList([
-                            [9, 11],
-                            [9, 12],
-                            [9, 11],
-                            [9, 12]
-                        ]))
-                        .then(() => leo.supply(11, 11))
-                        .then(() =>{
-                            if(protect.normalNurse){//普通护士回补
-                                return leo.autoWalk([18,15])
-                                .then(()=>leo.walkList([
-                                    [17,15],[18,15],[17,15],[18,15]
-                                ]))
-                                .then(()=>leo.supply(18, 14));
-                            }
-                        })
-                        .then(() => leo.statistics(leo.beginTime, leo.oldXp))	//打印统计信息
-                        .then(() => leo.autoWalkList([
-                            [0, 20, '圣骑士营地'],
-                            [36, 87, '肯吉罗岛'],
-                            [547, 332]
-                        ]));
-                    }
-                    if (currentMap == '肯吉罗岛') {
-                        if (leo.checkStopEncounter(protect, false)) {
-                            return leo.autoWalk([551, 332, '圣骑士营地']).then(() => leo.delay(1000));
-                        } else {
-                            return leo.autoWalkList([
-                                [424, 344],
-                                [424, 345, '黑龙沼泽1区']
-                            ]).then(() => leo.delay(1000));
-                        }
-                    }
-                    if (currentMap == ('黑龙沼泽'+level+'区')) {
-                        //console.log(entryPos);
-                        console.log(leo.logTime() + '开始战斗');
-                        return leo.encounterTeamLeader(protect) //队长遇敌
-                        .then(() => {
-                            console.log(leo.logTime() + "登出回补");
-                            return leo.logBack();
-                        });
-                    }
-                    if (currentMap == '黑龙沼泽1区') {
-                        return leo.walkRandomMazeUntil(() => {
-                                const mn = cga.GetMapName();
-                                if (mn == ('黑龙沼泽'+level+'区')) {
-                                    return true;
-                                } else if (mn == '肯吉罗岛') {
-                                    return leo.reject('迷宫刷新');
-                                }
-                        },false);
-                    }
+                    cga.EnableFlags(cga.ENABLE_FLAG_JOINTEAM, true); //开启组队
+                    await leo.autoWalk(meetingPointTeamLeader[meetingPoint - 1])
+                    await leo.buildTeamBlock(teamPlayerCount,teammates)
                 } else {
-                    var mapInfo = leo.getMapInfo();
+                    await leo.autoWalk(meetingPointTeammate[meetingPoint - 1])
+                    await leo.enterTeamBlock(teamLeader)
+                }
+            }
+
+            if(isTeamLeader) {
+                if(['艾尔莎岛','里谢里雅堡','法兰城','银行'].includes(cga.GetMapName())) {
+                    await leo.goto(n => n.camp.x)
+                }
+                if(cga.GetMapName()=='圣骑士营地') {
+                    await leo.autoWalkList([
+                            [87, 72, '工房'],[20, 23]
+                    ])
+                    await leo.walkList([
+                            [20, 22],[20, 23],[20, 22]
+                    ])
+                    await leo.sell(21, 23)
+                    await leo.delay(5000)
+                }
+                if (cga.GetMapName()=='工房') {
+                    await leo.autoWalkList([
+                        [30, 37, '圣骑士营地'],[95, 72, '医院']
+                    ])
+                }
+                if(cga.GetMapName()=='医院') {
+                    await leo.autoWalk([9, 20])
+                    await leo.walkList([
+                        [9, 11],[9, 12],[9, 11],[9, 12]
+                    ])
+                    await leo.supply(11, 11)
+                    if(protect.normalNurse) {
+                        //普通护士回补
+                        await leo.autoWalk([18,15])
+                        await leo.walkList([
+                            [17,15],[18,15],[17,15],[18,15]
+                        ])
+                        await leo.supply(18, 14)
+                    }
+                    await leo.statistics(leo.beginTime, leo.oldXp) //打印统计信息
+                    await leo.autoWalkList([
+                        [0, 20, '圣骑士营地'],
+                        [36, 87, '肯吉罗岛'],
+                        [424, 344],
+                        [424, 345, '黑龙沼泽1区']
+                    ])
+                    await leo.delay(1000)
+                }
+                if(cga.GetMapName()=='肯吉罗岛') {
+                    if (leo.checkStopEncounter(protect, false)) {
+                        await leo.autoWalk([551, 332, '圣骑士营地'])
+                        await leo.delay(1000)
+                    } else {
+                        await leo.autoWalkList([
+                            [424, 344],
+                            [424, 345, '黑龙沼泽1区']
+                        ])
+                        await leo.delay(1000)
+                    }
+                }
+                if(cga.GetMapName().includes('黑龙沼泽')) {
+                    await leo.walkRandomMazeUntil(() => {
+                        const mn = cga.GetMapName();
+                        if (mn == targetMapName) {
+                            return true;
+                        } else if (mn == '肯吉罗岛') {
+                            return leo.reject('迷宫刷新');
+                        } else if (mn == '黑龙沼泽') {
+                            return leo.reject('异常：走到了龙顶');
+                        }
+                    },false)
+                }
+                if (cga.GetMapName()==targetMapName) {
+                    //await leo.moveAround()
+                    console.log(leo.logTime() + '开始战斗');
+                    await leo.encounterTeamLeader(protect) //队长遇敌
+                    console.log(leo.logTime() + "登出回补");
+                    await leo.logBack()
+                    await leo.delay(1000)
+                }
+                if (!['艾尔莎岛','里谢里雅堡','法兰城','圣骑士营地','肯吉罗岛','黑龙沼泽1区',targetMapName].includes(cga.GetMapName())) {
+                    await leo.logBack()
+                }
+            }else {
+                await leo.loop(async ()=>{
+                    await leo.waitAfterBattle()
+                    await leo.setPetBattle(protect.petIndex)
+                    await leo.checkHealth(doctorName)
+                    await checkGold()
+                    // await leo.checkCrystal(crystalName)
+                    if(cga.isInNormalState() && !leo.isInTeam()){
+                        await leo.logBack()
+                        return leo.reject();
+                    }
+                    const mapInfo = leo.getMapInfo();
                     if (mapInfo.name == '工房' && mapInfo.x == 20 && (mapInfo.y == 22 || mapInfo.y == 23)) {
-                        return leo.sell(21, 23).then(() => leo.delay(10000));
+                        await leo.sell(21, 23)
+                        await leo.delay(10000)
                     }
                     if (mapInfo.name == '医院' && mapInfo.x == 9 && (mapInfo.y == 11 || mapInfo.y == 12)) {
-                        return leo.supply(11, 11).then(() => {
-						    return leo.statistics(leo.beginTime, leo.oldXp);//打印统计信息
-                        });
+                        await leo.supply(11, 11)
+                        await leo.statistics(leo.beginTime, leo.oldXp) //打印统计信息
                     }
-                    if (mapInfo.name.indexOf('黑龙沼泽')!=-1){
-                        return leo.encounterTeammate(protect, '黑龙沼泽'); //队员遇敌
+                    if (mapInfo.name == targetMapName){
+                        await leo.encounterTeammate(protect, targetMapName) //队员遇敌
                     }
-                }
-                //console.log('延时3秒');
-                return leo.delay(3000);
-            }).
-            catch (console.log));
-    });
+                    await leo.delay(3000)
+                })
+            }
+            await leo.delay(1000)
+        })
+    }catch(e){
+        console.log(leo.logTime()+'脚本出错:'+e);
+        console.log(leo.logTime()+'重新开始');
+    }
+    return leo.exit();
 });

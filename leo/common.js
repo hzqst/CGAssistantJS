@@ -3,7 +3,7 @@ module.exports = require('./wrapper').then( async (cga) => {
     leo.messageServer = false;
     leo.appId = '';
     leo.appSecret = '';
-    leo.version = '9.2';
+    leo.version = '9.3';
     leo.qq = '158583461'
     leo.copyright = '红叶散落';
     leo.FORMAT_DATE = 'yyyy-MM-dd';
@@ -1563,9 +1563,9 @@ module.exports = require('./wrapper').then( async (cga) => {
         await leo.waitAfterBattle()
         if(leo.highspeed){
             const seconds = parseInt(waitTime / 1000);
-            console.log(leo.logTime()+'战斗结束，等待'+seconds+'秒');
+            //console.log(leo.logTime()+'战斗结束，等待'+seconds+'秒');
             await leo.delay(waitTime)
-            console.log(leo.logTime()+'等待完毕，继续移动');
+            //console.log(leo.logTime()+'等待完毕，继续移动');
         }
     }
     leo.contactStatus = false;
@@ -1611,7 +1611,7 @@ module.exports = require('./wrapper').then( async (cga) => {
             }
         });
         await leo.loop(async () => {
-            let afterBattleWaitTime = leo.afterBattleWaitTime || 5000;
+            let afterBattleWaitTime = leo.contactBattleWaitTime || 5000;
             await leo.checkBattle(afterBattleWaitTime)
             if(!leo.contactStatus){
                 await leo.delay(2000)
@@ -1948,6 +1948,7 @@ module.exports = require('./wrapper').then( async (cga) => {
          *   17981 down 17980 up (黑色方舟)
          *   17975 down 17974 up (黑色的祈祷)
          *   13997 down 13996 up (半山)
+         *   17965 down 19764 up (布满青苔的洞窟)
          *   0 迷宫出入口
          * return [最远，最近]
          */
@@ -1985,51 +1986,131 @@ module.exports = require('./wrapper').then( async (cga) => {
         }
         //两个楼梯的icon一样的，无法正确地判断，只能选取离入口最远的
         if(entries[0].icon == entries[1].icon){
+            //console.log('两个楼梯的icon一样的，无法正确地判断：')
+            //console.log(entries)
             return entries[0];
         }
         //特殊的迷宫地图
-        const mazeSpecial = [12000,12002,17966,17967,13272,13273,17980,17981,17974,17975,13996,13997]; //楼梯是往下走，层数越高
+        const mazeSpecial = [17966,17967,13272,13273,17980,17981,17974,17975,13996,13997,17964,17965];
         const mazeSpecialFlag = entries.find(entry=>mazeSpecial.includes(entry.icon));
-        const entrySpecial = [12000,12002,17966,17967,13272,13273,17980,17981,17974,17975]; //楼梯是往下走
+        const entrySpecial = [17966,17967,13272,13273,17980,17981,17974,17975];
         const entrySpecialFlag = entries.find(entry=>entrySpecial.includes(entry.icon));
         const entryFlag = entries.find(entry=>entry.icon===0);
-        const elist = entries.map((v,i,arr)=>{
-            if(entryFlag) {
-                const regStr = '([^0-9]+1[^0-9]+)|([^0-9]+100[^0-9]+)|([^0-9]+1100[^0-9]+)';
-                const reg = new RegExp(regStr,"g");
-                const mapName = cga.GetMapName();
-                const isMatch = reg.test(mapName);
-                //console.log('isMatch:'+isMatch);
-                if(isMatch){
-                    if(v.icon === 0){
-                        v.up = false;
+
+        //特定的迷宫：
+        const mazeEntryOptions = [ 
+            //[迷宫名字,爬楼方向,[1楼up,1楼down],[顶楼up,顶楼down],[中间楼up,中间楼down]]
+            ['奇怪的洞窟',false,[0,12002],[12000,12000],[12000,12002]],//狗洞
+            ['黑龙沼泽',false,[0,12002],[12000,0],[12000,12002]],//黑龙
+            ['通往山顶的路',true,[13996,0],[0,13997],[13996,13997]],//半山
+            ['蜥蜴洞穴',false,[0,12002],[12000,0],[12000,12002]],//蜥蜴
+            ['布满青苔的洞窟',true,[17964,0],[0,17965],[17964,17965]],//1转树精
+            ['贝兹雷姆的迷宫',true,[12000,0],[0,12002],[12000,12002]],//2转神兽
+            ['隐秘山道上层',false,[0,17973],[17972,0],[17972,17973]],//探险专家(贝爷)
+            ['隐秘山道中层',false,[0,17991],[17990,0],[17990,17991]],//探险专家(贝爷)
+            ['隐秘山道下层',false,[0,17975],[17974,0],[17974,17975]],//探险专家(贝爷)
+            ['积雪的山路海拔',true,[17956,0],[0,17957],[17956,17957]],//雪山
+            ['废墟地下222',true,[0,120],[120,0],[120,120]],//承认之戒
+            ['隐秘之洞地下222',true,[0,120],[120,0],[120,120]],//五转
+            ['虫洞地下222',true,[0,120],[120,0],[120,120]],//卵3
+            ['牛鬼的洞窟222',true,[0,120],[120,0],[120,120]],//偷狗粮
+            ['奇怪的坑道222',true,[0,120],[120,0],[120,120]],//抓烈风哥布林
+            ['阿鲁巴斯的洞窟222',true,[0,120],[120,0],[120,120]],//抓僵尸
+            ['砂漠之祠地下222',true,[0,120],[120,0],[120,120]],//抓木乃伊
+            ['迷宫222',true,[0,120],[120,0],[120,120]],//人神
+            ['达尔文海海底地下222',true,[0,120],[120,0],[120,120]],//半山2
+            ['通往地狱的道路222',true,[0,120],[120,0],[120,120]],//半山6
+            ['海底墓场外苑222',true,[0,120],[120,0],[120,120]],//卵4
+            ['黑色方舟222',true,[0,120],[120,0],[120,120]],//四转
+            ['秘密回廊222',true,[0,120],[120,0],[120,120]],//天界2
+            ['通向顶端的阶梯222',true,[0,120],[120,0],[120,120]],//天界3
+            ['土之迷宫222',true,[0,120],[120,0],[120,120]],//土洞
+            ['水之洞窟地下222',true,[0,120],[120,0],[120,120]],//水洞
+            ['水之迷宫地下222',true,[0,120],[120,0],[120,120]],//水洞
+            ['炎之洞窟222',true,[0,120],[120,0],[120,120]],//炎洞
+            ['风之洞窟222',true,[0,120],[120,0],[120,120]],//风洞
+            ['旧日迷宫222',true,[0,120],[120,0],[120,120]],//旧日迷宫
+            ['旧日之塔222',true,[0,120],[120,0],[120,120]],//旧日之塔
+            ['未知',true,[0,120],[120,0],[120,120]],
+        ];
+        const mapName = cga.GetMapName();
+        const mazeEntryOption = mazeEntryOptions.find(option=>mapName.startsWith(option[0]));
+        let elist;
+        if(mazeEntryOption) {
+            //console.log('指定的迷宫')
+            elist = entries.map((v,i,arr)=>{
+                if(entryFlag) {
+                    const regStr = '([^0-9]+1[^0-9]+)|([^0-9]+100[^0-9]+)|([^0-9]+1100[^0-9]+)|([^0-9]+B1$)';
+                    const reg = new RegExp(regStr,"g");
+                    const isMatch = reg.test(mapName);
+                    //console.log('isMatch:'+isMatch);
+                    if(isMatch){
+                        //1楼，100，1100
+                        // if(v.icon === mazeEntryOption[2][0]){
+                        //     v.up = true;
+                        // }else{
+                        //     v.up = false;
+                        // }
+                        v.up = v.icon === mazeEntryOption[2][0];
                     }else{
-                        v.up = true;
+                        //顶楼
+                        // if(v.icon === mazeEntryOption[3][0]){
+                        //     v.up = true;
+                        // }else{
+                        //     v.up = false;
+                        // }
+                        v.up = v.icon === mazeEntryOption[3][0];
                     }
                 }else{
-                    if(v.icon === 0){
+                    //中间楼
+                    // if(v.icon === mazeEntryOption[4][0]){
+                    //     v.up = true;
+                    // }else{
+                    //     v.up = false;
+                    // }
+                    v.up = v.icon === mazeEntryOption[4][0];
+                }
+                return v;
+            })
+        }else{
+            //console.log('非指定的迷宫')
+            elist = entries.map((v,i,arr)=>{
+                if(entryFlag) {
+                    const regStr = '([^0-9]+1[^0-9]+)|([^0-9]+100[^0-9]+)|([^0-9]+1100[^0-9]+)';
+                    const reg = new RegExp(regStr,"g");
+                    const isMatch = reg.test(mapName);
+                    //console.log('isMatch:'+isMatch);
+                    if(isMatch){
+                        if(v.icon === 0){
+                            v.up = false;
+                        }else{
+                            v.up = true;
+                        }
+                    }else{
+                        if(v.icon === 0){
+                            v.up = true;
+                        }else{
+                            v.up = false;
+                        }
+                    }
+                    if(entrySpecialFlag){
+                        v.up = !v.up;
+                    }
+                }else{
+                    const e1 = v;
+                    const e2 = arr.find((v2,i2)=>i!=i2);
+                    if(e1.icon > e2.icon){
                         v.up = true;
                     }else{
                         v.up = false;
                     }
+                    if(mazeSpecialFlag){
+                        v.up = !v.up;
+                    }
                 }
-                if(entrySpecialFlag){
-                    v.up = !v.up;
-                }
-            }else{
-                const e1 = v;
-                const e2 = arr.find((v2,i2)=>i!=i2);
-                if(e1.icon > e2.icon){
-                    v.up = true;
-                }else{
-                    v.up = false;
-                }
-                if(mazeSpecialFlag){
-                    v.up = !v.up;
-                }
-            }
-            return v;
-        })
+                return v;
+            })
+        }
         //console.log(elist);
         return elist.find(e=>e.up === up);
     }
@@ -2106,7 +2187,7 @@ module.exports = require('./wrapper').then( async (cga) => {
         );
     });
     //迷宫寻找指定NPC或物品
-    leo.findOne = (targetFinder, todo = leo.next() , up = false)=>{
+    leo.findOne = (targetFinder, todo = leo.next(), up = false)=>{
         var position;
         if (!leo.isMapDownloaded(cga.buildMapCollisionMatrix())) {
             position = null;
@@ -2162,9 +2243,9 @@ module.exports = require('./wrapper').then( async (cga) => {
                 const world = cga.GetWorldStatus();
                 const game = cga.GetGameStatus();
                 if (world == 10) {
-                    console.log(leo.logTime()+'自动寻路中，进入战斗')
+                    //console.log(leo.logTime()+'自动寻路中，进入战斗')
                 }
-                let afterBattleWaitTime = leo.afterBattleWaitTime || 5000;
+                let afterBattleWaitTime = leo.autoWalkBattleWaitTime || 5000;
                 await leo.checkBattle(afterBattleWaitTime)
                 if(cga.GetMapName()==mapInfo.name){
                     return leo.autoWalkEx([x,y,destination],compress);
@@ -2187,85 +2268,7 @@ module.exports = require('./wrapper').then( async (cga) => {
         }
         return leo.autoWalkEx(target,options.compress);
     }
-    leo.walkRandomMaze1 = async (up, protect) => {
-        const toNextPoint = async (points, centre, up, randomSize = 12) => {
-            const remain = points.filter(p => {
-                const xd = Math.abs(p.x - centre.x);
-                const yd = Math.abs(p.y - centre.y);
-                p.d = xd + yd;
-                return !(xd < randomSize && yd < randomSize);
-            }).sort((a,b) => a.d - b.d);
-            const next = remain.shift();
-            if (next) {
-                const pathList = leo.findPathList([centre.x,centre.y],[next.x,next.y],false);
-                if(pathList.length>0){
-                    await leo.autoWalkEx([next.x,next.y],false)
-                    const entries = await leo.getMazeEntries(false);
-                    if(entries.length>1) {
-                        const targetEntry = leo.getEntry(entries, up);
-                        if(targetEntry) {
-                            return leo.done();
-                        }
-                    }
-                    if(protect && protect()) {
-                        return leo.reject('触发保护');
-                    }
-                }
-                return toNextPoint(remain,next,up,randomSize);
-            }
-            const current = cga.GetMapXY();
-            await leo.loop(async ()=>{
-                //等待加载周围的地图块
-                if(cga.getRandomSpace(current.x, current.y) != null){
-                    return leo.reject();
-                }
-                await leo.delay(2000)
-            })
-            randomSize = randomSize - 1;
-            if(randomSize<1) randomSize = 12;
-            console.log(leo.logTime()+'重新寻找，当前坐标：['+cga.GetMapName()+'] ['+current.x+','+current.y+']，randomSize='+randomSize);
-            points = leo.getMovablePoints(walls, current);
-            return toNextPoint(Object.values(points), current,up,randomSize);
-            //return Promise.resolve();
-        }
-
-        const entries = await leo.getMazeEntries(false);
-        let targetEntry = null;
-        if(entries && entries.length>1) {
-            targetEntry = leo.getEntry(entries, up)
-        }
-        if(targetEntry) {
-            console.log(leo.logTime()+'找到出口坐标：['+cga.GetMapName()+'] ['+targetEntry.x+','+targetEntry.y+']')
-            const current = cga.GetMapXY();
-            //找到出口
-            const list = leo.findPathList([current.x,current.y],[targetEntry.x, targetEntry.y, '*']);
-            if(list.length>0) {
-                //找到通路
-                await leo.autoWalkEx([targetEntry.x, targetEntry.y, '*'])
-                return leo.delay(2000);
-            }else{
-                //没有通路，继续开图
-            }
-        }else{
-            //没有找到出口，继续开图
-        }
-        //开图逻辑，以原始坐标为中心，向四周逐步寻找可移动的坐标点（顺时针方向）
-        const current = cga.GetMapXY();
-        await leo.loop(async ()=>{
-            //等待加载周围的地图块
-            if(cga.getRandomSpace(current.x, current.y) != null){
-                return leo.reject();
-            }
-            await leo.delay(2000)
-        })
-        const walls = cga.buildMapCollisionMatrix();
-        console.log(leo.logTime()+'开始寻找，当前坐标：['+cga.GetMapName()+'] ['+current.x+','+current.y+']');
-        const points = leo.getMovablePoints(walls, current);
-        //console.log(points)
-        await toNextPoint(Object.values(points), current,up)
-        return leo.walkRandomMaze(up);
-    }
-    leo.walkRandomMaze = async (up, protect) => {
+    leo.walkRandomMaze = async (up = true, walkProtect = ()=>{}, fixPoint = 6) => {
         let excludePoints = [];
         let pointList = [];
         const checkEntry = async (up) => {
@@ -2304,7 +2307,7 @@ module.exports = require('./wrapper').then( async (cga) => {
                     let yd = p.y - position[1];
                     let distance = Math.abs(xd) + Math.abs(yd);
                     let key = p.x + '-' + p.y;
-                    if(distance<=6 && !excludePoints.includes(key)){
+                    if(distance<=fixPoint && !excludePoints.includes(key)){
                         //console.log('新增排除点：' + p.key);
                         excludePoints.push(p.key);
                     }
@@ -2370,7 +2373,7 @@ module.exports = require('./wrapper').then( async (cga) => {
                 if(pathList.length>0) {
                     await leo.autoWalkEx([next.x,next.y],false)
                     addExclude(pathList)
-                    if(protect && protect()) {
+                    if(walkProtect && walkProtect()) {
                         return leo.reject('触发保护');
                     }
                     //检查是否因为走到新的坐标点，同象限有新的可移动坐标出现
@@ -2410,12 +2413,12 @@ module.exports = require('./wrapper').then( async (cga) => {
                         //继续往前开图
                         const index2 = Math.floor((Math.random()*newPoints.length));
                         const next2 = newPoints[index2];
-                        console.log(leo.logTime()+'继续往前开图，坐标：['+next2.x+','+next2.y+']')
+                        //console.log(leo.logTime()+'继续往前开图，坐标：['+next2.x+','+next2.y+']')
                         const pathList2 = leo.findPathList([current2.x,current2.y],[next2.x,next2.y],false);
                         if(pathList2.length>0){
                             await leo.autoWalkEx([next2.x,next2.y],false)
                             addExclude(pathList2);
-                            if(protect && protect()) {
+                            if(walkProtect && walkProtect()) {
                                 return leo.reject('触发保护');
                             }
                         }
@@ -2458,9 +2461,9 @@ module.exports = require('./wrapper').then( async (cga) => {
                 const list = leo.findPathList([current.x,current.y],[targetEntry.x, targetEntry.y, '*']);
                 if(list.length>0) {
                     //找到通路
-                    console.log(leo.logTime()+'找到出口坐标：['+targetEntry.x+','+targetEntry.y+']')
+                    //console.log(leo.logTime()+'找到出口坐标：['+targetEntry.x+','+targetEntry.y+']')
                     await leo.autoWalkEx([targetEntry.x, targetEntry.y, '*'])
-                    return leo.delay(2000);
+                    return leo.delay(500);
                 }else{
                     //没有通路，继续开图
                 }
@@ -2481,18 +2484,38 @@ module.exports = require('./wrapper').then( async (cga) => {
             const points = leo.getMovablePoints(walls, current);
             //console.log(points)
             await toNextPoint(Object.values(points), current,up)
-            return leo.walkRandomMaze(up,protect);
+            return leo.walkRandomMaze(up,walkProtect);
         }
         return walkMaze(up);
     }
-    leo.walkRandomMazeUntil = async (check, entryFilter, protect) => {
+    leo.walkRandomMazeUntil = async (check, entryFilter, walkProtect = ()=>{}, fixPoint) => {
         let times = 0;
         //console.log(entryFilter)
         while (times <= 101 && !check()) {
             times++;
-            await leo.walkRandomMaze(entryFilter,protect);
+            await leo.walkRandomMaze(entryFilter,walkProtect,fixPoint);
         }
-    };
+    }
+    leo.lookForNpc = async (targetFinder, todo = leo.next(), up = true, 
+        walkProtect = ()=>{}, recursion = true, fixPoint = 6, saveAndLoad = true) => {
+        if(leo.plugins.searchRandomMaze.enable) {
+            const options = {
+                targetFinder,
+                todo,
+                up,
+                walkProtect,
+                recursion,
+                fixPoint,
+                saveAndLoad
+            }
+            return leo.plugins.searchRandomMaze.lookForNpc(cga,options);
+        }else if(leo.searchRandomMaze && typeof leo.searchRandomMaze === 'function') {
+            console.log(leo.logTime()+'已成功加载自动寻找迷宫NPC插件(集成版)')
+            return leo.searchRandomMaze(targetFinder,todo,up,walkProtect,recursion,fixPoint,saveAndLoad);
+        }else{
+            return leo.findOne(targetFinder,todo,up);
+        }
+    }
 
     //哥拉尔镇定居登出
     leo.logBackG = async ()=>{
@@ -2982,7 +3005,7 @@ module.exports = require('./wrapper').then( async (cga) => {
         if(!config.jsCode){
             config.jsCode = {};
         }
-        var configStr = JSON.stringify(config);
+        var configStr = JSON.stringify(config,'','\t');
         var option = { encoding: 'utf-8'};
         leo.fs.writeFileSync(filePath,configStr,option);
         //console.log(leo.logTime()+'已保存配置，内容：');
@@ -3008,7 +3031,7 @@ module.exports = require('./wrapper').then( async (cga) => {
             config = {};
         }
         config.time = leo.formatDate(leo.now(), leo.FORMAT_DATETIME);
-        var configStr = JSON.stringify(config);
+        var configStr = JSON.stringify(config,'','\t');
         var option = { encoding: 'utf-8'};
         leo.fs.writeFileSync(filePath,configStr,option);
         console.log(leo.logTime()+'已保存配置，内容：');
@@ -3022,6 +3045,39 @@ module.exports = require('./wrapper').then( async (cga) => {
         var content = leo.logTime() + text + '\n';
         var option = { encoding: 'utf-8'};
         leo.fs.appendFileSync(filePath,content,option);
+    }
+    leo.loadMap = (name = cga.GetMapName()) => {
+        const line = leo.getLine();
+        let folder = leo.rootPath + leo.splitter + 'map' + leo.splitter;
+        let filePath = folder + leo.gametype + '-' + line + '线-' + name + '.json';
+        try{
+            if (!leo.fs.existsSync(folder)) {
+                leo.fs.mkdirSync(folder);
+            }
+            var dataStr = leo.fs.readFileSync(filePath,'utf-8');
+            return JSON.parse(dataStr);
+        }catch (e) {
+            return {};
+        }
+    }
+    leo.saveMap = (data) => {
+        const line = leo.getLine();
+        const name = data.name;
+        let folder = leo.rootPath + leo.splitter + 'map' + leo.splitter;
+        let filePath = folder + leo.gametype + '-' + line + '线-' + name + '.json';
+        if (!leo.fs.existsSync(folder)) {
+            leo.fs.mkdirSync(folder);
+        }
+        if(!data){
+            data = {};
+        }
+        data.time = leo.formatDate(leo.now(), leo.FORMAT_DATETIME);
+        var dataStr = JSON.stringify(data,'','\t');
+        var option = { encoding: 'utf-8'};
+        leo.fs.writeFileSync(filePath,dataStr,option);
+        //console.log(leo.logTime()+'已保存地图，内容：');
+        //console.log(data);
+        return data;
     }
 
     //职业声望表
@@ -4648,6 +4704,17 @@ module.exports = require('./wrapper').then( async (cga) => {
         }
     }
 
+    //插件：自动寻找迷宫NPC
+    try{
+        leo.plugins.searchRandomMaze = require('./plugin_searchRandomMaze');
+    }catch(e){
+        leo.plugins.searchRandomMaze = {
+            findNpc:()=>{
+                console.log('没有自动寻找迷宫NPC插件，跳过该功能');
+            }
+        }
+    }
+
 
     ///////////////////////脚本默认执行内容///////////////////////////////
     //leo.keepAlive(true); //启用防掉线功能
@@ -4659,8 +4726,10 @@ module.exports = require('./wrapper').then( async (cga) => {
     leo.oldXp = cga.GetPlayerInfo().xp; //脚本启动时的经验值
     leo.keepAliveStatus = null; //防掉线状态
     leo.moveTimeout = 220;//遇敌速度延时，单位毫秒
-    leo.afterBattleWaitTime = 5000;//战斗后等待时长，单位毫秒
+    leo.autoWalkBattleWaitTime = 5000;//自动寻路中，战斗后等待时长，单位毫秒
+    leo.contactBattleWaitTime = 5000;//原地遇敌时，战斗后等待时长，单位毫秒
     leo.highspeed = false; //是否开启了高速战斗
+    leo.gametype = '电信'; //区服
     leo.monitor = {};
     leo.monitor.keepAlive = () => {
         if(leo.keepAliveStatus != leo.monitor.config.keepAlive){

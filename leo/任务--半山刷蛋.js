@@ -1,4 +1,4 @@
-require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
+require(process.env.CGA_DIR_PATH_UTF8+'/leo').then(async (cga) => {
 	//leo.baseInfoPrint();
 	var teamLeader = '队长名称'; //队长名称
     var teamPlayerCount = 5; //队伍人数
@@ -109,7 +109,7 @@ require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
                 .then(() => {
                     if (isTeamLeader) {
                         return leo.moveAround()
-                        .then(()=>leo.buildTeamBlock(teamPlayerCount));
+                        .then(()=>leo.buildTeamBlock(teamPlayerCount,teammates));
                     } else {
                         return leo.enterTeamBlock(teamLeader);
                     }
@@ -161,7 +161,7 @@ require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
 					});
 				})
 				.then(()=>leo.moveAround())
-				.then(()=>leo.buildTeamBlock(teamPlayerCount))
+				.then(()=>leo.buildTeamBlock(teamPlayerCount,teammates))
 				.then(()=>leo.autoWalk([78, 88]))
 				.then(()=>leo.autoWalk([78, 87]))
 				.then(()=>leo.autoWalk([78, 88]))
@@ -203,7 +203,7 @@ require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
 							return true;
 						}
 						return false;
-				},false))
+				},true))
 				.then(()=>leo.autoWalk([78, 52, '通往山顶的路1100M']))
 				.then(()=>leo.walkRandomMazeUntil(() => {
 						const mn = cga.GetMapName();
@@ -211,7 +211,7 @@ require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
 							return true;
 						}
 						return false;
-				},false))
+				},true))
 				.then(()=>leo.autoWalk([13, 11]))
 				.then(()=>leo.autoWalk([13, 10]))
 				.then(()=>leo.autoWalk([13, 11]))
@@ -226,7 +226,7 @@ require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
 					});
 				})
 				.then(()=>leo.moveAround())
-				.then(()=>leo.buildTeamBlock(teamPlayerCount))
+				.then(()=>leo.buildTeamBlock(teamPlayerCount,teammates))
 				.then(()=>leo.autoWalk([23, 23]))
 				.then(()=>{
 					return leo.talkNpc(6, leo.talkNpcSelectorYes)

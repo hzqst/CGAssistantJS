@@ -1,4 +1,4 @@
-require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
+require(process.env.CGA_DIR_PATH_UTF8+'/leo').then(async (cga) => {
 	var teamPlayerCount = 5;
 	var task = async () => {
         var mapInfo = cga.getMapInfo();

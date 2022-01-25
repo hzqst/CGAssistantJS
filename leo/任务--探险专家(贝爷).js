@@ -1,4 +1,4 @@
-require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
+require(process.env.CGA_DIR_PATH_UTF8+'/leo').then(async (cga) => {
     //leo.baseInfoPrint();
     leo.monitor.config.keepAlive = false;   //关闭防掉线
 
@@ -74,7 +74,13 @@ require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
                 [38, 71,'莎莲娜'],[258, 180, '莎莲娜西方洞窟'],[30, 44, 14001],
                 [14, 68, 14000],[13, 11]
             ])
-            await leo.talkNpc(13, 9, leo.talkNpcSelectorYes, '隐秘山道上层')
+            await leo.loop(async ()=>{
+                if(cga.GetMapName()=='隐秘山道上层') {
+                    return leo.reject();
+                }
+                await leo.talkNpc(13, 9, leo.talkNpcSelectorYes)
+                await leo.delay(1000)
+            })
             await leo.loop(async ()=>{
                 try{
                     await leo.waitAfterBattle()
@@ -96,29 +102,45 @@ require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
                             }
                             return false;
                     },false)
-
                 }catch(e){
                     await leo.log('迷宫刷新');
                     await leo.delay(10000);
                 }
             })
             await leo.autoWalk([13,6])
-            await leo.talkNpc(13,5,leo.talkNpcSelectorYes)
+            await leo.loop(async ()=>{
+                if(leo.has('贝尔的军刀')) {
+                    return leo.reject();
+                }
+                await leo.talkNpc(13,5,leo.talkNpcSelectorYes)
+                await leo.delay(1000)
+            })
         }
         await leo.logBack()
         await leo.checkHealth(prepareOptions.doctorName)
         await leo.supplyCastle()
         await leo.goto(n=>n.castle.x)
         await leo.autoWalk([52,22])
-        await leo.talkNpc(53, 22, leo.talkNpcSelectorYes)
+        await leo.loop(async ()=>{
+            if(cga.GetMapName()=='贝尔的隐居地') {
+                return leo.reject();
+            }
+            await leo.talkNpc(53, 22, leo.talkNpcSelectorYes)
+            await leo.delay(1000)
+        })
         await leo.autoWalk([23,19])
         if(isTeamLeader){
             await leo.autoWalk([23,18])
-            await leo.buildTeamBlock(teamPlayerCount)
+            await leo.buildTeamBlock(teamPlayerCount,teammates)
             await leo.delay(3000)
             await leo.autoWalk([20,18])
-            await leo.talkNpc(6,leo.talkNpcSelectorYes)
-            await leo.delay(2000)
+            await leo.loop(async ()=>{
+                if(cga.isInBattle()) {
+                    return leo.reject();
+                }
+                await leo.talkNpc(6,leo.talkNpcSelectorYes)
+                await leo.delay(1000)
+            })
             await leo.waitAfterBattle()
             var mapInfo = cga.getMapInfo();
             if (mapInfo.name == '贝尔的隐居地' && mapInfo.indexes.index3 == 57199) {
@@ -126,7 +148,13 @@ require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
                 return;
             }else{
                 await leo.delay(1000)
-                await leo.talkNpc(20,16,leo.talkNpcSelectorYes,'法兰城')
+                await leo.loop(async ()=>{
+                    if(cga.GetMapName()=='法兰城') {
+                        return leo.reject();
+                    }
+                    await leo.talkNpc(20,16,leo.talkNpcSelectorYes)
+                    await leo.delay(1000)
+                })
             }
         }else{
             await leo.enterTeamBlock(teamLeader)

@@ -1,4 +1,4 @@
-require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
+require(process.env.CGA_DIR_PATH_UTF8+'/leo').then(async (cga) => {
 	//leo.baseInfoPrint();
     var npcName = '暗黑龙';   //要寻找的NPC名字，请确保名字无误
 
@@ -46,7 +46,7 @@ require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
         .then(() => console.log('已找到NPC，脚本结束'));
     }
 
-    leo.findOne(targetFinder, todo, true)
+    leo.lookForNpc(targetFinder, todo ,true)
     .catch(()=>console.log('未找到NPC，脚本结束'));
 
 });

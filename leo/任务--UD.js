@@ -2,7 +2,7 @@ const teams = [
 	['队长名1','队员名1','队员名2','队员名3','队员名4'], // 男队
 	['队长名2','队员名1','队员名2','队员名3','队员名4'] // 女队
 ];
-require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
+require(process.env.CGA_DIR_PATH_UTF8+'/leo').then(async (cga) => {
 	const {team, captain, isCaptain, teamNumber} = cga.emogua.parseTeams(teams);
 	let boys = false;
 	if (captain == teams[0][0]) {

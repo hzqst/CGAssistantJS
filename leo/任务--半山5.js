@@ -1,4 +1,4 @@
-require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
+require(process.env.CGA_DIR_PATH_UTF8+'/leo').then(async (cga) => {
 	//leo.baseInfoPrint();
 	var prepareOptions = {
         rechargeFlag: 1,
@@ -40,7 +40,7 @@ require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
 					return true;
 				}
 				return false;
-		},false))
+		},true))
 		.then(()=>leo.autoWalk([78, 52, '通往山顶的路1100M']))
 		.then(()=>leo.walkRandomMazeUntil(() => {
 				const mn = cga.GetMapName();
@@ -48,7 +48,7 @@ require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
 					return true;
 				}
 				return false;
-		},false))
+		},true))
 		.then(()=>leo.autoWalk([13, 11]))
 		.then(()=>leo.talkNpc(14, 11, leo.talkNpcSelectorYes))
 		.then(()=>leo.autoWalk([23, 23]))

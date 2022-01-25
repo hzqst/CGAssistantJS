@@ -1,4 +1,4 @@
-require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
+require(process.env.CGA_DIR_PATH_UTF8+'/leo').then(async (cga) => {
 	var red = ['绿璃之殇','琉璃之殇','奇迹之殇'];
 	var blue = ['绿萝之殇','露希之殇','栉田桔梗','一之濑帆波','龙园翔'];
 	var yellow = ['猎人仓库C'];

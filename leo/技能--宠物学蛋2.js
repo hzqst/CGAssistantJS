@@ -1,4 +1,4 @@
-require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
+require(process.env.CGA_DIR_PATH_UTF8+'/leo').then(async (cga) => {
     const autoLearnEgg2 = true;
     const index = 1; //出战宠物待学蛋2的技能栏序号，从1开始
     //！！！注意，会覆盖掉宠物该位置的原有技能，一定要注意，无法还原

@@ -1,4 +1,4 @@
-require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
+require(process.env.CGA_DIR_PATH_UTF8+'/leo').then(async (cga) => {
     //人物面朝BOSS
     var direction = cga.GetPlayerInfo().direction;
 	leo.loop(()=>{

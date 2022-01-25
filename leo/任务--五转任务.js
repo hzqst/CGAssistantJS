@@ -1,4 +1,4 @@
-require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
+require(process.env.CGA_DIR_PATH_UTF8+'/leo').then(async (cga) => {
     leo.baseInfoPrint();
     leo.logStatus = false;
     var teamLeader = '队长名称'; //队长名称

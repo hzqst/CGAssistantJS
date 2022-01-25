@@ -1,5 +1,5 @@
 //该脚本为自动做寿喜锅脚本,使用此脚本的厨师最好把银行开到80格。
-require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
+require(process.env.CGA_DIR_PATH_UTF8+'/leo').then(async (cga) => {
 	//leo.baseInfoPrint();
 	var bankSize = 80; //银行大小
 	leo.monitor.config.healSelf = true;//自动治疗自己

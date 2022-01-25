@@ -1,4 +1,4 @@
-require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
+require(process.env.CGA_DIR_PATH_UTF8+'/leo').then(async (cga) => {
     //leo.baseInfoPrint();
     //leo.monitor.config.keepAlive = false;   //关闭防掉线
     //输入‘0’从头（朵拉）开始任务，
@@ -37,12 +37,13 @@ require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
         teamPlayerCount = 1;
         teamLeader = playerName;
         isTeamLeader = true;
+        leo.panel.load('保证书.json');
     }
 
     leo.log('红叶の卵4保证书脚本，任务起始进度【'+taskInfo[taskIndex]+'】，启动~');
     leo.log('队伍人数【'+teamPlayerCount+'】，队长是【'+teamLeader+'】'+(isTeamLeader?'，没错，就是我':''));
     leo.log('身上已有【保证书】数量为【'+cga.getItemCount('转职保证书')+'】');
-
+    leo.panel.itemdroplistAdd('魔石');
     var zhanglaozheng = {
         flag : false,
         messageMonitor : ()=>{
@@ -53,8 +54,16 @@ require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
             });
         },
         targetFinder : (units) => {
-            return units.find(u => u.unit_name == '守墓员' && u.type == 1 
+            // return units.find(u => u.unit_name == '守墓员' && u.type == 1 
+            //     && (u.flags & leo.UnitFlags.NpcEntry) && u.model_id > 0);
+            var npcs = units.filter(u => u.unit_name == '守墓员' && u.type == 1 
                 && (u.flags & leo.UnitFlags.NpcEntry) && u.model_id > 0);
+            if(npcs.length>0) {
+                var index = Math.floor((Math.random()*npcs.length));
+                var npc = npcs[index];
+                return npc;
+            }
+            return false;
         },
         todo :(target) => {
             zhanglaozheng.messageMonitor();//队长监听队友消息
@@ -67,6 +76,14 @@ require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
                             zhanglaozheng.flag = true;
                             return true;
                         }else{
+                            if(cga.GetPlayerInfo().souls>0 || cga.GetPlayerInfo().health>0){
+                                //人物掉魂或人物受伤，直接重启脚本
+                                return leo.exit();
+                            }
+                            if(cga.GetMapName() == '？？？'){
+                                //打长老证的过程中，迷宫刷新，重启脚本
+                                return leo.exit();
+                            }
                             if(!cga.isInBattle()){
                                 console.log(leo.logTime()+'get:长老之证*'+cga.getItemCount('长老之证'));
                                 cga.ClickNPCDialog(1, 1);
@@ -77,13 +94,13 @@ require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
                 }else{
                     console.log(leo.logTime()+'没能触发战斗');
                 }
-                if(zhanglaozheng.flag){
+                if(zhanglaozheng.flag || cga.GetMapName() == '？？？'){
                     return leo.reject(); //退出循环
                 }else{
                     return leo.delay(5000);
                 }
             })
-            .then(()=>leo.walkRandomMaze(true,true));
+            .then(()=>leo.walkRandomMaze(true));
         }
     }
 
@@ -162,7 +179,7 @@ require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
         ])
         if(isTeamLeader){
             await leo.autoWalk([132, 62])
-            await leo.buildTeamBlock(teamPlayerCount)
+            await leo.buildTeamBlock(teamPlayerCount,teammates)
             await leo.delay(1000)
             zhanglaozheng.flag = false;
             await leo.loop(async ()=>{
@@ -173,10 +190,11 @@ require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
                         await leo.autoWalk([122, 69,'海底墓场外苑第1地带'])
                         await leo.log('开始找守墓员');
                     }
-                    await leo.findOne(zhanglaozheng.targetFinder, zhanglaozheng.todo, true);
+                    await leo.lookForNpc(zhanglaozheng.targetFinder, zhanglaozheng.todo, false);
                     if(zhanglaozheng.flag){
                         return leo.reject(); //退出循环
                     }
+                    await leo.delay(2000)
                 }catch(e){
                     await leo.log('迷宫刷新');
                     await leo.delay(10000);
@@ -195,12 +213,18 @@ require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
                     [132,61],[131,61],[132,61],[131,61]
                 ])
                 if(zhanglaozheng.flag){
-                    console.log('我来对话NPC');
-                    await leo.talkNpc(131, 60, leo.talkNpcSelectorYes);
-                    await leo.delay(1000)
-                    await leo.talkNpc(131, 60, leo.talkNpcSelectorYes);
-                    await leo.delay(1000)
-                    await leo.talkNpc(131, 60, leo.talkNpcSelectorYes);
+                    await leo.loop(async ()=>{
+                        if(cga.GetMapName()=='盖雷布伦森林') {
+                            return leo.reject();
+                        }
+                        console.log('我来对话NPC');
+                        await leo.talkNpc(131, 60, leo.talkNpcSelectorYes);
+                        await leo.delay(1000)
+                        await leo.talkNpc(131, 60, leo.talkNpcSelectorYes);
+                        await leo.delay(1000)
+                        await leo.talkNpc(131, 60, leo.talkNpcSelectorYes);
+                        await leo.delay(1000)
+                    })
                 }
                 await leo.waitUntil(()=>{
                     if (cga.GetMapName()=='盖雷布伦森林'){
@@ -224,15 +248,25 @@ require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
                 }
                 var mapInfo = cga.getMapInfo();
                 if(zhanglaozheng.flag && mapInfo.name=='？？？' && mapInfo.y == 61){
-                    console.log(leo.logTime()+'我来对话NPC');
-                    await leo.talkNpc(131, 60, leo.talkNpcSelectorYes);
-                    await leo.delay(1000)
-                    await leo.talkNpc(131, 60, leo.talkNpcSelectorYes);
-                    await leo.delay(1000)
-                    await leo.talkNpc(131, 60, leo.talkNpcSelectorYes);
+                    await leo.loop(async ()=>{
+                        if(cga.GetMapName()=='盖雷布伦森林') {
+                            return leo.reject();
+                        }
+                        console.log('我来对话NPC');
+                        await leo.talkNpc(131, 60, leo.talkNpcSelectorYes);
+                        await leo.delay(1000)
+                        await leo.talkNpc(131, 60, leo.talkNpcSelectorYes);
+                        await leo.delay(1000)
+                        await leo.talkNpc(131, 60, leo.talkNpcSelectorYes);
+                        await leo.delay(1000)
+                    })
                 }
                 if(cga.GetMapName()=='盖雷布伦森林'){
                     return leo.reject();
+                }
+                if(!leo.isInTeam() && mapInfo.x == 122 && mapInfo.y == 69){
+                    //打长老证的过程中，迷宫刷新，重启脚本
+                    return leo.exit();
                 }
                 await leo.delay(5000);
             })
@@ -253,13 +287,24 @@ require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
         await leo.autoWalkList([
             [201,96,'神殿　伽蓝'],[91,138]
         ])
+        let times = 0;
         await leo.loop(async ()=>{
             if(cga.findNPC('荷特普')){
                 await leo.talkNpc(92, 138,leo.talkNpcSelectorYes)
+                await leo.delay(1000*3)
+                await leo.talkNpc(92, 138,leo.talkNpcSelectorYes)
                 return leo.reject();//退出循环
             }else{
+                times++;
+                if(times>10){
+                    times = 0;
+                    await leo.logBack()
+                    await leo.autoWalkList([
+                        [201,96,'神殿　伽蓝'],[91,138]
+                    ])
+                }
                 await leo.log('当前时间是【'+leo.getSysTimeEx()+'】，等待黄昏或夜晚【荷特普】出现');
-                await leo.delay(30000);
+                await leo.delay(1000*30);
             }
         })
         taskIndex++;
@@ -305,7 +350,7 @@ require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
         await leo.autoWalk([156, 197, [213, 164]])
         if(isTeamLeader){
             await leo.autoWalk([213, 165])
-            await leo.buildTeamBlock(teamPlayerCount)
+            await leo.buildTeamBlock(teamPlayerCount,teammates)
             var zudangzheArr = [{
                 standPos : [229, 177],
                 npcPos : [230, 177]
@@ -344,7 +389,13 @@ require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
             await leo.autoWalkList([
                 [242, 117, 59716],[221, 187]
             ])
-            await leo.talkNpc(222, 188,leo.talkNpcSelectorNo)
+            await leo.loop(async ()=>{
+                if(cga.isInBattle()){
+                    return leo.reject();
+                }
+                await leo.talkNpc(222, 188,leo.talkNpcSelectorNo)
+                await leo.delay(2000)
+            })
             await leo.waitAfterBattle()
         }else{
             await leo.enterTeamBlock(teamLeader)
@@ -380,10 +431,20 @@ require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
         await leo.autoWalkList([
             [130, 50, '盖雷布伦森林'],[244, 74]
         ])
-        await leo.talkNpc(245, 73,leo.talkNpcSelectorYes)
-        if(cga.getItemCount('转职保证书')==1){
-            await leo.log('恭喜你！获得了【转职保证书】')
-        }
+
+        let failCount = 0;
+        await leo.loop(async ()=>{
+            await leo.autoWalk([244, 74])
+            await leo.talkNpc(245, 73,leo.talkYes)
+            if(leo.has('转职保证书')){
+                await leo.log('恭喜你！获得了【转职保证书】')
+                return leo.reject();
+            }else{
+                failCount++;
+                console.log(leo.logTime()+'对话NPC后，未能获取到【转职保证书】，'+failCount);
+            }
+            await leo.delay(1000)
+        })
         taskIndex++;
     }
 

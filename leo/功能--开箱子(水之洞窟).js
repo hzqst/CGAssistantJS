@@ -1,4 +1,4 @@
-require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
+require(process.env.CGA_DIR_PATH_UTF8+'/leo').then(async (cga) => {
 	//leo.baseInfoPrint();
 	leo.monitor.config.autoChangeLineForLeader = true;	//自动跟随队长换线
 	var teamLeader = '队长名称'; //队长名称
@@ -61,7 +61,7 @@ require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
 	    if (mapInfo.name.indexOf('水之洞窟')!=-1 || mapInfo.name.indexOf('水之迷宫')!=-1) {
 	        return leo.todo()
 	        .then(()=>leo.loop(()=>{
-				return leo.findOne(targetFinder, todo);
+				return leo.lookForNpc(targetFinder, todo);
 			}));
 	    }
     }
@@ -132,7 +132,7 @@ require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
 	            })
 				.then(()=>leo.autoWalk([10, 8, '水之洞窟地下1楼']))
 				.then(()=>leo.loop(()=>{
-					return leo.findOne(targetFinder, todo);
+					return leo.lookForNpc(targetFinder, todo);
 				}));
 
 			}else{

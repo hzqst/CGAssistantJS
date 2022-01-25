@@ -1,4 +1,4 @@
-/**version 2.1
+/**version 2.3
  * health 0 1-25(白) 26-50(黄) 51-75(粉) 76-100(红)
  * direction 0(右上)
  * 高速移动中不可丢东西
@@ -315,7 +315,7 @@ module.exports = new Promise(resolve => {
 	};
 	cga.emogua.downloadMap = (mapIndex = cga.GetMapIndex()) => {
 		const walls = cga.buildMapCollisionMatrix();
-		return walls;
+		return Promise.resolve(walls);
 		if(!cga.emogua.isMapDownloaded(walls, mapIndex)) {
 			return new Promise((resolve, reject) => {
 				console.log('当前地图：'+cga.GetMapName()+'，等待下载地图');
@@ -356,11 +356,14 @@ module.exports = new Promise(resolve => {
 		}
 		return Promise.resolve(walls);
 	};
-	cga.emogua.downloadMapEx = (xfrom, yfrom, xsize, ysize) => new Promise(resolve => cga.downloadMapEx(xfrom, yfrom, xsize, ysize, () => setTimeout(resolve, 0)));
+	cga.emogua.downloadMapEx = (xfrom, yfrom, xsize, ysize) => {
+		return cga.emogua.downloadMap();
+	};
 	cga.emogua.toRandomEntry = (xfrom, yfrom, xsize, ysize, except = []) => cga.emogua.downloadMapEx(xfrom, yfrom, xsize, ysize).then(() => {
 		xmax = xfrom + xsize;
 		ymax = yfrom + ysize;
 		const entry = cga.getMapObjects().find(o => o.cell == 3 && o.x >= xfrom && o.y >= yfrom && o.x <= xmax && o.y <= ymax && !except.find(p => p[0] == o.x && p[1] == o.y));
+		//console.log(entry);
 		if (entry) return cga.emogua.autoWalk([entry.x, entry.y, '*']);
 		return Promise.reject();
 	});
@@ -476,7 +479,7 @@ module.exports = new Promise(resolve => {
 	 *   0 迷宫出入口
 	 * return [最远，最近]
 	 */
-	cga.emogua.getMazeEntries = async (download=true) => {
+	cga.emogua.getMazeEntries = async (download = false) => {
 		if(download){
 			await cga.emogua.downloadMap();
 		}

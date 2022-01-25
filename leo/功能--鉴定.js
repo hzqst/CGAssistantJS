@@ -1,4 +1,4 @@
-require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
+require(process.env.CGA_DIR_PATH_UTF8+'/leo').then(async (cga) => {
 	var autoSupply = true; //true-自动城堡补蓝，false-原地鉴定，没蓝不去补给
 	var minMp = 200;
 	await leo.log('红叶の自动鉴定背包脚本，启动~');

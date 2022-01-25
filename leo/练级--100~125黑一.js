@@ -1,4 +1,4 @@
-require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
+require(process.env.CGA_DIR_PATH_UTF8+'/leo').then(async (cga) => {
     leo.monitor.config.keepAlive = false;   //关闭防掉线
     leo.monitor.config.logStatus = false;   //关闭战斗状态提示
     leo.moveTimeout = 20;                   //遇敌速度
@@ -212,14 +212,7 @@ require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
                     console.log(leo.logTime() + "触发回补");
                     await leo.delay(3000)
                     if (cga.GetMapName() != '肯吉罗岛') {
-                        //await leo.walkRandomMaze(true,true)
-                        //await leo.walkTo([mapInfo.x,mapInfo.y,'肯吉罗岛'])
-                        // if (cga.GetMapName() != '肯吉罗岛') {
-                        //     console.log(leo.logTime()+'不能回到【肯吉罗岛】，登出')
-                        //     await leo.logBack()
-                        // }
                         const entry = leo.getMazeEntry();
-                        //console.log(entry);
                         await leo.walkTo([entry.x,entry.y,'肯吉罗岛'])
                     }
                     await leo.autoWalkList([

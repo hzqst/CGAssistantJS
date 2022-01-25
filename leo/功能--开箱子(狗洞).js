@@ -1,4 +1,4 @@
-require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
+require(process.env.CGA_DIR_PATH_UTF8+'/leo').then(async (cga) => {
 	//leo.baseInfoPrint();
 	leo.monitor.config.autoChangeLineForLeader = true; //自动跟随队长换线
 	var teamLeader = '队长名称'; //队长名称
@@ -61,7 +61,7 @@ require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
 	    if (mapInfo.name.indexOf('奇怪的洞窟')!=-1) {
 	        return leo.todo()
 	        .then(()=>leo.loop(()=>{
-				return leo.findOne(targetFinder, todo, false);
+				return leo.lookForNpc(targetFinder, todo, false);
 			}));
 	    }
     }
@@ -84,13 +84,14 @@ require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
 				return leo.autoWalkList([
 					[58,31,'芙蕾雅']
 				])
+				.then(()=>leo.autoWalk([532,42]))
 				.then(()=>leo.toRandomEntry(520, 15, 40, 40,[[549,43]]))
 				.then(()=>leo.loop(()=>{
 					if(cga.GetMapName()=='阿鲁巴斯实验所'){
 						leo.log(leo.logTime()+'已经走出迷宫')
 						return leo.delay(1000*60*60*2);
 					}
-					return leo.findOne(targetFinder, todo, false);
+					return leo.lookForNpc(targetFinder, todo, false);
 				}));
 			}else{
 				return leo.loop(async ()=>{

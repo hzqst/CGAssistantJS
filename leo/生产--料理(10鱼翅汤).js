@@ -1,6 +1,6 @@
 //该脚本为自动到银行取鱼翅做鱼翅汤脚本,使用此脚本的厨师最好把银行开到80格。
 //每次使用脚本前把银行塞满鱼翅，脚本会自动去采集别的材料，然后把所有鱼翅都做成鱼翅汤。
-require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
+require(process.env.CGA_DIR_PATH_UTF8+'/leo').then(async (cga) => {
 	//leo.baseInfoPrint();
 	var bankSize = 20; //银行大小
 	leo.monitor.config.healSelf = false;//自动治疗自己

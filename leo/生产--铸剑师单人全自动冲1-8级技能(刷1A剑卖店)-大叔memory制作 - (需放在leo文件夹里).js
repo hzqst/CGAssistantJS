@@ -1,5 +1,5 @@
 
-require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
+require(process.env.CGA_DIR_PATH_UTF8+'/leo').then(async (cga) => {
 	leo.monitor.config.healSelf = true;//自动治疗自己
 	leo.log('大叔memory尝试自采自造1级剑制作脚本，需要使用leo的模块启动');
 	var doctorName = '大叔-医治苍生';

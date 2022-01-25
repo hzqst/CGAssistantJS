@@ -1,4 +1,4 @@
-require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
+require(process.env.CGA_DIR_PATH_UTF8+'/leo').then(async (cga) => {
 	var teams = [//自行修改角色名称，可以再加更多的队伍
         ['红叶1号','红叶2号'],
         ['绫小路清隆','堀北铃音'],

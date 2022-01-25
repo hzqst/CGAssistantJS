@@ -1,4 +1,4 @@
-require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
+require(process.env.CGA_DIR_PATH_UTF8+'/leo').then(async (cga) => {
 	//leo.baseInfoPrint();
 	var teamLeader = '队长名称'; //队长名称
     var teamPlayerCount = 5; //队伍人数
@@ -44,7 +44,7 @@ require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
 	.then(()=>{
 		if (isTeamLeader) {
 			return leo.autoWalk([155,100])
-			.then(()=>leo.buildTeamBlock(teamPlayerCount));
+			.then(()=>leo.buildTeamBlock(teamPlayerCount,teammates));
 		}else{
 			return leo.autoWalk([154,100])
 			.then(()=>leo.enterTeamBlock(teamLeader));
@@ -69,7 +69,7 @@ require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
 			})
 			.then(()=>leo.talkNpc(16, 4, leo.talkNpcSelectorYes,'杰诺瓦镇的传送点'))
 			.then(()=>leo.autoWalk([6, 8]))
-            .then(() => leo.buildTeamBlock(teamPlayerCount))
+            .then(() => leo.buildTeamBlock(teamPlayerCount,teammates))
 			.then(()=>leo.autoWalkList([
 				[14,6,'村长的家'],[1,9,'杰诺瓦镇'],[71,18,'莎莲娜'],[668,319]
 			]))
@@ -79,7 +79,7 @@ require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
 			.then(()=>leo.autoWalk([668, 319]))
 			.then(()=>leo.talkNpc(669, 319, leo.talkNpcSelectorYes))
 			.then(()=>leo.moveAround())
-			.then(()=>leo.buildTeamBlock(teamPlayerCount))
+			.then(()=>leo.buildTeamBlock(teamPlayerCount,teammates))
 			.then(()=>leo.autoWalk([78, 88]))
 			.then(()=>leo.autoWalk([78, 87]))
 			.then(()=>leo.autoWalk([78, 88]))
@@ -117,7 +117,7 @@ require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
 						return true;
 					}
 					return false;
-			},false))
+			},true))
 			.then(()=>leo.autoWalk([78, 52, '通往山顶的路1100M']))
 			.then(()=>leo.walkRandomMazeUntil(() => {
 					const mn = cga.GetMapName();
@@ -125,7 +125,7 @@ require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
 						return true;
 					}
 					return false;
-			},false))
+			},true))
 			.then(()=>leo.autoWalk([13, 11]))
 			.then(()=>leo.autoWalk([13, 10]))
 			.then(()=>leo.autoWalk([13, 11]))
@@ -140,7 +140,7 @@ require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
 				});
 			})
 			.then(()=>leo.moveAround())
-			.then(()=>leo.buildTeamBlock(teamPlayerCount))
+			.then(()=>leo.buildTeamBlock(teamPlayerCount,teammates))
 			.then(()=>leo.autoWalk([23, 23]))
 			.then(()=>{
 				if(autoBoss){
