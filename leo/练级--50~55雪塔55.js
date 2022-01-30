@@ -107,7 +107,7 @@ require(process.env.CGA_DIR_PATH_UTF8+'/leo').then(async (cga) => {
                 })
                 await leo.autoWalk([90,99,'国民会馆'])
                 if(sellStone) {
-                    await leo.autoWalkList([110, 43])
+                    await leo.autoWalk([110, 43])
                     await leo.sell(110, 42)
                 }
                 if (isTeamLeader) {

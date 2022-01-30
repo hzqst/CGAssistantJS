@@ -1,3 +1,4 @@
+//version 1.1
 const Professions = [
 	{
 		name: '暗黑骑士',
@@ -5,7 +6,7 @@ const Professions = [
 		category: '物理系'
 	}, {
 		name: '盗贼',
-		titles: ['见习盗贼', '盗贼', '小偷', '欺诈师', '偷窃高手', '盗贼头目'],
+		titles: ['见习盗贼', '盗贼', '小偷', '诈欺师', '偷窃高手', '盗贼头目'],
 		category: '物理系'
 	}, {
 		name: '格斗士',
