@@ -1,6 +1,6 @@
 require(process.env.CGA_DIR_PATH_UTF8+'/leo').then(async (cga) => {
 	//leo.baseInfoPrint();
-	var teamLeader = '队长名称'; //队长名称
+	var teamLeader = ''; //队长名称
     var teamPlayerCount = 1; //队伍人数
 	var prepareOptions = {
         rechargeFlag: 1,
@@ -15,6 +15,9 @@ require(process.env.CGA_DIR_PATH_UTF8+'/leo').then(async (cga) => {
 	var playerinfo = cga.GetPlayerInfo();
     var playerName = playerinfo.name;
     var isTeamLeader = false;
+    if(teamLeader==''){
+    	teamLeader = playerName;
+    }
     if (playerName == teamLeader) {
         isTeamLeader = true;
     }
@@ -26,7 +29,7 @@ require(process.env.CGA_DIR_PATH_UTF8+'/leo').then(async (cga) => {
 		.then(()=>{
 			if (isTeamLeader) {
 				return leo.autoWalk([155,100])
-				.then(()=>leo.buildTeam(teamPlayerCount))
+				.then(()=>leo.buildTeam(teamPlayerCount,teammates))
 				.then(() => {
                     var teamplayers = cga.getTeamPlayers();
                     //console.log(teamplayers);
@@ -67,7 +70,7 @@ require(process.env.CGA_DIR_PATH_UTF8+'/leo').then(async (cga) => {
                     return leo.autoWalk([mapInfo.x+1,mapInfo.y]);
                 }
             })
-            .then(() => leo.buildTeam(teamPlayerCount)).then(() => {
+            .then(() => leo.buildTeam(teamPlayerCount,teammates)).then(() => {
                 var teamplayers = cga.getTeamPlayers();
                 //console.log(teamplayers);
                 if (teamplayers && teamplayers.length == teamPlayerCount) {
@@ -89,7 +92,7 @@ require(process.env.CGA_DIR_PATH_UTF8+'/leo').then(async (cga) => {
 					if (mn == '土之洞窟第三层') {
 						return true;
 					}
-			},false))
+			},true))
 			.then(()=>leo.autoWalkList([
 				[37,61,11035],[42,70,11036],[74,73,11037],[46,57,11036],
 				[50,50,11037],[38,40,11036],[72,7]

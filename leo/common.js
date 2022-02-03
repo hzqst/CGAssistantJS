@@ -4,7 +4,7 @@ module.exports = require('./wrapper').then( async (cga) => {
     leo.messageServer = false;
     leo.appId = '';
     leo.appSecret = '';
-    leo.version = '9.4';
+    leo.version = '9.5';
     leo.qq = '158583461'
     leo.copyright = '红叶散落';
     leo.FORMAT_DATE = 'yyyy-MM-dd';
@@ -2011,29 +2011,31 @@ module.exports = require('./wrapper').then( async (cga) => {
             ['隐秘山道中层',false,[0,17991],[17990,0],[17990,17991]],//探险专家(贝爷)
             ['隐秘山道下层',false,[0,17975],[17974,0],[17974,17975]],//探险专家(贝爷)
             ['积雪的山路海拔',true,[17956,0],[0,17957],[17956,17957]],//雪山
-            ['废墟地下222',true,[0,120],[120,0],[120,120]],//承认之戒
-            ['隐秘之洞地下222',true,[0,120],[120,0],[120,120]],//五转
-            ['虫洞地下222',true,[0,120],[120,0],[120,120]],//卵3
+            ['废墟地下',false,[0,17955],[17954,0],[17954,17955]],//承认之戒
+            ['隐秘之洞地下',false,[0,[17971,17967,17983,17991]],[[17970,17966,17982,17990],0],[[17970,17966,17982,17990],[17971,17967,17983,17991]]],//五转
+            ['虫洞地下',false,[0,13273],[13272,0],[13272,13273]],//卵3
+            ['砂漠之祠地下',false,[0,13999],[13998,0],[13998,13999]],//抓木乃伊
+            ['海底墓场外苑',false,[0,17967],[17966,0],[17966,17967]],//卵4
+            ['土之迷宫',true,[17970,0],[0,17971],[17970,17971]],//土洞
+            ['水之洞窟地下',false,[0,17967],[17966,0],[17966,17967]],//水洞
+            ['水之迷宫地下',false,[0,17967],[17966,0],[17966,17967]],//水洞
+            ['炎之洞窟',false,[0,17983],[17982,0],[17982,17983]],//炎洞
+            ['风之洞窟',true,[17990,0],[0,17991],[17990,17991]],//风洞
+            ['旧日迷宫',false,[0,13275],[13274,0],[13274,13275]],//旧日迷宫
+            ['旧日之塔',true,[13996,0],[0,13997],[13996,13997]],//旧日之塔
             ['牛鬼的洞窟222',true,[0,120],[120,0],[120,120]],//偷狗粮
             ['奇怪的坑道222',true,[0,120],[120,0],[120,120]],//抓烈风哥布林
             ['阿鲁巴斯的洞窟222',true,[0,120],[120,0],[120,120]],//抓僵尸
-            ['砂漠之祠地下222',true,[0,120],[120,0],[120,120]],//抓木乃伊
             ['迷宫222',true,[0,120],[120,0],[120,120]],//人神
             ['达尔文海海底地下222',true,[0,120],[120,0],[120,120]],//半山2
             ['通往地狱的道路222',true,[0,120],[120,0],[120,120]],//半山6
-            ['海底墓场外苑222',true,[0,120],[120,0],[120,120]],//卵4
             ['黑色方舟222',true,[0,120],[120,0],[120,120]],//四转
             ['秘密回廊222',true,[0,120],[120,0],[120,120]],//天界2
             ['通向顶端的阶梯222',true,[0,120],[120,0],[120,120]],//天界3
-            ['土之迷宫222',true,[0,120],[120,0],[120,120]],//土洞
-            ['水之洞窟地下222',true,[0,120],[120,0],[120,120]],//水洞
-            ['水之迷宫地下222',true,[0,120],[120,0],[120,120]],//水洞
-            ['炎之洞窟222',true,[0,120],[120,0],[120,120]],//炎洞
-            ['风之洞窟222',true,[0,120],[120,0],[120,120]],//风洞
-            ['旧日迷宫222',true,[0,120],[120,0],[120,120]],//旧日迷宫
-            ['旧日之塔222',true,[0,120],[120,0],[120,120]],//旧日之塔
             ['未知',true,[0,120],[120,0],[120,120]],
         ];
+        //特定的迷宫起始楼层
+        const floorStart = ['隐秘之洞地下11层','通往山顶的路100M','通往山顶的路1100M','隐秘山道上层B1','隐秘山道中层B1','隐秘山道下层B1'];
         const mapName = cga.GetMapName();
         const mazeEntryOption = mazeEntryOptions.find(option=>mapName.startsWith(option[0]));
         let elist;
@@ -2043,33 +2045,36 @@ module.exports = require('./wrapper').then( async (cga) => {
                 if(entryFlag) {
                     const regStr = '([^0-9]+1[^0-9]+)|([^0-9]+100[^0-9]+)|([^0-9]+1100[^0-9]+)|([^0-9]+B1$)';
                     const reg = new RegExp(regStr,"g");
-                    const isMatch = reg.test(mapName);
+                    let isMatch = reg.test(mapName);
+                    if(floorStart.includes(mapName)){
+                        isMatch = true;
+                    }
                     //console.log('isMatch:'+isMatch);
                     if(isMatch){
                         //1楼，100，1100
-                        // if(v.icon === mazeEntryOption[2][0]){
-                        //     v.up = true;
-                        // }else{
-                        //     v.up = false;
-                        // }
-                        v.up = v.icon === mazeEntryOption[2][0];
+                        const es = mazeEntryOption[2][0];
+                        if(es instanceof Array) {
+                            v.up = es.includes(v.icon);
+                        }else{
+                            v.up = v.icon === es;
+                        }
                     }else{
                         //顶楼
-                        // if(v.icon === mazeEntryOption[3][0]){
-                        //     v.up = true;
-                        // }else{
-                        //     v.up = false;
-                        // }
-                        v.up = v.icon === mazeEntryOption[3][0];
+                        const es = mazeEntryOption[3][0];
+                        if(es instanceof Array) {
+                            v.up = es.includes(v.icon);
+                        }else{
+                            v.up = v.icon === es;
+                        }
                     }
                 }else{
                     //中间楼
-                    // if(v.icon === mazeEntryOption[4][0]){
-                    //     v.up = true;
-                    // }else{
-                    //     v.up = false;
-                    // }
-                    v.up = v.icon === mazeEntryOption[4][0];
+                    const es = mazeEntryOption[4][0];
+                    if(es instanceof Array) {
+                        v.up = es.includes(v.icon);
+                    }else{
+                        v.up = v.icon === es;
+                    }
                 }
                 return v;
             })
@@ -2079,7 +2084,10 @@ module.exports = require('./wrapper').then( async (cga) => {
                 if(entryFlag) {
                     const regStr = '([^0-9]+1[^0-9]+)|([^0-9]+100[^0-9]+)|([^0-9]+1100[^0-9]+)|([^0-9]+B1$)';
                     const reg = new RegExp(regStr,"g");
-                    const isMatch = reg.test(mapName);
+                    let isMatch = reg.test(mapName);
+                    if(floorStart.includes(mapName)){
+                        isMatch = true;
+                    }
                     //console.log('isMatch:'+isMatch);
                     if(isMatch){
                         if(v.icon === 0){
@@ -2459,7 +2467,8 @@ module.exports = require('./wrapper').then( async (cga) => {
                     //找到通路
                     //console.log(leo.logTime()+'找到出口坐标：['+targetEntry.x+','+targetEntry.y+']')
                     await leo.autoWalkEx([targetEntry.x, targetEntry.y, '*'])
-                    return leo.delay(500);
+                    const mazeChangeWaitTime = leo.mazeChangeWaitTime || 5000;
+                    return leo.delay(mazeChangeWaitTime);
                 }else{
                     //没有通路，继续开图
                 }
@@ -4735,6 +4744,7 @@ module.exports = require('./wrapper').then( async (cga) => {
     leo.moveTimeout = 220;//遇敌速度延时，单位毫秒
     leo.autoWalkBattleWaitTime = 5000;//自动寻路中，战斗后等待时长，单位毫秒
     leo.contactBattleWaitTime = 5000;//原地遇敌时，战斗后等待时长，单位毫秒
+    leo.mazeChangeWaitTime = 500;//迷宫切图时，切换后等待时长，单位毫秒
     leo.highspeed = false; //是否开启了高速战斗
     leo.gametype = '电信'; //区服
     leo.monitor = {};

@@ -35,7 +35,7 @@ require(process.env.CGA_DIR_PATH_UTF8+'/leo').then(async (cga) => {
 					return true;
 				}
 				return false;
-		},false))
+		},true))
 		.then(()=>leo.autoWalk([15, 10]))
 		.then(()=>{
 			//10楼，打黄蜂的蜜*6
@@ -59,7 +59,7 @@ require(process.env.CGA_DIR_PATH_UTF8+'/leo').then(async (cga) => {
 					return true;
 				}
 				return false;
-		},false))
+		},true))
 		.then(()=>leo.autoWalk([8, 8]))
 		.then(()=>{
 			//20楼，如果有米摩沙的弦乐器，直接通过，没有则打风蜘蛛丝*6

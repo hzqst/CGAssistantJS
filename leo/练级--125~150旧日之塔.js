@@ -162,7 +162,7 @@ require(process.env.CGA_DIR_PATH_UTF8+'/leo').then(async (cga) => {
                                 } else if (mn == '旧日之塔入口') {
                                     return leo.reject('迷宫刷新');
                                 }
-                        },false);
+                        },true);
                     }
                 } else {
                     var mapInfo = leo.getMapInfo();

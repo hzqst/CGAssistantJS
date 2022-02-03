@@ -51,7 +51,7 @@ require(process.env.CGA_DIR_PATH_UTF8+'/leo').then(async (cga) => {
             if(leo.has('信笺')){
                 await leo.goto(n=>n.castle.x)
                 await leo.autoWalk([41,84])
-                await leo.buildTeamBlock(teamPlayerCount)
+                await leo.buildTeamBlock(teamPlayerCount,teammates)
                 await leo.autoWalkList([
                     [41,98,'法兰城'],[153,241,'芙蕾雅'],[513,282,'曙光骑士团营地'],
                     [52,68,'曙光营地指挥部'],[69,70,[85,3]]
@@ -73,7 +73,7 @@ require(process.env.CGA_DIR_PATH_UTF8+'/leo').then(async (cga) => {
                             if (cga.GetMapName() == '遗迹') {
                                 return true;
                             }
-                        })
+                        },false)
                     }catch(e){
                         await leo.log('迷宫刷新');
                         await leo.delay(10000);
@@ -82,7 +82,7 @@ require(process.env.CGA_DIR_PATH_UTF8+'/leo').then(async (cga) => {
                             if (cga.GetMapName() == '遗迹') {
                                 return true;
                             }
-                        })
+                        },false)
                     }
                 }
                 if(cga.GetMapName() == '遗迹'){//44707
