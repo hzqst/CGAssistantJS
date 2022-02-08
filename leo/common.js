@@ -4,7 +4,7 @@ module.exports = require('./wrapper').then( async (cga) => {
     leo.messageServer = false;
     leo.appId = '';
     leo.appSecret = '';
-    leo.version = '9.5';
+    leo.version = '9.6';
     leo.qq = '158583461'
     leo.copyright = '红叶散落';
     leo.FORMAT_DATE = 'yyyy-MM-dd';
@@ -2023,19 +2023,19 @@ module.exports = require('./wrapper').then( async (cga) => {
             ['风之洞窟',true,[17990,0],[0,17991],[17990,17991]],//风洞
             ['旧日迷宫',false,[0,13275],[13274,0],[13274,13275]],//旧日迷宫
             ['旧日之塔',true,[13996,0],[0,13997],[13996,13997]],//旧日之塔
-            ['牛鬼的洞窟222',true,[0,120],[120,0],[120,120]],//偷狗粮
-            ['奇怪的坑道222',true,[0,120],[120,0],[120,120]],//抓烈风哥布林
-            ['阿鲁巴斯的洞窟222',true,[0,120],[120,0],[120,120]],//抓僵尸
+            ['牛鬼的洞窟',true,[13996,0],[0,13997],[13996,13997]],//偷狗粮
+            ['奇怪的坑道',false,[0,17955],[17954,0],[17954,17955]],//抓烈风哥布林
+            ['阿鲁巴斯的洞窟',true,[13996,0],[0,13997],[13996,13997]],//抓僵尸
             ['迷宫222',true,[0,120],[120,0],[120,120]],//人神
-            ['达尔文海海底地下222',true,[0,120],[120,0],[120,120]],//半山2
-            ['通往地狱的道路222',true,[0,120],[120,0],[120,120]],//半山6
+            ['达尔文海海底地下222',false,[0,120],[120,0],[120,120]],//半山2
+            ['通往地狱的道路',false,[0,17957],[17956,0],[17956,17957]],//半山6
             ['黑色方舟222',true,[0,120],[120,0],[120,120]],//四转
             ['秘密回廊222',true,[0,120],[120,0],[120,120]],//天界2
             ['通向顶端的阶梯222',true,[0,120],[120,0],[120,120]],//天界3
             ['未知',true,[0,120],[120,0],[120,120]],
         ];
         //特定的迷宫起始楼层
-        const floorStart = ['隐秘之洞地下11层','通往山顶的路100M','通往山顶的路1100M','隐秘山道上层B1','隐秘山道中层B1','隐秘山道下层B1'];
+        const floorStart = ['隐秘之洞地下11层','通往山顶的路100M','通往山顶的路1100M','隐秘山道上层B1','隐秘山道中层B1','隐秘山道下层B1','水之迷宫地下21楼'];
         const mapName = cga.GetMapName();
         const mazeEntryOption = mazeEntryOptions.find(option=>mapName.startsWith(option[0]));
         let elist;
@@ -2259,11 +2259,14 @@ module.exports = require('./wrapper').then( async (cga) => {
                 if(cga.GetMapName()==mapInfo.name){
                     return leo.autoWalkEx([x,y,destination],compress);
                 }else{
+                    if(destination && (destination === '*' || destination === cga.GetMapName())){
+                        return leo.done();
+                    }
                     return leo.reject('迷宫刷新');
                 }
             }
         }else{
-            return leo.reject('无法到达的坐标：['+destination+'] ['+x+','+y+']');
+            return leo.reject('leo.autoWalkEx()无法到达的坐标：['+destination+'] ['+x+','+y+']');
         }
     }
     leo.autoWalk = async (target, walls = cga.buildMapCollisionMatrix(), mapInfo = leo.getMapInfo(), options = {compress: true}) => {
