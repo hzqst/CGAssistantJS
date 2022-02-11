@@ -8,6 +8,9 @@ require(process.env.CGA_DIR_PATH_UTF8+'/leo').then(async (cga) => {
     //对话完是否要走到下一层迷宫
     var autoNextLevel = false;
 
+    //true - 往上层；false - 往下层
+    var up = true;
+
     if(npcName==''){
         leo.log('NPC的名字不能为空，请确认');
         return;
@@ -38,7 +41,7 @@ require(process.env.CGA_DIR_PATH_UTF8+'/leo').then(async (cga) => {
         })
         .then(() => {
             if(autoNextLevel && (autoTalk == '是' || autoTalk == '否')){
-                return leo.autoWalk([target.entry.x, target.entry.y, '*'],undefined,undefined,{compress: false});
+                return leo.walkRandomMaze(up);
             }else{
                 return leo.next();
             }
@@ -46,7 +49,7 @@ require(process.env.CGA_DIR_PATH_UTF8+'/leo').then(async (cga) => {
         .then(() => console.log('已找到NPC，脚本结束'));
     }
 
-    leo.lookForNpc(targetFinder, todo ,true)
+    leo.lookForNpc(targetFinder, todo ,up)
     .catch(()=>console.log('未找到NPC，脚本结束'));
 
 });
