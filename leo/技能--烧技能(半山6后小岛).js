@@ -14,6 +14,10 @@ require(process.env.CGA_DIR_PATH_UTF8+'/leo').then(async (cga) => {
     var sealCardMaxCount = 300; 
 
     var protect = {
+        //contactType遇敌类型：-1-旧遇敌，0-按地图自适应，1-东西移动，2-南北移动，
+        //3-随机移动，4-画小圈圈，5-画中圈圈，6-画大圈圈，7-画十字，8-画8字
+        contactType: 0,
+        visible: false, 
         minHp: 500,
         minMp: 50,
         minPetHp: 300,
@@ -147,7 +151,10 @@ require(process.env.CGA_DIR_PATH_UTF8+'/leo').then(async (cga) => {
                     return leo.next();
                 } else {
                     //console.log(leo.logTime() + '寻找队伍');
-                    return leo.todo()
+                    return leo.logBack()
+                    .then(()=>leo.sellCastle())
+                    .then(()=>leo.checkHealth(prepareOptions.doctorName))
+                    .then(()=>leo.checkCrystal(prepareOptions.crystalName))
                     .then(()=>{
                         if(usingpunchclock){
                             return leo.goto(n => n.castle.clock)
@@ -188,6 +195,9 @@ require(process.env.CGA_DIR_PATH_UTF8+'/leo').then(async (cga) => {
                         });
                     });
                 }else{
+                    if (!leo.isInTeam()) {
+                        return leo.logBack();
+                    }
                     if (cga.GetMapName().indexOf('小岛')!=-1){
                         return leo.encounterTeammate(protect, '小岛'); //队员遇敌
                     }

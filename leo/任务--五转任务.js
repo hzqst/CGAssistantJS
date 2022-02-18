@@ -3,7 +3,9 @@ require(process.env.CGA_DIR_PATH_UTF8+'/leo').then(async (cga) => {
     leo.logStatus = false;
     var teamLeader = '队长名称'; //队长名称
     var teamPlayerCount = 5; //队伍人数
-    var target = 4;//1-地，2-水，3-火，4-风
+    var target = 1;//1-地，2-水，3-火，4-风
+    var entryEarth = [0,0]; //预设地洞坐标
+    var entryExclude = [0,0]; //预设未来之塔坐标
     var protect = {
         minHp: 500,
         minMp: 100,
@@ -89,7 +91,7 @@ require(process.env.CGA_DIR_PATH_UTF8+'/leo').then(async (cga) => {
                     var itemArr = cga.findItemArray('隐秘的水晶（'+targetArr[target]+'）');
                     //console.log(itemArr);
                     if(itemArr.length==0){
-                        return leo.reject('身上没有足够的'+targetArr[target]+'碎片，脚本结束');
+                        return leo.reject('身上没有隐秘的水晶（'+targetArr[target]+'），脚本结束');
                     }else if(itemArr.length>1){
                         for (var i = 0; i < itemArr.length; i++) {
                             if(i!=itemArr.length-1){
@@ -107,7 +109,7 @@ require(process.env.CGA_DIR_PATH_UTF8+'/leo').then(async (cga) => {
                     if (isTeamLeader) {
                         cga.EnableFlags(cga.ENABLE_FLAG_JOINTEAM, true); //开启组队
                         return leo.autoWalk(meetingPointTeamLeader[meetingPoint - 1])
-                        .then(() => leo.buildTeam(teamPlayerCount)).then(() => {
+                        .then(() => leo.buildTeam(teamPlayerCount,teammates)).then(() => {
                             var teamplayers = cga.getTeamPlayers();
                             //console.log(teamplayers);
                             if (teamplayers && teamplayers.length == teamPlayerCount) {
@@ -146,6 +148,50 @@ require(process.env.CGA_DIR_PATH_UTF8+'/leo').then(async (cga) => {
                     ]))
                     .then(()=>leo.next());
                 }
+                if(cga.GetMapName() == '隐秘之洞 地下10层'){
+                    return leo.todo().then(() => {
+                        if(targetArr[target] == '地'){
+                            return leo.toRandomEntry(13,35,6,6);
+                            //return leo.autoWalk([16,38,'隐秘之洞地下11层']);
+                        }
+                        if(targetArr[target] == '水'){
+                            return leo.toRandomEntry(40,13,6,6);
+                            //return leo.autoWalk([43,16,'隐秘之洞地下11层']);
+                        }
+                        if(targetArr[target] == '火'){
+                            return leo.toRandomEntry(36,24,6,6);
+                            //return leo.autoWalk([39,27,'隐秘之洞地下11层']);
+                        }
+                        if(targetArr[target] == '风'){
+                            return leo.toRandomEntry(33,12,6,6);
+                            //return leo.autoWalk([36,15,'隐秘之洞地下11层']);
+                        }
+                        // var mazeEntry = cga.GetMapUnits().filter(u => (u.flags & cga.emogua.UnitFlags.NpcEntry) && u.model_id > 0 );
+                        // if(mazeEntry && mazeEntry.length>0){
+                        //     var entry11 = mazeEntry[0];
+                        //     return leo.autoWalk([entry11.xpos,entry11.ypos,'隐秘之洞地下11层']);
+                        // }else{
+                        //     return leo.say('找不到迷宫入口，请手动走到隐秘之洞地下11层');
+                        // }
+                        return leo.next();
+                    })
+                    .then(()=>leo.waitUntil(()=>{
+                        var mapInfo = leo.getMapInfo();
+                        if (mapInfo.name == '隐秘之洞地下11层') {
+                            return true;
+                        }
+                        return false;
+                    }))
+                    .then(()=>leo.walkRandomMazeUntil(() => {
+                            var mn = cga.GetMapName();
+                            if (mn == '隐秘之洞 最底层') {
+                                return true;
+                            }
+                            return false;
+                    },false))
+                    .then(()=>leo.say('已到达BOSS前，请手动战斗，脚本结束'))
+                    .then(()=>leo.reject());
+                }
             } else {
                 return leo.loop(
                     () => leo.waitAfterBattle().then(() => {
@@ -157,8 +203,17 @@ require(process.env.CGA_DIR_PATH_UTF8+'/leo').then(async (cga) => {
                             return leo.supply(11, 11);
                         }
                         if(mapInfo.name == '隐秘之洞 地下10层' && !leo.isInTeam()){
-                            console.log('到达10层');
-                            return leo.useItem(8)
+                            console.log(leo.logTime()+'到达10层');
+                            return leo.loop(async ()=>{
+                                const mapInfo2 = cga.getMapInfo();
+                                if(mapInfo.x === mapInfo2.x && mapInfo.y === mapInfo2.y) {
+                                    console.log(leo.logTime()+'使用道具【隐秘的水晶】');
+                                    await leo.useItem(8)
+                                }else{
+                                    return leo.reject();
+                                }
+                                await leo.delay(2000)
+                            })
                             .then(()=>leo.enterTeam(teamLeader)).then(() => {
                                 leo.log('已进入队伍，队长[' + cga.getTeamPlayers()[0].name + ']，队员脚本完成');
                                 return leo.delay(5000);
@@ -180,15 +235,23 @@ require(process.env.CGA_DIR_PATH_UTF8+'/leo').then(async (cga) => {
                 }
                 var index = -1;
                 var targetEntryAreaArr = targetEntryArr[targetArr[target]];
+                if(target == 1 && entryEarth[0] > 0 && entryEarth[1] > 0){
+                    targetEntryAreaArr.unshift(entryEarth);
+                }
                 var findHoleEntry = ()=>{
                     var mapInfo = leo.getMapInfo();
                     if(mapInfo.name == '隐秘之洞地下1层'){
+                        if(target==1){
+                            leo.log('迷宫入口坐标：'+entryEarth);
+                        }
                         return leo.next();
                     }
                     if(mapInfo.name == '未来之塔入口第1层'){
-                        return leo.autoWalk([mapInfo.x+1,mapInfo.y])
-                        .then(()=>leo.autoWalk([mapInfo.x,mapInfo.y,'肯吉罗岛']))
-                        .then(()=>findHoleEntry());
+                        return leo.autoWalk([mapInfo.x,mapInfo.y,'*'])
+                        .then(()=>{
+                            entryExclude = [cga.getMapInfo().x,cga.getMapInfo().y];
+                            return findHoleEntry();
+                        });
                     }
                     index++;
                     if(index >= targetEntryAreaArr.length){
@@ -197,8 +260,11 @@ require(process.env.CGA_DIR_PATH_UTF8+'/leo').then(async (cga) => {
                     if (mapInfo.name == '肯吉罗岛') {
                         return leo.autoWalk(targetEntryAreaArr[index])
                         .then(()=>{
-                            var mazeEntry = cga.GetMapUnits().filter(u => (u.flags & leo.UnitFlags.NpcEntry) && u.model_id > 0 && u.unit_name != '墨菲');
+                            var mazeEntry = cga.GetMapUnits().filter(u => (u.flags & leo.UnitFlags.NpcEntry) && u.model_id > 0 && u.unit_name != '墨菲' && u.xpos != entryExclude[0] && u.ypos != entryExclude[1]);
                             if(mazeEntry && mazeEntry.length>0){
+                                if(target==1){
+                                    entryEarth = [mazeEntry[0].xpos,mazeEntry[0].ypos];
+                                }
                                 return leo.autoWalk([mazeEntry[0].xpos,mazeEntry[0].ypos,'*'])
                                 .then(()=>findHoleEntry());
                             }else{
@@ -222,9 +288,23 @@ require(process.env.CGA_DIR_PATH_UTF8+'/leo').then(async (cga) => {
                             }
                             return false;
                     },false))
-                    .then(()=>leo.useItem(8))
+                    .then(()=>console.log(leo.logTime()+'到达10层'))
+                    .then(()=>leo.delay(2000))
+                    .then(()=>{
+                        const mapInfo = cga.getMapInfo();
+                        return leo.loop(async ()=>{
+                            const mapInfo2 = cga.getMapInfo();
+                            if(mapInfo.x === mapInfo2.x && mapInfo.y === mapInfo2.y) {
+                                console.log(leo.logTime()+'使用道具【隐秘的水晶】');
+                                await leo.useItem(8)
+                            }else{
+                                return leo.reject();
+                            }
+                            await leo.delay(2000)
+                        })
+                    })
                     .then(()=>leo.moveAround())
-                    .then(() => leo.buildTeam(teamPlayerCount)).then(() => {
+                    .then(() => leo.buildTeam(teamPlayerCount,teammates)).then(() => {
                         var teamplayers = cga.getTeamPlayers();
                         //console.log(teamplayers);
                         if (teamplayers && teamplayers.length == teamPlayerCount) {

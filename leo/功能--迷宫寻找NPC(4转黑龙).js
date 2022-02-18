@@ -29,7 +29,8 @@ require(process.env.CGA_DIR_PATH_UTF8+'/leo').then(async (cga) => {
     }
 
     var todo = (target) => {
-        return leo.todo()
+        const positions = leo.getMovablePositionsAround({x: target.xpos, y: target.ypos});
+        return leo.autoWalk([positions[0].x, positions[0].y])
         .then(() => {
             if(autoTalk=='是'){
                 return leo.talkNpc(target.xpos, target.ypos, leo.talkNpcSelectorYes);
