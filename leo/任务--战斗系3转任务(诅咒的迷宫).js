@@ -1,4 +1,4 @@
-require('\x2e\x2f\x63\x6f\x6d\x6d\x6f\x6e')['\x74\x68\x65\x6e'](async 红叶の脚本 => {
+require(process.env.CGA_DIR_PATH_UTF8+'/leo').then(async (红叶の脚本) => {
     var 自动对话BOSS = true, 
 	是否自动载入默认配置 = true, 
 	队长打印战斗明细 = true, 

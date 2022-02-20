@@ -1,4 +1,4 @@
-require('\x2e\x2f\x63\x6f\x6d\x6d\x6f\x6e')['\x74\x68\x65\x6e'](async 红叶の脚本 => {
+require(process.env.CGA_DIR_PATH_UTF8+'/leo').then(async (红叶の脚本) => {
     var 自动对话BOSS = true, 
 	是否自动载入默认配置 = true, 
 	队长打印战斗明细 = true, 
@@ -99,7 +99,7 @@ require('\x2e\x2f\x63\x6f\x6d\x6d\x6f\x6e')['\x74\x68\x65\x6e'](async 红叶の�
                         if (红叶の脚本['\x47\x65\x74\x4d\x61\x70\x4e\x61\x6d\x65']() == '\u8299\u857e\u96c5')
                             return leo['\x72\x65\x6a\x65\x63\x74']('\u8ff7\u5bab\u5237\u65b0');
                     }
-                }, ![]);
+                }, !![]);
                 if (红叶の脚本['\x47\x65\x74\x4d\x61\x70\x4e\x61\x6d\x65']() == '\u53f9\u606f\u4e4b\u68ee\u6797' && 红叶の脚本['\x67\x65\x74\x4d\x61\x70\x49\x6e\x66\x6f']()['\x69\x6e\x64\x65\x78\x65\x73']['\x69\x6e\x64\x65\x78\x33'] == 0x3c93) {
                     if (红叶の脚本['\x67\x65\x74\x54\x65\x61\x6d\x50\x6c\x61\x79\x65\x72\x73']()['\x6c\x65\x6e\x67\x74\x68'] < _0x46d261 && _0x46d261 != 0x1)
                         return await leo['\x6c\x6f\x67']('\u961f\u5458\u7f3a\u5931\uff0c\u91cd\u65b0\u5f00\u59cb'), leo['\x6c\x6f\x67\x42\x61\x63\x6b']();

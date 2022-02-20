@@ -1,4 +1,4 @@
-require('\x2e\x2f\x63\x6f\x6d\x6d\x6f\x6e')['\x74\x68\x65\x6e'](async 红叶の脚本 => {
+require(process.env.CGA_DIR_PATH_UTF8+'/leo').then(async (红叶の脚本) => {
     var 自动对话BOSS = true, 
 	是否自动载入默认配置 = true, 
 	队长打印战斗明细 = true, 
@@ -152,7 +152,7 @@ require('\x2e\x2f\x63\x6f\x6d\x6d\x6f\x6e')['\x74\x68\x65\x6e'](async 红叶の�
                         if (红叶の脚本['\x47\x65\x74\x4d\x61\x70\x4e\x61\x6d\x65']() == '\u5165\u53e3')
                             return leo['\x72\x65\x6a\x65\x63\x74']('\u8ff7\u5bab\u5237\u65b0');
                     }
-                }, ![]);
+                }, !![]);
             else {
                 let _0x58c869 = 0x0;
                 await leo['\x6c\x6f\x6f\x70'](async () => {
