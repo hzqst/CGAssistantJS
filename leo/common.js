@@ -4,7 +4,7 @@ module.exports = require('./wrapper').then( async (cga) => {
     leo.messageServer = false;
     leo.appId = '';
     leo.appSecret = '';
-    leo.version = '9.7';
+    leo.version = '9.8';
     leo.qq = '158583461'
     leo.copyright = '红叶散落';
     leo.FORMAT_DATE = 'yyyy-MM-dd';
@@ -214,7 +214,7 @@ module.exports = require('./wrapper').then( async (cga) => {
                 //检查是否是预设的队员
                 if (teammates && teammates.length > 0) {
                     for (var i = 0; i < teamplayers.length; ++i) {
-                        if (!is_array_contain(teammates, teamplayers[i].name)  ) {
+                        if (!is_array_contain(teammates, teamplayers[i].name) && teamplayers[i].name != '' ) {
                             //踢出不在预设队伍成员的未知队员
                             return leo.todo().then(() => cga.DoRequest(cga.REQUEST_TYPE_KICKTEAM)).then(
                                 () => leo.waitNPCDialog(dlg => {
@@ -259,42 +259,39 @@ module.exports = require('./wrapper').then( async (cga) => {
     }
     //队员进入队伍，参数为队长名字
     leo.enterTeam = async (teamLeader,waitPos = cga.GetMapXY()) => {
-        var teamplayers = cga.getTeamPlayers();
-        if (teamplayers.length > 0 && teamplayers[0].name == teamLeader) {
-            return leo.done();
-        } else if (teamplayers.length > 1) {
-            return leo.leaveTeam()
-            .then(() => leo.delay(1000))
-            .then(() => leo.autoWalk([waitPos.x,waitPos.y]))
-            .then(() => leo.enterTeam(teamLeader,waitPos));
-        } else {
-            return leo.todo().then(() => {
-                var leaderInfo = cga.findPlayerUnit(teamLeader);
-                var mypos = cga.GetMapXY();
-                if (leaderInfo == null || !cga.isDistanceClose(leaderInfo.xpos, leaderInfo.ypos, mypos.x, mypos.y) || (leaderInfo.xpos == mypos.x && leaderInfo.ypos == mypos.y)) {
-                    return leo.delay(1000).then(() => leo.enterTeam(teamLeader,waitPos));
-                } else {
-                    return leo.turnTo(leaderInfo.xpos, leaderInfo.ypos)
-                    .then(() => cga.DoRequest(cga.REQUEST_TYPE_JOINTEAM))
-                    .then(() => leo.waitNPCDialog(dialog => {
-                        if (dialog.type === 2) {
-                            cga.ClickNPCDialog(-1, dialog.message.split('\n').findIndex(e => e === teamLeader) - 2);
-                            return leo.delay(1000);
-                        }
-                    }))
-                    .then(() => {
-                        var teamPlayers = cga.getTeamPlayers();
-                        if(teamPlayers.length>0){
-                            var leader = teamPlayers[0].name;
-                            if(leader != teamLeader){
-                                return leo.leaveTeam();
-                            }
-                        }
-                    })
-                    .then(() => leo.enterTeam(teamLeader,waitPos));
+        return leo.loop(async ()=>{
+            const teamplayers = cga.getTeamPlayers();
+            if(teamplayers.length > 1) {
+                //console.log(leo.logTime()+'队长：' + teamplayers[0].name);
+                if(teamplayers[0].name == teamLeader 
+                    || teamplayers[0].name == '' //新增特殊判断：因为看不见队长导致的获取不到队长名字的BUG
+                ){
+                    return leo.reject();
+                }else{
+                    console.log(leo.logTime()+'进错队伍了，预期的队长【'+teamLeader+'】，当前队长【'+teamplayers[0].name+'】');
+                    await leo.leaveTeam()
+                    await leo.delay(2000)
+                    await leo.autoWalk([waitPos.x,waitPos.y])
                 }
-            });
-        }
+            }
+            const leaderInfo = cga.findPlayerUnit(teamLeader);
+            const mypos = cga.GetMapXY();
+            if (leaderInfo == null || !cga.isDistanceClose(leaderInfo.xpos, leaderInfo.ypos, mypos.x, mypos.y) || (leaderInfo.xpos == mypos.x && leaderInfo.ypos == mypos.y)) {
+                //等待
+                //console.log(leo.logTime()+'leo.enterTeam:'+teamLeader);
+                await leo.delay(1000)
+            }else{
+                await leo.turnTo(leaderInfo.xpos, leaderInfo.ypos)
+                cga.DoRequest(cga.REQUEST_TYPE_JOINTEAM)
+                await leo.waitNPCDialog(dialog => {
+                    if (dialog.type === 2) {
+                        cga.ClickNPCDialog(-1, dialog.message.split('\n').findIndex(e => e === teamLeader) - 2);
+                        return leo.delay(1000);
+                    }
+                })
+            }
+            await leo.delay(1000)
+        });
     }
     leo.enterTeamBlock = async (teamLeader)=>{
         if(leo.monitor.config.autoChangeLineForLeader) {
@@ -515,7 +512,7 @@ module.exports = require('./wrapper').then( async (cga) => {
             if(currentMap=='艾尔莎岛' || currentMap=='里谢里雅堡' || currentMap=='法兰城'){
                 return leo.goto(n => n.castle.x)
                 .then(()=>leo.autoWalk([31,77]))
-                .then(()=>leo.sell(4))
+                .then(()=>leo.sell(4,filter))
                 .then(()=>leo.logBack());
             }
         }
@@ -684,7 +681,7 @@ module.exports = require('./wrapper').then( async (cga) => {
         return leo.saveToBank(filter);
     }
     //银行全取
-    leo.getFormBankAll = (filter) => {
+    leo.getFromBankAll = (filter) => {
         // var items = cga.GetBankItemsInfo().map(i=>i.name);
         // let result = Promise.resolve();
         // if (items.length > 0) {
@@ -696,6 +693,7 @@ module.exports = require('./wrapper').then( async (cga) => {
         // }
         return leo.getFromBank(filter);
     }
+	leo.getFormBankAll = leo.getFromBankAll;
     leo.getOneFromBank = (filter,log = true) => {
         const bankList = cga.GetBankItemsInfo().filter(e => {
             if (typeof filter == 'string') return e.name == filter || e.itemid == filter;
@@ -2030,8 +2028,8 @@ module.exports = require('./wrapper').then( async (cga) => {
             ['达尔文海海底地下',false,[0,17967],[17966,0],[17966,17967]],//半山2
             ['通往地狱的道路',false,[0,17957],[17956,0],[17956,17957]],//半山6
             ['黑色方舟',true,[17980,0],[0,17981],[17980,17981]],//四转
-            ['秘密回廊222',true,[0,120],[120,0],[120,120]],//天界2
-            ['通向顶端的阶梯222',true,[0,120],[120,0],[120,120]],//天界3
+            ['秘密回廊',false,[0,12002],[12000,0],[12000,12002]],//天界2
+            ['通向顶端的阶梯',true,[13996,0],[0,13997],[13996,13997]],//天界3
             ['未知',true,[0,120],[120,0],[120,120]],
         ];
         //特定的迷宫起始楼层
@@ -2351,90 +2349,97 @@ module.exports = require('./wrapper').then( async (cga) => {
                 p.key = p.x + '-' + p.y;
                 return !excludePoints.includes(p.key);
             });
-            for (var i = 0; i < 4; i++) {
-                const quadrantList = allPoint.filter(p=>p.quadrant===i);
-                const maxDistance = Math.max(...quadrantList.map(p=>p.distance),-1);
-                const furthestList = quadrantList.filter(p=>p.distance===maxDistance);
-                if(furthestList.length>0) {
-                    const index = Math.floor((Math.random()*furthestList.length));
-                    const next = furthestList[index];
-                    pointList.push(next);
-                }
-            }
-            //console.log('坐标点列表：')
-            //console.log(pointList);
-
-            await leo.loop(async ()=>{
-                if(pointList.length===0) {
-                    return leo.reject();
-                }
-                const check = await checkEntry(up)
-                if(check){
-                    return leo.reject();
-                }
-                const current = cga.GetMapXY();
-                const next = pointList.shift();
-                //console.log('当前目标：')
-                //console.log(next);
-                const pathList = leo.findPathList([current.x,current.y],[next.x,next.y],false);
-                if(pathList.length>0) {
-                    await leo.autoWalkEx([next.x,next.y],false)
-                    addExclude(pathList)
-                    if(walkProtect && walkProtect()) {
-                        return leo.reject('触发保护');
+            const randomMazeAlgorithm = leo.randomMazeAlgorithm || 'DepthFirst';
+            if(randomMazeAlgorithm == 'DepthFirst') {
+                for (var i = 0; i < 4; i++) {
+                    const quadrantList = allPoint.filter(p=>p.quadrant===i);
+                    const maxDistance = Math.max(...quadrantList.map(p=>p.distance),-1);
+                    const furthestList = quadrantList.filter(p=>p.distance===maxDistance);
+                    if(furthestList.length>0) {
+                        const index = Math.floor((Math.random()*furthestList.length));
+                        const next = furthestList[index];
+                        pointList.push(next);
                     }
-                    //检查是否因为走到新的坐标点，同象限有新的可移动坐标出现
-                    await leo.loop(async ()=>{
-                        const check = await checkEntry(up)
-                        if(check){
-                            return leo.reject();
-                        }
-                        const current2 = cga.GetMapXY();
-                        const walls = cga.buildMapCollisionMatrix();
-                        const newPoints = Object.values(leo.getMovablePoints(walls, current2))
-                        .filter(p=>{
-                            p.key = p.x + '-' + p.y;
-                            return !excludePoints.includes(p.key);
-                        })
-                        .map(p=>{
-                            let xd = p.x - current2.x;
-                            let yd = p.y - current2.y;
-                            let distance = Math.abs(xd) + Math.abs(yd);
-                            p.distance = distance;
-                            if(xd>=0&&yd<0){
-                                p.quadrant = 0; 
-                            }else if(xd>0&&yd>=0){
-                                p.quadrant = 1;
-                            }else if(xd<=0&&yd>0){
-                                p.quadrant = 2;
-                            }else if(xd<0&&yd<=0){
-                                p.quadrant = 3;
-                            }
-                            p.key = p.x + '-' + p.y;
-                            return p;
-                        })
-                        .filter(p=>p.quadrant===next.quadrant&&p.distance>0);
-                        if(newPoints.length==0) {
-                            return leo.reject();
-                        }
-                        //继续往前开图
-                        const index2 = Math.floor((Math.random()*newPoints.length));
-                        const next2 = newPoints[index2];
-                        //console.log(leo.logTime()+'继续往前开图，坐标：['+next2.x+','+next2.y+']')
-                        const pathList2 = leo.findPathList([current2.x,current2.y],[next2.x,next2.y],false);
-                        if(pathList2.length>0){
-                            await leo.autoWalkEx([next2.x,next2.y],false)
-                            addExclude(pathList2);
-                            if(walkProtect && walkProtect()) {
-                                return leo.reject('触发保护');
-                            }
-                        }
-                    })
-                }else{
-                    addExclude([next]);
                 }
-                await leo.delay(1000)
-            })
+                //console.log('坐标点列表：')
+                //console.log(pointList);
+
+                await leo.loop(async ()=>{
+                    if(pointList.length===0) {
+                        return leo.reject();
+                    }
+                    const check = await checkEntry(up)
+                    if(check){
+                        return leo.reject();
+                    }
+                    const current = cga.GetMapXY();
+                    const next = pointList.shift();
+                    //console.log('当前目标：')
+                    //console.log(next);
+                    const pathList = leo.findPathList([current.x,current.y],[next.x,next.y],false);
+                    if(pathList.length>0) {
+                        await leo.autoWalkEx([next.x,next.y],false)
+                        addExclude(pathList)
+                        if(walkProtect && walkProtect()) {
+                            return leo.reject('触发保护');
+                        }
+                        //检查是否因为走到新的坐标点，同象限有新的可移动坐标出现
+                        await leo.loop(async ()=>{
+                            const check = await checkEntry(up)
+                            if(check){
+                                return leo.reject();
+                            }
+                            const current2 = cga.GetMapXY();
+                            const walls = cga.buildMapCollisionMatrix();
+                            const newPoints = Object.values(leo.getMovablePoints(walls, current2))
+                            .filter(p=>{
+                                p.key = p.x + '-' + p.y;
+                                return !excludePoints.includes(p.key);
+                            })
+                            .map(p=>{
+                                let xd = p.x - current2.x;
+                                let yd = p.y - current2.y;
+                                let distance = Math.abs(xd) + Math.abs(yd);
+                                p.distance = distance;
+                                if(xd>=0&&yd<0){
+                                    p.quadrant = 0; 
+                                }else if(xd>0&&yd>=0){
+                                    p.quadrant = 1;
+                                }else if(xd<=0&&yd>0){
+                                    p.quadrant = 2;
+                                }else if(xd<0&&yd<=0){
+                                    p.quadrant = 3;
+                                }
+                                p.key = p.x + '-' + p.y;
+                                return p;
+                            })
+                            .filter(p=>p.quadrant===next.quadrant&&p.distance>0);
+                            if(newPoints.length==0) {
+                                return leo.reject();
+                            }
+                            //继续往前开图
+                            const index2 = Math.floor((Math.random()*newPoints.length));
+                            const next2 = newPoints[index2];
+                            //console.log(leo.logTime()+'继续往前开图，坐标：['+next2.x+','+next2.y+']')
+                            const pathList2 = leo.findPathList([current2.x,current2.y],[next2.x,next2.y],false);
+                            if(pathList2.length>0){
+                                await leo.autoWalkEx([next2.x,next2.y],false)
+                                addExclude(pathList2);
+                                if(walkProtect && walkProtect()) {
+                                    return leo.reject('触发保护');
+                                }
+                            }
+                        })
+                    }else{
+                        addExclude([next]);
+                    }
+                    await leo.delay(1000)
+                })
+            }else {
+                console.log(leo.logTime()+'迷宫开图算法异常:'+randomMazeAlgorithm);
+                return leo.reject();
+            }
+
             const check = await checkEntry(up)
             if(check){
                 return leo.done();
@@ -3501,6 +3506,12 @@ module.exports = require('./wrapper').then( async (cga) => {
                 skillName: '防御',
                 targets: context => [context.petUnit.pos]
             });
+            sets.push({
+                user: 2,
+                check: context => true,
+                skillName: '护卫-Ⅰ',
+                targets: context => [context.player_pos]
+            });
             var firstRoundDelay = 1;    //首回合延迟
             var roundDelay = 1          //每回合延迟
             var force = true ;          //是否强制启用战斗配置
@@ -3597,7 +3608,7 @@ module.exports = require('./wrapper').then( async (cga) => {
             });
 
             let firstRoundDelay = 1;    //首回合延迟
-            let roundDelay = 4000       //每回合延迟
+            let roundDelay = 1       //每回合延迟
             let force = true ;          //是否强制启用战斗配置
             leo.setBattlePet2(false);   //关闭宠物二动
             leo.autoBattle(sets,firstRoundDelay,roundDelay,force);
@@ -4744,12 +4755,13 @@ module.exports = require('./wrapper').then( async (cga) => {
     //统计信息
     leo.oldXp = cga.GetPlayerInfo().xp; //脚本启动时的经验值
     leo.keepAliveStatus = null; //防掉线状态
-    leo.moveTimeout = 220;//遇敌速度延时，单位毫秒
-    leo.autoWalkBattleWaitTime = 5000;//自动寻路中，战斗后等待时长，单位毫秒
-    leo.contactBattleWaitTime = 5000;//原地遇敌时，战斗后等待时长，单位毫秒
-    leo.mazeChangeWaitTime = 500;//迷宫切图时，切换后等待时长，单位毫秒
+    leo.moveTimeout = 20;//遇敌速度延时，单位毫秒
+    leo.autoWalkBattleWaitTime = 10000;//自动寻路中，战斗后等待时长，单位毫秒
+    leo.contactBattleWaitTime = 10000;//原地遇敌时，战斗后等待时长，单位毫秒
+    leo.mazeChangeWaitTime = 10000;//迷宫切图时，切换后等待时长，单位毫秒
     leo.highspeed = false; //是否开启了高速战斗
     leo.gametype = '电信'; //区服
+    leo.randomMazeAlgorithm = 'DepthFirst'; //迷宫开图算法
     leo.monitor = {};
     leo.monitor.keepAlive = () => {
         if(leo.keepAliveStatus != leo.monitor.config.keepAlive){
@@ -4784,6 +4796,7 @@ module.exports = require('./wrapper').then( async (cga) => {
         petLoyalProtectValue: 40,   //宠物忠诚保护值，出战宠物忠诚低于该值，会自动设置宠物待命
         autoExit: false, //是否开启自动结束脚本
         autoExitValue: 5, //x分钟不动自动结束脚本
+        autoExitLogBack: true, //x分钟不动自动结束脚本前是否先登回城
         autoExitMemory:{}, //缓存上一次检查的战斗状态和坐标值
         syncInfo: false, //是否开启角色信息同步功能
         autoChangeLineForLeader: false, //自动跟随队长换线
@@ -4811,7 +4824,11 @@ module.exports = require('./wrapper').then( async (cga) => {
                 let keepTime = checkTime.getTime() - lastTime.getTime();
                 if(keepTime > 1000*60*autoExitValue){
                     await leo.log('【重要提示】 '+autoExitValue+'分钟不动自动结束脚本')
-                    await leo.logBack()
+                    if(leo.monitor.config.autoExitLogBack){
+                        await leo.logBack()
+                    }else{
+                        await leo.leaveTeam()
+                    }
                     return leo.exit(); //超出指定时长，结束脚本
                 }
 
