@@ -1,4 +1,4 @@
-require(process.env.CGA_DIR_PATH_UTF8+'/leo').then(async (cga) => {
+require(process.env.CGA_DIR_PATH+'/leo').then(async (cga) => {
 	//leo.baseInfoPrint();
 	leo.monitor.config.healSelf = true;//自动治疗自己
 	leo.log('红叶の挖谢尔哈特矿脚本，启动~');
@@ -25,7 +25,7 @@ require(process.env.CGA_DIR_PATH_UTF8+'/leo').then(async (cga) => {
 			await leo.gotoAKLF()
 			await leo.autoWalk([157,208,'阿凯鲁法工房'])
 			await leo.autoWalk([11,18])
-			var exchangeCount = cga.getItemCount(itemName) / 20;
+			var exchangeCount = parseInt(cga.getItemCount(itemName) / 20);
 			var list = [{index:0, count:exchangeCount}];
 			await leo.exchange(4,list)
 			await leo.autoWalk([15,24,'阿凯鲁法村'])
@@ -50,6 +50,7 @@ require(process.env.CGA_DIR_PATH_UTF8+'/leo').then(async (cga) => {
 		await leo.loop(()=>{
 			if(cga.GetPlayerInfo().mp < 1){
 				return leo.log('魔力不足')
+				.then(()=>leo.logBack())
 				.then(()=>leo.reject());
 			}
 			var emptyIndexes = leo.getEmptyBagIndexes();

@@ -4,7 +4,7 @@ module.exports = require('./wrapper').then( async (cga) => {
     leo.messageServer = false;
     leo.appId = '';
     leo.appSecret = '';
-    leo.version = '9.8';
+    leo.version = '9.9';
     leo.qq = '158583461'
     leo.copyright = '红叶散落';
     leo.FORMAT_DATE = 'yyyy-MM-dd';
@@ -4723,6 +4723,17 @@ module.exports = require('./wrapper').then( async (cga) => {
         }
     }
 
+    //插件：保存物品【王冠/公主王冠/小猫帽】
+    try{
+        leo.plugins.crownSave = require('./plugin_crownSave');
+    }catch(e){
+        leo.plugins.crownSave = {
+            saveItem:()=>{
+                console.log('没有保存物品【王冠/公主王冠/小猫帽】插件，跳过该功能');
+            }
+        }
+    }
+
     //插件：自动寻找迷宫NPC
     try{
         leo.plugins.searchRandomMaze = require('./plugin_searchRandomMaze');
@@ -4796,10 +4807,11 @@ module.exports = require('./wrapper').then( async (cga) => {
         petLoyalProtectValue: 40,   //宠物忠诚保护值，出战宠物忠诚低于该值，会自动设置宠物待命
         autoExit: false, //是否开启自动结束脚本
         autoExitValue: 5, //x分钟不动自动结束脚本
-        autoExitLogBack: true, //x分钟不动自动结束脚本前是否先登回城
+        autoExitPreHook: 'logBack', //x分钟不动自动结束脚本前置操作
         autoExitMemory:{}, //缓存上一次检查的战斗状态和坐标值
         syncInfo: false, //是否开启角色信息同步功能
         autoChangeLineForLeader: false, //自动跟随队长换线
+        autoSetPetBattle: -1, //自动出战宠物-1不设置，0~4为宠物栏1~5
         monitorLoop: async () =>{
             leo.highspeed = await leo.getSubSettings('battle','highspeed');
 
@@ -4824,10 +4836,18 @@ module.exports = require('./wrapper').then( async (cga) => {
                 let keepTime = checkTime.getTime() - lastTime.getTime();
                 if(keepTime > 1000*60*autoExitValue){
                     await leo.log('【重要提示】 '+autoExitValue+'分钟不动自动结束脚本')
-                    if(leo.monitor.config.autoExitLogBack){
-                        await leo.logBack()
+                    if(leo.monitor.config.autoExitPreHook){
+                        if(leo.monitor.config.autoExitPreHook === 'logOut') {
+                            return cga.LogOut();
+                        }
+                        if(leo.monitor.config.autoExitPreHook === 'logBack') {
+                            await leo.logBack()
+                        }
+                        if(leo.monitor.config.autoExitPreHook === 'leaveTeam') {
+                            await leo.leaveTeam()
+                        }
                     }else{
-                        await leo.leaveTeam()
+                        await leo.logBack()
                     }
                     return leo.exit(); //超出指定时长，结束脚本
                 }
@@ -5038,7 +5058,13 @@ module.exports = require('./wrapper').then( async (cga) => {
                 }
             }
 
+            //自动加点
             leo.upgrade();
+
+            //自动设置宠物出战
+            if(leo.monitor.config.autoSetPetBattle > -1 && leo.monitor.config.autoSetPetBattle < 5) {
+                leo.setPetBattle(leo.monitor.config.autoSetPetBattle);
+            } 
 
             setTimeout(leo.monitor.config.monitorLoop, 2000);//每秒循环调用
         }
