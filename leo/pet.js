@@ -1,5 +1,8 @@
-const version = '1.8';
-const doctorName = '医道之殇';
+const version = '3.0';
+const doctorName = ['医道之殇','⌒雪医师∨'];
+const globalTeamPlayerCount = 5;
+const globalMinTeamNumber = 3;
+const globalTeamLeaders = ['猎人仓库C','Bonn打猎师'];
 const petConfig = {
     '水龙蜥': {
         name: '水龙蜥',
@@ -433,7 +436,13 @@ const petConfig = {
                     [130, 50, '盖雷布伦森林'],
                     [215, 43]
                 ])
-                await leo.talkNpc(0,leo.talkNo,'方堡盆地')
+                await leo.loop(async ()=>{
+                    if(cga.GetMapName()=='方堡盆地') {
+                        return leo.reject();
+                    }
+                    await leo.talkNpc(0,leo.talkNo)
+                    await leo.delay(2000)
+                })
                 await leo.autoWalk([248, 134])
             }
         }
@@ -520,13 +529,13 @@ const petConfig = {
         sealCardName: '封印卡（野兽系)',
         sealCardLevel: 1,
         autoDropPet: true, //是否自动扔宠，true扔/false不扔
-        minHp: 120 - 3,
-        minMp: 89 - 3,
+        minHp: 120 - 5,
+        minMp: 89 - 5,
         minAttack: 44,
         minDefensive: 35,
         minAgility: 32,
         index: 1,
-        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMin: 0,    //高于该档次的宠判断丢弃
         gradeMax:20,    //低于该档次的宠判断丢弃
         gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
@@ -550,7 +559,13 @@ const petConfig = {
                     [130, 50, '盖雷布伦森林'],
                     [215, 43]
                 ])
-                await leo.talkNpc(0,leo.talkNo,'方堡盆地')
+                await leo.loop(async ()=>{
+                    if(cga.GetMapName()=='方堡盆地') {
+                        return leo.reject();
+                    }
+                    await leo.talkNpc(0,leo.talkNo)
+                    await leo.delay(2000)
+                })
                 await leo.autoWalk([182, 104])
             }
         }
@@ -829,6 +844,26 @@ const petConfig = {
             }
         }
     },
+    '迷你石像怪': {
+        name: '迷你石像怪',
+        sealCardName: '封印卡（飞行系）',
+        sealCardLevel: 4,
+        autoDropPet: true, //是否自动扔宠，true扔/false不扔
+        minHp: 97 - 3,
+        minMp: 110 - 3,
+        minAttack: 35,
+        minDefensive: 32,
+        minAgility: 32,
+        index: 1,
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
+        gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
+        gradeLog: true, //打印算档日志
+        gradeLogMax: 5, //最多显示多少行日志
+        crystalName: '水火的水晶（5：5）',
+        petSkillName: '强力火焰魔法-Ⅰ',
+    },
     '大地翼龙': {
         name: '大地翼龙',
         sealCardName: '封印卡（龙系）',
@@ -861,28 +896,77 @@ const petConfig = {
                 await leo.checkCrystal(this.crystalName)
                 await leo.goto(n => n.castle.teleport)
                 await leo.autoWalk([37,4])
-                await leo.talkNpc(0,leo.talkYes)
+                await leo.loop(async ()=>{
+                    if(cga.GetMapName()=='阿巴尼斯村的传送点'){
+                        return leo.reject();
+                    }else{
+                        await leo.talkNpc(0,leo.talkYes)
+                    }
+                    await leo.delay(2000)
+                })
                 await leo.autoWalkList([
-                    [5, 4, 4313],[6, 13, 4312],[6, 13, '阿巴尼斯村'],
-                    [40, 30,'民家'],[13, 11]
+                    [5, 4, 4313],[6, 13, 4312],[6, 13, '阿巴尼斯村']
                 ])
-                await leo.talkNpc(7,leo.talkYes)
-                await leo.autoWalk([9,5])
-                await leo.talkNpc(6,leo.talkYes)
-                await leo.autoWalk([14,7])
-                await leo.talkNpc(0,leo.talkYes)
-                await leo.autoWalk([14,7])
-                await leo.talkNpc(0,leo.talkYes)
-                await leo.autoWalk([5,3,4333])
-                await leo.autoWalk([9,5])
-                await leo.autoWalk([9,4,4334])
-                await leo.autoWalk([14,10])
-                await leo.talkNpc(0,leo.talkYes)
-                await leo.autoWalk([7,3,4320])
-                await leo.autoWalkList([
-                    [11,17,'阿巴尼斯村'],[37,71,'莎莲娜'],[54,162]
-                ])
-                await leo.turnDir(6)
+                if(!leo.has('刀刃的碎片')){
+                    await leo.autoWalk([40, 30, '民家'])
+                    await leo.autoWalk([13, 10])
+                    await leo.loop(async ()=>{
+                        if(!leo.has('野草莓')){
+                            await leo.talkNpc(14, 10,leo.talkYes)
+                        }else{
+                            return leo.reject();
+                        }
+                        await leo.delay(1000)
+                    })
+                    console.log(leo.logTime()+'拿到了【野草莓】');
+                    await leo.loop(async ()=>{
+                        if(cga.getMapInfo().indexes.index3 == 4331){
+                            return leo.reject();
+                        }else{
+                            await leo.talkNpcAt(9, 4)
+                        }
+                        await leo.delay(2000)
+                    })
+                    await leo.loop(async ()=>{
+                        if(cga.getMapInfo().indexes.index3 == 4332){
+                            return leo.reject();
+                        }else{
+                            await leo.talkNpcAt(15, 7)
+                        }
+                        await leo.delay(2000)
+                    })
+                    await leo.loop(async ()=>{
+                        if(leo.has('刀刃的碎片')){
+                            return leo.reject();
+                        }else{
+                            await leo.talkNpcAt(15, 7)
+                        }
+                        await leo.delay(2000)
+                    })
+                    console.log(leo.logTime()+'拿到了【刀刃的碎片】');
+                    await leo.autoWalkList([
+                        [5, 3, 4333], [9, 4, 4334]
+                    ])
+                    await leo.loop(async ()=>{
+                        if(cga.getMapInfo().indexes.index3 == 4335){
+                            return leo.reject();
+                        }else{
+                            await leo.talkNpcAt(15, 10)
+                        }
+                        await leo.delay(2000)
+                    })
+                    await leo.autoWalkList([
+                        [7, 3, 4320],[12, 17, '阿巴尼斯村'],[37,71,'莎莲娜'],[54,162]
+                    ])
+                }
+                await leo.loop(async ()=>{
+                    if(cga.GetMapName()=='诅咒的迷宫'){
+                        return leo.reject();
+                    }else{
+                        await leo.talkNpc(54, 161, leo.talkYes)
+                    }
+                    await leo.delay(2000)
+                })
                 await leo.autoWalkList([
                     [35,9,'诅咒的迷宫 地下1楼'],[25,13,'诅咒的迷宫 地下2楼'],
                     [17,4,'诅咒的迷宫 地下3楼'],[23,20,'诅咒的迷宫 地下4楼'],
@@ -1146,7 +1230,7 @@ const petConfig = {
             //地图判断，如果已经在1级宠捕捉点，则继续捕捉
             var currentMap = cga.GetMapName();
             if (currentMap == '雪拉威森塔７７层') {
-                await leo.autoWalkList([[87,24]])
+                await leo.autoWalkList([[89, 26]])
             } else {
                 await leo.logBack()
                 //await leo.sellCastle()
@@ -1186,7 +1270,7 @@ const petConfig = {
                     [95,17],[95,16,'雪拉威森塔７７层']
                 ])
                 await leo.checkHealth(doctorName)
-                await leo.autoWalkList([[87,24]])
+                await leo.autoWalkList([[89, 26]])
             }
         }
     },
@@ -1291,13 +1375,33 @@ const petConfig = {
                     [14,18,'诅咒的迷宫 地下9楼'],[24,4,'第一个难关'],
                     [22,15]
                 ])
-                await leo.talkNpc(6,leo.talkYes,'诅咒的迷宫 地下11楼')
+                await leo.talkNpc(22, 14,leo.talkYes,'诅咒的迷宫 地下11楼')
                 await leo.autoWalkList([
                     [15,4,'诅咒的迷宫 地下12楼'],[24,15,'诅咒的迷宫 地下13楼'],
                     [25,5]
                 ])
             }
         }
+    },
+    '妖狐': {
+        name: '妖狐',
+        sealCardName: '封印卡（野兽系)',
+        sealCardLevel: 4,
+        autoDropPet: true, //是否自动扔宠，true扔/false不扔
+        minHp: 94 - 5,
+        minMp: 108 - 5,
+        minAttack: 41,
+        minDefensive: 33,
+        minAgility: 33,
+        index: 1,
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
+        gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
+        gradeLog: true, //打印算档日志
+        gradeLogMax: 5, //最多显示多少行日志
+        crystalName: '火风的水晶（5：5）',
+        petSkillName: '强力火焰魔法-Ⅰ',
     },
     '猫人': {
         name: '猫人',
@@ -1341,16 +1445,189 @@ const petConfig = {
             }
         }
     },
-    '巨人': {
-        name: '巨人',
+    '哥布林': {
+        name: '哥布林',
         sealCardName: '封印卡（人形系）',
         sealCardLevel: 1,
         autoDropPet: true, //是否自动扔宠，true扔/false不扔
-        minHp: 124 - 3,
-        minMp: 89 - 3,
-        minAttack: 44,
+        minHp: 108 - 3,
+        minMp: 74 - 3,
+        minAttack: 40,
+        minDefensive: 41,
+        minAgility: 30,
+        index: 1,
+        gradeMin: 0,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
+        gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
+        gradeLog: true, //打印算档日志
+        gradeLogMax: 5, //最多显示多少行日志
+        crystalName: '火风的水晶（5：5）',
+        petSkillName: '强力陨石魔法-Ⅰ',
+        async walk(cga){
+            const leo = cga.emogua;
+            //地图判断，如果已经在1级宠捕捉点，则继续捕捉
+            var currentMap = cga.GetMapName();
+            if (currentMap == '芙蕾雅') {
+                await leo.autoWalkList([[484, 170],[482, 170]])
+            } else {
+                await leo.logBack()
+                //await leo.sellCastle()
+                await leo.checkHealth(doctorName)
+                await leo.checkCrystal(this.crystalName)
+                await leo.goto(n => n.falan.eout)
+                await leo.autoWalkList([
+                    [482, 170]
+                ])
+            }
+        }
+    },
+    '红帽哥布林': {
+        name: '红帽哥布林',
+        sealCardName: '封印卡（人形系）',
+        sealCardLevel: 1,
+        autoDropPet: true, //是否自动扔宠，true扔/false不扔
+        minHp: 106 - 3,
+        minMp: 73 - 3,
+        minAttack: 41,
+        minDefensive: 43,
+        minAgility: 31,
+        index: 1,
+        gradeMin: 0,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
+        gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
+        gradeLog: true, //打印算档日志
+        gradeLogMax: 5, //最多显示多少行日志
+        crystalName: '地水的水晶（5：5）',
+        petSkillName: '强力陨石魔法-Ⅰ',
+        autoBattle: [{
+            user: 1, //1-人 2-宠 3-人宠 4-人二动 5-人一动和二动
+            check: context => context.enemies.find(e => e.name == '小鬼' || e.name == '星雄' || e.name == '鬼犬'),
+            type: '攻击',
+            targets: context => [context.enemies.find(e => e.name == '小鬼' || e.name == '星雄' || e.name == '鬼犬').pos]
+        },{
+            user: 2, //1-人 2-宠 3-人宠 4-人二动 5-人一动和二动
+            check: context => context.enemies.find(e => e.name == '小鬼' || e.name == '星雄' || e.name == '鬼犬'),
+            skillName: '攻击',
+            targets: context => [context.enemies.find(e => e.name == '小鬼' || e.name == '星雄' || e.name == '鬼犬').pos]
+        }],
+        async walk(cga,protect){
+            const leo = cga.emogua;
+            const targetFinder = (units) => {
+                return units.find(u => u.unit_name == '冒险者金德其' && u.type == 1 
+            && (u.flags & cga.emogua.UnitFlags.NpcEntry) && u.model_id > 0);
+            }
+            const todo = async (target) => {
+                const positions = leo.getMovablePositionsAround({x: target.xpos, y: target.ypos});
+                await leo.autoWalk([positions[0].x, positions[0].y],undefined,undefined,{compress: false})
+                await leo.loop(async ()=>{
+                    if(leo.has('牛鬼杀')){
+                        console.log(leo.logTime()+'拿到了牛鬼杀');
+                        return leo.reject();
+                    }
+                    if(leo.has('酒？')){
+                        console.log(leo.logTime()+'拿到了酒？');
+                        return leo.reject();
+                    }
+                    await leo.talkNpc(target.xpos, target.ypos, leo.talkYes)
+                })
+            }
+            await leo.loop(async ()=>{
+                if(leo.checkStopEncounter(protect)){
+                    console.log(leo.logTime() + "触发回补");
+                    await leo.logBack()
+                    return leo.reject();
+                }
+                try{
+                    if(['艾尔莎岛','里谢里雅堡','法兰城','银行','达美姊妹的店'].includes(cga.GetMapName())){
+                        await leo.goto(n => n.falan.eout)
+                    }
+                    if(cga.GetMapName() == '芙蕾雅'){
+                        await leo.autoWalk([665,184,'*']);
+                    }
+                    if(cga.GetMapName() == '牛鬼的洞穴'){
+                        await leo.autoWalk([16,10,'*']);
+                    }
+                    if(cga.GetMapName() == '洞窟'){
+                        await leo.log('现在是白天，进不了牛鬼的洞穴，等待3分钟')
+                        await leo.delay(180000)
+                        await leo.autoWalk([16,19,'芙蕾雅'])
+                        await leo.delay(5000)
+                    }
+                    if(cga.GetMapName().includes('牛鬼的洞窟')){
+                        if(leo.has('牛鬼杀') || leo.has('酒？')){
+                            console.log(leo.logTime()+'已有【牛鬼杀】或者【酒？】，直接走迷宫');
+                            await leo.walkRandomMazeUntil(() => {
+                                var mapInfo = leo.getMapInfo();
+                                if (mapInfo.indexes.index3 == 11019) {
+                                    return true;
+                                }
+                                return false;
+                            },false)
+                        }else{
+                            console.log('开始找冒险者金德其');
+                            await leo.lookForNpc(targetFinder, todo, true);
+                        }
+                    }
+                    let mapInfo = cga.getMapInfo();
+                    if(mapInfo.indexes.index3 == 11019 && mapInfo.y >= 32){
+                        await leo.autoWalk([25,34])
+                        await leo.talkNpc(25,33,leo.talkYes)
+                        await leo.delay(1000)
+                        await leo.waitAfterBattle()
+                        mapInfo = cga.getMapInfo();
+                    }
+                    if(mapInfo.indexes.index3 == 11019 && (mapInfo.y < 32 & mapInfo.y > 14)){
+                        await leo.autoWalkList([[27,16],[27,15]])
+                        return leo.reject();
+                    }
+                    if(mapInfo.indexes.index3 == 11019 && (mapInfo.y < 14)){
+                        await leo.autoWalkList([[27,12],[27,13]])
+                        return leo.reject();
+                    }
+                }catch(e){
+                    console.log(leo.logTime()+'出错，可能是迷宫刷新：'+e);
+                    if(cga.GetMapName() != '牛鬼的洞穴'){
+                        await leo.logBack()
+                    }
+                    await leo.delay(1000*5)
+                }
+                await leo.delay(500)
+            })
+            console.log(leo.logTime()+'到达位置，开始抓宠，请注意是否开启了自动扔宠物。')
+            await leo.loop(async ()=> {
+                if(leo.checkStopEncounter(protect)){
+                    console.log(leo.logTime() + "触发回补");
+                    await leo.logBack()
+                    return leo.reject();
+                }
+                await leo.waitAfterBattle()
+                await leo.turnTo(27,14)
+                await leo.delay(2000)
+                await leo.waitAfterBattle()
+                let mapInfo = cga.getMapInfo();
+                if(mapInfo.indexes.index3 == 11019 && (mapInfo.y < 13)){
+                    await leo.autoWalkList([[27,12],[27,13]])
+                }
+                if(mapInfo.indexes.index3 == 11019 && (mapInfo.y > 15)){
+                    await leo.autoWalkList([[27,16],[27,15]])
+                }
+                protect.checker();
+                await leo.delay(1000)
+            })
+        }
+    },
+    '烈风哥布林': {
+        name: '烈风哥布林',
+        sealCardName: '封印卡（人形系）',
+        sealCardLevel: 4,
+        autoDropPet: true, //是否自动扔宠，true扔/false不扔
+        minHp: 114 - 3,
+        minMp: 70 - 3,
+        minAttack: 39,
         minDefensive: 40,
-        minAgility: 28,
+        minAgility: 32,
         index: 1,
         gradeMin: 1,    //高于该档次的宠判断丢弃
         gradeMax:20,    //低于该档次的宠判断丢弃
@@ -1358,43 +1635,210 @@ const petConfig = {
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
-        crystalName: '风地的水晶（5：5）',
-        petSkillName: '火焰魔法-Ⅰ',
+        crystalName: '火风的水晶（5：5）',
+        petSkillName: '陨石魔法-Ⅰ',
         async walk(cga){
             const leo = cga.emogua;
             //地图判断，如果已经在1级宠捕捉点，则继续捕捉
             var currentMap = cga.GetMapName();
-            if (currentMap == '风鸣之塔 10楼') {
-                await leo.autoWalkList([[15, 62],[14, 62]])
+            if (currentMap == '地下水脉') {
+                await leo.autoWalkList([[46, 57],[44, 55]])
+            } else {
+                if(leo.oldLine && leo.oldLine > 0) {
+                    //如果之前已经回补过，则需要换线抓
+                    let newLine = leo.oldLine + 1;
+                    if(newLine>10){
+                        newLine = 1;
+                    }
+                    return leo.changeLine(newLine);
+                }
+                await leo.logBack()
+                //await leo.sellCastle()
+                await leo.checkHealth(doctorName)
+                await leo.checkCrystal(this.crystalName)
+                await leo.goto(n => n.teleport.jenova)
+                await leo.autoWalkList([
+                    [71, 18, '莎莲娜']
+                ])
+                if(cga.GetMapName() == '莎莲娜' && !leo.has('塔比欧的细胞') && !leo.has('月之锄头')){
+                    await leo.loop(async ()=>{
+                        if(leo.has('塔比欧的细胞')){
+                            return leo.reject();
+                        }
+                        await leo.autoWalk([281, 371])
+                        await leo.turnDir(6)
+                        await leo.delay(1000)
+                        await leo.waitAfterBattle()
+                        await leo.delay(1000)
+                    })
+                }
+                if(cga.GetMapName() == '莎莲娜' && leo.has('塔比欧的细胞') && !leo.has('月之锄头')){
+                    await leo.loop(async ()=>{
+                        if(leo.has('月之锄头')){
+                            return leo.reject();
+                        }
+                        await leo.autoWalk([314,432])
+                        await leo.talkNpc(313, 432,leo.talkYes)
+                        await leo.delay(2000)
+                    })
+                }
+                if(cga.GetMapName() == '莎莲娜' && leo.has('月之锄头')){
+                    await leo.loop(async ()=>{
+                        if(leo.has('月之锄头')){
+                            return leo.reject();
+                        }
+                        await leo.autoWalk([314,432])
+                        await leo.talkNpc(313, 432,leo.talkYes)
+                        await leo.delay(2000)
+                    })
+                }
+                console.log(leo.logTime()+'到达莎莲娜，开始寻找迷宫入口');
+                await leo.loop(async ()=>{
+                    try{
+                        if(cga.GetMapName() == '莎莲娜'){
+                            var gotoTarget = () => {
+                                var targetEntryArr = {
+                                    '奇怪的坑道' : [[365,354],[365,362],[364,370],[354,384],[351,398],[361,408],
+                                       [359,453],[375,457],[387,459],
+                                       [395,447],[395,431],[388,421],[378,414],
+                                       [373,390],[361,420],[360,434],[374,433],
+                                    ]
+                                }
+                                var index = -1;
+                                var targetEntryAreaArr = targetEntryArr['奇怪的坑道'];
+                                if(leo.oldEntry){
+                                    targetEntryAreaArr.unshift(leo.oldEntry);
+                                }
+                                var tempEntry = null;
+                                var findHoleEntry = ()=>{
+                                    var mapInfo = leo.getMapInfo();
+                                    if(mapInfo.name == '奇怪的坑道地下1楼'){
+                                        console.log(leo.logTime()+'找到迷宫入口：'+tempEntry);
+                                        leo.oldEntry = tempEntry;
+                                        return leo.next();
+                                    }
+                                    index++;
+                                    if(index >= targetEntryAreaArr.length){
+                                        return leo.log('没有找到迷宫入口');
+                                    }
+                                    if (mapInfo.name == '莎莲娜') {
+                                        console.log(leo.logTime()+targetEntryAreaArr[index])
+                                        return leo.moveNearest(targetEntryAreaArr[index])
+                                        .then(()=>{
+                                            var npcExcept = ['附近的NPC'];
+                                            var mazeEntry = cga.GetMapUnits().filter(u => (u.flags & leo.UnitFlags.NpcEntry) && u.model_id > 0 && !npcExcept.includes(u.unit_name));
+                                            if(mazeEntry && mazeEntry.length>0){
+                                                tempEntry = [mazeEntry[0].xpos,mazeEntry[0].ypos];
+                                                return leo.autoWalk([mazeEntry[0].xpos,mazeEntry[0].ypos,'*'])
+                                                .then(()=>findHoleEntry());
+                                            }else{
+                                                return findHoleEntry();
+                                            }
+                                        })
+                                    }
+                                }
+                                return findHoleEntry();
+                            }
+                            await gotoTarget()
+                        }
+                        if(cga.GetMapName().includes('奇怪的坑道')) {
+                            return leo.reject();
+                        }
+                        await leo.delay(1000)
+                    }catch(e){
+                        await leo.log('迷宫刷新，e:' + e)
+                        await leo.delay(60000)
+                    }
+                })
+                if(cga.GetMapName().includes('奇怪的坑道') && !leo.has('红色三菱镜')){
+                    var targetFinder = (units) =>{ //发现NPC
+                        return units.find(u =>u.unit_name == '挖掘的迪太' && u.type == 1);
+                    }
+                    var todo = async (target) =>{　 //走向NPC对话
+                        const positions = leo.getMovablePositionsAround({x: target.xpos, y: target.ypos});
+                        await leo.autoWalk([positions[0].x, positions[0].y],undefined,undefined,{compress: false})
+                        await leo.loop(async ()=>{
+                            if(leo.has('红色三菱镜')){
+                                return leo.reject();
+                            }
+                            await leo.talkNpc(target.xpos, target.ypos, leo.talkYes)
+                        })
+                        if(leo.has('红色三菱镜')){
+                            console.log(leo.logTime()+'获取了道具【红色三菱镜】');
+                        }
+                    }
+                    await leo.lookForNpc(targetFinder, todo, false)
+                }
+                if(cga.GetMapName().includes('奇怪的坑道') && leo.has('红色三菱镜')){
+                    await leo.walkRandomMazeUntil(() => {
+                        var mapInfo = leo.getMapInfo();
+                        if (mapInfo.name.indexOf('奇怪的坑道地下1')!=-1 && mapInfo.x == 10 && mapInfo.y == 19) {
+                            return true;
+                        }
+                        return false;
+                    },false)
+                    await leo.autoWalkList([
+                        [10,15,[12, 7]],[8,5]
+                    ])
+                    await leo.turnDir(0)
+                    await leo.delay(2000)
+                    await leo.waitAfterBattle()
+                    await leo.delay(5000)
+                    await leo.waitUntil(()=>{
+                        var mapInfo = leo.getMapInfo();
+                        if (mapInfo.x == 2 && mapInfo.y == 5) {
+                            return true;
+                        }
+                        return false;
+                    })
+                    await leo.autoWalk([4,5])
+                    await leo.turnDir(0)
+                    await leo.waitUntil(()=>{
+                        var mapInfo = leo.getMapInfo();
+                        if (mapInfo.name == '地下水脉' && mapInfo.indexes.index3 == 15531) {
+                            return true;
+                        }
+                        return false;
+                    })
+                    await leo.autoWalkList([[46, 57],[44, 55]])
+                }
+            }
+        }
+    },
+    '火焰哥布林': {
+        name: '火焰哥布林',
+        sealCardName: '封印卡（人形系）',
+        sealCardLevel: 4,
+        autoDropPet: true, //是否自动扔宠，true扔/false不扔
+        minHp: 100 - 3,
+        minMp: 86 - 3,
+        minAttack: 40,
+        minDefensive: 41,
+        minAgility: 29,
+        index: 1,
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
+        gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
+        gradeLog: true, //打印算档日志
+        gradeLogMax: 5, //最多显示多少行日志
+        crystalName: '水火的水晶（5：5）',
+        petSkillName: '强力火焰魔法-Ⅰ',
+        async walk(cga){
+            const leo = cga.emogua;
+            //地图判断，如果已经在1级宠捕捉点，则继续捕捉
+            var currentMap = cga.GetMapName();
+            if (currentMap == '莎莲娜') {
+                await leo.autoWalkList([[255, 593],[257, 593]])
             } else {
                 await leo.logBack()
                 //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
-                await leo.goto(n => n.teleport.ghana)
+                await leo.goto(n => n.teleport.jenova)
                 await leo.autoWalkList([
-                    [47, 77, '索奇亚'],
-                    [462, 404, '索奇亚']
-                ])
-                await leo.turnTo(462, 404)
-                await leo.say('以军神之名开启海路')
-                await leo.talkNpc(-1,-1,leo.talkYes)
-                await leo.autoWalkList([
-                    [17, 13, '契约的海道'],
-                    [17, 12, '阿卡斯'],
-                    [45, 69, 20301], 
-                    [50, 15, 20302],
-                    [50, 62, 20303],    
-                    [66, 81, 20304],
-                    [72, 81, 20303],
-                    [88, 29, 20304],
-                    [94, 74, 20305],
-                    [89, 30, 20306],
-                    [50, 90, 20307],
-                    [50, 85, 20308],
-                    [93, 65, 20309],
-                    [90, 63, 20310],
-                    [14, 62]  
+                    [71, 19, '莎莲娜'],
+                    [257, 593]
                 ])
             }
         }
@@ -1457,52 +1901,73 @@ const petConfig = {
             }
         }
     },
-    '哥布林': {
-        name: '哥布林',
+    '巨人': {
+        name: '巨人',
         sealCardName: '封印卡（人形系）',
         sealCardLevel: 1,
         autoDropPet: true, //是否自动扔宠，true扔/false不扔
-        minHp: 108 - 3,
-        minMp: 74 - 3,
-        minAttack: 40,
-        minDefensive: 41,
-        minAgility: 30,
+        minHp: 124 - 3,
+        minMp: 89 - 3,
+        minAttack: 44,
+        minDefensive: 40,
+        minAgility: 28,
         index: 1,
-        gradeMin: 0,    //高于该档次的宠判断丢弃
+        gradeMin: 1,    //高于该档次的宠判断丢弃
         gradeMax:20,    //低于该档次的宠判断丢弃
         gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
-        crystalName: '火风的水晶（5：5）',
+        crystalName: '风地的水晶（5：5）',
         petSkillName: '火焰魔法-Ⅰ',
         async walk(cga){
             const leo = cga.emogua;
             //地图判断，如果已经在1级宠捕捉点，则继续捕捉
             var currentMap = cga.GetMapName();
-            if (currentMap == '芙蕾雅') {
-                await leo.autoWalkList([[484, 170],[482, 170]])
+            if (currentMap == '风鸣之塔 10楼') {
+                await leo.autoWalkList([[15, 62],[14, 62]])
             } else {
                 await leo.logBack()
                 //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
-                await leo.goto(n => n.falan.eout)
+                await leo.goto(n => n.teleport.ghana)
                 await leo.autoWalkList([
-                    [482, 170]
+                    [47, 77, '索奇亚'],
+                    [462, 404, '索奇亚']
+                ])
+                await leo.turnTo(462, 404)
+                await leo.say('以军神之名开启海路')
+                await leo.talkNpc(-1,-1,leo.talkYes)
+                await leo.autoWalkList([
+                    [17, 13, '契约的海道'],
+                    [17, 12, '阿卡斯'],
+                    [45, 69, 20301], 
+                    [50, 15, 20302],
+                    [50, 62, 20303],    
+                    [66, 81, 20304],
+                    [72, 81, 20303],
+                    [88, 29, 20304],
+                    [94, 74, 20305],
+                    [89, 30, 20306],
+                    [50, 90, 20307],
+                    [50, 85, 20308],
+                    [93, 65, 20309],
+                    [90, 63, 20310],
+                    [14, 62]  
                 ])
             }
         }
     },
-    '火焰哥布林': {
-        name: '火焰哥布林',
+    '单眼巨人': {
+        name: '单眼巨人',
         sealCardName: '封印卡（人形系）',
         sealCardLevel: 4,
         autoDropPet: true, //是否自动扔宠，true扔/false不扔
-        minHp: 100 - 3,
-        minMp: 86 - 3,
-        minAttack: 40,
-        minDefensive: 41,
+        minHp: 118 - 3,
+        minMp: 100 - 3,
+        minAttack: 43,
+        minDefensive: 38,
         minAgility: 29,
         index: 1,
         gradeMin: 1,    //高于该档次的宠判断丢弃
@@ -1511,23 +1976,41 @@ const petConfig = {
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
-        crystalName: '水火的水晶（5：5）',
-        petSkillName: '强力火焰魔法-Ⅰ',
+        crystalName: '风地的水晶（5：5）',
+        petSkillName: '陨石魔法-Ⅰ',
         async walk(cga){
             const leo = cga.emogua;
             //地图判断，如果已经在1级宠捕捉点，则继续捕捉
             var currentMap = cga.GetMapName();
-            if (currentMap == '莎莲娜') {
-                await leo.autoWalkList([[255, 593],[257, 593]])
-            } else {
+            if(currentMap=='雪拉威森塔９２层'){
+                await leo.autoWalkList([[106, 96]])
+            }else{
                 await leo.logBack()
                 //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
-                await leo.goto(n => n.teleport.jenova)
+                await leo.goto(n => n.elsa.x)
+                await leo.autoWalk([165,153])
+                await leo.talkNpc(2,leo.talkYes,'利夏岛')
+                await leo.autoWalk([90,99,'国民会馆'])
+                await leo.autoWalk([107,52])
+                await leo.supply(108, 52)
+                await leo.autoWalk([108,39,'雪拉威森塔１层'])
                 await leo.autoWalkList([
-                    [71, 19, '莎莲娜'],
-                    [257, 593]
+                    [73,56],[75,50,'雪拉威森塔５０层'],
+                    [18, 44, '雪拉威森塔９０层'],
+                ])
+                await leo.checkHealth(doctorName)
+                await leo.autoWalkList([
+                    [43, 26, '雪拉威森塔９１层'],
+                ])
+                await leo.checkHealth(doctorName)
+                await leo.autoWalkList([
+                    [44, 109, '雪拉威森塔９２层'],
+                ])
+                await leo.checkHealth(doctorName)
+                await leo.autoWalkList([
+                    [106, 96]
                 ])
             }
         }
@@ -1613,8 +2096,8 @@ const petConfig = {
         sealCardName: '封印卡（飞行系）',
         sealCardLevel: 1,
         autoDropPet: true, //是否自动扔宠，true扔/false不扔
-        minHp: 78 - 3,
-        minMp: 80 - 3,
+        minHp: 86 - 3,
+        minMp: 90 - 3,
         minAttack: 39,
         minDefensive: 37,
         minAgility: 34,
@@ -1819,6 +2302,55 @@ const petConfig = {
             }
         }
     },
+    '海蝙蝠': {
+        name: '海蝙蝠',
+        sealCardName: '封印卡（飞行系）',
+        sealCardLevel: 1,
+        autoDropPet: true, //是否自动扔宠，true扔/false不扔
+        minHp: 103 - 3,
+        minMp: 86 - 3,
+        minAttack: 41,
+        minDefensive: 42,
+        minAgility: 35,
+        index: 1,
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
+        gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
+        gradeLog: true, //打印算档日志
+        gradeLogMax: 5, //最多显示多少行日志
+        crystalName: '火风的水晶（5：5）',
+        petSkillName: '火焰魔法-Ⅰ',
+        async walk(cga){
+            const leo = cga.emogua;
+            //地图判断，如果已经在1级宠捕捉点，则继续捕捉
+            var currentMap = cga.GetMapName();
+            if(currentMap=='地底湖 地下2楼'){
+                await leo.autoWalkList([[40,60],[42,60]])
+            }else{
+                await leo.logBack()
+                //await leo.sellCastle()
+                await leo.checkHealth(doctorName)
+                await leo.checkCrystal(this.crystalName)
+                await leo.goto(n => n.castle.teleport)
+                await leo.autoWalk([37,4])
+                await leo.talkNpc(0,leo.talkYes)
+                await leo.autoWalkList([
+                    [5, 4, 4313],[6, 13, 4312],[6, 13, '阿巴尼斯村'],
+                    [38, 71,'莎莲娜'],[118, 100 ,'魔法大学'],[36,31]
+                ])
+                await leo.loop(async ()=>{
+                    if(cga.GetMapName()=='地底湖 地下1楼'){
+                        return leo.reject();
+                    }
+                    await leo.autoWalk([36,31])
+                    await leo.talkNpc(6,leo.talkYes)
+                    await leo.delay(1000)
+                })
+                await leo.autoWalkList([[6,23,'地底湖 地下2楼'],[42,60]])
+            }
+        }
+    },
     '兔耳蝙蝠': {
         name: '兔耳蝙蝠',
         sealCardName: '封印卡（飞行系）',
@@ -1912,6 +2444,142 @@ const petConfig = {
             }
         }
     },
+    '土蜘蛛': {
+        name: '土蜘蛛',
+        sealCardName: '封印卡（昆虫系）',
+        sealCardLevel: 1,
+        autoDropPet: true, //是否自动扔宠，true扔/false不扔
+        minHp: 103 - 3,
+        minMp: 100 - 3,
+        minAttack: 34,
+        minDefensive: 36,
+        minAgility: 32,
+        index: 1,
+        gradeMin: 0,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
+        gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
+        gradeLog: true, //打印算档日志
+        gradeLogMax: 5, //最多显示多少行日志
+        crystalName: '风地的水晶（5：5）',
+        petSkillName: '强力火焰魔法-Ⅰ',
+        autoBattle: [{
+            user: 1, //1-人 2-宠 3-人宠 4-人二动 5-人一动和二动
+            check: context => context.enemies.find(e => e.name == '小鬼' || e.name == '星雄' || e.name == '鬼犬'),
+            type: '攻击',
+            targets: context => [context.enemies.find(e => e.name == '小鬼' || e.name == '星雄' || e.name == '鬼犬').pos]
+        },{
+            user: 2, //1-人 2-宠 3-人宠 4-人二动 5-人一动和二动
+            check: context => context.enemies.find(e => e.name == '小鬼' || e.name == '星雄' || e.name == '鬼犬'),
+            skillName: '攻击',
+            targets: context => [context.enemies.find(e => e.name == '小鬼' || e.name == '星雄' || e.name == '鬼犬').pos]
+        }],
+        async walk(cga,protect){
+            const leo = cga.emogua;
+            const targetFinder = (units) => {
+                return units.find(u => u.unit_name == '冒险者金德其' && u.type == 1 
+            && (u.flags & cga.emogua.UnitFlags.NpcEntry) && u.model_id > 0);
+            }
+            const todo = async (target) => {
+                const positions = leo.getMovablePositionsAround({x: target.xpos, y: target.ypos});
+                await leo.autoWalk([positions[0].x, positions[0].y],undefined,undefined,{compress: false})
+                await leo.loop(async ()=>{
+                    if(leo.has('牛鬼杀')){
+                        console.log(leo.logTime()+'拿到了牛鬼杀');
+                        return leo.reject();
+                    }
+                    if(leo.has('酒？')){
+                        console.log(leo.logTime()+'拿到了酒？');
+                        return leo.reject();
+                    }
+                    await leo.talkNpc(target.xpos, target.ypos, leo.talkYes)
+                })
+            }
+            await leo.loop(async ()=>{
+                if(leo.checkStopEncounter(protect)){
+                    console.log(leo.logTime() + "触发回补");
+                    await leo.logBack()
+                    return leo.reject();
+                }
+                try{
+                    if(['艾尔莎岛','里谢里雅堡','法兰城','银行','达美姊妹的店'].includes(cga.GetMapName())){
+                        await leo.goto(n => n.falan.eout)
+                    }
+                    if(cga.GetMapName() == '芙蕾雅'){
+                        await leo.autoWalk([665,184,'*']);
+                    }
+                    if(cga.GetMapName() == '牛鬼的洞穴'){
+                        await leo.autoWalk([16,10,'*']);
+                    }
+                    if(cga.GetMapName() == '洞窟'){
+                        await leo.log('现在是白天，进不了牛鬼的洞穴，等待3分钟')
+                        await leo.delay(180000)
+                        await leo.autoWalk([16,19,'芙蕾雅'])
+                        await leo.delay(5000)
+                    }
+                    if(cga.GetMapName().includes('牛鬼的洞窟')){
+                        if(leo.has('牛鬼杀') || leo.has('酒？')){
+                            console.log(leo.logTime()+'已有【牛鬼杀】或者【酒？】，直接走迷宫');
+                            await leo.walkRandomMazeUntil(() => {
+                                var mapInfo = leo.getMapInfo();
+                                if (mapInfo.indexes.index3 == 11019) {
+                                    return true;
+                                }
+                                return false;
+                            },false)
+                        }else{
+                            console.log('开始找冒险者金德其');
+                            await leo.lookForNpc(targetFinder, todo, true);
+                        }
+                    }
+                    let mapInfo = cga.getMapInfo();
+                    if(mapInfo.indexes.index3 == 11019 && mapInfo.y >= 32){
+                        await leo.autoWalk([25,34])
+                        await leo.talkNpc(25,33,leo.talkYes)
+                        await leo.delay(1000)
+                        await leo.waitAfterBattle()
+                        mapInfo = cga.getMapInfo();
+                    }
+                    if(mapInfo.indexes.index3 == 11019 && (mapInfo.y < 32 & mapInfo.y > 14)){
+                        await leo.autoWalkList([[27,16],[27,15]])
+                        return leo.reject();
+                    }
+                    if(mapInfo.indexes.index3 == 11019 && (mapInfo.y < 14)){
+                        await leo.autoWalkList([[27,12],[27,13]])
+                        return leo.reject();
+                    }
+                }catch(e){
+                    console.log(leo.logTime()+'出错，可能是迷宫刷新：'+e);
+                    if(cga.GetMapName() != '牛鬼的洞穴'){
+                        await leo.logBack()
+                    }
+                    await leo.delay(1000*5)
+                }
+                await leo.delay(500)
+            })
+            console.log(leo.logTime()+'到达位置，开始抓宠，请注意是否开启了自动扔宠物。')
+            await leo.loop(async ()=> {
+                if(leo.checkStopEncounter(protect)){
+                    console.log(leo.logTime() + "触发回补");
+                    await leo.logBack()
+                    return leo.reject();
+                }
+                await leo.waitAfterBattle()
+                await leo.turnTo(27,14)
+                await leo.delay(2000)
+                await leo.waitAfterBattle()
+                let mapInfo = cga.getMapInfo();
+                if(mapInfo.indexes.index3 == 11019 && (mapInfo.y < 13)){
+                    await leo.autoWalkList([[27,12],[27,13]])
+                }
+                if(mapInfo.indexes.index3 == 11019 && (mapInfo.y > 15)){
+                    await leo.autoWalkList([[27,16],[27,15]])
+                }
+                protect.checker();
+                await leo.delay(1000)
+            })
+        }
+    },
     '水蜘蛛': {
         name: '水蜘蛛',
         sealCardName: '封印卡（昆虫系）',
@@ -1947,6 +2615,50 @@ const petConfig = {
                     [60, 45, '索奇亚'],
                     [356, 334, '角笛大风穴'],
                     [10, 33]
+                ])
+            }
+        }
+    },
+    '风蜘蛛': {
+        name: '风蜘蛛',
+        sealCardName: '封印卡（昆虫系）',
+        sealCardLevel: 4,
+        autoDropPet: true, //是否自动扔宠，true扔/false不扔
+        minHp: 102 - 5,
+        minMp: 92 - 5,
+        minAttack: 40,
+        minDefensive: 35,
+        minAgility: 31,
+        index: 1,
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
+        gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
+        gradeLog: true, //打印算档日志
+        gradeLogMax: 5, //最多显示多少行日志
+        crystalName: '火风的水晶（5：5）',
+        petSkillName: '强力火焰魔法-Ⅰ',
+        async walk(cga){
+            const leo = cga.emogua;
+            //地图判断，如果已经在1级宠捕捉点，则继续捕捉
+            var currentMap = cga.GetMapName();
+            if(currentMap=='雪拉威森塔６５层'){
+                await leo.autoWalkList([[72,111],[70,111]])
+            }else{
+                await leo.logBack()
+                //await leo.sellCastle()
+                await leo.checkHealth(doctorName)
+                await leo.checkCrystal(this.crystalName)
+                await leo.goto(n => n.elsa.x)
+                await leo.autoWalk([165,153])
+                await leo.talkNpc(2,leo.talkYes,'利夏岛')
+                await leo.autoWalk([90,99,'国民会馆'])
+                await leo.autoWalk([107,52])
+                await leo.supply(108, 52)
+                await leo.autoWalk([108,39,'雪拉威森塔１层'])
+                await leo.autoWalkList([
+                    [73,56],[75,50,'雪拉威森塔５０层'],
+                    [23,55,'雪拉威森塔６５层'],[70,111]
                 ])
             }
         }
@@ -2222,7 +2934,7 @@ const petConfig = {
                 ])
                 await leo.talkNpc(0,leo.talkYes,'井的底部')
                 await leo.autoWalkList([
-                    [7,4,'通路'],[33,3,21025],[22,29]
+                    [7,4,'通路'],[22,26,21025],[22,29]
                 ])
             }
         }
@@ -2269,8 +2981,8 @@ const petConfig = {
         sealCardName: '封印卡（不死系）',
         sealCardLevel: 1,
         autoDropPet: true, //是否自动扔宠，true扔/false不扔
-        minHp: 89 - 3,
-        minMp: 115 - 3,
+        minHp: 89 - 30,
+        minMp: 115 - 30,
         minAttack: 41,
         minDefensive: 45,
         minAgility: 31,
@@ -2282,7 +2994,7 @@ const petConfig = {
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
         crystalName: '火风的水晶（5：5）',
-        petSkillName: '火焰魔法-Ⅰ',
+        petSkillName: '强力火焰魔法-Ⅰ',
         async walk(cga){
             const leo = cga.emogua;
             await leo.log('当前时间是【'+leo.getSysTimeEx()+'】')
@@ -2323,6 +3035,26 @@ const petConfig = {
                 })
             }
         }
+    },
+    '幽灵': {
+        name: '幽灵',
+        sealCardName: '封印卡（不死系）',
+        sealCardLevel: 1,
+        autoDropPet: true, //是否自动扔宠，true扔/false不扔
+        minHp: 100 - 3,
+        minMp: 112 - 3,
+        minAttack: 36,
+        minDefensive: 44,
+        minAgility: 31,
+        index: 1,
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
+        gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
+        gradeLog: true, //打印算档日志
+        gradeLogMax: 5, //最多显示多少行日志
+        crystalName: '地水的水晶（5：5）',
+        petSkillName: '强力陨石魔法-Ⅰ',
     },
     '小恶魔': {
         name: '小恶魔',
@@ -2373,7 +3105,7 @@ const petConfig = {
         minDefensive: 46,
         minAgility: 30,
         index: 1,
-        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMin: 0,    //高于该档次的宠判断丢弃
         gradeMax:20,    //低于该档次的宠判断丢弃
         gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
@@ -2394,28 +3126,77 @@ const petConfig = {
                 await leo.checkCrystal(this.crystalName)
                 await leo.goto(n => n.castle.teleport)
                 await leo.autoWalk([37,4])
-                await leo.talkNpc(0,leo.talkYes)
+                await leo.loop(async ()=>{
+                    if(cga.GetMapName()=='阿巴尼斯村的传送点'){
+                        return leo.reject();
+                    }else{
+                        await leo.talkNpc(0,leo.talkYes)
+                    }
+                    await leo.delay(2000)
+                })
                 await leo.autoWalkList([
-                    [5, 4, 4313],[6, 13, 4312],[6, 13, '阿巴尼斯村'],
-                    [40, 30,'民家'],[13, 11]
+                    [5, 4, 4313],[6, 13, 4312],[6, 13, '阿巴尼斯村']
                 ])
-                await leo.talkNpc(7,leo.talkYes)
-                await leo.autoWalk([9,5])
-                await leo.talkNpc(6,leo.talkYes)
-                await leo.autoWalk([14,7])
-                await leo.talkNpc(0,leo.talkYes)
-                await leo.autoWalk([14,7])
-                await leo.talkNpc(0,leo.talkYes)
-                await leo.autoWalk([5,3,4333])
-                await leo.autoWalk([9,5])
-                await leo.autoWalk([9,4,4334])
-                await leo.autoWalk([14,10])
-                await leo.talkNpc(0,leo.talkYes)
-                await leo.autoWalk([7,3,4320])
-                await leo.autoWalkList([
-                    [11,17,'阿巴尼斯村'],[37,71,'莎莲娜'],[54,162]
-                ])
-                await leo.turnDir(6)
+                if(!leo.has('刀刃的碎片')){
+                    await leo.autoWalk([40, 30, '民家'])
+                    await leo.autoWalk([13, 10])
+                    await leo.loop(async ()=>{
+                        if(!leo.has('野草莓')){
+                            await leo.talkNpc(14, 10,leo.talkYes)
+                        }else{
+                            return leo.reject();
+                        }
+                        await leo.delay(1000)
+                    })
+                    console.log(leo.logTime()+'拿到了【野草莓】');
+                    await leo.loop(async ()=>{
+                        if(cga.getMapInfo().indexes.index3 == 4331){
+                            return leo.reject();
+                        }else{
+                            await leo.talkNpcAt(9, 4)
+                        }
+                        await leo.delay(2000)
+                    })
+                    await leo.loop(async ()=>{
+                        if(cga.getMapInfo().indexes.index3 == 4332){
+                            return leo.reject();
+                        }else{
+                            await leo.talkNpcAt(15, 7)
+                        }
+                        await leo.delay(2000)
+                    })
+                    await leo.loop(async ()=>{
+                        if(leo.has('刀刃的碎片')){
+                            return leo.reject();
+                        }else{
+                            await leo.talkNpcAt(15, 7)
+                        }
+                        await leo.delay(2000)
+                    })
+                    console.log(leo.logTime()+'拿到了【刀刃的碎片】');
+                    await leo.autoWalkList([
+                        [5, 3, 4333], [9, 4, 4334]
+                    ])
+                    await leo.loop(async ()=>{
+                        if(cga.getMapInfo().indexes.index3 == 4335){
+                            return leo.reject();
+                        }else{
+                            await leo.talkNpcAt(15, 10)
+                        }
+                        await leo.delay(2000)
+                    })
+                    await leo.autoWalkList([
+                        [7, 3, 4320],[12, 17, '阿巴尼斯村'],[37,71,'莎莲娜'],[54,162]
+                    ])
+                }
+                await leo.loop(async ()=>{
+                    if(cga.GetMapName()=='诅咒的迷宫'){
+                        return leo.reject();
+                    }else{
+                        await leo.talkNpc(54, 161, leo.talkYes)
+                    }
+                    await leo.delay(2000)
+                })
                 await leo.autoWalkList([
                     [35,9,'诅咒的迷宫 地下1楼'],[25,13,'诅咒的迷宫 地下2楼'],
                     [17,4,'诅咒的迷宫 地下3楼'],[23,20,'诅咒的迷宫 地下4楼'],
@@ -2424,7 +3205,7 @@ const petConfig = {
                     [14,18,'诅咒的迷宫 地下9楼'],[24,4,'第一个难关'],
                     [22,15]
                 ])
-                await leo.talkNpc(6,leo.talkYes,'诅咒的迷宫 地下11楼')
+                await leo.talkNpc(22, 14,leo.talkYes,'诅咒的迷宫 地下11楼')
                 await leo.autoWalkList([
                     [15,4,'诅咒的迷宫 地下12楼'],[24,15,'诅咒的迷宫 地下13楼'],
                     [16,3,'诅咒的迷宫 地下14楼'],[25,12,'诅咒的迷宫 地下15楼'],
@@ -2442,10 +3223,10 @@ const petConfig = {
         sealCardLevel: 1,
         autoDropPet: true, //是否自动扔宠，true扔/false不扔
         minHp: 112 - 3,
-        minMp: 99 - 3,
-        minAttack: 33,
-        minDefensive: 45,
-        minAgility: 27,
+        minMp: 96 - 3,
+        minAttack: 34,
+        minDefensive: 44,
+        minAgility: 28,
         index: 1,
         gradeMin: 1,    //高于该档次的宠判断丢弃
         gradeMax:20,    //低于该档次的宠判断丢弃
@@ -2549,6 +3330,642 @@ const petConfig = {
             }
         }
     },
+    '僵尸': {
+        name: '僵尸',
+        sealCardName: '封印卡（不死系）',
+        sealCardLevel: 1,
+        autoDropPet: true, //是否自动扔宠，true扔/false不扔
+        minHp: 115 - 3,
+        minMp: 80 - 3,
+        minAttack: 42,
+        minDefensive: 33,
+        minAgility: 28,
+        index: 1,
+        gradeMin: 0,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
+        gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
+        gradeLog: true, //打印算档日志
+        gradeLogMax: 5, //最多显示多少行日志
+        crystalName: '风地的水晶（5：5）',
+        petSkillName: '强力陨石魔法-Ⅰ',
+        async walk(cga){
+            const leo = cga.emogua;
+            //地图判断，如果已经在1级宠捕捉点，则继续捕捉
+            const mapInfo = leo.getMapInfo();
+            if(mapInfo.name=='阿鲁巴斯的研究所' 
+                && mapInfo.indexes.index3 == 15519
+                && mapInfo.x >= 20 && mapInfo.x <= 26
+                && mapInfo.y >= 32 && mapInfo.y <= 40) {
+                await leo.autoWalkList([
+                    [23, 34],[23,36]
+                ])
+            }else{
+                await leo.loop(async ()=>{
+                    if(cga.GetMapName()=='阿鲁巴斯的研究所') {
+                        return leo.reject();
+                    }
+                    if(cga.GetMapName()!='索奇亚' && cga.GetMapName()!='森林小路' && !cga.GetMapName().includes('阿鲁巴斯的洞窟') && cga.GetMapName()!='阿鲁巴斯的研究所') {
+                        await leo.logBack()
+                        //await leo.sellCastle()
+                        await leo.checkHealth(doctorName)
+                        await leo.checkCrystal(this.crystalName)
+                        await leo.goto(n => n.teleport.kili)
+                        if(!leo.has(18338)){
+                            console.log(leo.logTime()+'拿【调查诱拐事件的委托信】1');
+                            await leo.autoWalk([50,54,'老夫妇的家'])
+                            await leo.autoWalk([5,5])
+                            await leo.loop(async ()=>{
+                                if(leo.has('记载罪行的纸条')){
+                                    return leo.reject();
+                                }
+                                await leo.talkNpc(0,leo.talkYes)
+                                await leo.delay(1000)
+                            })
+                            await leo.autoWalk([10,8])
+                            await leo.loop(async ()=>{
+                                if(leo.has(18338)){ //调查诱拐事件的委托信
+                                    return leo.reject();
+                                }
+                                await leo.talkNpc(0,leo.talkYes)
+                                await leo.delay(1000)
+                            })
+                            await leo.autoWalk([10,15,'奇利村'])
+                        }
+                        if(!leo.has(18339)){
+                            console.log(leo.logTime()+'拿【调查诱拐事件的委托信】2');
+                            await leo.autoWalk([64,56,'医院'])
+                            await leo.autoWalk([7,2])
+                            await leo.loop(async ()=>{
+                                if(leo.has('记载罪行的纸条')){
+                                    return leo.reject();
+                                }
+                                await leo.talkNpc(0,leo.talkYes)
+                                await leo.delay(1000)
+                            })
+                            await leo.autoWalk([13,16])
+                            await leo.loop(async ()=>{
+                                if(leo.has(18339)){ //调查诱拐事件的委托信
+                                    return leo.reject();
+                                }
+                                await leo.talkNpc(0,leo.talkYes)
+                                await leo.delay(1000)
+                            })
+                            await leo.autoWalk([3,9,'奇利村'])
+                        }
+                        if(!leo.has(18340)){
+                            console.log(leo.logTime()+'拿【调查诱拐事件的委托信】3');
+                            await leo.autoWalk([50,63,'村长的家'])
+                            await leo.autoWalk([10,5])
+                            await leo.loop(async ()=>{
+                                if(leo.getSysTimeEx()=='夜晚'){
+                                    await leo.autoWalk([10,2,'*'])
+                                    if(leo.getMapInfo().indexes.index3 == 15514){
+                                        return leo.reject();
+                                    }else{
+                                        //不是夜晚的地图，出去，重新进
+                                        await leo.autoWalk([7,13,'*'])
+                                        await leo.autoWalk([10,5])
+                                    }
+                                }
+                                await leo.log('当前时间是【'+leo.getSysTimeEx()+'】，等待【夜晚】')
+                                await leo.moveAround()
+                                await leo.delay(120000)
+                            })
+                            leo.battleSetting.attack()
+                            await leo.autoWalk([7,6])
+                            await leo.turnDir(2)
+                            await leo.loop(async ()=>{
+                                if(cga.findNPC('黑暗医师阿鲁巴斯')){
+                                    await leo.talkNpc(8, 6,leo.talkYes)
+                                    return leo.reject();//退出循环
+                                }else{
+                                    await leo.log('当前时间是【'+leo.getSysTimeEx()+'】，等待夜晚【黑暗医师阿鲁巴斯】出现')
+
+                                    await leo.delay(30000);
+                                }
+                            })
+                            await leo.waitAfterBattle()
+                            await leo.autoWalk([6,3])
+                            await leo.loop(async ()=>{
+                                if(leo.has('记载罪行的纸条')){
+                                    return leo.reject();
+                                }
+                                await leo.talkNpc(0,leo.talkYes)
+                                await leo.delay(1000)
+                            })
+                            await leo.autoWalk([7,13,15516])
+                            await leo.autoWalk([10,7])
+                            await leo.loop(async ()=>{
+                                if(leo.has(18340)){ //调查诱拐事件的委托信
+                                    return leo.reject();
+                                }
+                                await leo.talkNpc(0,leo.talkYes)
+                                await leo.delay(1000)
+                            })
+                            await leo.autoWalk([1,8,'奇利村'])
+                            leo.battleSetting.escape()
+                        }
+                        if(!leo.has('双亲的信')){
+                            console.log(leo.logTime()+'拿【双亲的信】');
+                            await leo.autoWalk([71,63,'民家'])
+                            await leo.autoWalk([10,10])
+                            await leo.loop(async ()=>{
+                                if(leo.has('双亲的信')){
+                                    return leo.reject();
+                                }
+                                await leo.talkNpc(0,leo.talkYes)
+                                await leo.delay(1000)
+                            })
+                            await leo.autoWalk([3,9,'奇利村'])
+                        }
+                        await leo.autoWalk([79,76,'索奇亚'])
+                    }
+                    if(cga.GetMapName()=='索奇亚') {
+                        await leo.autoWalk([217,222])
+                        leo.monitor.config.autoExit = false; //关闭5分钟不动结束脚本
+                        leo.monitor.config.keepAlive = true; //开启防掉线
+                        await leo.loop(async ()=>{
+                            if(cga.GetMapName()=='森林小路'){
+                                return leo.reject();
+                            }
+                            if(cga.findNPC('守门的腐尸')){
+                                await leo.talkNpc(216, 222,leo.talkYes)
+                            }else{
+                                await leo.log('当前时间是【'+leo.getSysTimeEx()+'】，等待夜晚【守门的腐尸】出现');
+                                await leo.delay(30000);
+                            }
+                            await leo.delay(2000)
+                        })
+                        leo.monitor.config.autoExitMemory = {}; //重置x分钟不动缓存
+                        leo.monitor.config.autoExit = true; //开启5分钟不动结束脚本
+                        leo.monitor.config.keepAlive = false; //关闭防掉线
+                    }
+                    if(cga.GetMapName()=='森林小路') {
+                        await leo.autoWalk([8,38,'阿鲁巴斯的洞窟1楼'])
+                    }
+                    if(cga.GetMapName().includes('阿鲁巴斯的洞窟')){
+                        try{
+                            await leo.walkRandomMazeUntil(() => {
+                                if (cga.GetMapName() == '阿鲁巴斯的研究所') {
+                                    return true; //15518
+                                }
+                                if (cga.GetMapName() == '森林小路') {
+                                    console.log(leo.logTime()+'迷宫刷新');
+                                    return true;
+                                }
+                                return false;
+                            },true);
+                        }catch(e){
+                            console.log(leo.logTime()+'迷宫刷新:' + e);
+                        }
+                    }
+                    await leo.delay(2000)
+                })
+                if(cga.GetMapName() == '阿鲁巴斯的研究所'){
+                    if(leo.getMapInfo().indexes.index3 == 15518
+                        && (leo.getMapInfo().x<=48 
+                        || leo.getMapInfo().y>=26)) {
+                        await leo.autoWalk([17,18,15519])
+                    }
+                    if(leo.getMapInfo().indexes.index3 == 15519
+                        && leo.getMapInfo().x<16) {
+                        await leo.autoWalk([37,10,15518])
+                    }
+                    if(leo.getMapInfo().indexes.index3 == 15518
+                        && leo.getMapInfo().x>48 
+                        && leo.getMapInfo().y<26) {
+                        await leo.autoWalk([49,19,15519])
+                    }
+                    await leo.autoWalk([23,36])
+                }
+            }
+        }
+    },
+    '腐尸': {
+        name: '腐尸',
+        sealCardName: '封印卡（不死系）',
+        sealCardLevel: 1,
+        autoDropPet: true, //是否自动扔宠，true扔/false不扔
+        minHp: 121 - 3,
+        minMp: 71 - 3,
+        minAttack: 44,
+        minDefensive: 33,
+        minAgility: 26,
+        index: 1,
+        gradeMin: 0,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
+        gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
+        gradeLog: true, //打印算档日志
+        gradeLogMax: 5, //最多显示多少行日志
+        crystalName: '风地的水晶（5：5）',
+        petSkillName: '强力陨石魔法-Ⅰ',
+        async walk(cga){
+            const leo = cga.emogua;
+            //地图判断，如果已经在1级宠捕捉点，则继续捕捉
+            const mapInfo = leo.getMapInfo();
+            if(mapInfo.name=='阿鲁巴斯的研究所' 
+                && mapInfo.indexes.index3 == 15519
+                && mapInfo.x >= 20 && mapInfo.x <= 26
+                && mapInfo.y >= 32 && mapInfo.y <= 40) {
+                await leo.autoWalkList([
+                    [23, 34],[23,36]
+                ])
+            }else{
+                await leo.loop(async ()=>{
+                    if(cga.GetMapName()=='阿鲁巴斯的研究所') {
+                        return leo.reject();
+                    }
+                    if(cga.GetMapName()!='索奇亚' && cga.GetMapName()!='森林小路' && !cga.GetMapName().includes('阿鲁巴斯的洞窟') && cga.GetMapName()!='阿鲁巴斯的研究所') {
+                        await leo.logBack()
+                        //await leo.sellCastle()
+                        await leo.checkHealth(doctorName)
+                        await leo.checkCrystal(this.crystalName)
+                        await leo.goto(n => n.teleport.kili)
+                        if(!leo.has(18338)){
+                            console.log(leo.logTime()+'拿【调查诱拐事件的委托信】1');
+                            await leo.autoWalk([50,54,'老夫妇的家'])
+                            await leo.autoWalk([5,5])
+                            await leo.loop(async ()=>{
+                                if(leo.has('记载罪行的纸条')){
+                                    return leo.reject();
+                                }
+                                await leo.talkNpc(0,leo.talkYes)
+                                await leo.delay(1000)
+                            })
+                            await leo.autoWalk([10,8])
+                            await leo.loop(async ()=>{
+                                if(leo.has(18338)){ //调查诱拐事件的委托信
+                                    return leo.reject();
+                                }
+                                await leo.talkNpc(0,leo.talkYes)
+                                await leo.delay(1000)
+                            })
+                            await leo.autoWalk([10,15,'奇利村'])
+                        }
+                        if(!leo.has(18339)){
+                            console.log(leo.logTime()+'拿【调查诱拐事件的委托信】2');
+                            await leo.autoWalk([64,56,'医院'])
+                            await leo.autoWalk([7,2])
+                            await leo.loop(async ()=>{
+                                if(leo.has('记载罪行的纸条')){
+                                    return leo.reject();
+                                }
+                                await leo.talkNpc(0,leo.talkYes)
+                                await leo.delay(1000)
+                            })
+                            await leo.autoWalk([13,16])
+                            await leo.loop(async ()=>{
+                                if(leo.has(18339)){ //调查诱拐事件的委托信
+                                    return leo.reject();
+                                }
+                                await leo.talkNpc(0,leo.talkYes)
+                                await leo.delay(1000)
+                            })
+                            await leo.autoWalk([3,9,'奇利村'])
+                        }
+                        if(!leo.has(18340)){
+                            console.log(leo.logTime()+'拿【调查诱拐事件的委托信】3');
+                            await leo.autoWalk([50,63,'村长的家'])
+                            await leo.autoWalk([10,5])
+                            await leo.loop(async ()=>{
+                                if(leo.getSysTimeEx()=='夜晚'){
+                                    await leo.autoWalk([10,2,'*'])
+                                    if(leo.getMapInfo().indexes.index3 == 15514){
+                                        return leo.reject();
+                                    }else{
+                                        //不是夜晚的地图，出去，重新进
+                                        await leo.autoWalk([7,13,'*'])
+                                        await leo.autoWalk([10,5])
+                                    }
+                                }
+                                await leo.log('当前时间是【'+leo.getSysTimeEx()+'】，等待【夜晚】')
+                                await leo.moveAround()
+                                await leo.delay(120000)
+                            })
+                            leo.battleSetting.attack()
+                            await leo.autoWalk([7,6])
+                            await leo.turnDir(2)
+                            await leo.loop(async ()=>{
+                                if(cga.findNPC('黑暗医师阿鲁巴斯')){
+                                    await leo.talkNpc(8, 6,leo.talkYes)
+                                    return leo.reject();//退出循环
+                                }else{
+                                    await leo.log('当前时间是【'+leo.getSysTimeEx()+'】，等待夜晚【黑暗医师阿鲁巴斯】出现')
+
+                                    await leo.delay(30000);
+                                }
+                            })
+                            await leo.waitAfterBattle()
+                            await leo.autoWalk([6,3])
+                            await leo.loop(async ()=>{
+                                if(leo.has('记载罪行的纸条')){
+                                    return leo.reject();
+                                }
+                                await leo.talkNpc(0,leo.talkYes)
+                                await leo.delay(1000)
+                            })
+                            await leo.autoWalk([7,13,15516])
+                            await leo.autoWalk([10,7])
+                            await leo.loop(async ()=>{
+                                if(leo.has(18340)){ //调查诱拐事件的委托信
+                                    return leo.reject();
+                                }
+                                await leo.talkNpc(0,leo.talkYes)
+                                await leo.delay(1000)
+                            })
+                            await leo.autoWalk([1,8,'奇利村'])
+                            leo.battleSetting.escape()
+                        }
+                        if(!leo.has('双亲的信')){
+                            console.log(leo.logTime()+'拿【双亲的信】');
+                            await leo.autoWalk([71,63,'民家'])
+                            await leo.autoWalk([10,10])
+                            await leo.loop(async ()=>{
+                                if(leo.has('双亲的信')){
+                                    return leo.reject();
+                                }
+                                await leo.talkNpc(0,leo.talkYes)
+                                await leo.delay(1000)
+                            })
+                            await leo.autoWalk([3,9,'奇利村'])
+                        }
+                        await leo.autoWalk([79,76,'索奇亚'])
+                    }
+                    if(cga.GetMapName()=='索奇亚') {
+                        await leo.autoWalk([217,222])
+                        leo.monitor.config.autoExit = false; //关闭5分钟不动结束脚本
+                        leo.monitor.config.keepAlive = true; //开启防掉线
+                        await leo.loop(async ()=>{
+                            if(cga.GetMapName()=='森林小路'){
+                                return leo.reject();
+                            }
+                            if(cga.findNPC('守门的腐尸')){
+                                await leo.talkNpc(216, 222,leo.talkYes)
+                            }else{
+                                await leo.log('当前时间是【'+leo.getSysTimeEx()+'】，等待夜晚【守门的腐尸】出现');
+                                await leo.delay(30000);
+                            }
+                            await leo.delay(2000)
+                        })
+                        leo.monitor.config.autoExitMemory = {}; //重置x分钟不动缓存
+                        leo.monitor.config.autoExit = true; //开启5分钟不动结束脚本
+                        leo.monitor.config.keepAlive = false; //关闭防掉线
+                    }
+                    if(cga.GetMapName()=='森林小路') {
+                        await leo.autoWalk([8,38,'阿鲁巴斯的洞窟1楼'])
+                    }
+                    if(cga.GetMapName().includes('阿鲁巴斯的洞窟')){
+                        try{
+                            await leo.walkRandomMazeUntil(() => {
+                                if (cga.GetMapName() == '阿鲁巴斯的研究所') {
+                                    return true; //15518
+                                }
+                                if (cga.GetMapName() == '森林小路') {
+                                    console.log(leo.logTime()+'迷宫刷新');
+                                    return true;
+                                }
+                                return false;
+                            },true);
+                        }catch(e){
+                            console.log(leo.logTime()+'迷宫刷新:' + e);
+                        }
+                    }
+                    await leo.delay(2000)
+                })
+                if(cga.GetMapName() == '阿鲁巴斯的研究所'){
+                    if(leo.getMapInfo().indexes.index3 == 15518
+                        && (leo.getMapInfo().x<=48 
+                        || leo.getMapInfo().y>=26)) {
+                        await leo.autoWalk([17,18,15519])
+                    }
+                    if(leo.getMapInfo().indexes.index3 == 15519
+                        && leo.getMapInfo().x<16) {
+                        await leo.autoWalk([37,10,15518])
+                    }
+                    if(leo.getMapInfo().indexes.index3 == 15518
+                        && leo.getMapInfo().x>48 
+                        && leo.getMapInfo().y<26) {
+                        await leo.autoWalk([49,19,15519])
+                    }
+                    await leo.autoWalk([23,36])
+                }
+            }
+        }
+    },
+    '食尸鬼': {
+        name: '食尸鬼',
+        sealCardName: '封印卡（不死系）',
+        sealCardLevel: 1,
+        autoDropPet: true, //是否自动扔宠，true扔/false不扔
+        minHp: 108 - 3,
+        minMp: 89 - 3,
+        minAttack: 42,
+        minDefensive: 36,
+        minAgility: 26,
+        index: 1,
+        gradeMin: 0,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
+        gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
+        gradeLog: true, //打印算档日志
+        gradeLogMax: 5, //最多显示多少行日志
+        crystalName: '风地的水晶（5：5）',
+        petSkillName: '强力陨石魔法-Ⅰ',
+        async walk(cga){
+            const leo = cga.emogua;
+            //地图判断，如果已经在1级宠捕捉点，则继续捕捉
+            const mapInfo = leo.getMapInfo();
+            if(mapInfo.name=='阿鲁巴斯的研究所' 
+                && mapInfo.indexes.index3 == 15519
+                && mapInfo.x >= 20 && mapInfo.x <= 26
+                && mapInfo.y >= 32 && mapInfo.y <= 40) {
+                await leo.autoWalkList([
+                    [23, 34],[23,36]
+                ])
+            }else{
+                await leo.loop(async ()=>{
+                    if(cga.GetMapName()=='阿鲁巴斯的研究所') {
+                        return leo.reject();
+                    }
+                    if(cga.GetMapName()!='索奇亚' && cga.GetMapName()!='森林小路' && !cga.GetMapName().includes('阿鲁巴斯的洞窟') && cga.GetMapName()!='阿鲁巴斯的研究所') {
+                        await leo.logBack()
+                        //await leo.sellCastle()
+                        await leo.checkHealth(doctorName)
+                        await leo.checkCrystal(this.crystalName)
+                        await leo.goto(n => n.teleport.kili)
+                        if(!leo.has(18338)){
+                            console.log(leo.logTime()+'拿【调查诱拐事件的委托信】1');
+                            await leo.autoWalk([50,54,'老夫妇的家'])
+                            await leo.autoWalk([5,5])
+                            await leo.loop(async ()=>{
+                                if(leo.has('记载罪行的纸条')){
+                                    return leo.reject();
+                                }
+                                await leo.talkNpc(0,leo.talkYes)
+                                await leo.delay(1000)
+                            })
+                            await leo.autoWalk([10,8])
+                            await leo.loop(async ()=>{
+                                if(leo.has(18338)){ //调查诱拐事件的委托信
+                                    return leo.reject();
+                                }
+                                await leo.talkNpc(0,leo.talkYes)
+                                await leo.delay(1000)
+                            })
+                            await leo.autoWalk([10,15,'奇利村'])
+                        }
+                        if(!leo.has(18339)){
+                            console.log(leo.logTime()+'拿【调查诱拐事件的委托信】2');
+                            await leo.autoWalk([64,56,'医院'])
+                            await leo.autoWalk([7,2])
+                            await leo.loop(async ()=>{
+                                if(leo.has('记载罪行的纸条')){
+                                    return leo.reject();
+                                }
+                                await leo.talkNpc(0,leo.talkYes)
+                                await leo.delay(1000)
+                            })
+                            await leo.autoWalk([13,16])
+                            await leo.loop(async ()=>{
+                                if(leo.has(18339)){ //调查诱拐事件的委托信
+                                    return leo.reject();
+                                }
+                                await leo.talkNpc(0,leo.talkYes)
+                                await leo.delay(1000)
+                            })
+                            await leo.autoWalk([3,9,'奇利村'])
+                        }
+                        if(!leo.has(18340)){
+                            console.log(leo.logTime()+'拿【调查诱拐事件的委托信】3');
+                            await leo.autoWalk([50,63,'村长的家'])
+                            await leo.autoWalk([10,5])
+                            await leo.loop(async ()=>{
+                                if(leo.getSysTimeEx()=='夜晚'){
+                                    await leo.autoWalk([10,2,'*'])
+                                    if(leo.getMapInfo().indexes.index3 == 15514){
+                                        return leo.reject();
+                                    }else{
+                                        //不是夜晚的地图，出去，重新进
+                                        await leo.autoWalk([7,13,'*'])
+                                        await leo.autoWalk([10,5])
+                                    }
+                                }
+                                await leo.log('当前时间是【'+leo.getSysTimeEx()+'】，等待【夜晚】')
+                                await leo.moveAround()
+                                await leo.delay(120000)
+                            })
+                            leo.battleSetting.attack()
+                            await leo.autoWalk([7,6])
+                            await leo.turnDir(2)
+                            await leo.loop(async ()=>{
+                                if(cga.findNPC('黑暗医师阿鲁巴斯')){
+                                    await leo.talkNpc(8, 6,leo.talkYes)
+                                    return leo.reject();//退出循环
+                                }else{
+                                    await leo.log('当前时间是【'+leo.getSysTimeEx()+'】，等待夜晚【黑暗医师阿鲁巴斯】出现')
+
+                                    await leo.delay(30000);
+                                }
+                            })
+                            await leo.waitAfterBattle()
+                            await leo.autoWalk([6,3])
+                            await leo.loop(async ()=>{
+                                if(leo.has('记载罪行的纸条')){
+                                    return leo.reject();
+                                }
+                                await leo.talkNpc(0,leo.talkYes)
+                                await leo.delay(1000)
+                            })
+                            await leo.autoWalk([7,13,15516])
+                            await leo.autoWalk([10,7])
+                            await leo.loop(async ()=>{
+                                if(leo.has(18340)){ //调查诱拐事件的委托信
+                                    return leo.reject();
+                                }
+                                await leo.talkNpc(0,leo.talkYes)
+                                await leo.delay(1000)
+                            })
+                            await leo.autoWalk([1,8,'奇利村'])
+                            leo.battleSetting.escape()
+                        }
+                        if(!leo.has('双亲的信')){
+                            console.log(leo.logTime()+'拿【双亲的信】');
+                            await leo.autoWalk([71,63,'民家'])
+                            await leo.autoWalk([10,10])
+                            await leo.loop(async ()=>{
+                                if(leo.has('双亲的信')){
+                                    return leo.reject();
+                                }
+                                await leo.talkNpc(0,leo.talkYes)
+                                await leo.delay(1000)
+                            })
+                            await leo.autoWalk([3,9,'奇利村'])
+                        }
+                        await leo.autoWalk([79,76,'索奇亚'])
+                    }
+                    if(cga.GetMapName()=='索奇亚') {
+                        await leo.autoWalk([217,222])
+                        leo.monitor.config.autoExit = false; //关闭5分钟不动结束脚本
+                        leo.monitor.config.keepAlive = true; //开启防掉线
+                        await leo.loop(async ()=>{
+                            if(cga.GetMapName()=='森林小路'){
+                                return leo.reject();
+                            }
+                            if(cga.findNPC('守门的腐尸')){
+                                await leo.talkNpc(216, 222,leo.talkYes)
+                            }else{
+                                await leo.log('当前时间是【'+leo.getSysTimeEx()+'】，等待夜晚【守门的腐尸】出现');
+                                await leo.delay(30000);
+                            }
+                            await leo.delay(2000)
+                        })
+                        leo.monitor.config.autoExitMemory = {}; //重置x分钟不动缓存
+                        leo.monitor.config.autoExit = true; //开启5分钟不动结束脚本
+                        leo.monitor.config.keepAlive = false; //关闭防掉线
+                    }
+                    if(cga.GetMapName()=='森林小路') {
+                        await leo.autoWalk([8,38,'阿鲁巴斯的洞窟1楼'])
+                    }
+                    if(cga.GetMapName().includes('阿鲁巴斯的洞窟')){
+                        try{
+                            await leo.walkRandomMazeUntil(() => {
+                                if (cga.GetMapName() == '阿鲁巴斯的研究所') {
+                                    return true; //15518
+                                }
+                                if (cga.GetMapName() == '森林小路') {
+                                    console.log(leo.logTime()+'迷宫刷新');
+                                    return true;
+                                }
+                                return false;
+                            },true);
+                        }catch(e){
+                            console.log(leo.logTime()+'迷宫刷新:' + e);
+                        }
+                    }
+                    await leo.delay(2000)
+                })
+                if(cga.GetMapName() == '阿鲁巴斯的研究所'){
+                    if(leo.getMapInfo().indexes.index3 == 15518
+                        && (leo.getMapInfo().x<=48 
+                        || leo.getMapInfo().y>=26)) {
+                        await leo.autoWalk([17,18,15519])
+                    }
+                    if(leo.getMapInfo().indexes.index3 == 15519
+                        && leo.getMapInfo().x<16) {
+                        await leo.autoWalk([37,10,15518])
+                    }
+                    if(leo.getMapInfo().indexes.index3 == 15518
+                        && leo.getMapInfo().x>48 
+                        && leo.getMapInfo().y<26) {
+                        await leo.autoWalk([49,19,15519])
+                    }
+                    await leo.autoWalk([23,36])
+                }
+            }
+        }
+    },
     '木乃伊': {
         name: '木乃伊',
         sealCardName: '封印卡（不死系）',
@@ -2568,111 +3985,6 @@ const petConfig = {
         gradeLogMax: 5, //最多显示多少行日志
         crystalName: '风地的水晶（5：5）',
         petSkillName: '强力陨石魔法-Ⅰ',
-        async walk(cga){
-            const leo = cga.emogua;
-            //地图判断，如果已经在1级宠捕捉点，则继续捕捉
-            var mapInfo = cga.getMapInfo();
-            if (mapInfo.name == '沙漠之庙' && mapInfo.indexes.index3 == 13021) {
-                await leo.autoWalkList([[18,31],[18,34]])
-            } else {
-                if(mapInfo.name != '索奇亚') {
-                    await leo.logBack()
-                    //await leo.sellCastle()
-                    await leo.checkHealth(doctorName)
-                    await leo.checkCrystal(this.crystalName)
-                    await leo.goto(n => n.teleport.ghana)
-                    await leo.autoWalk([48,77, '索奇亚'])
-                }
-                console.log(leo.logTime()+'到达索奇亚，开始寻找迷宫入口');
-                await leo.loop(async ()=>{
-                    try{
-                        if(cga.GetMapName() == '索奇亚'){
-                            var gotoTarget = () => {
-                                var targetEntryArr = {
-                                    '砂漠之祠' : [
-                        [660,290],[640,290],[620,290],[600,290],[580,290],[560,290],[540,290],
-                        [540,310],[560,310],[580,310],[600,310],[620,310],[640,310],[660,310],
-                        [660,330],[640,330],[620,330],[600,330],[580,330],[560,330],[540,330],
-                        [540,350],[560,350],[580,350],[600,350],[620,350],[640,350],[600,350],
-                        [660,370],[640,370],[620,370],[600,370],[580,370],[560,370],[540,370]
-                                    ]
-                                }
-                                var index = -1;
-                                var targetEntryAreaArr = targetEntryArr['砂漠之祠'];
-                                var findHoleEntry = ()=>{
-                                    var mapInfo = leo.getMapInfo();
-                                    if(mapInfo.name == '砂漠之祠地下1楼'){
-                                        return leo.next();
-                                    }
-                                    index++;
-                                    if(index >= targetEntryAreaArr.length){
-                                        return leo.log('没有找到迷宫入口');
-                                    }
-                                    if (mapInfo.name == '索奇亚') {
-                                        console.log(leo.logTime()+targetEntryAreaArr[index])
-                                        return leo.moveNearest(targetEntryAreaArr[index])
-                                        .then(()=>{
-                                            var npcExcept = ['部下葛霸','部下葛克','甘卡佐','夏瓦特','古代石碑','地之石碑'];
-                                            var mazeEntry = cga.GetMapUnits().filter(u => (u.flags & leo.UnitFlags.NpcEntry) && u.model_id > 0 && !npcExcept.includes(u.unit_name));
-                                            if(mazeEntry && mazeEntry.length>0){
-                                                return leo.autoWalk([mazeEntry[0].xpos,mazeEntry[0].ypos,'*'])
-                                                .then(()=>findHoleEntry());
-                                            }else{
-                                                return findHoleEntry();
-                                            }
-                                        })
-                                    }
-                                }
-                                return findHoleEntry();
-                            }
-                            await gotoTarget()
-                        }
-                        if(cga.GetMapName().includes('砂漠之祠地下')){
-                            await leo.walkRandomMazeUntil(() => {
-                                if (cga.GetMapName() == '索奇亚') {
-                                    return true;
-                                }
-                                if (cga.GetMapName() == '沙漠之庙  地下6楼') {
-                                    return true;
-                                }
-                                return false;
-                            },false)
-                        }
-                        if(cga.GetMapName() == '沙漠之庙  地下6楼') {
-                            return leo.reject();
-                        }
-                        await leo.delay(1000)
-                    }catch(e){
-                        await leo.log('迷宫刷新，e:' + e)
-                        await leo.delay(60000)
-                    }
-                })
-                // 沙漠之庙  地下6楼
-                await leo.autoWalkList([
-                    [14, 13, '沙漠之庙'],
-                    [43, 19]
-                ])
-                await leo.talkNpc(4, leo.talkYes)   //拿到古代王族的血壶
-                await leo.autoWalk([12,31])
-                await leo.talkNpc(2, leo.talkYes, '*')  //13020
-                await leo.autoWalk([10,37, 13017])
-                await leo.autoWalk([10,8])
-                await leo.talkNpc(0, leo.talkYes)   //拿到古代莎草制绷带
-                await leo.autoWalk([10,11, 13020])
-                await leo.autoWalk([12,33])
-                await leo.talkNpc(6, leo.talkYes, '*')  //13016
-                await leo.autoWalk([66,23])
-                await leo.talkNpc(2, leo.talkYes, '*')  //13020
-                await leo.autoWalk([73,30, 13019])
-                await leo.autoWalk([15,4])
-                await leo.talkNpc(0, leo.talkYes)   //拿到红光的古代石
-                await leo.autoWalk([7,6, 13020])
-                await leo.autoWalk([66,33, 13018])
-                await leo.autoWalk([19,18])
-                await leo.talkNpc(2, leo.talkYes, '*')  //13021
-                await leo.autoWalk([18,34])
-            }
-        }
     },
     '红蝎': {
         name: '红蝎',
@@ -2791,15 +4103,35 @@ const petConfig = {
             }
         }
     },
-    '印第安仙人掌 ': {
-        name: '印第安仙人掌 ',
-        sealCardName: '封印卡（植物系）',
+    '杀手蝎': {
+        name: '杀手蝎',
+        sealCardName: '封印卡（昆虫系）',
         sealCardLevel: 1,
         autoDropPet: true, //是否自动扔宠，true扔/false不扔
-        minHp: 105 - 3,
-        minMp: 89 - 3 ,
-        minAttack: 44,
-        minDefensive: 40,
+        minHp: 117 - 3,
+        minMp: 78 - 3,
+        minAttack: 41,
+        minDefensive: 48,
+        minAgility: 28,
+        index: 1,
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
+        gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
+        gradeLog: true, //打印算档日志
+        gradeLogMax: 5, //最多显示多少行日志
+        crystalName: '风地的水晶（5：5）',
+        petSkillName: '陨石魔法-Ⅰ',
+    },
+    '武术仙人掌': {
+        name: '武术仙人掌',
+        sealCardName: '封印卡（植物系）',
+        sealCardLevel: 4,
+        autoDropPet: true, //是否自动扔宠，true扔/false不扔
+        minHp: 103 - 3,
+        minMp: 93 - 3 ,
+        minAttack: 41,
+        minDefensive: 41,
         minAgility: 27,
         index: 1,
         gradeMin: 1,    //高于该档次的宠判断丢弃
@@ -2808,23 +4140,23 @@ const petConfig = {
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
-        crystalName: '地水的水晶（5：5）',
-        petSkillName: '陨石魔法-Ⅰ',
+        crystalName: '火风的水晶（5：5）',
+        petSkillName: '强力火焰魔法-Ⅰ',
         async walk(cga){
             const leo = cga.emogua;
             //地图判断，如果已经在1级宠捕捉点，则继续捕捉
             var currentMap = cga.GetMapName();
             if (currentMap == '索奇亚') {
-                await leo.autoWalkList([[339, 316],[341, 316]])
+                await leo.autoWalkList([[552, 398],[552, 400]])
             } else {
                 await leo.logBack()
                 //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
-                await leo.goto(n => n.teleport.kili)
+                await leo.goto(n => n.teleport.ghana)
                 await leo.autoWalkList([
-                    [60, 45, '索奇亚'],
-                    [341, 316]
+                    [47, 77, '索奇亚'],
+                    [552, 400]
                 ])
             }
         }
@@ -2867,16 +4199,16 @@ const petConfig = {
             }
         }
     },
-    '武术仙人掌': {
-        name: '武术仙人掌',
+    '凶暴仙人掌': {
+        name: '凶暴仙人掌',
         sealCardName: '封印卡（植物系）',
-        sealCardLevel: 4,
+        sealCardLevel: 1,
         autoDropPet: true, //是否自动扔宠，true扔/false不扔
-        minHp: 103 - 3,
-        minMp: 93 - 3 ,
+        minHp: 106 - 3,
+        minMp: 97 - 3 ,
         minAttack: 41,
-        minDefensive: 41,
-        minAgility: 27,
+        minDefensive: 39,
+        minAgility: 28,
         index: 1,
         gradeMin: 1,    //高于该档次的宠判断丢弃
         gradeMax:20,    //低于该档次的宠判断丢弃
@@ -2886,21 +4218,41 @@ const petConfig = {
         gradeLogMax: 5, //最多显示多少行日志
         crystalName: '火风的水晶（5：5）',
         petSkillName: '强力火焰魔法-Ⅰ',
+    },
+    '印地安仙人掌': {
+        name: '印地安仙人掌',
+        sealCardName: '封印卡（植物系）',
+        sealCardLevel: 1,
+        autoDropPet: true, //是否自动扔宠，true扔/false不扔
+        minHp: 105 - 3,
+        minMp: 89 - 3 ,
+        minAttack: 44,
+        minDefensive: 40,
+        minAgility: 27,
+        index: 1,
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
+        gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
+        gradeLog: true, //打印算档日志
+        gradeLogMax: 5, //最多显示多少行日志
+        crystalName: '地水的水晶（5：5）',
+        petSkillName: '强力陨石魔法-Ⅰ',
         async walk(cga){
             const leo = cga.emogua;
             //地图判断，如果已经在1级宠捕捉点，则继续捕捉
             var currentMap = cga.GetMapName();
             if (currentMap == '索奇亚') {
-                await leo.autoWalkList([[552, 398],[552, 400]])
+                await leo.autoWalkList([[339, 316],[341, 316]])
             } else {
                 await leo.logBack()
                 //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
-                await leo.goto(n => n.teleport.ghana)
+                await leo.goto(n => n.teleport.kili)
                 await leo.autoWalkList([
-                    [47, 77, '索奇亚'],
-                    [552, 400]
+                    [60, 45, '索奇亚'],
+                    [341, 316]
                 ])
             }
         }
@@ -3045,7 +4397,7 @@ const petConfig = {
             //地图判断，如果已经在1级宠捕捉点，则继续捕捉
             var currentMap = cga.GetMapName();
             if (currentMap == '索奇亚') {
-                await leo.autoWalkList([[453, 389],[451, 389]])
+                await leo.autoWalkList([[470, 389],[472, 387]])
             } else {
                 await leo.logBack()
                 //await leo.sellCastle()
@@ -3054,7 +4406,7 @@ const petConfig = {
                 await leo.goto(n => n.teleport.ghana)
                 await leo.autoWalkList([
                     [47, 77, '索奇亚'],
-                    [451, 389]
+                    [472, 387]
                 ])
             }
         }
@@ -3137,6 +4489,26 @@ const petConfig = {
             }
         }
     },
+    '黑暗鸟人': {
+        name: '黑暗鸟人',
+        sealCardName: '封印卡（人形系）',
+        sealCardLevel: 4,
+        autoDropPet: true, //是否自动扔宠，true扔/false不扔
+        minHp: 100 - 5,
+        minMp: 118 - 5,
+        minAttack: 32,
+        minDefensive: 33,
+        minAgility: 40,
+        index: 1,
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
+        gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
+        gradeLog: true, //打印算档日志
+        gradeLogMax: 5, //最多显示多少行日志
+        crystalName: '火风的水晶（5：5）',
+        petSkillName: '强力火焰魔法-Ⅰ',
+    },
     '绿色口臭鬼': {
         name: '绿色口臭鬼',
         sealCardName: '封印卡（植物系）',
@@ -3167,10 +4539,10 @@ const petConfig = {
                 //await leo.sellCastle()
                 await leo.checkHealth(doctorName)
                 await leo.checkCrystal(this.crystalName)
-                await leo.goto(n => n.teleport.jenova)
+                await leo.goto(n => n.falan.w1)
+                await leo.autoWalkList([[22, 88, '芙蕾雅'],[200, 165]])
+                await leo.talkNpc(201, 165,leo.talkYes,'莎莲娜海底洞窟 地下1楼')
                 await leo.autoWalkList([
-                    [24, 40, '莎莲娜'],
-                    [196, 443, '莎莲娜海底洞窟 地下1楼'],
                     [10, 10]
                 ])
             }
@@ -3194,7 +4566,7 @@ const petConfig = {
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
         crystalName: '火风的水晶（5：5）',
-        petSkillName: '火焰魔法-Ⅰ',
+        petSkillName: '陨石魔法-Ⅰ',
         async walk(cga){
             const leo = cga.emogua;
             //地图判断，如果已经在1级宠捕捉点，则继续捕捉
@@ -3213,6 +4585,26 @@ const petConfig = {
                 ])
             }
         }
+    },
+    '蓝色口臭鬼': {
+        name: '蓝色口臭鬼',
+        sealCardName: '封印卡（植物系）',
+        sealCardLevel: 1,
+        autoDropPet: true, //是否自动扔宠，true扔/false不扔
+        minHp: 118 - 5,
+        minMp: 111 - 5,
+        minAttack: 39,
+        minDefensive: 35,
+        minAgility: 31,
+        index: 1,
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
+        gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
+        gradeLog: true, //打印算档日志
+        gradeLogMax: 5, //最多显示多少行日志
+        crystalName: '地水的水晶（5：5）',
+        petSkillName: '陨石魔法-Ⅰ',
     },
     '史莱姆': {
         name: '史莱姆',
@@ -3254,6 +4646,27 @@ const petConfig = {
             }
         }
     },
+    '液态史莱姆': {
+        name: '液态史莱姆',
+        sealCardName: '封印卡（特殊系）',
+        sealCardLevel: 1,
+        autoDropPet: true, //是否自动扔宠，true扔/false不扔
+        minHp: 129 - 3,
+        minMp: 78 - 3 ,
+        minAttack: 38,
+        minDefensive: 34,
+        minAgility: 25,
+        index: 1,
+        gradeMin: 0,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
+        gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
+        gradeLog: true, //打印算档日志
+        gradeLogMax: 5, //最多显示多少行日志
+        crystalName: '地水的水晶（5：5）',
+        petSkillName: '陨石魔法-Ⅰ',
+        isNameOnly: true,
+    },
     '果冻史莱姆': {
         name: '果冻史莱姆',
         sealCardName: '封印卡（特殊系）',
@@ -3293,6 +4706,26 @@ const petConfig = {
             }
         }
     },
+    '布丁史莱姆': {
+        name: '布丁史莱姆',
+        sealCardName: '封印卡（特殊系）',
+        sealCardLevel: 4,
+        autoDropPet: true, //是否自动扔宠，true扔/false不扔
+        minHp: 116 - 5,
+        minMp: 92 - 5,
+        minAttack: 38,
+        minDefensive: 33,
+        minAgility: 26,
+        index: 1,
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
+        gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
+        gradeLog: true, //打印算档日志
+        gradeLogMax: 5, //最多显示多少行日志
+        crystalName: '水火的水晶（5：5）',
+        petSkillName: '火焰魔法-Ⅰ',
+    },
     '蜥蜴战士': {
         name: '蜥蜴战士',
         sealCardName: '封印卡（龙系）',
@@ -3304,14 +4737,14 @@ const petConfig = {
         minDefensive: 44,
         minAgility: 29,
         index: 1,
-        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMin: 0,    //高于该档次的宠判断丢弃
         gradeMax:20,    //低于该档次的宠判断丢弃
         gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
         gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
         gradeLog: true, //打印算档日志
         gradeLogMax: 5, //最多显示多少行日志
         crystalName: '火风的水晶（5：5）',
-        petSkillName: '火焰魔法-Ⅰ',
+        petSkillName: '强力火焰魔法-Ⅰ',
         async walk(cga){
             const leo = cga.emogua;
             //地图判断，如果已经在1级宠捕捉点，则继续捕捉
@@ -3333,16 +4766,36 @@ const petConfig = {
             }
         }
     },
-    '绿烟': {
-        name: '绿烟',
-        sealCardName: '封印卡（特殊系）',
-        sealCardLevel: 1,
+    '蜥蜴斗士': {
+        name: '蜥蜴斗士',
+        sealCardName: '封印卡（龙系）',
+        sealCardLevel: 4,
         autoDropPet: true, //是否自动扔宠，true扔/false不扔
-        minHp: 97 - 3,
-        minMp: 126 - 3 ,
-        minAttack: 36,
-        minDefensive: 34,
-        minAgility: 33,
+        minHp: 99 - 3,
+        minMp: 83 - 3 ,
+        minAttack: 45,
+        minDefensive: 47,
+        minAgility: 27,
+        index: 1,
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
+        gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
+        gradeLog: true, //打印算档日志
+        gradeLogMax: 5, //最多显示多少行日志
+        crystalName: '地水的水晶（5：5）',
+        petSkillName: '强力陨石魔法-Ⅰ',
+    },
+    '猎豹蜥蜴': {
+        name: '猎豹蜥蜴',
+        sealCardName: '封印卡（龙系）',
+        sealCardLevel: 4,
+        autoDropPet: true, //是否自动扔宠，true扔/false不扔
+        minHp: 103 - 3,
+        minMp: 87 - 3 ,
+        minAttack: 44,
+        minDefensive: 42,
+        minAgility: 28,
         index: 1,
         gradeMin: 1,    //高于该档次的宠判断丢弃
         gradeMax:20,    //低于该档次的宠判断丢弃
@@ -3352,26 +4805,6 @@ const petConfig = {
         gradeLogMax: 5, //最多显示多少行日志
         crystalName: '火风的水晶（5：5）',
         petSkillName: '强力火焰魔法-Ⅰ',
-        async walk(cga){
-            const leo = cga.emogua;
-            //地图判断，如果已经在1级宠捕捉点，则继续捕捉
-            var currentMap = cga.GetMapName();
-            if (currentMap == '方堡盆地') {
-                await leo.autoWalkList([[221,165],[219,165]])
-            } else {
-                await leo.logBack()
-                //await leo.sellCastle()
-                await leo.checkHealth(doctorName)
-                await leo.checkCrystal(this.crystalName)
-                await leo.goto(n => n.elsa.x)
-                await leo.autoWalkList([
-                    [130, 50, '盖雷布伦森林'],
-                    [215, 43]
-                ])
-                await leo.talkNpc(0,leo.talkNo,'方堡盆地')
-                await leo.autoWalk([219,165])
-            }
-        }
     },
     '水晶怪': {
         name: '水晶怪',
@@ -3411,6 +4844,152 @@ const petConfig = {
             }
         }
     },
+    '走路花妖': {
+        name: '走路花妖',
+        sealCardName: '封印卡（植物系）',
+        sealCardLevel: 1,
+        autoDropPet: true, //是否自动扔宠，true扔/false不扔
+        minHp: 81 - 3,
+        minMp: 96 - 3 ,
+        minAttack: 45,
+        minDefensive: 40,
+        minAgility: 28,
+        index: 1,
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
+        gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
+        gradeLog: true, //打印算档日志
+        gradeLogMax: 5, //最多显示多少行日志
+        crystalName: '火风的水晶（5：5）',
+        petSkillName: '强力火焰魔法-Ⅰ',
+        async walk(cga){
+            const leo = cga.emogua;
+            //地图判断，如果已经在1级宠捕捉点，则继续捕捉
+            var currentMap = cga.GetMapName();
+            if (currentMap == '布拉基姆高地') {
+                await leo.autoWalkList([[165, 243]])
+            } else {
+                await leo.logBack()
+                //await leo.sellCastle()
+                await leo.checkHealth(doctorName)
+                await leo.checkCrystal(this.crystalName)
+                await leo.goto(n => n.elsa.x)
+                await leo.autoWalkList([[165, 153]])
+                await leo.loop(async ()=>{
+                    if(cga.GetMapName()=='梅布尔隘地') {
+                        return leo.reject();
+                    }
+                    await leo.talkNpc(2, leo.talkNo)
+                    await leo.delay(2000)
+                })
+                await leo.autoWalkList([[256, 166, '布拉基姆高地'], [165, 243]])
+            }
+        }
+    },
+    '绿烟': {
+        name: '绿烟',
+        sealCardName: '封印卡（特殊系）',
+        sealCardLevel: 1,
+        autoDropPet: true, //是否自动扔宠，true扔/false不扔
+        minHp: 97 - 3,
+        minMp: 126 - 3 ,
+        minAttack: 36,
+        minDefensive: 34,
+        minAgility: 33,
+        index: 1,
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
+        gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
+        gradeLog: true, //打印算档日志
+        gradeLogMax: 5, //最多显示多少行日志
+        crystalName: '火风的水晶（5：5）',
+        petSkillName: '强力火焰魔法-Ⅰ',
+        async walk(cga){
+            const leo = cga.emogua;
+            //地图判断，如果已经在1级宠捕捉点，则继续捕捉
+            var currentMap = cga.GetMapName();
+            if (currentMap == '方堡盆地') {
+                await leo.autoWalkList([[221,165],[219,165]])
+            } else {
+                await leo.logBack()
+                //await leo.sellCastle()
+                await leo.checkHealth(doctorName)
+                await leo.checkCrystal(this.crystalName)
+                await leo.goto(n => n.elsa.x)
+                await leo.autoWalkList([
+                    [130, 50, '盖雷布伦森林'],
+                    [215, 43]
+                ])
+                await leo.loop(async ()=>{
+                    if(cga.GetMapName()=='方堡盆地') {
+                        return leo.reject();
+                    }
+                    await leo.talkNpc(0,leo.talkNo)
+                    await leo.delay(2000)
+                })
+                await leo.autoWalk([219,165])
+            }
+        }
+    },
+    '骷髅海盗': {
+        name: '骷髅海盗',
+        sealCardName: '封印卡（不死系）',
+        sealCardLevel: 4,
+        autoDropPet: true, //是否自动扔宠，true扔/false不扔
+        minHp: 95 - 3,
+        minMp: 96 - 3,
+        minAttack: 41,
+        minDefensive: 52,
+        minAgility: 29,
+        index: 1,
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
+        gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
+        gradeLog: true, //打印算档日志
+        gradeLogMax: 5, //最多显示多少行日志
+        crystalName: '火风的水晶（5：5）',
+        petSkillName: '强力陨石魔法-Ⅰ',
+        autoBattle: [{
+            user: 1, //1-人 2-宠 3-人宠 4-人二动 5-人一动和二动
+            check: context => context.enemies.find(e=>e.name=='赤熊'&&e.level>1),
+            type: '攻击',
+            targets: context => context.enemies.filter(e=>e.name=='赤熊'&&e.level>1).map(e=>e.pos)
+        },{
+            user: 2, //1-人 2-宠 3-人宠 4-人二动 5-人一动和二动
+            check: context => context.enemies.find(e=>e.name=='赤熊'&&e.level>1),
+            skillName: '攻击',
+            targets: context => context.enemies.filter(e=>e.name=='赤熊'&&e.level>1).map(e=>e.pos)
+        }],
+        async walk(cga){
+            const leo = cga.emogua;
+            //地图判断，如果已经在1级宠捕捉点，则继续捕捉
+            var currentMap = cga.GetMapName();
+            if (currentMap == '方堡盆地') {
+                await leo.autoWalkList([[184, 104],[182, 104]])
+            } else {
+                await leo.logBack()
+                //await leo.sellCastle()
+                await leo.checkHealth(doctorName)
+                await leo.checkCrystal(this.crystalName)
+                await leo.goto(n => n.elsa.x)
+                await leo.autoWalkList([
+                    [130, 50, '盖雷布伦森林'],
+                    [215, 43]
+                ])
+                await leo.loop(async ()=>{
+                    if(cga.GetMapName()=='方堡盆地') {
+                        return leo.reject();
+                    }
+                    await leo.talkNpc(0,leo.talkNo)
+                    await leo.delay(2000)
+                })
+                await leo.autoWalk([182, 104])
+            }
+        }
+    },
     '马优尔': {
         name: '马优尔',
         sealCardName: '封印卡（野兽系)',
@@ -3446,7 +5025,13 @@ const petConfig = {
                     [130, 50, '盖雷布伦森林'],
                     [215, 43]
                 ])
-                await leo.talkNpc(0,leo.talkNo,'方堡盆地')
+                await leo.loop(async ()=>{
+                    if(cga.GetMapName()=='方堡盆地') {
+                        return leo.reject();
+                    }
+                    await leo.talkNpc(0,leo.talkNo)
+                    await leo.delay(2000)
+                })
                 await leo.autoWalk([228,178,'方堡盆地·南'])
                 await leo.autoWalk([176,109])
             }
@@ -3487,9 +5072,120 @@ const petConfig = {
                     [130, 50, '盖雷布伦森林'],
                     [215, 43]
                 ])
-                await leo.talkNpc(0,leo.talkNo,'方堡盆地')
+                await leo.loop(async ()=>{
+                    if(cga.GetMapName()=='方堡盆地') {
+                        return leo.reject();
+                    }
+                    await leo.talkNpc(0,leo.talkNo)
+                    await leo.delay(2000)
+                })
                 await leo.autoWalk([228,178,'方堡盆地·南'])
                 await leo.autoWalk([235,152])
+            }
+        }
+    },
+    '猫脸女神巴斯铁特': {
+        name: '猫脸女神巴斯铁特',
+        sealCardName: '封印卡（不死系）',
+        sealCardLevel: 1,
+        autoDropPet: true, //是否自动扔宠，true扔/false不扔
+        minHp: 99 - 3,
+        minMp: 109 - 3 ,
+        minAttack: 38,
+        minDefensive: 41,
+        minAgility: 33,
+        index: 1,
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
+        gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
+        gradeLog: true, //打印算档日志
+        gradeLogMax: 5, //最多显示多少行日志
+        crystalName: '地水的水晶（5：5）',
+        petSkillName: '强力陨石魔法-Ⅰ',
+        autoBattle: [{
+            user: 1, //1-人 2-宠 3-人宠 4-人二动 5-人一动和二动
+            check: context => context.enemies.find(e=>e.name=='马优尔'&&e.level>1),
+            type: '攻击',
+            targets: context => context.enemies.filter(e=>e.name=='马优尔'&&e.level>1).map(e=>e.pos)
+        },{
+            user: 2, //1-人 2-宠 3-人宠 4-人二动 5-人一动和二动
+            check: context => context.enemies.find(e=>e.name=='马优尔'&&e.level>1),
+            skillName: '攻击',
+            targets: context => context.enemies.filter(e=>e.name=='马优尔'&&e.level>1).map(e=>e.pos)
+        }],
+        async walk(cga){
+            const leo = cga.emogua;
+            //地图判断，如果已经在1级宠捕捉点，则继续捕捉
+            var currentMap = cga.GetMapName();
+            if (currentMap == '方堡盆地·南') {
+                await leo.autoWalkList([[178,109],[176,109]])
+            } else {
+                await leo.logBack()
+                //await leo.sellCastle()
+                await leo.checkHealth(doctorName)
+                await leo.checkCrystal(this.crystalName)
+                await leo.goto(n => n.elsa.x)
+                await leo.autoWalkList([
+                    [130, 50, '盖雷布伦森林'],
+                    [215, 43]
+                ])
+                await leo.loop(async ()=>{
+                    if(cga.GetMapName()=='方堡盆地') {
+                        return leo.reject();
+                    }
+                    await leo.talkNpc(0,leo.talkNo)
+                    await leo.delay(2000)
+                })
+                await leo.autoWalk([228,178,'方堡盆地·南'])
+                await leo.autoWalk([176,109])
+            }
+        }
+    },
+    '亭登': {
+        name: '亭登',
+        sealCardName: '封印卡（植物系）',
+        sealCardLevel: 1,
+        autoDropPet: true, //是否自动扔宠，true扔/false不扔
+        minHp: 107 - 3,
+        minMp: 101 - 3 ,
+        minAttack: 33,
+        minDefensive: 49,
+        minAgility: 31,
+        index: 1,
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
+        gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
+        gradeLog: true, //打印算档日志
+        gradeLogMax: 5, //最多显示多少行日志
+        crystalName: '火风的水晶（5：5）',
+        petSkillName: '强力陨石魔法-Ⅰ',
+        async walk(cga){
+            const leo = cga.emogua;
+            //地图判断，如果已经在1级宠捕捉点，则继续捕捉
+            var currentMap = cga.GetMapName();
+            if (currentMap == '方堡盆地·南') {
+                await leo.autoWalkList([[215,136],[217,136]])
+            } else {
+                await leo.logBack()
+                //await leo.sellCastle()
+                await leo.checkHealth(doctorName)
+                await leo.checkCrystal(this.crystalName)
+                await leo.goto(n => n.elsa.x)
+                await leo.autoWalkList([
+                    [130, 50, '盖雷布伦森林'],
+                    [215, 43]
+                ])
+                await leo.loop(async ()=>{
+                    if(cga.GetMapName()=='方堡盆地') {
+                        return leo.reject();
+                    }
+                    await leo.talkNpc(0,leo.talkNo)
+                    await leo.delay(2000)
+                })
+                await leo.autoWalk([228,178,'方堡盆地·南'])
+                await leo.autoWalk([217,136])
             }
         }
     },
@@ -3528,7 +5224,165 @@ const petConfig = {
                     [130, 50, '盖雷布伦森林'],
                     [215, 43]
                 ])
-                await leo.talkNpc(0,leo.talkNo,'方堡盆地')
+                await leo.loop(async ()=>{
+                    if(cga.GetMapName()=='方堡盆地') {
+                        return leo.reject();
+                    }
+                    await leo.talkNpc(0,leo.talkNo)
+                    await leo.delay(2000)
+                })
+                await leo.autoWalk([163,77,'方堡盆地·西'])
+                await leo.autoWalk([142,155])
+            }
+        }
+    },
+    '丘陵鲨': {
+        name: '丘陵鲨',
+        sealCardName: '封印卡（飞行系）',
+        sealCardLevel: 1,
+        autoDropPet: true, //是否自动扔宠，true扔/false不扔
+        minHp: 102 - 3,
+        minMp: 75 - 3 ,
+        minAttack: 40,
+        minDefensive: 31,
+        minAgility: 37,
+        index: 1,
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
+        gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
+        gradeLog: true, //打印算档日志
+        gradeLogMax: 5, //最多显示多少行日志
+        crystalName: '火风的水晶（5：5）',
+        petSkillName: '强力火焰魔法-Ⅰ',
+        async walk(cga){
+            const leo = cga.emogua;
+            //地图判断，如果已经在1级宠捕捉点，则继续捕捉
+            var currentMap = cga.GetMapName();
+            if (currentMap == '方堡盆地·西') {
+                await leo.autoWalkList([[230,123],[231,125]])
+            } else {
+                await leo.logBack()
+                //await leo.sellCastle()
+                await leo.checkHealth(doctorName)
+                await leo.checkCrystal(this.crystalName)
+                await leo.goto(n => n.elsa.x)
+                await leo.autoWalkList([
+                    [130, 50, '盖雷布伦森林'],
+                    [215, 43]
+                ])
+                await leo.loop(async ()=>{
+                    if(cga.GetMapName()=='方堡盆地') {
+                        return leo.reject();
+                    }
+                    await leo.talkNpc(0,leo.talkNo)
+                    await leo.delay(2000)
+                })
+                await leo.autoWalk([163,77,'方堡盆地·西'])
+                await leo.autoWalk([231,125])
+            }
+        }
+    },
+    '毒蜥蜴': {
+        name: '毒蜥蜴',
+        sealCardName: '封印卡（龙系）',
+        sealCardLevel: 1,
+        autoDropPet: true, //是否自动扔宠，true扔/false不扔
+        minHp: 119 - 3,
+        minMp: 97 - 3 ,
+        minAttack: 43,
+        minDefensive: 34,
+        minAgility: 28,
+        index: 1,
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
+        gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
+        gradeLog: true, //打印算档日志
+        gradeLogMax: 5, //最多显示多少行日志
+        crystalName: '火风的水晶（5：5）',
+        petSkillName: '陨石魔法-Ⅰ',
+        async walk(cga){
+            const leo = cga.emogua;
+            //地图判断，如果已经在1级宠捕捉点，则继续捕捉
+            var currentMap = cga.GetMapName();
+            if (currentMap == '方堡盆地·西') {
+                await leo.autoWalkList([[183,173],[181,173]])
+            } else {
+                await leo.logBack()
+                //await leo.sellCastle()
+                await leo.checkHealth(doctorName)
+                await leo.checkCrystal(this.crystalName)
+                await leo.goto(n => n.elsa.x)
+                await leo.autoWalkList([
+                    [130, 50, '盖雷布伦森林'],
+                    [215, 43]
+                ])
+                await leo.loop(async ()=>{
+                    if(cga.GetMapName()=='方堡盆地') {
+                        return leo.reject();
+                    }
+                    await leo.talkNpc(0,leo.talkNo)
+                    await leo.delay(2000)
+                })
+                await leo.autoWalk([163,77,'方堡盆地·西'])
+                await leo.autoWalk([181,173])
+            }
+        }
+    },
+    '毒龙骨': {
+        name: '毒龙骨',
+        sealCardName: '封印卡（不死系）',
+        sealCardLevel: 4,
+        autoDropPet: true, //是否自动扔宠，true扔/false不扔
+        minHp: 76 - 3,
+        minMp: 118 - 3 ,
+        minAttack: 42,
+        minDefensive: 33,
+        minAgility: 32,
+        index: 1,
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
+        gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
+        gradeLog: true, //打印算档日志
+        gradeLogMax: 5, //最多显示多少行日志
+        crystalName: '火风的水晶（5：5）',
+        petSkillName: '强力火焰魔法-Ⅰ',
+        autoBattle: [{
+            user: 1, //1-人 2-宠 3-人宠 4-人二动 5-人一动和二动
+            check: context => context.enemies.find(e=>e.name=='剑鸵鸟'&&e.level>1),
+            type: '攻击',
+            targets: context => context.enemies.filter(e=>e.name=='剑鸵鸟'&&e.level>1).map(e=>e.pos)
+        },{
+            user: 2, //1-人 2-宠 3-人宠 4-人二动 5-人一动和二动
+            check: context => context.enemies.find(e=>e.name=='剑鸵鸟'&&e.level>1),
+            skillName: '攻击',
+            targets: context => context.enemies.filter(e=>e.name=='剑鸵鸟'&&e.level>1).map(e=>e.pos)
+        }],
+        async walk(cga){
+            const leo = cga.emogua;
+            //地图判断，如果已经在1级宠捕捉点，则继续捕捉
+            var currentMap = cga.GetMapName();
+            if (currentMap == '方堡盆地·西') {
+                await leo.autoWalkList([[144,155],[142,155]])
+            } else {
+                await leo.logBack()
+                //await leo.sellCastle()
+                await leo.checkHealth(doctorName)
+                await leo.checkCrystal(this.crystalName)
+                await leo.goto(n => n.elsa.x)
+                await leo.autoWalkList([
+                    [130, 50, '盖雷布伦森林'],
+                    [215, 43]
+                ])
+                await leo.loop(async ()=>{
+                    if(cga.GetMapName()=='方堡盆地') {
+                        return leo.reject();
+                    }
+                    await leo.talkNpc(0,leo.talkNo)
+                    await leo.delay(2000)
+                })
                 await leo.autoWalk([163,77,'方堡盆地·西'])
                 await leo.autoWalk([142,155])
             }
@@ -3567,7 +5421,7 @@ const petConfig = {
                 await leo.goto(n => n.elsa.x)
                 await leo.autoWalk([157, 93])
                 await leo.turnDir(0)
-                await leo.delay(500)
+                await leo.delay(2000)
                 await leo.autoWalkList([
                     [190, 116, '盖雷布伦森林'],
                     [231, 222, '布拉基姆高地'],[171,117]
@@ -3637,6 +5491,414 @@ const petConfig = {
             }
         }
     },
+    '宝贝炸弹': {
+        name: '宝贝炸弹',
+        sealCardName: '封印卡（特殊系）',
+        sealCardLevel: 4,
+        autoDropPet: true, //是否自动扔宠，true扔/false不扔
+        minHp: 80 - 3,
+        minMp: 131 - 3,
+        minAttack: 34,
+        minDefensive: 32,
+        minAgility: 29,
+        index: 1,
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
+        gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
+        gradeLog: true, //打印算档日志
+        gradeLogMax: 5, //最多显示多少行日志
+        crystalName: '地水的水晶（5：5）',
+        petSkillName: '强力火焰魔法-Ⅰ',
+    },
+    '地底龟': {
+        name: '地底龟',
+        sealCardName: '封印卡（野兽系)',
+        sealCardLevel: 1,
+        autoDropPet: true, //是否自动扔宠，true扔/false不扔
+        minHp: 102 - 3,
+        minMp: 96 - 3,
+        minAttack: 37,
+        minDefensive: 47,
+        minAgility: 28,
+        index: 1,
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
+        gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
+        gradeLog: true, //打印算档日志
+        gradeLogMax: 5, //最多显示多少行日志
+        crystalName: '火风的水晶（5：5）',
+        petSkillName: '强力火焰魔法-Ⅰ',
+        async walk(cga){
+            const leo = cga.emogua;
+            //地图判断，如果已经在1级宠捕捉点，则继续捕捉
+            var currentMap = cga.GetMapName();
+            if (currentMap == '雪拉威森塔３９层') {
+                await leo.autoWalkList([[250,245]])
+            } else {
+                await leo.logBack()
+                //await leo.sellCastle()
+                await leo.checkHealth(doctorName)
+                await leo.checkCrystal(this.crystalName)
+                await leo.goto(n => n.elsa.x)
+                await leo.autoWalk([165,153])
+                await leo.talkNpc(2,leo.talkYes,'利夏岛')
+                await leo.autoWalk([90,99,'国民会馆'])
+                await leo.autoWalk([107,52])
+                await leo.supply(108, 52)
+                await leo.autoWalk([108,39,'雪拉威森塔１层'])
+                await leo.autoWalkList([[73,56],[72,56,'雪拉威森塔４０层']])
+                await leo.autoWalk([96,83,'雪拉威森塔３９层'])
+                await leo.autoWalkList([
+                    [250,245]
+                ])
+            }
+        }
+    },
+    '颚牙': {
+        name: '颚牙',
+        sealCardName: '封印卡（不死系）',
+        sealCardLevel: 4,
+        autoDropPet: true, //是否自动扔宠，true扔/false不扔
+        minHp: 117 - 3,
+        minMp: 72 - 3,
+        minAttack: 41,
+        minDefensive: 47,
+        minAgility: 27,
+        index: 1,
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
+        gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
+        gradeLog: true, //打印算档日志
+        gradeLogMax: 5, //最多显示多少行日志
+        crystalName: '地水的水晶（5：5）',
+        petSkillName: '强力陨石魔法-Ⅰ',
+        async walk(cga){
+            const leo = cga.emogua;
+            //地图判断，如果已经在1级宠捕捉点，则继续捕捉
+            var currentMap = cga.GetMapName();
+            if (currentMap == '雪拉威森塔３９层') {
+                await leo.autoWalkList([[148,302]])
+            } else {
+                await leo.logBack()
+                //await leo.sellCastle()
+                await leo.checkHealth(doctorName)
+                await leo.checkCrystal(this.crystalName)
+                await leo.goto(n => n.elsa.x)
+                await leo.autoWalk([165,153])
+                await leo.talkNpc(2,leo.talkYes,'利夏岛')
+                await leo.autoWalk([90,99,'国民会馆'])
+                await leo.autoWalk([107,52])
+                await leo.supply(108, 52)
+                await leo.autoWalk([108,39,'雪拉威森塔１层'])
+                await leo.autoWalkList([[73,56],[72,56,'雪拉威森塔４０层']])
+                await leo.autoWalk([96,83,'雪拉威森塔３９层'])
+                await leo.autoWalkList([
+                    [148,302]
+                ])
+            }
+        }
+    },
+    '刀鸡': {
+        name: '刀鸡',
+        sealCardName: '封印卡（不死系）',
+        sealCardLevel: 1,
+        autoDropPet: true, //是否自动扔宠，true扔/false不扔
+        minHp: 78 - 3,
+        minMp: 90 - 3,
+        minAttack: 42,
+        minDefensive: 33,
+        minAgility: 37,
+        index: 1,
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
+        gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
+        gradeLog: true, //打印算档日志
+        gradeLogMax: 5, //最多显示多少行日志
+        crystalName: '火风的水晶（5：5）',
+        petSkillName: '强力火焰魔法-Ⅰ',
+        async walk(cga){
+            const leo = cga.emogua;
+            //地图判断，如果已经在1级宠捕捉点，则继续捕捉
+            var currentMap = cga.GetMapName();
+            if (currentMap == '雪拉威森塔７６层') {
+                await leo.autoWalkList([[56, 110]])
+            } else {
+                await leo.logBack()
+                //await leo.sellCastle()
+                await leo.checkHealth(doctorName)
+                await leo.checkCrystal(this.crystalName)
+                await leo.goto(n => n.elsa.x)
+                await leo.autoWalk([165,153])
+                await leo.talkNpc(2,leo.talkYes,'利夏岛')
+                await leo.autoWalk([90,99,'国民会馆'])
+                await leo.autoWalk([107,52])
+                await leo.supply(108, 52)
+                await leo.autoWalk([108,39,'雪拉威森塔１层'])
+                await leo.autoWalkList([
+                    [73,56],[75,50,'雪拉威森塔５０层'],
+                    [24,44,'雪拉威森塔７５层'],
+                ])
+                await leo.checkHealth(doctorName)
+                await leo.autoWalkList([
+                    [133,133],[133,140],[120,140],[120,149],[109,149],
+                    [109,157],[91,157],[91,151],[91,150,'雪拉威森塔７６层']
+                ])
+                await leo.checkHealth(doctorName)
+                await leo.autoWalkList([
+                    [93,148],[116,148],[116,132],[140,132],[140,125],
+                    [122,125],[121,125,'雪拉威森塔７５层']
+                ])
+                await leo.checkHealth(doctorName)
+                await leo.autoWalkList([
+                    [106,125]
+                ])
+                await leo.checkHealth(doctorName)
+                await leo.autoWalkList([
+                    [106,52],[104,52],[104,19],[93,19],[93,18,'雪拉威森塔７６层']
+                ])
+                await leo.checkHealth(doctorName)
+                await leo.autoWalkList([
+                    [56, 110]
+                ])
+            }
+        }
+    },
+    '魔术机甲': {
+        name: '魔术机甲',
+        sealCardName: '封印卡（金属系）',
+        sealCardLevel: 1,
+        autoDropPet: true, //是否自动扔宠，true扔/false不扔
+        minHp: 110 - 3,
+        minMp: 87 - 3,
+        minAttack: 38,
+        minDefensive: 45,
+        minAgility: 33,
+        index: 1,
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
+        gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
+        gradeLog: true, //打印算档日志
+        gradeLogMax: 5, //最多显示多少行日志
+        crystalName: '火风的水晶（5：5）',
+        petSkillName: '火焰魔法-Ⅰ',
+        async walk(cga){
+            const leo = cga.emogua;
+            //地图判断，如果已经在1级宠捕捉点，则继续捕捉
+            var currentMap = cga.GetMapName();
+            if(currentMap=='雪拉威森塔９３层'){
+                await leo.autoWalkList([[164, 105]])
+            }else{
+                await leo.logBack()
+                //await leo.sellCastle()
+                await leo.checkHealth(doctorName)
+                await leo.checkCrystal(this.crystalName)
+                await leo.goto(n => n.elsa.x)
+                await leo.autoWalk([165,153])
+                await leo.talkNpc(2,leo.talkYes,'利夏岛')
+                await leo.autoWalk([90,99,'国民会馆'])
+                await leo.autoWalk([107,52])
+                await leo.supply(108, 52)
+                await leo.autoWalk([108,39,'雪拉威森塔１层'])
+                await leo.autoWalkList([
+                    [73,56],[75,50,'雪拉威森塔５０层'],
+                    [16,44,'雪拉威森塔９５层'],
+                ])
+                await leo.checkHealth(doctorName)
+                await leo.autoWalkList([
+                    [99,44,'雪拉威森塔９４层'],
+                ])
+                await leo.checkHealth(doctorName)
+                await leo.autoWalkList([
+                    [89,134,'雪拉威森塔９３层'],
+                ])
+                await leo.checkHealth(doctorName)
+                await leo.autoWalkList([
+                    [164, 105]
+                ])
+            }
+        }
+    },
+    '碎碎地雷': {
+        name: '碎碎地雷',
+        sealCardName: '封印卡（金属系）',
+        sealCardLevel: 1,
+        autoDropPet: true, //是否自动扔宠，true扔/false不扔
+        minHp: 94 - 3,
+        minMp: 90 - 3,
+        minAttack: 40,
+        minDefensive: 47,
+        minAgility: 27,
+        index: 1,
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
+        gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
+        gradeLog: true, //打印算档日志
+        gradeLogMax: 5, //最多显示多少行日志
+        crystalName: '水火的水晶（5：5）',
+        petSkillName: '强力火焰魔法-Ⅰ',
+        async walk(cga){
+            const leo = cga.emogua;
+            //地图判断，如果已经在1级宠捕捉点，则继续捕捉
+            var currentMap = cga.GetMapName();
+            if(currentMap=='雪拉威森塔９４层'){
+                await leo.autoWalkList([[99, 62]])
+            }else{
+                await leo.logBack()
+                //await leo.sellCastle()
+                await leo.checkHealth(doctorName)
+                await leo.checkCrystal(this.crystalName)
+                await leo.goto(n => n.elsa.x)
+                await leo.autoWalk([165,153])
+                await leo.talkNpc(2,leo.talkYes,'利夏岛')
+                await leo.autoWalk([90,99,'国民会馆'])
+                await leo.autoWalk([107,52])
+                await leo.supply(108, 52)
+                await leo.autoWalk([108,39,'雪拉威森塔１层'])
+                await leo.autoWalkList([
+                    [73,56],[75,50,'雪拉威森塔５０层'],
+                    [16,44,'雪拉威森塔９５层'],
+                ])
+                await leo.checkHealth(doctorName)
+                await leo.autoWalkList([
+                    [99,44,'雪拉威森塔９４层'],
+                ])
+                await leo.checkHealth(doctorName)
+                await leo.autoWalkList([
+                    [99, 62]
+                ])
+            }
+        }
+    },
+    '红鬼': {
+        name: '红鬼',
+        sealCardName: '封印卡（不死系）',
+        sealCardLevel: 1,
+        autoDropPet: true, //是否自动扔宠，true扔/false不扔
+        minHp: 95 - 3,
+        minMp: 98 - 3,
+        minAttack: 50,
+        minDefensive: 36,
+        minAgility: 36,
+        index: 1,
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
+        gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
+        gradeLog: true, //打印算档日志
+        gradeLogMax: 5, //最多显示多少行日志
+        crystalName: '水火的水晶（5：5）',
+        petSkillName: '强力火焰魔法-Ⅰ',
+        async walk(cga){
+            const leo = cga.emogua;
+            //地图判断，如果已经在1级宠捕捉点，则继续捕捉
+            var currentMap = cga.GetMapName();
+            if(currentMap=='雪拉威森塔９２层'){
+                await leo.autoWalkList([[106, 96]])
+            }else{
+                await leo.logBack()
+                //await leo.sellCastle()
+                await leo.checkHealth(doctorName)
+                await leo.checkCrystal(this.crystalName)
+                await leo.goto(n => n.elsa.x)
+                await leo.autoWalk([165,153])
+                await leo.talkNpc(2,leo.talkYes,'利夏岛')
+                await leo.autoWalk([90,99,'国民会馆'])
+                await leo.autoWalk([107,52])
+                await leo.supply(108, 52)
+                await leo.autoWalk([108,39,'雪拉威森塔１层'])
+                await leo.autoWalkList([
+                    [73,56],[75,50,'雪拉威森塔５０层'],
+                    [18, 44, '雪拉威森塔９０层'],
+                ])
+                await leo.checkHealth(doctorName)
+                await leo.autoWalkList([
+                    [43, 26, '雪拉威森塔９１层'],
+                ])
+                await leo.checkHealth(doctorName)
+                await leo.autoWalkList([
+                    [44, 109, '雪拉威森塔９２层'],
+                ])
+                await leo.checkHealth(doctorName)
+                await leo.autoWalkList([
+                    [106, 96]
+                ])
+            }
+        }
+    },
+    '巫师之鬼': {
+        name: '巫师之鬼',
+        sealCardName: '封印卡（不死系）',
+        sealCardLevel: 1,
+        autoDropPet: true, //是否自动扔宠，true扔/false不扔
+        minHp: 102 - 3,
+        minMp: 97 - 3,
+        minAttack: 42,
+        minDefensive: 37,
+        minAgility: 39,
+        index: 1,
+        gradeMin: 1,    //高于该档次的宠判断丢弃
+        gradeMax:20,    //低于该档次的宠判断丢弃
+        gradeType: 0,   //扔宠类型 0-gradeMin，2-gradeMax，7-both
+        gradeFirst: false, //true-启用快速算档，只返回第一个命中的档次，注意该档次有可能不是最低的档次
+        gradeLog: true, //打印算档日志
+        gradeLogMax: 5, //最多显示多少行日志
+        crystalName: '水火的水晶（5：5）',
+        petSkillName: '强力火焰魔法-Ⅰ',
+        async walk(cga){
+            const leo = cga.emogua;
+            //地图判断，如果已经在1级宠捕捉点，则继续捕捉
+            var currentMap = cga.GetMapName();
+            if (currentMap == '雪拉威森塔７７层') {
+                await leo.autoWalkList([[89, 26]])
+            } else {
+                await leo.logBack()
+                //await leo.sellCastle()
+                await leo.checkHealth(doctorName)
+                await leo.checkCrystal(this.crystalName)
+                await leo.goto(n => n.elsa.x)
+                await leo.autoWalk([165,153])
+                await leo.talkNpc(2,leo.talkYes,'利夏岛')
+                await leo.autoWalk([90,99,'国民会馆'])
+                await leo.autoWalk([107,52])
+                await leo.supply(108, 52)
+                await leo.autoWalk([108,39,'雪拉威森塔１层'])
+                await leo.autoWalkList([
+                    [73,56],[75,50,'雪拉威森塔５０层'],
+                    [24,44,'雪拉威森塔７５层'],
+                ])
+                await leo.checkHealth(doctorName)
+                await leo.autoWalkList([
+                    [133,133],[133,140],[120,140],[120,149],[109,149],
+                    [109,157],[91,157],[91,151],[91,150,'雪拉威森塔７６层']
+                ])
+                await leo.checkHealth(doctorName)
+                await leo.autoWalkList([
+                    [93,148],[116,148],[116,132],[140,132],[140,125],
+                    [122,125],[121,125,'雪拉威森塔７５层']
+                ])
+                await leo.checkHealth(doctorName)
+                await leo.autoWalkList([
+                    [106,125]
+                ])
+                await leo.checkHealth(doctorName)
+                await leo.autoWalkList([
+                    [106,52],[104,52],[104,19],[93,19],[93,18,'雪拉威森塔７６层']
+                ])
+                await leo.checkHealth(doctorName)
+                await leo.autoWalkList([
+                    [95,17],[95,16,'雪拉威森塔７７层']
+                ])
+                await leo.checkHealth(doctorName)
+                await leo.autoWalkList([[89, 26]])
+            }
+        }
+    },
 } 
 const getPetConfig = (petName) => {
     return petConfig[petName];
@@ -3655,7 +5917,7 @@ const tips = async (cga) => {
     let content = '';
     for (var i = 0; i < petList.length; i++) {
         const index = i+1;
-        let petName = (index.toString().padStart(2, '0') + '-' + petList[i]) + '\t';
+        let petName = (index.toString().padStart(3, '0') + '-' + petList[i]).toString().padEnd(10, 'ㅤ');
         content += petName;
         if(index%5==0 || index == petList.length){
             console.log(content)

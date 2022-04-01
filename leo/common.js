@@ -4,7 +4,7 @@ module.exports = require('./wrapper').then( async (cga) => {
     leo.messageServer = false;
     leo.appId = '';
     leo.appSecret = '';
-    leo.version = '9.9';
+    leo.version = '9.10';
     leo.qq = '158583461'
     leo.copyright = '红叶散落';
     leo.FORMAT_DATE = 'yyyy-MM-dd';
@@ -4674,6 +4674,15 @@ module.exports = require('./wrapper').then( async (cga) => {
     leo.plugins.petPlugins = () => {
         try{
             return require('./pet');
+        }catch(e){
+            return null;
+        }
+    }
+
+    //插件：封印师常规合集抓宠插件(拓展)
+    leo.plugins.petExtPlugins = () => {
+        try{
+            return require('./plugin_pet');
         }catch(e){
             return null;
         }
