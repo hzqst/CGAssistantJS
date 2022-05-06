@@ -1661,6 +1661,7 @@ const petConfig = {
                     [71, 18, '莎莲娜']
                 ])
                 if(cga.GetMapName() == '莎莲娜' && !leo.has('塔比欧的细胞') && !leo.has('月之锄头')){
+                    leo.battleSetting.attack()
                     await leo.loop(async ()=>{
                         if(leo.has('塔比欧的细胞')){
                             return leo.reject();
@@ -1671,6 +1672,7 @@ const petConfig = {
                         await leo.waitAfterBattle()
                         await leo.delay(1000)
                     })
+                    leo.battleSetting.escape()
                 }
                 if(cga.GetMapName() == '莎莲娜' && leo.has('塔比欧的细胞') && !leo.has('月之锄头')){
                     await leo.loop(async ()=>{
@@ -1757,6 +1759,7 @@ const petConfig = {
                     var todo = async (target) =>{　 //走向NPC对话
                         const positions = leo.getMovablePositionsAround({x: target.xpos, y: target.ypos});
                         await leo.autoWalk([positions[0].x, positions[0].y],undefined,undefined,{compress: false})
+                        leo.battleSetting.attack()
                         await leo.loop(async ()=>{
                             if(leo.has('红色三菱镜')){
                                 return leo.reject();
@@ -1766,6 +1769,7 @@ const petConfig = {
                         if(leo.has('红色三菱镜')){
                             console.log(leo.logTime()+'获取了道具【红色三菱镜】');
                         }
+                        leo.battleSetting.escape()
                     }
                     await leo.lookForNpc(targetFinder, todo, false)
                 }
