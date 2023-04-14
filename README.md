@@ -1,4 +1,4 @@
-# CGAssistant (Release Package)
+# CGAssistant (scripts)
 
 ![](img/logo.png)
 
@@ -24,6 +24,6 @@ This project is licensed under MIT License, however if it is otherwise stated be
 
 [Source Code](https://github.com/hzqst/CGAssistant)
 
-[Release Package (Github)](https://github.com/hzqst/CGAssistantJS) [Release Package (Gitee, CN mirror)](https://gitee.com/hzqst/CGAssistantJS)
+[Release](https://github.com/hzqst/CGAssistant/releases)
 
-[Wiki (Github)](https://github.com/hzqst/CGAssistantJS/wiki) [Wiki (Gitee, CN mirror)](https://gitee.com/hzqst/CGAssistantJS/wikis)
+[Wiki](https://github.com/hzqst/CGAssistantJS/wiki)
