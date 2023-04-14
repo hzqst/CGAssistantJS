@@ -4,7 +4,7 @@ module.exports = require('./wrapper').then( async (cga) => {
     leo.messageServer = false;
     leo.appId = '';
     leo.appSecret = '';
-    leo.version = '9.10';
+    leo.version = '9.11';
     leo.qq = '158583461'
     leo.copyright = '红叶散落';
     leo.FORMAT_DATE = 'yyyy-MM-dd';
@@ -4771,7 +4771,7 @@ module.exports = require('./wrapper').then( async (cga) => {
     await leo.panel.autosupply(true);//勾选CGA面板的“自动补给”
     leo.beginTime = leo.now(); //脚本启动时间(Date类型，用于时间计算)
     leo.beginTimeStr = leo.formatDate(leo.now(), leo.FORMAT_DATETIME); //脚本启动时间(字符串类型，用于时间显示)
-    leo.log('欢迎使用红叶の脚本，版本['+leo.version+']，请注意是否已经开启防掉线功能');
+    leo.log('欢迎使用红叶の脚本，版本['+leo.version+']，当前线路为：['+leo.getLine()+'线]，请注意是否已经开启防掉线功能');
     //统计信息
     leo.oldXp = cga.GetPlayerInfo().xp; //脚本启动时的经验值
     leo.keepAliveStatus = null; //防掉线状态
@@ -4793,6 +4793,7 @@ module.exports = require('./wrapper').then( async (cga) => {
         }
         setTimeout(leo.monitor.keepAlive, 60000);//每60秒循环调用
     }
+	cga.EnableFlags(cga.ENABLE_FLAG_SHOWPETS, false);
     leo.talkNpcRetryTimes = 20; //对话NPC无法切图时，失败登出次数
     leo.monitor.config = {
         keepAlive: true,    //防掉线
