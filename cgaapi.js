@@ -65,6 +65,7 @@ module.exports = function(callback){
 	cga.ENABLE_FLAG_CARD = 3;
 	cga.ENABLE_FLAG_TRADE = 4;
 	cga.ENABLE_FLAG_FAMILY = 5;
+	cga.ENABLE_FLAG_SHOWPETS = 6;
 	cga.ENABLE_FLAG_AVATAR_PUBLIC = 100;
 	cga.ENABLE_FLAG_BATTLE_POSITION = 101;
 	
