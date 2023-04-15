@@ -4,7 +4,7 @@ module.exports = require('./wrapper').then( async (cga) => {
     leo.messageServer = false;
     leo.appId = '';
     leo.appSecret = '';
-    leo.version = '9.11';
+    leo.version = '9.12';
     leo.qq = '158583461'
     leo.copyright = '红叶散落';
     leo.FORMAT_DATE = 'yyyy-MM-dd';
@@ -4518,6 +4518,30 @@ module.exports = require('./wrapper').then( async (cga) => {
             return upperCase?ip.mac.toUpperCase():ip.mac;
         }
     }
+	
+	//获取服务器信息
+	leo.serverInfo = (type) => {
+		//电信服务器列表
+		const serverTelecom = ['221.122.119.111','221.122.119.112','221.122.119.113','221.122.119.114','221.122.119.115'];
+		//网通服务器列表
+		const serverNetcom = ['221.122.119.117','221.122.119.119','221.122.119.120','221.122.119.166','221.122.119.167'];
+		let info = cga.GetGameServerInfo();
+		if(serverNetcom.includes(info.ip)) {
+			info.serverType = '网通';
+		} else {
+			info.serverType = '电信';
+		}
+		if(type == 'ip') {
+			return info.ip;
+		}
+		if(type == 'port') {
+			return info.port;
+		}
+		if(type == 'type') {
+			return info.serverType;
+		}
+		return info;
+	}
 
     //宠物图鉴卡
     leo.getPetCard = (petName) => {
@@ -4604,6 +4628,37 @@ module.exports = require('./wrapper').then( async (cga) => {
         }
     }
 
+    leo.setKeepAlive = (keepAlive = true) => {
+        leo.monitor.config.keepAlive = keepAlive;
+    }
+
+    leo.setAutoExit = (status = false, value, reset, preHook) => {
+        if(value !== undefined) {
+            leo.monitor.config.autoExitValue = value; 
+        }
+        if(reset === true) {
+            leo.monitor.config.autoExitMemory = {};
+        }
+        if(preHook !== undefined) {
+            leo.monitor.config.autoExitPreHook = preHook;
+        }
+        leo.monitor.config.autoExit = status;
+    }
+
+    leo.setAutoExitWithKeepAlive = (keepAlive = true, status = false, value, reset, preHook) => {
+        leo.setAutoExit(status,value,reset,preHook);
+        leo.setKeepAlive(keepAlive);
+    }
+	
+	leo.setShowPets = (enable = true) => {
+		if(enable === true){
+			cga.EnableFlags(cga.ENABLE_FLAG_SHOWPETS, enable);
+			leo.log('红叶の温馨提示：已设置【显示放出的宠物】');
+		}else{
+			cga.EnableFlags(cga.ENABLE_FLAG_SHOWPETS, false);
+			leo.log('红叶の温馨提示：已设置【隐藏放出的宠物】');
+		}
+	}
 
     ///////////////////////插件加载系列///////////////////////////////////
     leo.plugins = {};
@@ -4771,7 +4826,7 @@ module.exports = require('./wrapper').then( async (cga) => {
     await leo.panel.autosupply(true);//勾选CGA面板的“自动补给”
     leo.beginTime = leo.now(); //脚本启动时间(Date类型，用于时间计算)
     leo.beginTimeStr = leo.formatDate(leo.now(), leo.FORMAT_DATETIME); //脚本启动时间(字符串类型，用于时间显示)
-    leo.log('欢迎使用红叶の脚本，版本['+leo.version+']，当前线路为：['+leo.getLine()+'线]，请注意是否已经开启防掉线功能');
+    leo.log('欢迎使用红叶の脚本，版本['+leo.version+']，当前线路['+leo.getLine()+'线]');
     //统计信息
     leo.oldXp = cga.GetPlayerInfo().xp; //脚本启动时的经验值
     leo.keepAliveStatus = null; //防掉线状态
@@ -4793,7 +4848,7 @@ module.exports = require('./wrapper').then( async (cga) => {
         }
         setTimeout(leo.monitor.keepAlive, 60000);//每60秒循环调用
     }
-	cga.EnableFlags(cga.ENABLE_FLAG_SHOWPETS, false);
+	leo.setShowPets(false); //隐藏放出的宠物
     leo.talkNpcRetryTimes = 20; //对话NPC无法切图时，失败登出次数
     leo.monitor.config = {
         keepAlive: true,    //防掉线
