@@ -2,28 +2,12 @@
 
 ![](img/logo.png)
 
-[中文README](READMECN.md)
+Check [CGassistant](https://github.com/hzqst/CGAssistant) for what you want.
 
-CGAssistant is a helper for you to play CrossGate with highly automated game experience.
+## What is this ?
 
-QQ Group: 300303705
+This is the repository that stores javascripts and additional resources that required by CGAssistant.
 
-## Warning
+## 这是啥
 
-This project is only for academic purposes, commercial use is prohibited.
-
-You are prohibited to publish this project elsewhere than GitHub.
-
-All binaries included in the [Release Package](https://github.com/hzqst/CGAssistantJS) are compiled and built by [GitHub Actions](https://docs.github.com/en/actions/learn-github-actions) from [Source Code](https://github.com/hzqst/CGAssistant), which could be reviewed and supervised by everyone. There is no chance of having malware or virus in this project.
-
-However we make no promises to your game accounts and so you have to use this project at your own risk, including taking any damage to your accounts from scripts and binaries.
-
-This project is licensed under MIT License, however if it is otherwise stated before, the latter shall prevail.
-
-## Links
-
-[Source Code](https://github.com/hzqst/CGAssistant)
-
-[Release](https://github.com/hzqst/CGAssistant/releases)
-
-[Wiki](https://github.com/hzqst/CGAssistantJS/wiki)
+该项目仅用于保存脚本和CGAssistant所需的资源文件。
