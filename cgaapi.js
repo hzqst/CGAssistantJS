@@ -5586,11 +5586,12 @@ module.exports = function(callback){
 	/*
 		加载脚本
 		cga.gui.LoadScript({
-			path : "路径",
+			path : "脚本路径，中文必须为utf8编码",
 			autorestart : 2, //自动重启脚本全开=2,半开=1,关闭=0
-			autoterm : true, //自动关闭脚本开启
-			injuryprot : true, //受伤保护开启
-			soulprot : true, //掉魂受伤保护开启
+			freezestop : true, //开启“人物静止超时一段时间后自动停止脚本”的功能
+			freezeduration : 60, //设置“人物静止超时一段时间后自动停止脚本”的超时时间，单位为秒。
+			injuryprot : true, //开启“受伤时停止脚本”的功能
+			soulprot : true //开启“掉魂时停止脚本”的功能
 		}, (err, result)=>{
 			console.log(result);
 		})
