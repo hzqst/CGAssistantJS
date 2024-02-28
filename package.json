@@ -27,7 +27,7 @@
       "component-inherit": "0.0.3",
       "cookie": "0.3.1",
       "debug": "4.3.1",
-      "engine.io": "3.3.2",
+      "engine.io": "3.6.1",
       "engine.io-client": "3.3.2",
       "engine.io-parser": "2.1.3",
       "has-binary2": "1.0.3",
