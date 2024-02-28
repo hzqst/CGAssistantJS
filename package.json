@@ -54,7 +54,7 @@
       "socket.io-parser": "3.3.0",
       "to-array": "0.1.4",
       "ws": "6.2.2",
-      "xmlhttprequest-ssl": "1.5.5",
+      "xmlhttprequest-ssl": "1.6.2",
       "yeast": "0.1.2",
       "request": "latest",
       "bindings": "latest"
