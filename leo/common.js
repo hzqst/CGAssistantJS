@@ -5115,11 +5115,13 @@ module.exports = require('./wrapper').then( async (cga) => {
             }
 
             //自动治疗自己
-            if(!cga.isInBattle() && leo.monitor.config.healSelf
-                && cga.GetPlayerInfo().health > 0){
-                var skill = cga.findPlayerSkill('治疗');
-                if(skill){
-                    leo.healSelf();
+            if(!cga.isInBattle() && leo.monitor.config.healSelf){
+                var playerInfo = cga.GetPlayerInfo();
+                if(playerInfo.health > 0){
+                    var skill = cga.findPlayerSkill('治疗');
+                    if(skill && playerInfo.mp >= skill.lv * 5 + 25){
+                        leo.healSelf();
+                    }
                 }
             }
 
