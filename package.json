@@ -25,7 +25,7 @@
       "component-bind": "1.0.0",
       "component-emitter": "1.2.1",
       "component-inherit": "0.0.3",
-      "cookie": "0.3.1",
+      "cookie": "0.7.0",
       "debug": "4.3.1",
       "engine.io": "3.6.1",
       "engine.io-client": "3.3.2",
