@@ -51,7 +51,7 @@
       "socket.io": "2.4.0",
       "socket.io-adapter": "1.1.1",
       "socket.io-client": "2.2.0",
-      "socket.io-parser": "3.3.3",
+      "socket.io-parser": "3.3.4",
       "to-array": "0.1.4",
       "ws": "6.2.2",
       "xmlhttprequest-ssl": "1.6.2",
